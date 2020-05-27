@@ -1,0 +1,352 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pharmpy.parse_utils.treeprint &#8212; Pharmpy 0.2.0 documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../../../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+<div class="container-xl">
+
+    
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
+      <ul id="navbar-main-elements" class="navbar-nav mr-auto">
+        
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../installation.html">Installation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../getting_started.html">Getting started</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../user_guide.html">User guide</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../reference/modules.html">Documentation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../development.html">Development</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../changelog.html">Changelog</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../license.html">License</a>
+        </li>
+        
+        
+      </ul>
+
+
+      
+
+      <ul class="navbar-nav">
+        
+        
+      </ul>
+    </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+          <div class="col-12 col-md-3 bd-sidebar">
+
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
+  <div class="bd-toc-item active">
+  
+
+  <ul class="nav bd-sidenav">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </ul>
+
+</nav>
+          </div>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+              
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+    </ul>
+</nav>
+
+
+              
+          </div>
+          
+
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for pharmpy.parse_utils.treeprint</h1><div class="highlight"><pre>
+<span></span><span class="ch">#!/usr/bin/env python3</span>
+<span class="c1"># -*- encoding: utf-8 -*-</span>
+
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">Pretty printing of tree-structures. Inspired by the &#39;tree&#39; command (Steve</span>
+<span class="sd">Baker). In development.</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">enum</span> <span class="kn">import</span> <span class="n">Enum</span>
+
+<span class="n">BranchStyle</span> <span class="o">=</span> <span class="n">Enum</span><span class="p">(</span><span class="s1">&#39;BranchStyle&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;SIMPLE&#39;</span><span class="p">,</span> <span class="s1">&#39;INLINE&#39;</span><span class="p">,</span> <span class="s1">&#39;BUSY&#39;</span><span class="p">])</span>
+
+<span class="n">Indent</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Indent&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;header&#39;</span><span class="p">,</span> <span class="s1">&#39;node&#39;</span><span class="p">,</span> <span class="s1">&#39;fork&#39;</span><span class="p">])</span>
+
+<span class="n">CharSet</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;CharSet&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;fork&#39;</span><span class="p">,</span> <span class="s1">&#39;horiz&#39;</span><span class="p">,</span> <span class="s1">&#39;vert&#39;</span><span class="p">,</span>
+                                 <span class="s1">&#39;inline&#39;</span><span class="p">,</span> <span class="s1">&#39;lfork&#39;</span><span class="p">,</span> <span class="s1">&#39;end&#39;</span><span class="p">])</span>
+
+
+<div class="viewcode-block" id="NodeStyle"><a class="viewcode-back" href="../../../reference/pharmpy.parse_utils.treeprint.html#pharmpy.parse_utils.treeprint.NodeStyle">[docs]</a><span class="k">class</span> <span class="nc">NodeStyle</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">__defaults</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span>
+        <span class="n">branch</span><span class="o">=</span><span class="n">BranchStyle</span><span class="p">[</span><span class="s1">&#39;SIMPLE&#39;</span><span class="p">],</span>
+        <span class="n">indent</span><span class="o">=</span><span class="n">Indent</span><span class="p">(</span><span class="n">header</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">node</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">fork</span><span class="o">=</span><span class="mi">1</span><span class="p">),</span>
+        <span class="n">char</span><span class="o">=</span><span class="n">CharSet</span><span class="p">(</span><span class="n">fork</span><span class="o">=</span><span class="s1">&#39;├&#39;</span><span class="p">,</span> <span class="n">horiz</span><span class="o">=</span><span class="s1">&#39;│&#39;</span><span class="p">,</span> <span class="n">vert</span><span class="o">=</span><span class="s1">&#39;─&#39;</span><span class="p">,</span>
+                     <span class="n">inline</span><span class="o">=</span><span class="s1">&#39;┌&#39;</span><span class="p">,</span> <span class="n">lfork</span><span class="o">=</span><span class="s1">&#39;└&#39;</span><span class="p">,</span> <span class="n">end</span><span class="o">=</span><span class="s1">&#39; &#39;</span><span class="p">),</span>
+    <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">styling</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val_default</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">__defaults</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">styling</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">val</span> <span class="o">=</span> <span class="n">val_default</span>
+            <span class="k">finally</span><span class="p">:</span>
+                <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verify</span><span class="p">()</span>
+
+<div class="viewcode-block" id="NodeStyle.verify"><a class="viewcode-back" href="../../../reference/pharmpy.parse_utils.treeprint.html#pharmpy.parse_utils.treeprint.NodeStyle.verify">[docs]</a>    <span class="k">def</span> <span class="nf">verify</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">log</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span> <span class="o">+</span> <span class="s1">&#39;.&#39;</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span><span class="o">.</span><span class="n">header</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">indent</span><span class="o">.</span><span class="n">node</span><span class="p">:</span>
+            <span class="n">log</span><span class="o">.</span><span class="n">warning</span><span class="p">(</span><span class="s2">&quot;Indent of header &gt; node might break assumptions&quot;</span><span class="p">)</span>
+        <span class="n">charlen</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">char</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">charlen</span> <span class="o">!=</span> <span class="p">{</span><span class="mi">1</span><span class="p">}:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;len(char)!=1 for some char: </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">charlen</span><span class="p">,))</span></div></div>
+
+
+<div class="viewcode-block" id="Node"><a class="viewcode-back" href="../../../reference/pharmpy.parse_utils.treeprint.html#pharmpy.parse_utils.treeprint.Node">[docs]</a><span class="k">class</span> <span class="nc">Node</span><span class="p">(</span><span class="nb">object</span><span class="p">):</span>
+    <span class="n">_cls_str</span> <span class="o">=</span> <span class="s1">&#39;__str__&#39;</span>
+    <span class="n">_cls_map</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="n">cls_obj</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">cls_node</span> <span class="o">=</span> <span class="bp">cls</span><span class="o">.</span><span class="n">_cls_map</span><span class="p">[</span><span class="n">cls_obj</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">obj</span>
+                <span class="bp">cls</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+            <span class="n">cls_name</span> <span class="o">=</span> <span class="n">cls_obj</span><span class="o">.</span><span class="vm">__name__</span> <span class="o">+</span> <span class="bp">cls</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="n">cls_node</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="n">cls_name</span><span class="p">,</span> <span class="p">(</span><span class="bp">cls</span><span class="p">,),</span> <span class="p">{</span><span class="s1">&#39;__init__&#39;</span><span class="p">:</span> <span class="fm">__init__</span><span class="p">})</span>
+            <span class="bp">cls</span><span class="o">.</span><span class="n">_cls_map</span><span class="p">[</span><span class="n">cls_obj</span><span class="p">]</span> <span class="o">=</span> <span class="n">cls_node</span>
+        <span class="n">instance</span> <span class="o">=</span> <span class="nb">super</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">cls_node</span><span class="p">)</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="n">cls_node</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">instance</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_style</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Node.add"><a class="viewcode-back" href="../../../reference/pharmpy.parse_utils.treeprint.html#pharmpy.parse_utils.treeprint.Node.add">[docs]</a>    <span class="k">def</span> <span class="nf">add</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">nodes</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+            <span class="n">node</span><span class="o">.</span><span class="n">_parent</span> <span class="o">=</span> <span class="bp">self</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span> <span class="o">+=</span> <span class="p">[</span><span class="n">node</span><span class="p">]</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">style</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_style</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_style</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent</span><span class="o">.</span><span class="n">style</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">NodeStyle</span><span class="p">()</span>
+
+    <span class="nd">@style</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">style</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_style</span> <span class="o">=</span> <span class="n">NodeStyle</span><span class="p">(</span><span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">lines</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">attr</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cls_str</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+            <span class="n">out</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_cls_str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">attr</span><span class="p">())</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="n">out</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span>
+        <span class="k">finally</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">out</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">out</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">out</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">type_map</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cdict</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="o">.</span><span class="vm">__class__</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span><span class="p">:</span>
+            <span class="n">cdict</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">type_map</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cdict</span>
+
+<div class="viewcode-block" id="Node.set_formatter"><a class="viewcode-back" href="../../../reference/pharmpy.parse_utils.treeprint.html#pharmpy.parse_utils.treeprint.Node.set_formatter">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">set_formatter</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">formatter</span><span class="p">):</span>
+        <span class="bp">cls</span><span class="o">.</span><span class="n">_cls_str</span> <span class="o">=</span> <span class="nb">staticmethod</span><span class="p">(</span><span class="n">formatter</span><span class="p">)</span></div>
+
+    <span class="k">def</span> <span class="nf">_prefix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">lines</span><span class="p">,</span> <span class="n">early_branch</span><span class="p">,</span> <span class="n">ind_used</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">branch</span> <span class="o">!=</span> <span class="n">BranchStyle</span><span class="o">.</span><span class="n">SIMPLE</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s1">&#39;only BranchStyle.SIMPLE suppported&#39;</span><span class="p">)</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">indent</span>
+        <span class="n">char</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">char</span>
+        <span class="k">if</span> <span class="n">early_branch</span><span class="p">:</span>
+            <span class="n">ch_first</span><span class="p">,</span> <span class="n">ch_after</span> <span class="o">=</span> <span class="p">(</span><span class="n">char</span><span class="o">.</span><span class="n">fork</span><span class="p">,</span> <span class="n">char</span><span class="o">.</span><span class="n">horiz</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ch_first</span><span class="p">,</span> <span class="n">ch_after</span> <span class="o">=</span> <span class="p">(</span><span class="n">char</span><span class="o">.</span><span class="n">lfork</span><span class="p">,</span> <span class="s1">&#39; &#39;</span><span class="p">)</span>
+
+        <span class="n">vnew</span> <span class="o">=</span> <span class="n">char</span><span class="o">.</span><span class="n">vert</span><span class="o">*</span><span class="n">ind</span><span class="o">.</span><span class="n">node</span>
+        <span class="n">vext</span> <span class="o">=</span> <span class="n">char</span><span class="o">.</span><span class="n">vert</span><span class="o">*</span><span class="n">ind_used</span><span class="o">.</span><span class="n">header</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">lines</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">*</span><span class="n">ind</span><span class="o">.</span><span class="n">fork</span> <span class="o">+</span> <span class="n">ch_first</span>
+                            <span class="o">+</span> <span class="n">vnew</span> <span class="o">+</span> <span class="n">vext</span> <span class="o">+</span> <span class="n">char</span><span class="o">.</span><span class="n">end</span> <span class="o">+</span> <span class="n">line</span><span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">vext</span><span class="p">):])</span>
+                <span class="k">continue</span>
+            <span class="n">lines</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">*</span><span class="n">ind</span><span class="o">.</span><span class="n">fork</span> <span class="o">+</span> <span class="n">ch_after</span> <span class="o">+</span> <span class="s1">&#39; &#39;</span><span class="o">*</span><span class="n">ind</span><span class="o">.</span><span class="n">node</span> <span class="o">+</span> <span class="n">line</span>
+
+        <span class="k">return</span> <span class="n">lines</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">indent</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lines</span>
+        <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">*</span><span class="n">ind</span><span class="o">.</span><span class="n">header</span> <span class="o">+</span> <span class="n">lines</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+        <span class="n">idx_last</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">idx</span><span class="p">,</span> <span class="n">node</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span><span class="p">):</span>
+            <span class="n">nlines</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">nlines</span><span class="p">:</span>
+                <span class="k">continue</span>
+            <span class="n">nlines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_prefix</span><span class="p">(</span><span class="n">nlines</span><span class="p">,</span> <span class="n">idx</span> <span class="o">&lt;</span> <span class="n">idx_last</span><span class="p">,</span> <span class="n">node</span><span class="o">.</span><span class="n">style</span><span class="o">.</span><span class="n">indent</span><span class="p">)</span>
+            <span class="n">lines</span> <span class="o">+=</span> <span class="n">nlines</span>
+
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">head</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_obj</span><span class="p">))</span>
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_nodes</span><span class="p">:</span>
+            <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39; &#39;</span> <span class="o">+</span> <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="nb">repr</span><span class="p">(</span><span class="n">node</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()]</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">head</span><span class="p">]</span> <span class="o">+</span> <span class="n">lines</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="from_ast"><a class="viewcode-back" href="../../../reference/pharmpy.parse_utils.treeprint.html#pharmpy.parse_utils.treeprint.from_ast">[docs]</a><span class="k">def</span> <span class="nf">from_ast</span><span class="p">(</span><span class="n">ast_node</span><span class="p">):</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">Node</span><span class="p">(</span><span class="n">ast_node</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="n">root</span><span class="o">.</span><span class="n">_fields</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">fields</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">fields</span><span class="p">:</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">root</span><span class="p">,</span> <span class="n">field</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="n">ast</span><span class="o">.</span><span class="n">iter_child_nodes</span><span class="p">(</span><span class="n">ast_node</span><span class="p">):</span>
+        <span class="n">node</span> <span class="o">=</span> <span class="n">from_ast</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+        <span class="n">root</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">root</span></div>
+
+
+<span class="k">if</span> <span class="vm">__name__</span> <span class="o">==</span> <span class="s1">&#39;__main__&#39;</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">ast</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="vm">__file__</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">source</span><span class="p">:</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="n">ast</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">read</span><span class="p">())</span>
+    <span class="n">root</span> <span class="o">=</span> <span class="n">from_ast</span><span class="p">(</span><span class="n">root</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">root</span><span class="p">))</span>
+    <span class="c1"># print(repr(root))</span>
+</pre></div>
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+
+    <script src="../../../_static/js/index.js"></script>
+    <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    <p>
+          &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
+        Last updated on May 27, 2020.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,240 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pharmpy.parse_utils.prettyprint &#8212; Pharmpy 0.2.0 documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../../../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+<div class="container-xl">
+
+    
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
+      <ul id="navbar-main-elements" class="navbar-nav mr-auto">
+        
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../installation.html">Installation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../getting_started.html">Getting started</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../user_guide.html">User guide</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../reference/modules.html">Documentation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../development.html">Development</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../changelog.html">Changelog</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../license.html">License</a>
+        </li>
+        
+        
+      </ul>
+
+
+      
+
+      <ul class="navbar-nav">
+        
+        
+      </ul>
+    </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+          <div class="col-12 col-md-3 bd-sidebar">
+
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
+  <div class="bd-toc-item active">
+  
+
+  <ul class="nav bd-sidenav">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </ul>
+
+</nav>
+          </div>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+              
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+    </ul>
+</nav>
+
+
+              
+          </div>
+          
+
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for pharmpy.parse_utils.prettyprint</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;Pretty printing of :class:`generic.AttrTree` via :class:`treeprint.Node`.&quot;&quot;&quot;</span>
+<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+
+<span class="kn">import</span> <span class="nn">lark</span>
+
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">treeprint</span>
+
+<span class="n">MAXLEN</span> <span class="o">=</span> <span class="mi">60</span>
+
+
+<span class="k">def</span> <span class="nf">_preview</span><span class="p">(</span><span class="n">content</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Represents str and cut into shorts if too long&quot;&quot;&quot;</span>
+    <span class="n">cut</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">content</span><span class="p">)</span> <span class="o">-</span> <span class="n">MAXLEN</span>
+    <span class="k">if</span> <span class="n">cut</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">preview</span> <span class="o">=</span> <span class="s1">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">content</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">MAXLEN</span><span class="p">])[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
+        <span class="n">preview</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">+</span><span class="si">%d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">preview</span><span class="p">,</span> <span class="n">cut</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">preview</span> <span class="o">=</span> <span class="s1">&#39;&quot;&#39;</span> <span class="o">+</span> <span class="nb">repr</span><span class="p">(</span><span class="n">content</span><span class="p">)[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;&quot;&#39;</span>
+    <span class="k">return</span> <span class="n">preview</span>
+
+
+<span class="k">def</span> <span class="nf">_formatter</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">ast_node</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Formats AST node (Tree and Token) for treeprint&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">content</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ast_node</span><span class="o">.</span><span class="n">rule</span><span class="p">,)</span>
+    <span class="k">elif</span> <span class="n">content</span> <span class="o">!=</span> <span class="s1">&#39;full&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">ast_node</span><span class="o">.</span><span class="n">rule</span><span class="p">,</span> <span class="n">_preview</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">ast_node</span><span class="p">)))</span>
+    <span class="n">lines</span> <span class="o">=</span> <span class="p">[</span><span class="n">ast_node</span><span class="o">.</span><span class="n">rule</span><span class="p">]</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">ast_node</span><span class="p">)</span><span class="o">.</span><span class="n">splitlines</span><span class="p">(</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span> <span class="o">=</span> <span class="p">[</span><span class="n">_preview</span><span class="p">(</span><span class="n">line</span><span class="p">)</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">[</span><span class="mi">1</span><span class="p">:]]</span>
+    <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_format_tree</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">ast_tree</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">_formatter</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">ast_tree</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_format_token</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">ast_token</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">_formatter</span><span class="p">(</span><span class="n">content</span><span class="p">,</span> <span class="n">ast_token</span><span class="p">)</span>
+
+
+<div class="viewcode-block" id="transform"><a class="viewcode-back" href="../../../reference/pharmpy.parse_utils.prettyprint.html#pharmpy.parse_utils.prettyprint.transform">[docs]</a><span class="k">def</span> <span class="nf">transform</span><span class="p">(</span><span class="n">ast_tree</span><span class="p">,</span> <span class="n">content</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Traverses tree and generates :class:`treeprint.Node`, which can format a</span>
+<span class="sd">    multiline (command) tree-styled string.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        content: If True, include text preview (or all if &#39;full&#39;) on each node.</span>
+
+<span class="sd">    Returns:</span>
+<span class="sd">        Multiline string, ready for the printing press.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">ast_tree</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="p">[</span><span class="n">lark</span><span class="o">.</span><span class="n">Tree</span><span class="p">,</span> <span class="n">lark</span><span class="o">.</span><span class="n">lexer</span><span class="o">.</span><span class="n">Token</span><span class="p">]):</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;can&#39;t transform </span><span class="si">%s</span><span class="s2"> object (is not a Lark Tree or Token&#39;)&quot;</span>
+                        <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="n">ast_tree</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+    <span class="n">tree</span> <span class="o">=</span> <span class="n">treeprint</span><span class="o">.</span><span class="n">Node</span><span class="p">(</span><span class="n">ast_tree</span><span class="p">)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="n">ast_tree</span><span class="o">.</span><span class="n">children</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">tree</span><span class="o">.</span><span class="n">set_formatter</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_format_token</span><span class="p">,</span> <span class="n">content</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">nodes</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;&#39;children&#39; of tree appears to be &#39;str&#39; (expects list/iterable): </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span>
+                            <span class="nb">repr</span><span class="p">(</span><span class="n">ast_tree</span><span class="p">))</span>
+        <span class="n">tree</span><span class="o">.</span><span class="n">set_formatter</span><span class="p">(</span><span class="n">partial</span><span class="p">(</span><span class="n">_format_tree</span><span class="p">,</span> <span class="n">content</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">ast_node</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">nodes</span><span class="p">):</span>
+            <span class="n">node</span> <span class="o">=</span> <span class="n">transform</span><span class="p">(</span><span class="n">ast_node</span><span class="p">,</span> <span class="n">content</span><span class="p">)</span>
+            <span class="n">tree</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tree</span></div>
+</pre></div>
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+
+    <script src="../../../_static/js/index.js"></script>
+    <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    <p>
+          &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
+        Last updated on May 27, 2020.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

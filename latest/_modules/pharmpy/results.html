@@ -1,0 +1,580 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pharmpy.results &#8212; Pharmpy 0.2.0 documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+<div class="container-xl">
+
+    
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
+      <ul id="navbar-main-elements" class="navbar-nav mr-auto">
+        
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../installation.html">Installation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../getting_started.html">Getting started</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../user_guide.html">User guide</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../reference/modules.html">Documentation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../development.html">Development</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../changelog.html">Changelog</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../license.html">License</a>
+        </li>
+        
+        
+      </ul>
+
+
+      
+
+      <ul class="navbar-nav">
+        
+        
+      </ul>
+    </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+          <div class="col-12 col-md-3 bd-sidebar">
+
+<form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
+  <div class="bd-toc-item active">
+  
+
+  <ul class="nav bd-sidenav">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </ul>
+
+</nav>
+          </div>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+              
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+    </ul>
+</nav>
+
+
+              
+          </div>
+          
+
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for pharmpy.results</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+
+<span class="sd">.. list-table:: Options for the results module</span>
+<span class="sd">   :widths: 25 25 50 150</span>
+<span class="sd">   :header-rows: 1</span>
+
+<span class="sd">   * - Option name</span>
+<span class="sd">     - Default value</span>
+<span class="sd">     - Type</span>
+<span class="sd">     - Description</span>
+<span class="sd">   * - ``native_shrinkage``</span>
+<span class="sd">     - ``True``</span>
+<span class="sd">     - bool</span>
+<span class="sd">     - Should shrinkage calculation of external tool be used.</span>
+<span class="sd">       Otherwise pharmpy will calculate shrinkage</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">json</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">altair</span> <span class="k">as</span> <span class="nn">alt</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">pharmpy.config</span> <span class="k">as</span> <span class="nn">config</span>
+<span class="kn">import</span> <span class="nn">pharmpy.visualization</span>
+<span class="kn">from</span> <span class="nn">pharmpy.data</span> <span class="kn">import</span> <span class="n">PharmDataFrame</span>
+<span class="kn">from</span> <span class="nn">pharmpy.math</span> <span class="kn">import</span> <span class="n">cov2corr</span>
+
+
+<div class="viewcode-block" id="ResultsConfiguration"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ResultsConfiguration">[docs]</a><span class="k">class</span> <span class="nc">ResultsConfiguration</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
+    <span class="n">native_shrinkage</span> <span class="o">=</span> <span class="n">config</span><span class="o">.</span><span class="n">ConfigItem</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="s1">&#39;Use shrinkage results from external tool&#39;</span><span class="p">)</span></div>
+
+
+<span class="n">conf</span> <span class="o">=</span> <span class="n">ResultsConfiguration</span><span class="p">()</span>
+
+
+<div class="viewcode-block" id="ResultsJSONEncoder"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ResultsJSONEncoder">[docs]</a><span class="k">class</span> <span class="nc">ResultsJSONEncoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="p">):</span>
+<div class="viewcode-block" id="ResultsJSONEncoder.default"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ResultsJSONEncoder.default">[docs]</a>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">loads</span><span class="p">(</span><span class="n">obj</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">orient</span><span class="o">=</span><span class="s1">&#39;table&#39;</span><span class="p">))</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">PharmDataFrame</span><span class="p">):</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;__class__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;DataFrame&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">d</span><span class="p">[</span><span class="s1">&#39;__class__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+            <span class="k">return</span> <span class="n">d</span>
+        <span class="k">elif</span> <span class="n">obj</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;altair.&#39;</span><span class="p">):</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">d</span><span class="p">[</span><span class="s1">&#39;__class__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;vega-lite&#39;</span>
+            <span class="k">return</span> <span class="n">d</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">json</span><span class="o">.</span><span class="n">JSONEncoder</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="ResultsJSONDecoder"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ResultsJSONDecoder">[docs]</a><span class="k">class</span> <span class="nc">ResultsJSONDecoder</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">JSONDecoder</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">json</span><span class="o">.</span><span class="n">JSONDecoder</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">object_hook</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">object_hook</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">cls</span> <span class="o">=</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ResultsJSONDecoder.object_hook"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ResultsJSONDecoder.object_hook">[docs]</a>    <span class="k">def</span> <span class="nf">object_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dct</span><span class="p">):</span>
+        <span class="k">if</span> <span class="s1">&#39;__class__&#39;</span> <span class="ow">in</span> <span class="n">dct</span><span class="p">:</span>
+            <span class="bp">cls</span> <span class="o">=</span> <span class="n">dct</span><span class="p">[</span><span class="s1">&#39;__class__&#39;</span><span class="p">]</span>
+            <span class="k">del</span> <span class="n">dct</span><span class="p">[</span><span class="s1">&#39;__class__&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="bp">cls</span> <span class="o">==</span> <span class="s1">&#39;DataFrame&#39;</span> <span class="ow">or</span> <span class="bp">cls</span> <span class="o">==</span> <span class="s1">&#39;Series&#39;</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">dct</span><span class="p">),</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;table&#39;</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">res</span>
+            <span class="k">elif</span> <span class="bp">cls</span> <span class="o">==</span> <span class="s1">&#39;vega-lite&#39;</span><span class="p">:</span>
+                <span class="n">res</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">dct</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">cls</span> <span class="o">=</span> <span class="bp">cls</span>
+        <span class="k">return</span> <span class="n">dct</span></div></div>
+
+
+<div class="viewcode-block" id="read_results"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.read_results">[docs]</a><span class="k">def</span> <span class="nf">read_results</span><span class="p">(</span><span class="n">path_or_buf</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path_or_buf</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">FileNotFoundError</span>
+    <span class="k">except</span> <span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">,</span> <span class="ne">OSError</span><span class="p">,</span> <span class="ne">TypeError</span><span class="p">,</span> <span class="ne">ValueError</span><span class="p">):</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">path_or_buf</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">json_file</span><span class="p">:</span>
+            <span class="n">s</span> <span class="o">=</span> <span class="n">json_file</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">decoder</span> <span class="o">=</span> <span class="n">ResultsJSONDecoder</span><span class="p">()</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">decoder</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">decoder</span><span class="o">.</span><span class="n">cls</span> <span class="o">==</span> <span class="s1">&#39;FREMResults&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.methods.frem</span> <span class="kn">import</span> <span class="n">FREMResults</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">FREMResults</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">decoder</span><span class="o">.</span><span class="n">cls</span> <span class="o">==</span> <span class="s1">&#39;BootstrapResults&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.methods.bootstrap</span> <span class="kn">import</span> <span class="n">BootstrapResults</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">BootstrapResults</span><span class="p">(</span><span class="n">original_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bootstrap_models</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">res</span><span class="o">.</span><span class="n">_statistics</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;statistics&#39;</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="Results"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.Results">[docs]</a><span class="k">class</span> <span class="nc">Results</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Base class for all result classes</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="Results.to_json"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.Results.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">json_dict</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="n">json_dict</span><span class="p">[</span><span class="s1">&#39;__class__&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">json</span><span class="o">.</span><span class="n">dumps</span><span class="p">(</span><span class="n">json_dict</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">ResultsJSONEncoder</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+                <span class="n">fh</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">s</span></div>
+
+<div class="viewcode-block" id="Results.to_dict"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.Results.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert results object to a dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Results.from_dict"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.Results.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Cread a results object from a dictionary</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Results.to_csv"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.Results.to_csv">[docs]</a>    <span class="k">def</span> <span class="nf">to_csv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Save results as a human readable csv file</span>
+
+<span class="sd">           Index will not be printed if it is a basic range.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__module__</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;altair.&#39;</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">RangeIndex</span><span class="p">):</span>
+                    <span class="n">use_index</span> <span class="o">=</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">use_index</span> <span class="o">=</span> <span class="kc">True</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="n">value</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">use_index</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">file</span><span class="o">=</span><span class="n">fh</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Results.create_report"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.Results.create_report">[docs]</a>    <span class="k">def</span> <span class="nf">create_report</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="kn">import</span> <span class="nn">pharmpy.reporting.reporting</span> <span class="k">as</span> <span class="nn">reporting</span>
+        <span class="n">reporting</span><span class="o">.</span><span class="n">generate_report</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">rst_path</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Results.add_plots"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.Results.add_plots">[docs]</a>    <span class="k">def</span> <span class="nf">add_plots</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create and add all plots to results object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div></div>
+
+
+<div class="viewcode-block" id="ModelfitResults"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ModelfitResults">[docs]</a><span class="k">class</span> <span class="nc">ModelfitResults</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Base class for results from a modelfit operation</span>
+
+<span class="sd">    properties: individual_OFV is a df with currently ID and iOFV columns</span>
+<span class="sd">        model_name - name of model that generated the results</span>
+<span class="sd">        model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ofv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameter_estimates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">covariance_matrix</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">standard_errors</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ofv</span> <span class="o">=</span> <span class="n">ofv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_estimates</span> <span class="o">=</span> <span class="n">parameter_estimates</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_covariance_matrix</span> <span class="o">=</span> <span class="n">covariance_matrix</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_standard_errors</span> <span class="o">=</span> <span class="n">standard_errors</span>
+
+<div class="viewcode-block" id="ModelfitResults.reparameterize"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ModelfitResults.reparameterize">[docs]</a>    <span class="k">def</span> <span class="nf">reparameterize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameterizations</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Reparametrize all parameters given a list of parametrization object</span>
+<span class="sd">           will change the parameter_estimates and standard_errors to be for</span>
+<span class="sd">           the transformed parameter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Not implemented&quot;</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ofv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Final objective function value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ofv</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameter_estimates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Parameter estimates as series</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_estimates</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">covariance_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The covariance matrix of the population parameter estimates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_covariance_matrix</span>
+
+    <span class="k">def</span> <span class="nf">_cov_from_inf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Im</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">information_matrix</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Im</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">Im</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">Im</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cov</span>
+
+    <span class="k">def</span> <span class="nf">_cov_from_corrse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">se</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_errors</span>
+        <span class="n">corr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">correlation_matrix</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">se</span><span class="o">.</span><span class="n">values</span> <span class="o">@</span> <span class="n">se</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">corr</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">cov_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">cov</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">corr</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">corr</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">cov_df</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">information_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The Fischer information matrix of the population parameter estimates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_inf_from_cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">covariance_matrix</span>
+        <span class="n">Im</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">C</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">C</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Im</span>
+
+    <span class="k">def</span> <span class="nf">_inf_from_corrse</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">se</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_errors</span>
+        <span class="n">corr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">correlation_matrix</span>
+        <span class="n">x</span> <span class="o">=</span> <span class="n">se</span><span class="o">.</span><span class="n">values</span> <span class="o">@</span> <span class="n">se</span><span class="o">.</span><span class="n">values</span><span class="o">.</span><span class="n">T</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="n">x</span> <span class="o">*</span> <span class="n">corr</span><span class="o">.</span><span class="n">values</span>
+        <span class="n">Im</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">cov</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">corr</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">corr</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Im</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">correlation_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The correlation matrix of the population parameter estimates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_corr_from_cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">C</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">covariance_matrix</span>
+        <span class="n">corr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">cov2corr</span><span class="p">(</span><span class="n">C</span><span class="o">.</span><span class="n">values</span><span class="p">),</span> <span class="n">index</span><span class="o">=</span><span class="n">C</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">C</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">corr</span>
+
+    <span class="k">def</span> <span class="nf">_corr_from_inf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">Im</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">information_matrix</span>
+        <span class="n">corr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">cov2corr</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Im</span><span class="o">.</span><span class="n">values</span><span class="p">)),</span> <span class="n">index</span><span class="o">=</span><span class="n">Im</span><span class="o">.</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">Im</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">corr</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">standard_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Standard errors of population parameter estimates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_standard_errors</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">relative_standard_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Relative standard errors of popilation parameter estimates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">ser</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_errors</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_estimates</span>
+        <span class="n">ser</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;RSE&#39;</span>
+        <span class="k">return</span> <span class="n">ser</span>
+
+    <span class="k">def</span> <span class="nf">_se_from_cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the standard errors from the covariance matrix</span>
+<span class="sd">           can be used by subclasses</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">covariance_matrix</span>
+        <span class="n">se</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">cov</span><span class="o">.</span><span class="n">values</span><span class="p">)),</span> <span class="n">index</span><span class="o">=</span><span class="n">cov</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">se</span>
+
+    <span class="k">def</span> <span class="nf">_se_from_inf</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Calculate the standard errors from the information matrix</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">Im</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">information_matrix</span>
+        <span class="n">se</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Im</span><span class="o">.</span><span class="n">values</span><span class="p">)),</span> <span class="n">index</span><span class="o">=</span><span class="n">Im</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">se</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">individual_ofv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A Series with individual estimates indexed over ID</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Not implemented&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">individual_estimates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Individual parameter estimates</span>
+
+<span class="sd">           A DataFrame with ID as index one column for each individual parameter</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Not implemented&quot;</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">individual_estimates_covariance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The covariance matrix of the individual estimates</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Not implemented&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="ModelfitResults.eta_shrinkage"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ModelfitResults.eta_shrinkage">[docs]</a>    <span class="k">def</span> <span class="nf">eta_shrinkage</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Eta shrinkage for each eta</span>
+
+<span class="sd">           Variance = False to get sd scale</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_estimates</span>
+        <span class="c1"># Want parameter estimates combined with fixed parameter values</span>
+        <span class="n">param_inits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">summary</span><span class="p">()[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+        <span class="n">pe</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">combine_first</span><span class="p">(</span><span class="n">param_inits</span><span class="p">)</span>
+
+        <span class="n">ie</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individual_estimates</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv_variance_parameters</span><span class="p">()</span>
+        <span class="n">param_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
+        <span class="n">diag_ests</span> <span class="o">=</span> <span class="n">pe</span><span class="p">[</span><span class="n">param_names</span><span class="p">]</span>
+        <span class="n">diag_ests</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">ie</span><span class="o">.</span><span class="n">columns</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">sd</span><span class="p">:</span>
+            <span class="n">shrinkage</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">ie</span><span class="o">.</span><span class="n">var</span><span class="p">()</span> <span class="o">/</span> <span class="n">diag_ests</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">shrinkage</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">ie</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">diag_ests</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">shrinkage</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">individual_shrinkage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The individual eta-shrinkage</span>
+
+<span class="sd">            Definition: ieta_shr = (var(eta) / omega)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individual_estimates_covariance</span>
+        <span class="n">pe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_estimates</span>
+        <span class="c1"># Want parameter estimates combined with fixed parameter values</span>
+        <span class="n">param_inits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">summary</span><span class="p">()[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+        <span class="n">pe</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">combine_first</span><span class="p">(</span><span class="n">param_inits</span><span class="p">)</span>
+
+        <span class="c1"># Get all iiv variance parameters</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv_variance_parameters</span><span class="p">()</span>
+        <span class="n">param_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
+        <span class="n">diag_ests</span> <span class="o">=</span> <span class="n">pe</span><span class="p">[</span><span class="n">param_names</span><span class="p">]</span>
+
+        <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">ests</span><span class="p">):</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
+            <span class="n">ser</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="n">ests</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">ser</span>
+
+        <span class="n">ish</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ests</span><span class="o">=</span><span class="n">diag_ests</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ish</span>
+
+<div class="viewcode-block" id="ModelfitResults.parameter_summary"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ModelfitResults.parameter_summary">[docs]</a>    <span class="k">def</span> <span class="nf">parameter_summary</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Summary of parameter estimates and uncertainty</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_estimates</span>
+        <span class="n">ses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">standard_errors</span>
+        <span class="n">rses</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">relative_standard_errors</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;estimate&#39;</span><span class="p">:</span> <span class="n">pe</span><span class="p">,</span> <span class="s1">&#39;SE&#39;</span><span class="p">:</span> <span class="n">ses</span><span class="p">,</span> <span class="s1">&#39;RSE&#39;</span><span class="p">:</span> <span class="n">rses</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">df</span></div>
+
+<div class="viewcode-block" id="ModelfitResults.plot_iofv_vs_iofv"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ModelfitResults.plot_iofv_vs_iofv">[docs]</a>    <span class="k">def</span> <span class="nf">plot_iofv_vs_iofv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="n">x_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">model_name</span><span class="si">}</span><span class="s1"> iOFV&#39;</span>
+        <span class="n">y_label</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">other</span><span class="o">.</span><span class="n">model_name</span><span class="si">}</span><span class="s1"> iOFV&#39;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">PharmDataFrame</span><span class="p">({</span><span class="n">x_label</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">individual_ofv</span><span class="p">,</span> <span class="n">y_label</span><span class="p">:</span> <span class="n">other</span><span class="o">.</span><span class="n">individual_ofv</span><span class="p">})</span>
+        <span class="n">plot</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">scatter_plot_correlation</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x_label</span><span class="p">,</span> <span class="n">y_label</span><span class="p">,</span>
+                                                              <span class="n">title</span><span class="o">=</span><span class="s1">&#39;iOFV vs iOFV&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">plot</span></div></div>
+
+
+<div class="viewcode-block" id="ChainedModelfitResults"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ChainedModelfitResults">[docs]</a><span class="k">class</span> <span class="nc">ChainedModelfitResults</span><span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">ModelfitResults</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A list of modelfit results given in order from first to final</span>
+<span class="sd">       inherits from both list and ModelfitResults. Each method from ModelfitResults</span>
+<span class="sd">       will be performed on the final modelfit object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="ChainedModelfitResults.reparameterize"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ChainedModelfitResults.reparameterize">[docs]</a>    <span class="k">def</span> <span class="nf">reparameterize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameterizations</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">reparameterize</span><span class="p">(</span><span class="n">parameterizations</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ofv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">ofv</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parameter_estimates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">parameter_estimates</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">covariance_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">covariance_matrix</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">information_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">information_matrix</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">correlation_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">correlation_matrix</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">standard_errors</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">standard_errors</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">individual_ofv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">individual_ofv</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">individual_estimates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">individual_estimates</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">individual_estimates_covariance</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">individual_estimates_covariance</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">individual_shrinkage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">individual_shrinkage</span>
+
+<div class="viewcode-block" id="ChainedModelfitResults.plot_iofv_vs_iofv"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ChainedModelfitResults.plot_iofv_vs_iofv">[docs]</a>    <span class="k">def</span> <span class="nf">plot_iofv_vs_iofv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot_iofv_vs_iofv</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">model_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">model_name</span></div>
+
+    <span class="c1"># FIXME: To not have to manually intercept everything here. Could do it in a general way.</span>
+</pre></div>
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+
+    <script src="../../_static/js/index.js"></script>
+    <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    <p>
+          &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
+        Last updated on May 27, 2020.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

@@ -1,0 +1,371 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pharmpy.data.iterators &#8212; Pharmpy 0.2.0 documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../../../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+<div class="container-xl">
+
+    
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
+      <ul id="navbar-main-elements" class="navbar-nav mr-auto">
+        
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../installation.html">Installation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../getting_started.html">Getting started</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../user_guide.html">User guide</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../reference/modules.html">Documentation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../development.html">Development</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../changelog.html">Changelog</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../license.html">License</a>
+        </li>
+        
+        
+      </ul>
+
+
+      
+
+      <ul class="navbar-nav">
+        
+        
+      </ul>
+    </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+          <div class="col-12 col-md-3 bd-sidebar">
+
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
+  <div class="bd-toc-item active">
+  
+
+  <ul class="nav bd-sidenav">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </ul>
+
+</nav>
+          </div>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+              
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+    </ul>
+</nav>
+
+
+              
+          </div>
+          
+
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for pharmpy.data.iterators</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">data.iterators</span>
+<span class="sd">==============</span>
+
+<span class="sd">Iterators generating new datasets from a dataset. The dataset could either be stand alone</span>
+<span class="sd">or connected to a model. If a model is used the same model will be updated with different</span>
+<span class="sd">datasets for each iteration.</span>
+
+<span class="sd">Currenly contains:</span>
+
+<span class="sd">1. Omit - Can be used for cdd</span>
+<span class="sd">2. Resample - Can be used by bootstrap</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">collections</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">import</span> <span class="nn">pharmpy.math</span>
+
+
+<div class="viewcode-block" id="DatasetIterator"><a class="viewcode-back" href="../../../reference/pharmpy.data.iterators.html#pharmpy.data.iterators.DatasetIterator">[docs]</a><span class="k">class</span> <span class="nc">DatasetIterator</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot; Base class for iterator classes that generate new datasets from an input dataset</span>
+
+<span class="sd">        The __next__ function could return either a DataFrame or a tuple where the first</span>
+<span class="sd">        element is the main DataFrame.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">name_pattern</span><span class="o">=</span><span class="s1">&#39;dataset_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialization of the base class</span>
+<span class="sd">           :param iterations: is the number of iterations</span>
+<span class="sd">           :param name_pattern: Name too use for generated datasets.</span>
+<span class="sd">                A number starting from 1 will be put in the placeholder.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_iterations</span> <span class="o">=</span> <span class="n">iterations</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name_pattern</span> <span class="o">=</span> <span class="n">name_pattern</span>
+
+    <span class="k">def</span> <span class="nf">_check_exhausted</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Check if the iterator is exhaused. Raise StopIteration in that case</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">_iterations</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">StopIteration</span>
+
+    <span class="k">def</span> <span class="nf">_prepare_next</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name_pattern</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_next</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">+=</span> <span class="mi">1</span>
+
+    <span class="k">def</span> <span class="nf">_retrieve_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df_or_model</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Extract dataset from model and remember the model.</span>
+<span class="sd">            If input is dataset simply pass through and set model to None</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">df_or_model</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dataset</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="n">df_or_model</span>
+            <span class="k">return</span> <span class="n">dataset</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_model</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">return</span> <span class="n">df_or_model</span>
+
+    <span class="k">def</span> <span class="nf">_combine_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">df</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; If we are working with a model set the dataset and return model</span>
+<span class="sd">            else simply pass the dataset through</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">df</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">return</span> <span class="n">model</span>
+
+    <span class="k">def</span> <span class="fm">__iter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+
+<div class="viewcode-block" id="Omit"><a class="viewcode-back" href="../../../reference/pharmpy.data.iterators.html#pharmpy.data.iterators.Omit">[docs]</a><span class="k">class</span> <span class="nc">Omit</span><span class="p">(</span><span class="n">DatasetIterator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Iterate over omissions of a certain group in a dataset. One group is omitted at a time.</span>
+
+<span class="sd">        :param dataset_or_model: DataFrame to iterate over or a model from which to use the dataset</span>
+<span class="sd">        :param colname group: Name of the column to use for grouping</span>
+<span class="sd">        :param name_pattern: Name to use for generated datasets. A number starting from 1 will</span>
+<span class="sd">            be put in the placeholder.</span>
+<span class="sd">        :returns: Tuple of DataFrame and the omitted group</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_or_model</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">name_pattern</span><span class="o">=</span><span class="s1">&#39;omitted_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_dataset</span><span class="p">(</span><span class="n">dataset_or_model</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_unique_groups</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_unique_groups</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot create an Omit iterator as the number of unique groups is 1.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_group</span> <span class="o">=</span> <span class="n">group</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_unique_groups</span><span class="p">),</span> <span class="n">name_pattern</span><span class="o">=</span><span class="n">name_pattern</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_exhausted</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span>
+        <span class="n">next_group</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_unique_groups</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
+        <span class="n">new_df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">]</span> <span class="o">!=</span> <span class="n">next_group</span><span class="p">]</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_next</span><span class="p">(</span><span class="n">new_df</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine_dataset</span><span class="p">(</span><span class="n">new_df</span><span class="p">),</span> <span class="n">next_group</span></div>
+
+
+<div class="viewcode-block" id="Resample"><a class="viewcode-back" href="../../../reference/pharmpy.data.iterators.html#pharmpy.data.iterators.Resample">[docs]</a><span class="k">class</span> <span class="nc">Resample</span><span class="p">(</span><span class="n">DatasetIterator</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Iterate over resamples of a dataset.</span>
+
+<span class="sd">        The dataset will be grouped on the group column then groups will be selected</span>
+<span class="sd">        randomly with or without replacement to form a new dataset.</span>
+<span class="sd">        The groups will be renumbered from 1 and upwards to keep them separated in the new</span>
+<span class="sd">        dataset.</span>
+
+<span class="sd">        Stratification will make sure that</span>
+
+<span class="sd">        :param DataFrame df: DataFrame to iterate over</span>
+<span class="sd">        :param colname group: Name of column to group by</span>
+<span class="sd">        :param Int resamples: Number of resamples (iterations) to make</span>
+<span class="sd">        :param colname stratify: Name of column to use for stratification.</span>
+<span class="sd">            The values in the stratification column must be equal within a group so that the group</span>
+<span class="sd">            can be uniquely determined. A ValueError exception will be raised otherwise.</span>
+<span class="sd">        :param Int sample_size: The number of groups that should be sampled. The default is</span>
+<span class="sd">            the number of groups. If using stratification the default is to sample using the</span>
+<span class="sd">            proportion of the stratas in the dataset. A dictionary of specific sample sizes</span>
+<span class="sd">            for each strata can also be supplied.</span>
+<span class="sd">        :param bool replace: A boolean controlling whether sampling should be done with or</span>
+<span class="sd">            without replacement</span>
+<span class="sd">        :param name_pattern: Name to use for generated datasets. A number starting from 1 will</span>
+<span class="sd">            be put in the placeholder.</span>
+
+<span class="sd">        :returns: A tuple of a resampled DataFrame and a list of resampled groups in order</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dataset_or_model</span><span class="p">,</span> <span class="n">group</span><span class="p">,</span> <span class="n">resamples</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">sample_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                 <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">name_pattern</span><span class="o">=</span><span class="s1">&#39;resample_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">):</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_dataset</span><span class="p">(</span><span class="n">dataset_or_model</span><span class="p">)</span>
+        <span class="n">unique_groups</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+        <span class="n">numgroups</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">unique_groups</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">sample_size</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">sample_size</span> <span class="o">=</span> <span class="n">numgroups</span>
+
+        <span class="k">if</span> <span class="n">stratify</span><span class="p">:</span>
+            <span class="c1"># Default is to use proportions in dataset</span>
+            <span class="n">stratas</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">stratify</span><span class="p">)[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
+            <span class="n">have_mult_sample_sizes</span> <span class="o">=</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sample_size</span><span class="p">,</span> <span class="n">collections</span><span class="o">.</span><span class="n">abc</span><span class="o">.</span><span class="n">Mapping</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">have_mult_sample_sizes</span><span class="p">:</span>
+                <span class="n">non_rounded_sample_sizes</span> <span class="o">=</span> <span class="n">stratas</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+                        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">/</span> <span class="n">numgroups</span><span class="p">)</span> <span class="o">*</span> <span class="n">sample_size</span><span class="p">)</span>
+                <span class="n">rounded_sample_sizes</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">round_and_keep_sum</span><span class="p">(</span><span class="n">non_rounded_sample_sizes</span><span class="p">,</span>
+                                                                       <span class="n">sample_size</span><span class="p">)</span>
+                <span class="n">sample_size_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">rounded_sample_sizes</span><span class="p">)</span>    <span class="c1"># strata: numsamples</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">sample_size_dict</span> <span class="o">=</span> <span class="n">sample_size</span>
+
+            <span class="n">stratas</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">stratas</span><span class="p">)</span>     <span class="c1"># strata: list of groups</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sample_size_dict</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">sample_size</span><span class="p">}</span>
+            <span class="n">stratas</span> <span class="o">=</span> <span class="p">{</span><span class="mi">1</span><span class="p">:</span> <span class="n">unique_groups</span><span class="p">}</span>
+
+        <span class="c1"># Check that we will not run out of samples without replacement.</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">replace</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">strata</span> <span class="ow">in</span> <span class="n">sample_size_dict</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">sample_size_dict</span><span class="p">[</span><span class="n">strata</span><span class="p">]</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">stratas</span><span class="p">[</span><span class="n">strata</span><span class="p">]):</span>
+                    <span class="k">if</span> <span class="n">stratify</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s1">&#39;The sample size (</span><span class="si">{</span><span class="n">sample_size_dict</span><span class="p">[</span><span class="n">strata</span><span class="p">]</span><span class="si">}</span><span class="s1">) for strata </span><span class="si">{</span><span class="n">strata</span><span class="si">}</span><span class="s1"> is &#39;</span>
+                            <span class="sa">f</span><span class="s1">&#39;larger than the number of groups (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">stratas</span><span class="p">[</span><span class="n">strata</span><span class="p">])</span><span class="si">}</span><span class="s1">) in that &#39;</span>
+                            <span class="sa">f</span><span class="s1">&#39;strata which is impossible with replacement.&#39;</span><span class="p">)</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                            <span class="sa">f</span><span class="s1">&#39;The sample size (</span><span class="si">{</span><span class="n">sample_size_dict</span><span class="p">[</span><span class="n">strata</span><span class="p">]</span><span class="si">}</span><span class="s1">) is larger than the &#39;</span>
+                            <span class="sa">f</span><span class="s1">&#39;number of groups (</span><span class="si">{</span><span class="nb">len</span><span class="p">(</span><span class="n">stratas</span><span class="p">[</span><span class="n">strata</span><span class="p">])</span><span class="si">}</span><span class="s1">) which is impossible with &#39;</span>
+                            <span class="sa">f</span><span class="s1">&#39;replacement.&#39;</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_df</span> <span class="o">=</span> <span class="n">df</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_group</span> <span class="o">=</span> <span class="n">group</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_replace</span> <span class="o">=</span> <span class="n">replace</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_stratas</span> <span class="o">=</span> <span class="n">stratas</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size_dict</span> <span class="o">=</span> <span class="n">sample_size_dict</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">resamples</span><span class="p">,</span> <span class="n">name_pattern</span><span class="o">=</span><span class="n">name_pattern</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_check_exhausted</span><span class="p">()</span>
+
+        <span class="n">random_groups</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">strata</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size_dict</span><span class="p">:</span>
+            <span class="n">random_groups</span> <span class="o">+=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">choice</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stratas</span><span class="p">[</span><span class="n">strata</span><span class="p">],</span>
+                                              <span class="n">size</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_sample_size_dict</span><span class="p">[</span><span class="n">strata</span><span class="p">],</span>
+                                              <span class="n">replace</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_replace</span><span class="p">)</span><span class="o">.</span><span class="n">tolist</span><span class="p">()</span>
+
+        <span class="n">new_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="c1"># Build the dataset given the random_groups list</span>
+        <span class="k">for</span> <span class="n">grp_id</span><span class="p">,</span> <span class="n">new_grp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">random_groups</span><span class="p">,</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">random_groups</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)):</span>
+            <span class="n">sub</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_df</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">]</span> <span class="o">==</span> <span class="n">grp_id</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">sub</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_grp</span>
+            <span class="n">new_df</span> <span class="o">=</span> <span class="n">new_df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span>
+        <span class="n">new_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_next</span><span class="p">(</span><span class="n">new_df</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine_dataset</span><span class="p">(</span><span class="n">new_df</span><span class="p">),</span> <span class="n">random_groups</span></div>
+</pre></div>
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+
+    <script src="../../../_static/js/index.js"></script>
+    <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    <p>
+          &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
+        Last updated on May 27, 2020.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

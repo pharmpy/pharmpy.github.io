@@ -1,0 +1,252 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pharmpy.visualization &#8212; Pharmpy 0.2.0 documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+<div class="container-xl">
+
+    
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
+      <ul id="navbar-main-elements" class="navbar-nav mr-auto">
+        
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../installation.html">Installation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../getting_started.html">Getting started</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../user_guide.html">User guide</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../reference/modules.html">Documentation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../development.html">Development</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../changelog.html">Changelog</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../license.html">License</a>
+        </li>
+        
+        
+      </ul>
+
+
+      
+
+      <ul class="navbar-nav">
+        
+        
+      </ul>
+    </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+          <div class="col-12 col-md-3 bd-sidebar">
+
+<form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
+  <div class="bd-toc-item active">
+  
+
+  <ul class="nav bd-sidenav">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </ul>
+
+</nav>
+          </div>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+              
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+    </ul>
+</nav>
+
+
+              
+          </div>
+          
+
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for pharmpy.visualization</h1><div class="highlight"><pre>
+<span></span><span class="c1"># The pharmpy visualization module</span>
+
+<span class="c1"># Since the python visualization and plotting landscape is rapidly</span>
+<span class="c1"># evolving and there are many different modules to choose from</span>
+<span class="c1"># all visualization API calls should be made from this module so</span>
+<span class="c1"># that we could start using another API more easily.</span>
+<span class="c1"># Design conciderations:</span>
+<span class="c1"># We would like to be able to have interactive plots which currently</span>
+<span class="c1"># means to select a package that can render to html. The two main</span>
+<span class="c1"># contenders that can do this are the altair and the bokeh libraries.</span>
+<span class="c1"># Bokeh seems to have a larger community, but the strength in altair</span>
+<span class="c1"># is its use of the standard vega-lite format, which decouples the</span>
+<span class="c1"># creation of a plot from the rendering. Altair plots (or rather vega</span>
+<span class="c1"># plots) can be changed from the html directly via the online vega</span>
+<span class="c1"># editor. So using altair for now, but expecting to revisit this</span>
+<span class="c1"># decision shortly.</span>
+
+<span class="c1"># Will provide base functions for creating different types of plots</span>
+<span class="c1"># or other types of visualizations</span>
+
+<span class="kn">import</span> <span class="nn">altair</span> <span class="k">as</span> <span class="nn">alt</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="n">_chart_width</span> <span class="o">=</span> <span class="mi">500</span>
+<span class="n">_chart_height</span> <span class="o">=</span> <span class="mi">500</span>
+
+
+<div class="viewcode-block" id="scatter_plot_correlation"><a class="viewcode-back" href="../../reference/pharmpy.visualization.html#pharmpy.visualization.scatter_plot_correlation">[docs]</a><span class="k">def</span> <span class="nf">scatter_plot_correlation</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="n">chart</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">width</span><span class="o">=</span><span class="n">_chart_width</span><span class="p">,</span> <span class="n">height</span><span class="o">=</span><span class="n">_chart_height</span><span class="p">)</span><span class="o">.</span><span class="n">mark_circle</span><span class="p">(</span><span class="n">size</span><span class="o">=</span><span class="mi">100</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
+        <span class="n">tooltip</span><span class="o">=</span><span class="p">[</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">]</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">title</span><span class="p">,</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+    <span class="n">line</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span>
+        <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">x</span><span class="p">:</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">x</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">x</span><span class="p">])],</span>
+                      <span class="n">y</span><span class="p">:</span> <span class="p">[</span><span class="nb">min</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">y</span><span class="p">]),</span> <span class="nb">max</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">y</span><span class="p">])]}))</span><span class="o">.</span><span class="n">mark_line</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+            <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="n">x</span><span class="p">),</span>
+            <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="n">y</span><span class="p">),</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">interactive</span><span class="p">()</span>
+
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">chart</span> <span class="o">+</span> <span class="n">line</span>
+
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">configure_title</span><span class="p">(</span><span class="n">fontSize</span><span class="o">=</span><span class="mi">16</span><span class="p">)</span>
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">plot</span><span class="o">.</span><span class="n">configure_axis</span><span class="p">(</span><span class="n">labelFontSize</span><span class="o">=</span><span class="mi">12</span><span class="p">,</span> <span class="n">titleFontSize</span><span class="o">=</span><span class="mi">14</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">plot</span></div>
+
+
+<div class="viewcode-block" id="histogram"><a class="viewcode-back" href="../../reference/pharmpy.visualization.html#pharmpy.visualization.histogram">[docs]</a><span class="k">def</span> <span class="nf">histogram</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s2">&quot;&quot;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Histogram with percentage on y and a rule at mean</span>
+<span class="sd">       slider for reducing the number of values used.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="n">values</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">values</span><span class="p">,</span> <span class="s1">&#39;num&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))})</span>
+
+    <span class="n">slider</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">binding_range</span><span class="p">(</span><span class="nb">min</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="nb">max</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">),</span> <span class="n">step</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;Number of samples: &#39;</span><span class="p">)</span>
+    <span class="n">selection</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">selection_single</span><span class="p">(</span><span class="n">bind</span><span class="o">=</span><span class="n">slider</span><span class="p">,</span> <span class="n">fields</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;num&#39;</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s2">&quot;num&quot;</span><span class="p">,</span>
+                                     <span class="n">init</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;num&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)})</span>
+
+    <span class="n">base</span> <span class="o">=</span> <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">df</span><span class="p">)</span><span class="o">.</span><span class="n">transform_filter</span><span class="p">(</span><span class="s1">&#39;datum.num &lt;= num_num&#39;</span><span class="p">)</span>
+
+    <span class="n">plot</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">transform_joinaggregate</span><span class="p">(</span>
+        <span class="n">total</span><span class="o">=</span><span class="s1">&#39;count(*)&#39;</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">transform_calculate</span><span class="p">(</span>
+        <span class="n">pct</span><span class="o">=</span><span class="s1">&#39;1 / datum.total&#39;</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">mark_bar</span><span class="p">()</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">X</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">values</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">:Q&#39;</span><span class="p">,</span> <span class="nb">bin</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span>
+        <span class="n">alt</span><span class="o">.</span><span class="n">Y</span><span class="p">(</span><span class="s1">&#39;sum(pct):Q&#39;</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">Axis</span><span class="p">(</span><span class="nb">format</span><span class="o">=</span><span class="s1">&#39;%&#39;</span><span class="p">))</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">add_selection</span><span class="p">(</span>
+        <span class="n">selection</span>
+    <span class="p">)</span><span class="o">.</span><span class="n">properties</span><span class="p">(</span>
+        <span class="n">title</span><span class="o">=</span><span class="n">title</span>
+    <span class="p">)</span>
+
+    <span class="n">rule</span> <span class="o">=</span> <span class="n">base</span><span class="o">.</span><span class="n">mark_rule</span><span class="p">(</span><span class="n">color</span><span class="o">=</span><span class="s1">&#39;red&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">encode</span><span class="p">(</span>
+        <span class="n">x</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;mean(</span><span class="si">{</span><span class="n">values</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">):Q&#39;</span><span class="p">,</span>
+        <span class="n">size</span><span class="o">=</span><span class="n">alt</span><span class="o">.</span><span class="n">value</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">plot</span> <span class="o">+</span> <span class="n">rule</span></div>
+</pre></div>
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+
+    <script src="../../_static/js/index.js"></script>
+    <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    <p>
+          &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
+        Last updated on May 27, 2020.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

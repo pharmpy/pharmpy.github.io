@@ -1,0 +1,487 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pharmpy.execute.job &#8212; Pharmpy 0.2.0 documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../../../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+<div class="container-xl">
+
+    
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
+      <ul id="navbar-main-elements" class="navbar-nav mr-auto">
+        
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../installation.html">Installation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../getting_started.html">Getting started</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../user_guide.html">User guide</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../reference/modules.html">Documentation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../development.html">Development</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../changelog.html">Changelog</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../license.html">License</a>
+        </li>
+        
+        
+      </ul>
+
+
+      
+
+      <ul class="navbar-nav">
+        
+        
+      </ul>
+    </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+          <div class="col-12 col-md-3 bd-sidebar">
+
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
+  <div class="bd-toc-item active">
+  
+
+  <ul class="nav bd-sidenav">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </ul>
+
+</nav>
+          </div>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+              
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+    </ul>
+</nav>
+
+
+              
+          </div>
+          
+
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for pharmpy.execute.job</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- encoding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">============</span>
+<span class="sd">Executed Job</span>
+<span class="sd">============</span>
+
+<span class="sd">A job unit, for non-blocking execution and communication (of subprocesses).</span>
+
+<span class="sd">Can be used raw for running subprocesses asynchronously.</span>
+
+<span class="sd">Definitions</span>
+<span class="sd">-----------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">asyncio</span>
+<span class="kn">import</span> <span class="nn">functools</span>
+<span class="kn">import</span> <span class="nn">locale</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">os</span>
+<span class="kn">import</span> <span class="nn">queue</span>
+<span class="kn">import</span> <span class="nn">threading</span>
+<span class="kn">import</span> <span class="nn">time</span>
+<span class="kn">from</span> <span class="nn">asyncio.subprocess</span> <span class="kn">import</span> <span class="n">PIPE</span>
+
+
+<div class="viewcode-block" id="Status"><a class="viewcode-back" href="../../../reference/pharmpy.execute.job.html#pharmpy.execute.job.Status">[docs]</a><span class="k">class</span> <span class="nc">Status</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">Event</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A started/done status of a :class:`~Job` instance.&quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_set</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;&lt;</span><span class="si">%s</span><span class="s1"> </span><span class="si">%r</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="Job"><a class="viewcode-back" href="../../../reference/pharmpy.execute.job.html#pharmpy.execute.job.Job">[docs]</a><span class="k">class</span> <span class="nc">Job</span><span class="p">(</span><span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A job of an :class:`~pharmpy.execute.Engine` running in a</span>
+<span class="sd">    :class:`~pharmpy.execute.RunDirectory` (via an :class:`~pharmpy.execute.Environment`).</span>
+
+<span class="sd">    Responsible for generating and wrapping a subprocess for execution and monitoring. Inherits from</span>
+<span class="sd">    :class:`~threading.Thread` to run in separate thread (non-blocking monitoring). Call</span>
+<span class="sd">    :func:`~Job.start` to execute (:func:`~Job.run` considered low-level API).</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        command: Program and arguments (iterable).</span>
+<span class="sd">        cwd: Working directory.</span>
+<span class="sd">        stdout: Callback, for each line of stdout.</span>
+<span class="sd">        stderr: Callback, for each line of stderr.</span>
+<span class="sd">        callback: Callback, for when task completes.</span>
+<span class="sd">        keepends: Keep line breaks for individual lines?</span>
+
+<span class="sd">    .. note:: Callback functions (arguments *stdout*, *stderr* and *callback*) must be threadsafe.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">command</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">callback</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">keepends</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="n">threading</span><span class="o">.</span><span class="n">Thread</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="n">Status</span><span class="p">()</span>  <span class="c1">#: True if job has started. :class:`Status` instance.</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">done</span> <span class="o">=</span> <span class="n">Status</span><span class="p">()</span>  <span class="c1">#: True if job is done. :class:`Status` instance.</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">command</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">command</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">working_dir</span> <span class="o">=</span> <span class="n">cwd</span> <span class="k">if</span> <span class="n">cwd</span> <span class="k">else</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">keepends</span> <span class="o">=</span> <span class="n">keepends</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">stdout</span><span class="o">=</span><span class="n">stdout</span><span class="p">,</span> <span class="n">stderr</span><span class="o">=</span><span class="n">stderr</span><span class="p">,</span> <span class="n">done</span><span class="o">=</span><span class="n">callback</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queue</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">(),</span> <span class="n">stdout</span><span class="o">=</span><span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">(),</span> <span class="n">stderr</span><span class="o">=</span><span class="n">queue</span><span class="o">.</span><span class="n">Queue</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_history</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">output</span><span class="o">=</span><span class="p">[],</span> <span class="n">stdout</span><span class="o">=</span><span class="p">[],</span> <span class="n">stderr</span><span class="o">=</span><span class="p">[])</span>
+
+<div class="viewcode-block" id="Job.run"><a class="viewcode-back" href="../../../reference/pharmpy.execute.job.html#pharmpy.execute.job.Job.run">[docs]</a>    <span class="k">def</span> <span class="nf">run</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Starts execution *in current thread*.</span>
+
+<span class="sd">        .. note:: You probably want :func:`~Job.start`.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;nt&#39;</span><span class="p">:</span>
+            <span class="n">asyncio</span><span class="o">.</span><span class="n">set_event_loop_policy</span><span class="p">(</span><span class="n">asyncio</span><span class="o">.</span> <span class="n">WindowsProactorEventLoopPolicy</span><span class="p">())</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">RuntimeError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loop</span> <span class="o">=</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">new_event_loop</span><span class="p">()</span>
+            <span class="n">asyncio</span><span class="o">.</span><span class="n">set_event_loop</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">os</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;nt&#39;</span><span class="p">:</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="p">,</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">ProactorEventLoop</span><span class="p">),</span> <span class="s1">&#39;bad event loop for Windows&#39;</span>
+
+        <span class="n">returncode</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">run_until_complete</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_main</span><span class="p">())</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s1">&#39;Finishing job&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">q</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_queue</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+            <span class="n">q</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">returncode</span></div>
+
+<div class="viewcode-block" id="Job.wait"><a class="viewcode-back" href="../../../reference/pharmpy.execute.job.html#pharmpy.execute.job.Job.wait">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">wait</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">poll</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Awaits job completion.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            timeout: Maximum wait time in seconds.</span>
+<span class="sd">            poll: Wait between each status check of job.</span>
+
+<span class="sd">        Raises:</span>
+<span class="sd">            TimeoutError: Job did not complete in *timeout* seconds.</span>
+
+<span class="sd">        Use ``None`` for *timeout* to wait forever. Polling impossible to avoid with Python&#39;s GIL</span>
+<span class="sd">        (don&#39;t event try)!</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="p">(</span><span class="n">timeout</span> <span class="ow">and</span> <span class="n">timeout</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">)</span> <span class="ow">or</span> <span class="p">(</span><span class="n">poll</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;arguments (timeout, poll) not positive numbers (seconds)&quot;</span><span class="p">)</span>
+
+        <span class="k">def</span> <span class="nf">fmt_sec</span><span class="p">(</span><span class="n">seconds</span><span class="p">):</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">seconds</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;infinite&#39;</span>
+            <span class="k">elif</span> <span class="n">seconds</span> <span class="o">&lt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1"> msec&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">seconds</span><span class="o">*</span><span class="mi">1000</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">seconds</span> <span class="o">&lt;</span> <span class="mi">60</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%.3f</span><span class="s1"> sec&#39;</span> <span class="o">%</span> <span class="nb">round</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">m</span><span class="p">,</span> <span class="n">s</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">seconds</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+                <span class="n">h</span><span class="p">,</span> <span class="n">m</span> <span class="o">=</span> <span class="nb">divmod</span><span class="p">(</span><span class="n">m</span><span class="p">,</span> <span class="mi">60</span><span class="p">)</span>
+                <span class="k">return</span> <span class="s1">&#39;</span><span class="si">%d</span><span class="s1">:</span><span class="si">%02d</span><span class="s1">:</span><span class="si">%02d</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">h</span><span class="p">,</span> <span class="n">m</span><span class="p">,</span> <span class="n">s</span><span class="p">)</span>
+
+        <span class="n">start_time</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s1">&#39;Waiting (timeout: </span><span class="si">%s</span><span class="s1">) on job (poll: </span><span class="si">%s</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="n">fmt_sec</span><span class="p">(</span><span class="n">timeout</span><span class="p">),</span> <span class="n">fmt_sec</span><span class="p">(</span><span class="n">poll</span><span class="p">))</span>
+        <span class="k">while</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">done</span><span class="p">:</span>
+            <span class="n">seconds</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span>
+            <span class="k">if</span> <span class="p">(</span><span class="n">timeout</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span><span class="n">seconds</span> <span class="o">&gt;</span> <span class="n">timeout</span><span class="p">):</span>
+                <span class="n">msg</span> <span class="o">=</span> <span class="s1">&#39;Timed out (</span><span class="si">%s</span><span class="s1"> &gt; </span><span class="si">%s</span><span class="s1">) while waiting on job&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">fmt_sec</span><span class="p">(</span><span class="n">seconds</span><span class="p">),</span>
+                                                                    <span class="n">fmt_sec</span><span class="p">(</span><span class="n">timeout</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">ERROR</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">, terminating </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">msg</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">))</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">terminate</span><span class="p">()</span>
+                <span class="k">raise</span> <span class="ne">TimeoutError</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+            <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">sleep</span><span class="p">(</span><span class="n">poll</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="s1">&#39;Waited </span><span class="si">%s</span><span class="s1"> on job, now joining thread&#39;</span><span class="p">,</span> <span class="n">fmt_sec</span><span class="p">(</span><span class="n">time</span><span class="o">.</span><span class="n">time</span><span class="p">()</span> <span class="o">-</span> <span class="n">start_time</span><span class="p">))</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_alive</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">join</span><span class="p">()</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Current, non-linesplit stdout/stderr (mixed) history.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stdout</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Current, non-linesplit stdout history.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">[</span><span class="s1">&#39;stdout&#39;</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">stderr</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Current, non-linesplit stderr history.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">():</span>
+            <span class="k">return</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">[</span><span class="s1">&#39;stderr&#39;</span><span class="p">])</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">rc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return code of subprocess.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">returncode</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">pid</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;PID of subprocess.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
+        <span class="k">with</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">():</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">pid</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">proc</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Started subprocess. :class:`Process` object.&quot;&quot;&quot;</span>
+        <span class="k">with</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">():</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_proc</span>
+            <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@proc</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">proc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_proc</span> <span class="o">=</span> <span class="n">value</span>
+
+<div class="viewcode-block" id="Job.iter_stream"><a class="viewcode-back" href="../../../reference/pharmpy.execute.job.html#pharmpy.execute.job.Job.iter_stream">[docs]</a>    <span class="k">def</span> <span class="nf">iter_stream</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stream_type</span><span class="p">,</span> <span class="n">timeout</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">keepends</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Line-for-line generator for :attr:`~Job.stdout`, :attr:`~Job.stderr` or</span>
+<span class="sd">        :attr:`~Job.output` of non-processed lines in queue.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            stream_type: *stdout*, *stderr* or *output* (mixed stream)</span>
+<span class="sd">            timeout: Time to wait for new lines/process completion. Non-blocking if 0.</span>
+<span class="sd">            keepends: Keep line breaks?</span>
+
+<span class="sd">        .. todo:: Needs reference counting for multiple instances.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">keepends</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">keepends</span> <span class="k">if</span> <span class="n">keepends</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">keepends</span>
+        <span class="n">get_line</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_queue</span><span class="p">[</span><span class="n">stream_type</span><span class="p">]</span><span class="o">.</span><span class="n">get</span><span class="p">,</span> <span class="n">timeout</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">,</span> <span class="n">timeout</span><span class="p">)</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">line</span> <span class="o">=</span> <span class="n">get_line</span><span class="p">()</span>
+            <span class="k">except</span> <span class="n">queue</span><span class="o">.</span><span class="n">Empty</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">if</span> <span class="n">line</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span>
+            <span class="k">if</span> <span class="n">keepends</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="n">line</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">yield</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span></div>
+
+    <span class="k">def</span> <span class="nf">_warn</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span> <span class="n">msg</span> <span class="o">%</span> <span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="n">msg</span> <span class="o">%</span> <span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_debug</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_log</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span> <span class="n">msg</span> <span class="o">%</span> <span class="n">args</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_log</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">msg</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">():</span>
+            <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__name__</span><span class="p">)</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">level</span><span class="p">,</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: </span><span class="si">%r</span><span class="s1"> on &lt;Thread </span><span class="si">%s</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">msg</span><span class="p">,</span>
+                                            <span class="bp">self</span><span class="p">,</span> <span class="n">threading</span><span class="o">.</span><span class="n">current_thread</span><span class="p">()</span><span class="o">.</span><span class="n">getName</span><span class="p">())</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_main</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Main coroutine.</span>
+
+<span class="sd">        Subprocess running/scheduling. Only called internally.</span>
+
+<span class="sd">        See `reference &lt;https://stackoverflow.com/a/20697159&gt;`_ of implementation.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">working_dir</span><span class="p">:</span>
+            <span class="n">working_dir</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">working_dir</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">working_dir</span> <span class="o">=</span> <span class="kc">None</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s1">&#39;Starting subprocess </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">proc</span> <span class="o">=</span> <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">create_subprocess_exec</span><span class="p">(</span><span class="o">*</span><span class="bp">self</span><span class="o">.</span><span class="n">command</span><span class="p">,</span> <span class="n">stdout</span><span class="o">=</span><span class="n">PIPE</span><span class="p">,</span>
+                                                             <span class="n">stderr</span><span class="o">=</span><span class="n">PIPE</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="n">working_dir</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">Exception</span> <span class="k">as</span> <span class="n">exc</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_warn</span><span class="p">(</span><span class="s1">&#39;Job failed to start! Process raised &lt;</span><span class="si">%r</span><span class="s1">&gt;&#39;</span><span class="p">,</span> <span class="n">exc</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">done</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="n">exc</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="s1">&#39;Job </span><span class="si">%r</span><span class="s1"> started&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+
+        <span class="k">await</span> <span class="n">asyncio</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_await_stream_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">stdout</span><span class="p">,</span> <span class="s1">&#39;stdout&#39;</span><span class="p">),</span>
+                             <span class="bp">self</span><span class="o">.</span><span class="n">_await_stream_lines</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">stderr</span><span class="p">,</span> <span class="s1">&#39;stderr&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%r</span><span class="s1"> pipes closed&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">)</span>
+
+        <span class="n">return_code</span> <span class="o">=</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="o">.</span><span class="n">wait</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">return_code</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_info</span><span class="p">(</span><span class="s1">&#39;Job </span><span class="si">%r</span><span class="s1"> exited normally&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_warn</span><span class="p">(</span><span class="s1">&#39;Job </span><span class="si">%r</span><span class="s1"> error exited (rc=</span><span class="si">%d</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">,</span> <span class="n">return_code</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">[</span><span class="s1">&#39;done&#39;</span><span class="p">]:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s1">&#39;Scheduling callback (to </span><span class="si">%r</span><span class="s1">)&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">[</span><span class="s1">&#39;done&#39;</span><span class="p">])</span>
+            <span class="n">callback</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">[</span><span class="s1">&#39;done&#39;</span><span class="p">],</span> <span class="bp">self</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">call_soon_threadsafe</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">loop</span><span class="o">.</span><span class="n">run_in_executor</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">callback</span><span class="p">)</span>
+            <span class="c1"># await loop.run_in_executor(None, callback)</span>
+            <span class="c1"># asyncio.run_coroutine_threadsafe(callback, loop=self.loop)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">done</span><span class="o">.</span><span class="n">set</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">return_code</span>
+
+    <span class="k">def</span> <span class="nf">_stream_handle</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Handler of all stdout/stderr lines.</span>
+
+<span class="sd">        Put in queue, history and call external handler (if any).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">line</span> <span class="o">=</span> <span class="n">line</span><span class="o">.</span><span class="n">decode</span><span class="p">(</span><span class="n">locale</span><span class="o">.</span><span class="n">getpreferredencoding</span><span class="p">(</span><span class="kc">False</span><span class="p">))</span>
+        <span class="k">with</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">():</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">line</span><span class="p">]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_history</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">+=</span> <span class="p">[</span><span class="n">line</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">keepends</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">line</span><span class="o">.</span><span class="n">splitlines</span><span class="p">())</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queue</span><span class="p">[</span><span class="s1">&#39;output&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_queue</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">put</span><span class="p">(</span><span class="n">line</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">[</span><span class="n">name</span><span class="p">]:</span>
+            <span class="n">callback</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_callback</span><span class="p">[</span><span class="n">name</span><span class="p">],</span> <span class="n">line</span><span class="p">)</span>
+            <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">call_soon_threadsafe</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_await_stream_lines</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">reader</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Awaits new line in *reader*, calling handler threadsafely.&quot;&quot;&quot;</span>
+        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+            <span class="n">line</span> <span class="o">=</span> <span class="k">await</span> <span class="n">reader</span><span class="o">.</span><span class="n">readline</span><span class="p">()</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">line</span><span class="p">:</span>
+                <span class="k">break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s1">&#39;Read </span><span class="si">%r</span><span class="s1"> [</span><span class="si">%s</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+            <span class="n">callback</span> <span class="o">=</span> <span class="n">functools</span><span class="o">.</span><span class="n">partial</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_stream_handle</span><span class="p">,</span> <span class="n">line</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="n">asyncio</span><span class="o">.</span><span class="n">get_event_loop</span><span class="p">()</span><span class="o">.</span><span class="n">call_soon_threadsafe</span><span class="p">(</span><span class="n">callback</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_debug</span><span class="p">(</span><span class="s1">&#39;Read EOF [</span><span class="si">%s</span><span class="s1">]&#39;</span><span class="p">,</span> <span class="n">name</span><span class="o">.</span><span class="n">upper</span><span class="p">())</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">with</span> <span class="n">threading</span><span class="o">.</span><span class="n">Lock</span><span class="p">():</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%s</span><span class="s1"> (</span><span class="si">%s</span><span class="s1">)&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">hex</span><span class="p">(</span><span class="nb">id</span><span class="p">(</span><span class="bp">self</span><span class="p">)),</span> <span class="bp">self</span><span class="o">.</span><span class="n">getName</span><span class="p">())</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">done</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+                <span class="k">return</span> <span class="s1">&#39;&lt;done </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span><span class="o">.</span><span class="n">is_set</span><span class="p">():</span>
+                <span class="k">return</span> <span class="s1">&#39;&lt;busy </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">, </span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">proc</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">return</span> <span class="s1">&#39;&lt;new </span><span class="si">%s</span><span class="s1"> </span><span class="si">%s</span><span class="s1">&gt;&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span></div>
+</pre></div>
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+
+    <script src="../../../_static/js/index.js"></script>
+    <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    <p>
+          &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
+        Last updated on May 27, 2020.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

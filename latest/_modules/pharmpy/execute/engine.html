@@ -1,0 +1,267 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pharmpy.execute.engine &#8212; Pharmpy 0.2.0 documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../../../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
+    <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
+    <script src="../../../_static/jquery.js"></script>
+    <script src="../../../_static/underscore.js"></script>
+    <script src="../../../_static/doctools.js"></script>
+    <script src="../../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../../genindex.html" />
+    <link rel="search" title="Search" href="../../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+<div class="container-xl">
+
+    
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
+      <ul id="navbar-main-elements" class="navbar-nav mr-auto">
+        
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../installation.html">Installation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../getting_started.html">Getting started</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../user_guide.html">User guide</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../reference/modules.html">Documentation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../development.html">Development</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../changelog.html">Changelog</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../license.html">License</a>
+        </li>
+        
+        
+      </ul>
+
+
+      
+
+      <ul class="navbar-nav">
+        
+        
+      </ul>
+    </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+          <div class="col-12 col-md-3 bd-sidebar">
+
+<form class="bd-search d-flex align-items-center" action="../../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
+  <div class="bd-toc-item active">
+  
+
+  <ul class="nav bd-sidenav">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </ul>
+
+</nav>
+          </div>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+              
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+    </ul>
+</nav>
+
+
+              
+          </div>
+          
+
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for pharmpy.execute.engine</h1><div class="highlight"><pre>
+<span></span><span class="c1"># -*- encoding: utf-8 -*-</span>
+<span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">================</span>
+<span class="sd">Execution Engine</span>
+<span class="sd">================</span>
+
+<span class="sd">Job creator for a :class:`~pharmpy.generic.Model` implementation.</span>
+
+<span class="sd">The critical, non-agnostic and central unit to inherit (e.g.</span>
+<span class="sd">:class:`~pharmpy.api_nonmem.execute.NONMEM7`). That implementation can be multiclassed dynamically</span>
+<span class="sd">for :class:`~pharmpy.tool.Tool` implementations, if mere duck typing doesn&#39;t cut it.</span>
+
+<span class="sd">.. note:: An :class:`.Engine` implementation is expected to implement all methods/attributes.</span>
+
+<span class="sd">Definitions</span>
+<span class="sd">-----------</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">from</span> <span class="nn">.environment</span> <span class="kn">import</span> <span class="n">SystemEnvironment</span>
+<span class="kn">from</span> <span class="nn">.run_directory</span> <span class="kn">import</span> <span class="n">RunDirectory</span>
+
+
+<div class="viewcode-block" id="Engine"><a class="viewcode-back" href="../../../reference/pharmpy.execute.engine.html#pharmpy.execute.Engine">[docs]</a><span class="k">class</span> <span class="nc">Engine</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;An execution engine (e.g. for NONMEM7) of a :class:`~pharmpy.generic.Model`.</span>
+
+<span class="sd">    Is a model API attached to attribute :attr:`Model.execute &lt;pharmpy.generic.Model.execute&gt;`.</span>
+
+<span class="sd">    Arguments:</span>
+<span class="sd">        envir: Type of :class:`~.environment.Environment` to use.</span>
+
+<span class="sd">    Default `envir` inherits (depending on the current OS) :class:`~.environment.SystemEnvironment`</span>
+<span class="sd">    (direct execution).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">envir</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="n">model</span>
+        <span class="k">if</span> <span class="n">envir</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="n">envir</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">environment</span> <span class="o">=</span> <span class="n">SystemEnvironment</span><span class="p">()</span>
+
+<div class="viewcode-block" id="Engine.evaluate"><a class="viewcode-back" href="../../../reference/pharmpy.execute.engine.html#pharmpy.execute.Engine.evaluate">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">evaluate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Starts model evaluation and returns :class:`~.job.Job` object.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            cwd: Directory to create run directory in (temporary if None).</span>
+
+<span class="sd">        .. todo:: Make either this level, or one up (:class:`pharmpy.generic.Model` and</span>
+<span class="sd">            :class:`pharmpy.tool.Tool`), emulate -model_subdir command of PsN. Estimating</span>
+<span class="sd">            pheno_real.mod with no dir info but the *parent* (otherwise it must be a temp dir),</span>
+<span class="sd">            should create &#39;pheno_real/&#39; dir only if it doesn&#39;t already exist, and *then* create</span>
+<span class="sd">            pheno_real/estimate_dir1/, pheno_real/evaluate_dir74/, etc. (be clear but not collide).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Engine.estimate"><a class="viewcode-back" href="../../../reference/pharmpy.execute.engine.html#pharmpy.execute.Engine.estimate">[docs]</a>    <span class="k">async</span> <span class="k">def</span> <span class="nf">estimate</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cwd</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Starts model estimation and returns :class:`~.job.Job` object.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            cwd: Directory to create run directory in (temporary if None).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">return</span> <span class="k">await</span> <span class="bp">self</span><span class="o">.</span><span class="n">_execute_model</span><span class="p">(</span><span class="n">cwd</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">bin</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Path (to main binary).&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">version</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Version (of main binary).&quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span>
+
+<div class="viewcode-block" id="Engine.get_commandline"><a class="viewcode-back" href="../../../reference/pharmpy.execute.engine.html#pharmpy.execute.Engine.get_commandline">[docs]</a>    <span class="k">def</span> <span class="nf">get_commandline</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns a command line for performing a task.</span>
+
+<span class="sd">        Arguments:</span>
+<span class="sd">            task: Any task of {&#39;evaluate&#39;, &#39;estimate&#39;}.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">raise</span> <span class="ne">NotImplementedError</span></div>
+
+    <span class="k">async</span> <span class="k">def</span> <span class="nf">_execute_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">cwd</span><span class="p">):</span>
+        <span class="n">rundir</span> <span class="o">=</span> <span class="n">RunDirectory</span><span class="p">(</span><span class="n">cwd</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">stem</span><span class="p">)</span>
+        <span class="n">rundir</span><span class="o">.</span><span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
+        <span class="n">command</span> <span class="o">=</span> <span class="n">rundir</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">execute</span><span class="o">.</span><span class="n">get_commandline</span><span class="p">(</span><span class="s1">&#39;estimate&#39;</span><span class="p">)</span>
+        <span class="n">envir</span> <span class="o">=</span> <span class="n">rundir</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">execute</span><span class="o">.</span><span class="n">environment</span>
+
+        <span class="n">job</span> <span class="o">=</span> <span class="k">await</span> <span class="n">envir</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="n">command</span><span class="p">,</span> <span class="n">rundir</span><span class="p">)</span>
+        <span class="n">rundir</span><span class="o">.</span><span class="n">bind_job</span><span class="p">(</span><span class="n">job</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">rundir</span>
+
+    <span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;True if this engine is ready for executing *now*.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
+</pre></div>
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+
+    <script src="../../../_static/js/index.js"></script>
+    <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    <p>
+          &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
+        Last updated on May 27, 2020.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

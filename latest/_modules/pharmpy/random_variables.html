@@ -1,0 +1,520 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pharmpy.random_variables &#8212; Pharmpy 0.2.0 documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+<div class="container-xl">
+
+    
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
+      <ul id="navbar-main-elements" class="navbar-nav mr-auto">
+        
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../installation.html">Installation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../getting_started.html">Getting started</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../user_guide.html">User guide</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../reference/modules.html">Documentation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../development.html">Development</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../changelog.html">Changelog</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../license.html">License</a>
+        </li>
+        
+        
+      </ul>
+
+
+      
+
+      <ul class="navbar-nav">
+        
+        
+      </ul>
+    </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+          <div class="col-12 col-md-3 bd-sidebar">
+
+<form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
+  <div class="bd-toc-item active">
+  
+
+  <ul class="nav bd-sidenav">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </ul>
+
+</nav>
+          </div>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+              
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+    </ul>
+</nav>
+
+
+              
+          </div>
+          
+
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for pharmpy.random_variables</h1><div class="highlight"><pre>
+<span></span><span class="kn">import</span> <span class="nn">enum</span>
+<span class="kn">import</span> <span class="nn">itertools</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">symengine</span>
+<span class="kn">import</span> <span class="nn">sympy</span>
+<span class="kn">import</span> <span class="nn">sympy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
+<span class="kn">from</span> <span class="nn">sympy.matrices</span> <span class="kn">import</span> <span class="n">MatrixBase</span><span class="p">,</span> <span class="n">MatrixExpr</span>
+<span class="kn">from</span> <span class="nn">sympy.stats.rv</span> <span class="kn">import</span> <span class="n">RandomSymbol</span>
+
+<span class="kn">import</span> <span class="nn">pharmpy.math</span>
+
+<span class="kn">from</span> <span class="nn">.data_structures</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
+
+
+<div class="viewcode-block" id="VariabilityLevel"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.VariabilityLevel">[docs]</a><span class="k">class</span> <span class="nc">VariabilityLevel</span><span class="p">(</span><span class="n">enum</span><span class="o">.</span><span class="n">Enum</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Representation of a variability level</span>
+
+<span class="sd">       currently supports only IIV and RUV.</span>
+<span class="sd">       Can be changed into something not-enum</span>
+<span class="sd">       in future keeping the IIV and RUV as</span>
+<span class="sd">       class singletons</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">IIV</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span>
+    <span class="n">RUV</span> <span class="o">=</span> <span class="n">enum</span><span class="o">.</span><span class="n">auto</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="MultivariateNormalDistribution"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.MultivariateNormalDistribution">[docs]</a><span class="k">class</span> <span class="nc">MultivariateNormalDistribution</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">joint_rv_types</span><span class="o">.</span><span class="n">MultivariateNormalDistribution</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;A joint normal distribution that does not check for posdef.</span>
+<span class="sd">       Needed because of sympy issue #18625</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+<div class="viewcode-block" id="MultivariateNormalDistribution.check"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.MultivariateNormalDistribution.check">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">check</span><span class="p">(</span><span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">mu</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">!=</span> <span class="n">sigma</span><span class="o">.</span><span class="n">shape</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Size of the mean vector and covariance matrix are incorrect.&quot;</span><span class="p">)</span></div></div>
+
+
+<div class="viewcode-block" id="Normal"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.Normal">[docs]</a><span class="k">def</span> <span class="nf">Normal</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;sympy function patched to use our MultivariateNormalDistribution</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">MatrixBase</span><span class="p">,</span> <span class="n">MatrixExpr</span><span class="p">))</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">std</span><span class="p">,</span> <span class="p">(</span><span class="nb">list</span><span class="p">,</span> <span class="n">MatrixBase</span><span class="p">,</span>
+                                                                             <span class="n">MatrixExpr</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="n">stats</span><span class="o">.</span><span class="n">joint_rv_types</span><span class="o">.</span><span class="n">multivariate_rv</span><span class="p">(</span><span class="n">MultivariateNormalDistribution</span><span class="p">,</span>
+                                                    <span class="n">name</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">rv</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span><span class="p">,</span> <span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="JointDistributionSeparate"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.JointDistributionSeparate">[docs]</a><span class="k">class</span> <span class="nc">JointDistributionSeparate</span><span class="p">(</span><span class="n">RandomSymbol</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;One random variable in a joint distribution</span>
+
+<span class="sd">       sympy can currently only represent the random variables in a joint distribution</span>
+<span class="sd">       as one single indexed variable that cannot be separately named. This class</span>
+<span class="sd">       makes separation possible.</span>
+
+<span class="sd">       This class can probably not solve all issues with joint rvs, but it can at least</span>
+<span class="sd">       handle seprate symbols, pass as a random variable for random_variables and lead back</span>
+<span class="sd">       to its pspace.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">joint_symbol</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">name</span><span class="p">),</span> <span class="n">joint_symbol</span><span class="o">.</span><span class="n">pspace</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="JointNormalSeparate"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.JointNormalSeparate">[docs]</a><span class="k">def</span> <span class="nf">JointNormalSeparate</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Conveniently create a joint normal distribution and create separate random variables</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;__DUMMY__&#39;</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">cov</span><span class="p">)</span>
+    <span class="n">rvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">JointDistributionSeparate</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">rvs</span></div>
+
+
+<div class="viewcode-block" id="RandomVariables"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.RandomVariables">[docs]</a><span class="k">class</span> <span class="nc">RandomVariables</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;An ordered set of random variables</span>
+
+<span class="sd">       currently separately named jointrvs are not supported in sympy</span>
+<span class="sd">       (i.e. it is not possible to do [eta1, eta2] = Normal(...))</span>
+<span class="sd">       Use JointDistributionSeparate as a workaround</span>
+<span class="sd">       Joints must come in the correct order</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">nletter</span> <span class="o">=</span> <span class="s1">&#39;𝒩 &#39;</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_left_parens</span><span class="p">(</span><span class="n">height</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an array containing each row of a large parenthesis</span>
+<span class="sd">           used for pretty printing</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;⎧&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">height</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;⎪&#39;</span><span class="p">)</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;⎩&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_right_parens</span><span class="p">(</span><span class="n">height</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return an array containing each row of a large parenthesis</span>
+<span class="sd">           used for pretty printing</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;⎫&#39;</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">height</span> <span class="o">-</span> <span class="mi">2</span><span class="p">):</span>
+            <span class="n">a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;⎪&#39;</span><span class="p">)</span>
+        <span class="n">a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;⎭&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">a</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_normal_definition_string</span><span class="p">(</span><span class="n">rv</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Provide a array of pretty strings for the definition of a Normal random variable</span>
+<span class="sd">           This should ideally be available from sympy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span>
+        <span class="k">return</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="n">wrap_line</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;~ </span><span class="si">{</span><span class="n">RandomVariables</span><span class="o">.</span><span class="n">nletter</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">mean</span><span class="p">,</span> <span class="n">wrap_line</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="s1">, &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">std</span><span class="o">**</span><span class="mi">2</span><span class="p">,</span> <span class="n">wrap_line</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="si">}</span><span class="s1">)&#39;</span><span class="p">]</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_joint_normal_definition_string</span><span class="p">(</span><span class="n">rvs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Provide an array of pretty strings for the definition of a Joint Normal random variable</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">dist</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span>
+        <span class="n">name_vector</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span>
+        <span class="n">name_strings</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="n">name_vector</span><span class="p">,</span> <span class="n">wrap_line</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">mu_strings</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="n">wrap_line</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">sigma_strings</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">sigma</span><span class="p">,</span> <span class="n">wrap_line</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">mu_height</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">mu_strings</span><span class="p">)</span>
+        <span class="n">sigma_height</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">sigma_strings</span><span class="p">)</span>
+        <span class="n">max_height</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">mu_height</span><span class="p">,</span> <span class="n">sigma_height</span><span class="p">)</span>
+
+        <span class="n">left_parens</span> <span class="o">=</span> <span class="n">RandomVariables</span><span class="o">.</span><span class="n">_left_parens</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name_strings</span><span class="p">))</span>
+        <span class="n">right_parens</span> <span class="o">=</span> <span class="n">RandomVariables</span><span class="o">.</span><span class="n">_right_parens</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">name_strings</span><span class="p">))</span>
+
+        <span class="c1"># Pad the smaller of the matrices</span>
+        <span class="k">if</span> <span class="n">mu_height</span> <span class="o">!=</span> <span class="n">sigma_height</span><span class="p">:</span>
+            <span class="n">to_pad</span> <span class="o">=</span> <span class="n">mu_strings</span> <span class="k">if</span> <span class="n">mu_strings</span> <span class="o">&lt;</span> <span class="n">sigma_strings</span> <span class="k">else</span> <span class="n">sigma_strings</span>
+            <span class="n">num_lines</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="n">mu_height</span> <span class="o">-</span> <span class="n">sigma_height</span><span class="p">)</span>
+            <span class="n">padding</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">to_pad</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">num_lines</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">//</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">to_pad</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">padding</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">to_pad</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">padding</span><span class="p">)</span>
+
+        <span class="n">central_index</span> <span class="o">=</span> <span class="n">max_height</span> <span class="o">//</span> <span class="mi">2</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">enumerator</span> <span class="o">=</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">name_strings</span><span class="p">,</span> <span class="n">left_parens</span><span class="p">,</span> <span class="n">mu_strings</span><span class="p">,</span> <span class="n">sigma_strings</span><span class="p">,</span>
+                                   <span class="n">right_parens</span><span class="p">))</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="p">(</span><span class="n">name_line</span><span class="p">,</span> <span class="n">lpar</span><span class="p">,</span> <span class="n">mu_line</span><span class="p">,</span> <span class="n">sigma_line</span><span class="p">,</span> <span class="n">rpar</span><span class="p">)</span> <span class="ow">in</span> <span class="n">enumerator</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">central_index</span><span class="p">:</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name_line</span> <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39; ~ </span><span class="si">{</span><span class="n">RandomVariables</span><span class="o">.</span><span class="n">nletter</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">lpar</span> <span class="o">+</span>
+                           <span class="n">mu_line</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span> <span class="o">+</span> <span class="n">sigma_line</span> <span class="o">+</span> <span class="n">rpar</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">res</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name_line</span> <span class="o">+</span> <span class="s1">&#39;     &#39;</span> <span class="o">+</span> <span class="n">lpar</span> <span class="o">+</span> <span class="n">mu_line</span> <span class="o">+</span>
+                           <span class="s1">&#39;  &#39;</span> <span class="o">+</span> <span class="n">sigma_line</span> <span class="o">+</span> <span class="n">rpar</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">res</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">index</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">e</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">e</span> <span class="o">==</span> <span class="n">index</span> <span class="ow">or</span> <span class="n">e</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">index</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="n">e</span>
+        <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Random variable &quot;</span><span class="si">{</span><span class="n">index</span><span class="si">}</span><span class="s1">&quot; does not exist&#39;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Give a nicely formatted view of the definitions of all</span>
+<span class="sd">            random variables.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span><span class="p">):</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="n">RandomVariables</span><span class="o">.</span><span class="n">_normal_definition_string</span><span class="p">(</span><span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">joint_rv_types</span><span class="o">.</span><span class="n">MultivariateNormalDistribution</span><span class="p">):</span>
+                <span class="n">lines</span> <span class="o">=</span> <span class="n">RandomVariables</span><span class="o">.</span><span class="n">_joint_normal_definition_string</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="k">return</span> <span class="n">res</span>
+
+<div class="viewcode-block" id="RandomVariables.distributions"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.RandomVariables.distributions">[docs]</a>    <span class="k">def</span> <span class="nf">distributions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Iterate with one entry per distribution instead of per random variable.</span>
+
+<span class="sd">           level - only iterate over random variables of this variability level</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">dist</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span><span class="p">):</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">level</span> <span class="o">==</span> <span class="n">rv</span><span class="o">.</span><span class="n">variability_level</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="p">[</span><span class="n">rv</span><span class="p">],</span> <span class="n">dist</span>
+            <span class="k">else</span><span class="p">:</span>       <span class="c1"># Joint Normal</span>
+                <span class="n">n</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">sigma</span><span class="o">.</span><span class="n">rows</span>
+                <span class="n">rvs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">n</span><span class="p">)]</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="n">n</span>
+                <span class="k">if</span> <span class="n">level</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">level</span> <span class="o">==</span> <span class="n">rv</span><span class="o">.</span><span class="n">variability_level</span><span class="p">:</span>
+                    <span class="k">yield</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span></div>
+
+<div class="viewcode-block" id="RandomVariables.iiv_variance_parameters"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.RandomVariables.iiv_variance_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">iiv_variance_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">VariabilityLevel</span><span class="o">.</span><span class="n">IIV</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">std</span> <span class="o">**</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parameters</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">sigma</span><span class="o">.</span><span class="n">diagonal</span><span class="p">())</span>
+        <span class="k">return</span> <span class="n">parameters</span></div>
+
+<div class="viewcode-block" id="RandomVariables.merge_normal_distributions"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.RandomVariables.merge_normal_distributions">[docs]</a>    <span class="k">def</span> <span class="nf">merge_normal_distributions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">fill</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Merge all normal distributed rvs together into one joint normal</span>
+
+<span class="sd">           Set new covariances (and previous 0 covs) to &#39;fill&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">non_altered</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">means</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">blocks</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
+            <span class="n">names</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">])</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span><span class="p">):</span>
+                <span class="n">means</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
+                <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">dist</span><span class="o">.</span><span class="n">std</span><span class="o">**</span><span class="mi">2</span><span class="p">]))</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">stats</span><span class="o">.</span><span class="n">joint_rv_types</span><span class="o">.</span><span class="n">MultivariateNormalDistribution</span><span class="p">):</span>
+                <span class="n">means</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span>
+                <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">non_altered</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">names</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">blocks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="c1"># Need special case for len(blocks) == 1 because of sympy 1.5.1 bug #18618</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">BlockDiagMatrix</span><span class="p">(</span><span class="o">*</span><span class="n">blocks</span><span class="p">)</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">M</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">blocks</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">fill</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">rows</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">cols</span><span class="p">)):</span>
+                    <span class="k">if</span> <span class="n">M</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                        <span class="n">M</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">fill</span>
+            <span class="n">new_rvs</span> <span class="o">=</span> <span class="n">JointNormalSeparate</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">means</span><span class="p">,</span> <span class="n">M</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">new_rvs</span> <span class="o">+</span> <span class="n">non_altered</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RandomVariables.copy"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.RandomVariables.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Special copy because separated joints need special treatment</span>
+        <span class="n">new_rvs</span> <span class="o">=</span> <span class="n">RandomVariables</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">new_rvs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_rvs</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">JointNormalSeparate</span><span class="p">([</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">],</span> <span class="n">dist</span><span class="o">.</span><span class="n">mu</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">sigma</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">rvs</span></div>
+
+<div class="viewcode-block" id="RandomVariables.validate_parameters"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.RandomVariables.validate_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">validate_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_values</span><span class="p">,</span> <span class="n">use_cache</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Validate a dict or Series of parameter values</span>
+
+<span class="sd">            Currently checks that all covariance matrices are posdef</span>
+<span class="sd">            use_cache for using symengine cached matrices</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">use_cache</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_cached_sigmas&#39;</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_cached_sigmas</span> <span class="o">=</span> <span class="p">{}</span>
+            <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">sigma</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">sigma</span>
+                    <span class="n">a</span> <span class="o">=</span> <span class="p">[[</span><span class="n">symengine</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">sigma</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">i</span><span class="p">)]</span>
+                         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sigma</span><span class="o">.</span><span class="n">rows</span><span class="p">)]</span>
+                    <span class="n">A</span> <span class="o">=</span> <span class="n">symengine</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">_cached_sigmas</span><span class="p">[</span><span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">A</span>
+
+        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">use_cache</span><span class="p">:</span>
+                    <span class="n">sigma</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">sigma</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">parameter_values</span><span class="p">))</span>
+                    <span class="c1"># Switch to numpy here. Sympy posdef check is problematic</span>
+                    <span class="c1"># see https://github.com/sympy/sympy/issues/18955</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">sigma</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+                        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">is_posdef</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+                            <span class="k">return</span> <span class="kc">False</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cached_sigmas</span><span class="p">[</span><span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span>
+                    <span class="n">replacement</span> <span class="o">=</span> <span class="p">{}</span>
+                    <span class="c1"># Following because https://github.com/symengine/symengine/issues/1660</span>
+                    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">dict</span><span class="p">(</span><span class="n">parameter_values</span><span class="p">):</span>
+                        <span class="n">replacement</span><span class="p">[</span><span class="n">symengine</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">param</span><span class="p">)]</span> <span class="o">=</span> <span class="n">parameter_values</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
+                    <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">replacement</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">sigma</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>      <span class="c1"># Cannot validate since missing params</span>
+                        <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">is_posdef</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+                            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">True</span></div>
+
+<div class="viewcode-block" id="RandomVariables.nearest_valid_parameters"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.RandomVariables.nearest_valid_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">nearest_valid_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter_values</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Force parameter values into being valid</span>
+
+<span class="sd">            As small changes as possible</span>
+
+<span class="sd">            returns an updated parameter_values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">nearest</span> <span class="o">=</span> <span class="n">parameter_values</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">sigma</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">sigma</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">parameter_values</span><span class="p">))</span>
+                <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">nearest_posdef</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">B</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">A</span><span class="p">:</span>
+                    <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)):</span>
+                        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
+                            <span class="n">nearest</span><span class="p">[</span><span class="n">dist</span><span class="o">.</span><span class="n">sigma</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">B</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">nearest</span></div></div>
+
+
+<span class="c1"># pharmpy sets a parametrization attribute to the sympy distributions</span>
+<span class="c1"># It will currently not affect the sympy distribution itself just convey the information</span>
+<span class="c1"># The distribution class itself need to change to accomodate pdf etc.</span>
+<span class="c1"># Could have different distributions for different parametrization, but would like to be able</span>
+<span class="c1"># to convert between them. Ideally also support arbitrary parametrizations.</span>
+<span class="c1"># Classes will be used by ModelfitResults to be able to reparametrize results without</span>
+<span class="c1"># reparametrizing the whole model.</span>
+
+<span class="c1"># For now simply use these for the results object to set proper parametrization of parameter.</span>
+
+
+<div class="viewcode-block" id="NormalParametrizationVariance"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.NormalParametrizationVariance">[docs]</a><span class="k">class</span> <span class="nc">NormalParametrizationVariance</span><span class="p">:</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;variance&#39;</span>
+    <span class="n">distribution</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="NormalParametrizationSd"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.NormalParametrizationSd">[docs]</a><span class="k">class</span> <span class="nc">NormalParametrizationSd</span><span class="p">:</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;sd&#39;</span>
+    <span class="n">distribution</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">sd</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="MultivariateNormalParametrizationCovariance"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.MultivariateNormalParametrizationCovariance">[docs]</a><span class="k">class</span> <span class="nc">MultivariateNormalParametrizationCovariance</span><span class="p">:</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;covariance&#39;</span>
+    <span class="n">distribution</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">joint_rv_types</span><span class="o">.</span><span class="n">MultivariateNormalDistribution</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+
+
+<div class="viewcode-block" id="MultivariateNormalParametrizationSdCorr"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.random_variables.MultivariateNormalParametrizationSdCorr">[docs]</a><span class="k">class</span> <span class="nc">MultivariateNormalParametrizationSdCorr</span><span class="p">:</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;sdcorr&#39;</span>
+    <span class="n">distribution</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">joint_rv_types</span><span class="o">.</span><span class="n">MultivariateNormalDistribution</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">sd</span><span class="p">,</span> <span class="n">corr</span><span class="p">):</span>
+        <span class="k">pass</span></div>
+</pre></div>
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+
+    <script src="../../_static/js/index.js"></script>
+    <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    <p>
+          &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
+        Last updated on May 27, 2020.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>

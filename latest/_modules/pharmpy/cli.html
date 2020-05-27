@@ -1,0 +1,1104 @@
+
+
+<!DOCTYPE html>
+
+<html xmlns="http://www.w3.org/1999/xhtml">
+  <head>
+    <meta charset="utf-8" />
+    <title>pharmpy.cli &#8212; Pharmpy 0.2.0 documentation</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
+    <link href="../../_static/css/index.css" rel="stylesheet">
+    <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
+    <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
+    <script src="../../_static/jquery.js"></script>
+    <script src="../../_static/underscore.js"></script>
+    <script src="../../_static/doctools.js"></script>
+    <script src="../../_static/language_data.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <link rel="index" title="Index" href="../../genindex.html" />
+    <link rel="search" title="Search" href="../../search.html" />
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="docsearch:language" content="en">
+  </head>
+  <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
+    
+    <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
+<div class="container-xl">
+
+    
+    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
+        <span class="navbar-toggler-icon"></span>
+    </button>
+
+    <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
+      <ul id="navbar-main-elements" class="navbar-nav mr-auto">
+        
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../installation.html">Installation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../getting_started.html">Getting started</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../user_guide.html">User guide</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../reference/modules.html">Documentation</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../development.html">Development</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../changelog.html">Changelog</a>
+        </li>
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../license.html">License</a>
+        </li>
+        
+        
+      </ul>
+
+
+      
+
+      <ul class="navbar-nav">
+        
+        
+      </ul>
+    </div>
+</div>
+    </nav>
+    
+
+    <div class="container-xl">
+      <div class="row">
+          
+          <div class="col-12 col-md-3 bd-sidebar">
+
+<form class="bd-search d-flex align-items-center" action="../../search.html" method="get">
+  <i class="icon fas fa-search"></i>
+  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
+</form>
+
+
+<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
+
+  <div class="bd-toc-item active">
+  
+
+  <ul class="nav bd-sidenav">
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+      
+    </ul>
+
+</nav>
+          </div>
+          
+
+          
+          <div class="d-none d-xl-block col-xl-2 bd-toc">
+              
+
+<nav id="bd-toc-nav">
+    <ul class="nav section-nav flex-column">
+    
+    </ul>
+</nav>
+
+
+              
+          </div>
+          
+
+          
+          <main class="col-12 col-md-9 col-xl-7 py-md-5 pl-md-5 pr-md-4 bd-content" role="main">
+              
+              <div>
+                
+  <h1>Source code for pharmpy.cli</h1><div class="highlight"><pre>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">.. highlight:: console</span>
+
+<span class="sd">============================</span>
+<span class="sd">The CLI interface of Pharmpy</span>
+<span class="sd">============================</span>
+
+<span class="sd">Examples</span>
+<span class="sd">--------</span>
+
+<span class="sd">Example argument lines (only preceeded by ``pharmpy`` or ``python3 -m pharmpy``)::</span>
+
+<span class="sd">    # filter data (as model prescribes) and output to file &#39;output.csv&#39;</span>
+<span class="sd">    pharmpy data write run1.mod -o output.csv</span>
+
+<span class="sd">Entrypoints and Subcommands</span>
+<span class="sd">---------------------------</span>
+
+<span class="sd">Standard practice of packaging is to define &quot;entrypoints&quot; in the setuptools ``setup.py``. Currently:</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">  entry_points={</span>
+<span class="sd">      &#39;console_scripts&#39;: [</span>
+<span class="sd">          &#39;pharmpy           = pharmpy.cli:main&#39;,</span>
+<span class="sd">      ]</span>
+<span class="sd">  },</span>
+
+<span class="sd">Main entrypoint is ``pharmpy`` (which maps :func:`main`), but each subcommand could be given a</span>
+<span class="sd">shortcutting entrypoint (e.g. :func:`sumo`). This would be accomplished via invoking:</span>
+
+<span class="sd">.. code-block:: python</span>
+
+<span class="sd">    CLI(*args_of_sumo, subcommand=&#39;sumo&#39;)</span>
+
+<span class="sd">to skip straight to subcommand parser.</span>
+
+<span class="sd">Installing Pharmpy Wheel-build should install all of these to PATH. Then, these are clean targets</span>
+<span class="sd">for post-install hooks to symlink. Either to pollute the PATH namespace with traditional PsN-styled</span>
+<span class="sd">&quot;binscripts&quot;, as::</span>
+
+<span class="sd">    /usr/bin/execute               -&gt;  /usr/bin/pharmpy execute</span>
+
+<span class="sd">Or, to keep multiple versions when upgrading Pharmpy.</span>
+
+<span class="sd">On Logging</span>
+<span class="sd">----------</span>
+
+<span class="sd">As a CLI we are at the top, interacting with the user. All of Pharmpy will get messages</span>
+<span class="sd">filtered through here (loggers organize themselves in a hiearchy based on their period-split names).</span>
+
+<span class="sd">.. warning::</span>
+<span class="sd">    Loggers **mustn&#39;t** be configurated if imported as library (e.g. set handlers and such),</span>
+<span class="sd">    since that should bubble up into the lap of whomever is at the top (of the Python</span>
+<span class="sd">    period-separated namespace).</span>
+
+<span class="sd">Definitions</span>
+<span class="sd">===========</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">argparse</span>
+<span class="kn">import</span> <span class="nn">importlib</span>
+<span class="kn">import</span> <span class="nn">logging</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">pydoc</span>
+<span class="kn">import</span> <span class="nn">re</span>
+<span class="kn">import</span> <span class="nn">sys</span>
+<span class="kn">import</span> <span class="nn">types</span>
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">namedtuple</span>
+<span class="kn">from</span> <span class="nn">textwrap</span> <span class="kn">import</span> <span class="n">dedent</span>
+
+
+<div class="viewcode-block" id="LazyLoader"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.LazyLoader">[docs]</a><span class="k">class</span> <span class="nc">LazyLoader</span><span class="p">(</span><span class="n">types</span><span class="o">.</span><span class="n">ModuleType</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Class that masquerades as a module and lazily loads it when accessed the first time</span>
+
+<span class="sd">       The code for the class is taken from TensorFlow and is under the Apache 2.0 license</span>
+
+<span class="sd">       This is needed for the cli to be able to do things as version and help quicker than</span>
+<span class="sd">       if all modules were imported.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">local_name</span><span class="p">,</span> <span class="n">parent_module_globals</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_local_name</span> <span class="o">=</span> <span class="n">local_name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent_module_globals</span> <span class="o">=</span> <span class="n">parent_module_globals</span>
+
+        <span class="nb">super</span><span class="p">(</span><span class="n">LazyLoader</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_load</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Import the target module and insert it into the parent&#39;s namespace</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="vm">__name__</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent_module_globals</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_local_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">module</span>
+
+        <span class="c1"># Update this object&#39;s dict so that if someone keeps a reference to the</span>
+        <span class="c1">#   LazyLoader, lookups are efficient (__getattr__ is only called on lookups</span>
+        <span class="c1">#   that fail).</span>
+        <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">module</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">module</span>
+
+    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">module</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__dir__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">module</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_load</span><span class="p">()</span>
+        <span class="k">return</span> <span class="nb">dir</span><span class="p">(</span><span class="n">module</span><span class="p">)</span></div>
+
+
+<span class="n">pharmpy</span> <span class="o">=</span> <span class="n">LazyLoader</span><span class="p">(</span><span class="s1">&#39;pharmpy&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="s1">&#39;pharmpy&#39;</span><span class="p">)</span>
+<span class="n">np</span> <span class="o">=</span> <span class="n">LazyLoader</span><span class="p">(</span><span class="s1">&#39;numpy&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="s1">&#39;numpy&#39;</span><span class="p">)</span>
+<span class="n">iterators</span> <span class="o">=</span> <span class="n">LazyLoader</span><span class="p">(</span><span class="s1">&#39;iterators&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="s1">&#39;pharmpy.data.iterators&#39;</span><span class="p">)</span>
+<span class="n">plugin_utils</span> <span class="o">=</span> <span class="n">LazyLoader</span><span class="p">(</span><span class="s1">&#39;plugin_utils&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">(),</span> <span class="s1">&#39;pharmpy.plugins.utils&#39;</span><span class="p">)</span>
+
+<span class="n">formatter</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentDefaultsHelpFormatter</span>
+
+
+<div class="viewcode-block" id="error"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.error">[docs]</a><span class="k">def</span> <span class="nf">error</span><span class="p">(</span><span class="n">exception</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Raise the exception with no traceback printed</span>
+
+<span class="sd">    Used for non-recoverables in CLI. Exceptions giving traceback are bugs!</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">def</span> <span class="nf">exc_only_hook</span><span class="p">(</span><span class="n">exception_type</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">exception_type</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="n">exception</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">sys</span><span class="o">.</span><span class="n">excepthook</span> <span class="o">=</span> <span class="n">exc_only_hook</span>
+    <span class="k">raise</span> <span class="n">exception</span></div>
+
+
+<div class="viewcode-block" id="results_bootstrap"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_bootstrap">[docs]</a><span class="k">def</span> <span class="nf">results_bootstrap</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Subcommand to generate bootstrap results&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">models</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="n">error</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need at least the original model and 2&#39;</span>
+                         <span class="s1">&#39;other models&#39;</span><span class="p">))</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">BootstrapResults</span><span class="p">(</span><span class="n">original_model</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span>
+                                           <span class="n">bootstrap_models</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">models</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="results_frem"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_frem">[docs]</a><span class="k">def</span> <span class="nf">results_frem</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Generate frem results&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pharmpy.methods.frem.results</span> <span class="kn">import</span> <span class="n">psn_frem_results</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">error</span><span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="p">)))</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">psn_frem_results</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="p">,</span> <span class="n">method</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">method</span><span class="p">,</span>
+                           <span class="n">force_posdef_covmatrix</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">force_posdef_covmatrix</span><span class="p">,</span>
+                           <span class="n">force_posdef_samples</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">force_posdef_samples</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">add_plots</span><span class="p">()</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.json&#39;</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.csv&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="results_ofv"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_ofv">[docs]</a><span class="k">def</span> <span class="nf">results_ofv</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Subcommand to extract final ofv from multiple results&quot;&quot;&quot;</span>
+    <span class="n">ofvs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ofv</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">ofv</span> <span class="o">=</span> <span class="s1">&#39;NA&#39;</span>
+        <span class="n">ofvs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ofv</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">ofvs</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="results_print"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_print">[docs]</a><span class="k">def</span> <span class="nf">results_print</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Subcommand to print any results&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">dir</span> <span class="o">/</span> <span class="s1">&#39;results.json&#39;</span>
+    <span class="k">elif</span> <span class="n">args</span><span class="o">.</span><span class="n">dir</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">dir</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">error</span><span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dir</span><span class="p">)))</span>
+    <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">read_results</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">read_results</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="results_report"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_report">[docs]</a><span class="k">def</span> <span class="nf">results_report</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Subcommand to generate reports&quot;&quot;&quot;</span>
+    <span class="n">results_path</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.json&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">results_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">error</span><span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">(</span><span class="n">results_path</span><span class="p">))</span>
+    <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">read_results</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">read_results</span><span class="p">(</span><span class="n">results_path</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">create_report</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="results_summary"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_summary">[docs]</a><span class="k">def</span> <span class="nf">results_summary</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Subcommand to output summary of modelfit&quot;&quot;&quot;</span>
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">reparameterize</span><span class="p">([</span>
+            <span class="n">pharmpy</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">NormalParametrizationSd</span><span class="p">,</span>
+            <span class="n">pharmpy</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">MultivariateNormalParametrizationSdCorr</span>
+        <span class="p">])</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_summary</span><span class="p">())</span>
+        <span class="nb">print</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="check_input_path"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.check_input_path">[docs]</a><span class="k">def</span> <span class="nf">check_input_path</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Resolves path to input file and checks existence.</span>
+
+<span class="sd">    Raises if not found or is dir, without tracebacks (see :func:`error_exit`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+    <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+        <span class="n">exc</span> <span class="o">=</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;No such input file: </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">error</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">exc</span> <span class="o">=</span> <span class="ne">IsADirectoryError</span><span class="p">(</span><span class="s1">&#39;Is a directory (not an input file): </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+        <span class="n">error</span><span class="p">(</span><span class="n">exc</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">path</span></div>
+
+
+<div class="viewcode-block" id="input_model"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.input_model">[docs]</a><span class="k">def</span> <span class="nf">input_model</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Returns :class:`~pharmpy.model.Model` from *path*.</span>
+
+<span class="sd">    Raises if not found or is dir, without tracebacks (see :func:`error_exit`).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">check_input_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+
+<span class="n">args_input</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">add_help</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">group_input</span> <span class="o">=</span> <span class="n">args_input</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;inputs&#39;</span><span class="p">)</span>
+<span class="n">group_input</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;models&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;FILE&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">input_model</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span>
+                         <span class="n">help</span><span class="o">=</span><span class="s1">&#39;input model files&#39;</span><span class="p">)</span>
+
+<span class="n">parser_definition</span> <span class="o">=</span> <span class="p">[</span>
+    <span class="p">{</span><span class="s1">&#39;results&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;subs&#39;</span><span class="p">:</span> <span class="p">[</span>
+        <span class="p">{</span><span class="s1">&#39;bootstrap&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate bootstrap results&#39;</span><span class="p">,</span> <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">results_bootstrap</span><span class="p">,</span>
+                       <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">args_input</span><span class="p">]}},</span>
+        <span class="p">{</span><span class="s1">&#39;frem&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate FREM results&#39;</span><span class="p">,</span> <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">results_frem</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;psn_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;metavar&#39;</span><span class="p">:</span> <span class="s1">&#39;PsN directory&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Path to PsN frem run directory&#39;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;--method&#39;</span><span class="p">,</span> <span class="s1">&#39;choices&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;cov_sampling&#39;</span><span class="p">,</span> <span class="s1">&#39;bipp&#39;</span><span class="p">],</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="s1">&#39;cov_sampling&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Method to use for uncertainty of covariate effects&#39;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;--force_posdef_covmatrix&#39;</span><span class="p">,</span> <span class="s1">&#39;action&#39;</span><span class="p">:</span> <span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Should covariance matrix be forced to become positive definite&#39;</span><span class="p">},</span>
+            <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;--force_posdef_samples&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span> <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="mi">500</span><span class="p">,</span>
+             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Number of sampling tries to do before starting to force posdef&#39;</span><span class="p">}]}},</span>
+        <span class="p">{</span><span class="s1">&#39;ofv&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Extract OFVs from model runs&#39;</span><span class="p">,</span> <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">args_input</span><span class="p">],</span>
+                 <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">results_ofv</span><span class="p">}},</span>
+        <span class="p">{</span><span class="s1">&#39;print&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Print results&#39;</span><span class="p">,</span> <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">results_print</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;dir&#39;</span><span class="p">,</span> <span class="s1">&#39;metavar&#39;</span><span class="p">:</span> <span class="s1">&#39;file or directory&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Path to directory containing results.json &#39;</span>
+                     <span class="s1">&#39;or directly to json results file&#39;</span><span class="p">}]}},</span>
+        <span class="p">{</span><span class="s1">&#39;report&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate results report&#39;</span><span class="p">,</span> <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">results_report</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[</span>
+            <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;psn_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;metavar&#39;</span><span class="p">:</span> <span class="s1">&#39;PsN directory&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Path to PsN run directory&#39;</span><span class="p">}]}},</span>
+        <span class="p">{</span><span class="s1">&#39;summary&#39;</span><span class="p">:</span> <span class="p">{</span><span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Modelfit summary&#39;</span><span class="p">,</span> <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">args_input</span><span class="p">],</span>
+                     <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">results_summary</span><span class="p">}}],</span>
+        <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Result extraction and generation&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Pharmpy result generation commands&#39;</span><span class="p">,</span> <span class="s1">&#39;metavar&#39;</span><span class="p">:</span> <span class="s1">&#39;ACTION&#39;</span><span class="p">}}]</span>
+
+
+<div class="viewcode-block" id="generate_parsers"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.generate_parsers">[docs]</a><span class="k">def</span> <span class="nf">generate_parsers</span><span class="p">(</span><span class="n">parsers</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">command</span> <span class="ow">in</span> <span class="n">parser_definition</span><span class="p">:</span>
+        <span class="p">(</span><span class="n">cmd_name</span><span class="p">,</span> <span class="n">cmd_dict</span><span class="p">),</span> <span class="o">=</span> <span class="n">command</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+        <span class="n">cmd_parser</span> <span class="o">=</span> <span class="n">parsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">cmd_name</span><span class="p">,</span> <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="n">cmd_dict</span><span class="p">[</span><span class="s1">&#39;help&#39;</span><span class="p">],</span>
+                                        <span class="n">formatter_class</span><span class="o">=</span><span class="n">formatter</span><span class="p">)</span>
+        <span class="n">subs</span> <span class="o">=</span> <span class="n">cmd_parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="n">cmd_dict</span><span class="p">[</span><span class="s1">&#39;title&#39;</span><span class="p">],</span> <span class="n">metavar</span><span class="o">=</span><span class="n">cmd_dict</span><span class="p">[</span><span class="s1">&#39;metavar&#39;</span><span class="p">])</span>
+        <span class="k">for</span> <span class="n">sub_command</span> <span class="ow">in</span> <span class="n">cmd_dict</span><span class="p">[</span><span class="s1">&#39;subs&#39;</span><span class="p">]:</span>
+            <span class="p">(</span><span class="n">sub_name</span><span class="p">,</span> <span class="n">sub_dict</span><span class="p">),</span> <span class="o">=</span> <span class="n">sub_command</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">sub_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;args&#39;</span><span class="p">,</span> <span class="p">[])</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">sub_dict</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;func&#39;</span><span class="p">)</span>
+
+            <span class="n">sub_parser</span> <span class="o">=</span> <span class="n">subs</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="n">sub_name</span><span class="p">,</span> <span class="o">**</span><span class="n">sub_dict</span><span class="p">,</span> <span class="n">formatter_class</span><span class="o">=</span><span class="n">formatter</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">arg</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">)</span>
+                <span class="n">sub_parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">arg</span><span class="p">)</span>
+            <span class="n">sub_parser</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="n">func</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="CLI"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI">[docs]</a><span class="k">class</span> <span class="nc">CLI</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;Main CLI interface, based on subcommands (like git).</span>
+
+<span class="sd">    Parses and arguments executes all tasks.</span>
+
+<span class="sd">    Args:</span>
+<span class="sd">        *args: Arguments (overrides all of :attr:`sys.argv`).</span>
+<span class="sd">        subcommand: If given, skip straight to command (sub)parser.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="n">subcommand</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initialize and parse command line arguments&quot;&quot;&quot;</span>
+
+        <span class="c1"># root parser and common arguments</span>
+        <span class="n">parser</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span>
+            <span class="n">prog</span><span class="o">=</span><span class="s1">&#39;pharmpy&#39;</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">dedent</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">            Welcome to the command line interface of Pharmpy!</span>
+
+<span class="s2">            Functionality is split into various subcommands</span>
+<span class="s2">                - try --help after a COMMAND</span>
+<span class="s2">                - all keyword arguments can be abbreviated if unique</span>
+
+
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+            <span class="n">epilog</span><span class="o">=</span><span class="n">dedent</span><span class="p">(</span><span class="s2">&quot;&quot;&quot;</span>
+<span class="s2">                Examples:</span>
+<span class="s2">                    # Create 100 bootstrap datasets</span>
+<span class="s2">                    pharmpy data resample pheno_real.mod --resamples=100 --replace</span>
+
+<span class="s2">                    # prettyprint model</span>
+<span class="s2">                    pharmpy model print pheno_real.mod</span>
+
+<span class="s2">                    # version/install information</span>
+<span class="s2">                    pharmpy info</span>
+<span class="s2">            &quot;&quot;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">strip</span><span class="p">(),</span>
+            <span class="n">formatter_class</span><span class="o">=</span><span class="n">formatter</span><span class="p">,</span>
+            <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_common_args</span><span class="p">(</span><span class="n">parser</span><span class="p">)</span>
+        <span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;0.2.0&#39;</span><span class="p">)</span>
+
+        <span class="c1"># subcommand parsers</span>
+        <span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Pharmpy commands&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;COMMAND&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_commands_tools</span><span class="p">(</span><span class="n">subparsers</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init_commands_misc</span><span class="p">(</span><span class="n">subparsers</span><span class="p">)</span>
+        <span class="n">generate_parsers</span><span class="p">(</span><span class="n">subparsers</span><span class="p">)</span>
+
+        <span class="c1"># parse</span>
+        <span class="k">if</span> <span class="n">args</span> <span class="ow">and</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Call args overriding, ignoring sys.argv=</span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="n">sys</span><span class="o">.</span><span class="n">argv</span><span class="p">[</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="k">if</span> <span class="n">subcommand</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Skipping to subcommand (</span><span class="si">%r</span><span class="s1">) CLI&#39;</span><span class="p">,</span> <span class="n">subcommand</span><span class="p">)</span>
+            <span class="n">args</span> <span class="o">=</span> <span class="p">[</span><span class="n">subcommand</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%d</span><span class="s1"> args to parse: </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">),</span> <span class="n">args</span><span class="p">))</span>
+        <span class="n">args</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">parse_args</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+
+        <span class="c1"># output/logging setup</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_loglevel</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">loglevel</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Parsed into </span><span class="si">%d</span><span class="s1"> args: </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nb">vars</span><span class="p">(</span><span class="n">args</span><span class="p">)),</span> <span class="nb">vars</span><span class="p">(</span><span class="n">args</span><span class="p">)))</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">hide_traceback</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hide_traceback</span><span class="p">()</span>
+
+        <span class="c1"># dispatch subcommand</span>
+        <span class="k">if</span> <span class="s1">&#39;func&#39;</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">func</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parser</span><span class="o">.</span><span class="n">print_usage</span><span class="p">()</span>
+
+    <span class="c1"># -- additional initializers ---------------------------------------------------------------</span>
+
+    <span class="k">def</span> <span class="nf">_init_common_args</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parser</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes common arguments on *parser* and ``self``.</span>
+
+<span class="sd">        Groups common to all parsers (activated here)</span>
+
+<span class="sd">            .. list-table::</span>
+<span class="sd">                :widths: 20 80</span>
+<span class="sd">                :stub-columns: 1</span>
+
+<span class="sd">                - - configuration (*idea only*)</span>
+<span class="sd">                  - To override current (project) configuration file.</span>
+<span class="sd">                - - logging &amp; verbosity</span>
+<span class="sd">                  - Sets loglevel and behaviour (e.g. color, logfile copy, etc.) for everything.</span>
+
+<span class="sd">        Superclasses for some commands (*parents* in :func:`argparse.ArgumentParser.add_parser`)</span>
+
+<span class="sd">            .. list-table::</span>
+<span class="sd">                :widths: 20 80</span>
+<span class="sd">                :stub-columns: 1</span>
+
+<span class="sd">                - - :attr:`self._args_input`</span>
+<span class="sd">                  - Common arguments for reading files as input.</span>
+<span class="sd">                - - :attr:`self._args_output`</span>
+<span class="sd">                  - Common arguments for outputting files.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="c1"># common to: all</span>
+        <span class="n">verbosity</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;logging &amp; verbosity&#39;</span><span class="p">)</span>
+        <span class="n">verbosity</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--hide_traceback&#39;</span><span class="p">,</span>
+                               <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                               <span class="n">help</span><span class="o">=</span><span class="s2">&quot;avoid intimidating exception tracebacks&quot;</span><span class="p">)</span>
+        <span class="n">loglevel</span> <span class="o">=</span> <span class="n">verbosity</span><span class="o">.</span><span class="n">add_mutually_exclusive_group</span><span class="p">()</span>
+        <span class="n">loglevel</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-v&#39;</span><span class="p">,</span> <span class="s1">&#39;--verbose&#39;</span><span class="p">,</span>
+                              <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_const&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;loglevel&#39;</span><span class="p">,</span>
+                              <span class="n">const</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">,</span>
+                              <span class="n">help</span><span class="o">=</span><span class="s1">&#39;print additional info&#39;</span><span class="p">)</span>
+        <span class="n">loglevel</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-vv&#39;</span><span class="p">,</span> <span class="s1">&#39;--debug&#39;</span><span class="p">,</span>
+                              <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_const&#39;</span><span class="p">,</span> <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;loglevel&#39;</span><span class="p">,</span> <span class="n">const</span><span class="o">=</span><span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span><span class="p">,</span>
+                              <span class="n">help</span><span class="o">=</span><span class="s1">&#39;show debug messages&#39;</span><span class="p">)</span>
+
+        <span class="c1"># common to: commands taking one model file as input</span>
+        <span class="n">args_model_input</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">add_help</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">group_model_input</span> <span class="o">=</span> <span class="n">args_model_input</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">)</span>
+        <span class="n">group_model_input</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;FILE&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_model</span><span class="p">,</span>
+                                       <span class="n">help</span><span class="o">=</span><span class="s1">&#39;input model file&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_args_model_input</span> <span class="o">=</span> <span class="n">args_model_input</span>
+
+        <span class="c1"># common to: commands with model file input</span>
+        <span class="n">args_input</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">add_help</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">group_input</span> <span class="o">=</span> <span class="n">args_input</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;inputs&#39;</span><span class="p">)</span>
+        <span class="n">group_input</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;models&#39;</span><span class="p">,</span>
+                                 <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;FILE&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_model</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="s1">&#39;+&#39;</span><span class="p">,</span>
+                                 <span class="n">help</span><span class="o">=</span><span class="s1">&#39;input model files&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_args_input</span> <span class="o">=</span> <span class="n">args_input</span>
+
+        <span class="c1"># common to: command with model file or dataset input</span>
+        <span class="n">args_model_or_data_input</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">add_help</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">group_model_or_data_input</span> <span class="o">=</span> <span class="n">args_model_or_data_input</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;data_input&#39;</span><span class="p">)</span>
+        <span class="n">group_model_or_data_input</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;model_or_dataset&#39;</span><span class="p">,</span>
+                                               <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;FILE&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">input_model_or_dataset</span><span class="p">,</span>
+                                               <span class="n">help</span><span class="o">=</span><span class="s1">&#39;input model or dataset file&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_args_model_or_data_input</span> <span class="o">=</span> <span class="n">args_model_or_data_input</span>
+
+        <span class="c1"># common to: commands with file output</span>
+        <span class="n">args_output</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">add_help</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">group_output</span> <span class="o">=</span> <span class="n">args_output</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;outputs&#39;</span><span class="p">)</span>
+        <span class="n">group_output</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-f&#39;</span><span class="p">,</span> <span class="s1">&#39;--force&#39;</span><span class="p">,</span>
+                                  <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                                  <span class="n">help</span><span class="o">=</span><span class="s1">&#39;remove existing destination files (all)&#39;</span><span class="p">)</span>
+        <span class="n">group_output</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;-o&#39;</span><span class="p">,</span> <span class="s1">&#39;--output_file&#39;</span><span class="p">,</span>
+                                  <span class="n">dest</span><span class="o">=</span><span class="s1">&#39;output_file&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;file&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+                                  <span class="n">help</span><span class="o">=</span><span class="s1">&#39;output file&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_args_output</span> <span class="o">=</span> <span class="n">args_output</span>
+
+        <span class="c1"># common to: commands involving randomization</span>
+        <span class="n">args_random</span> <span class="o">=</span> <span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentParser</span><span class="p">(</span><span class="n">add_help</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">group_random</span> <span class="o">=</span> <span class="n">args_random</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;random seed&#39;</span><span class="p">)</span>
+        <span class="n">group_random</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--seed&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">random_seed</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;INTEGER&#39;</span><span class="p">,</span>
+                                  <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Provide a random seed. The seed must be an integer &#39;</span>
+                                  <span class="s1">&#39;between 0 and 2^32 - 1&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_args_random</span> <span class="o">=</span> <span class="n">args_random</span>
+
+    <span class="k">def</span> <span class="nf">_init_commands_tools</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parsers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes all &quot;tool-like&quot; subcommands.&quot;&quot;&quot;</span>
+
+        <span class="c1"># -- model -----------------------------------------------------------------------------</span>
+        <span class="n">cmd_model</span> <span class="o">=</span> <span class="n">parsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Model manipulations&#39;</span><span class="p">,</span> <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">cmd_model_subs</span> <span class="o">=</span> <span class="n">cmd_model</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Pharmpy model commands&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;ACTION&#39;</span><span class="p">)</span>
+
+        <span class="n">cmd_model_print</span> <span class="o">=</span> <span class="n">cmd_model_subs</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;print&#39;</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="s1">&#39;print model&#39;</span><span class="p">,</span>
+                                                    <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_args_input</span><span class="p">],</span>
+                                                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Format and print model overview&#39;</span><span class="p">,</span>
+                                                    <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">group_apis</span> <span class="o">=</span> <span class="n">cmd_model_print</span><span class="o">.</span><span class="n">add_argument_group</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;APIs to print&#39;</span><span class="p">)</span>
+        <span class="n">group_apis</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--all&#39;</span><span class="p">,</span>
+                                <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;This is the default&#39;</span><span class="p">)</span>
+        <span class="n">group_apis</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--data&#39;</span><span class="p">,</span>
+                                <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                                <span class="n">help</span><span class="o">=</span><span class="s1">&#39;A shortened version of the dataset&#39;</span><span class="p">)</span>
+        <span class="n">group_apis</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--parameters&#39;</span><span class="p">,</span>
+                                <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                                <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Parameters (e.g. inits)&#39;</span><span class="p">)</span>
+        <span class="n">group_apis</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--random_variables&#39;</span><span class="p">,</span>
+                                <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                                <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Random variables&#39;</span><span class="p">)</span>
+        <span class="n">cmd_model_print</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cmd_print</span><span class="p">)</span>
+
+        <span class="n">cmd_model_sample</span> <span class="o">=</span> <span class="n">cmd_model_subs</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;sample&#39;</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="s1">&#39;Sampling of parameter inits&#39;</span><span class="p">,</span>
+                                                     <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_args_model_input</span><span class="p">,</span>
+                                                              <span class="bp">self</span><span class="o">.</span><span class="n">_args_random</span><span class="p">],</span>
+                                                     <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Sampling of parameter inits using &#39;</span>
+                                                          <span class="s1">&#39;uncertainty given by covariance matrix&#39;</span><span class="p">,</span>
+                                                     <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">cmd_model_sample</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--samples&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;NUMBER&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                      <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of sampled models&#39;</span><span class="p">)</span>
+        <span class="n">cmd_model_sample</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_sample</span><span class="p">)</span>
+
+        <span class="c1"># -- run -------------------------------------------------------------------------------</span>
+        <span class="n">cmd_run</span> <span class="o">=</span> <span class="n">parsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;run&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Run workflows&#39;</span><span class="p">,</span> <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">cmd_run_subs</span> <span class="o">=</span> <span class="n">cmd_run</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Pharmpy workflow commands&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;ACTION&#39;</span><span class="p">)</span>
+
+        <span class="n">cmd_run_execute</span> <span class="o">=</span> <span class="n">cmd_run_subs</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;execute&#39;</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="s1">&#39;execute models&#39;</span><span class="p">,</span>
+                                                  <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_args_input</span><span class="p">],</span>
+                                                  <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Execute model&#39;</span><span class="p">,</span>
+                                                  <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">cmd_run_execute</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_execute</span><span class="p">)</span>
+
+        <span class="n">cmd_run_bootstrap</span> <span class="o">=</span> <span class="n">cmd_run_subs</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;bootstrap&#39;</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="s1">&#39;bootstrap&#39;</span><span class="p">,</span>
+                                                    <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_args_model_input</span><span class="p">],</span>
+                                                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Bootstrap&#39;</span><span class="p">,</span>
+                                                    <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">cmd_run_bootstrap</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">run_bootstrap</span><span class="p">)</span>
+
+        <span class="c1"># -- private ---------------------------------------------------------------------------</span>
+        <span class="n">cmd_private</span> <span class="o">=</span> <span class="n">parsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;private&#39;</span><span class="p">)</span>
+        <span class="n">cmd_private_subs</span> <span class="o">=</span> <span class="n">cmd_private</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">()</span>
+        <span class="n">cmd_private_frem</span> <span class="o">=</span> <span class="n">cmd_private_subs</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;frem&#39;</span><span class="p">)</span>
+        <span class="n">cmd_private_frem</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;rundir&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">)</span>
+        <span class="n">cmd_private_frem</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;ncovs&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">)</span>
+        <span class="n">cmd_private_frem</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">private_frem</span><span class="p">)</span>
+
+        <span class="c1"># -- data ------------------------------------------------------------------------------</span>
+        <span class="n">cmd_data</span> <span class="o">=</span> <span class="n">parsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Data manipulations&#39;</span><span class="p">,</span> <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+        <span class="n">cmd_data_subs</span> <span class="o">=</span> <span class="n">cmd_data</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Pharmpy data commands&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;ACTION&#39;</span><span class="p">)</span>
+
+        <span class="n">cmd_data_write</span> <span class="o">=</span> <span class="n">cmd_data_subs</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;write&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Write dataset&#39;</span><span class="p">,</span> <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                  <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_args_model_or_data_input</span><span class="p">,</span>
+                                                           <span class="bp">self</span><span class="o">.</span><span class="n">_args_output</span><span class="p">])</span>
+        <span class="n">cmd_data_write</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_write</span><span class="p">)</span>
+
+        <span class="n">cmd_data_print</span> <span class="o">=</span> <span class="n">cmd_data_subs</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;print&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Print dataset to stdout&#39;</span><span class="p">,</span>
+                                                  <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                  <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_args_model_or_data_input</span><span class="p">])</span>
+        <span class="n">cmd_data_print</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--columns&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;COLUMNS&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">comma_list</span><span class="p">,</span>
+                                    <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Select specific columns (default is all)&#39;</span><span class="p">)</span>
+        <span class="n">cmd_data_print</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_print</span><span class="p">)</span>
+
+        <span class="n">cmd_data_filter</span> <span class="o">=</span> <span class="n">cmd_data_subs</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;filter&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Filter rows of dataset&#39;</span><span class="p">,</span>
+                                                   <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                   <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_args_model_or_data_input</span><span class="p">,</span>
+                                                            <span class="bp">self</span><span class="o">.</span><span class="n">_args_output</span><span class="p">])</span>
+        <span class="n">cmd_data_filter</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;expressions&#39;</span><span class="p">,</span> <span class="n">nargs</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">REMAINDER</span><span class="p">)</span>
+        <span class="n">cmd_data_filter</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_filter</span><span class="p">)</span>
+
+        <span class="n">cmd_data_append</span> <span class="o">=</span> <span class="n">cmd_data_subs</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;append&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Append column to dataset&#39;</span><span class="p">,</span>
+                                                   <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                   <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_args_model_or_data_input</span><span class="p">,</span>
+                                                            <span class="bp">self</span><span class="o">.</span><span class="n">_args_output</span><span class="p">])</span>
+        <span class="n">cmd_data_append</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;expression&#39;</span><span class="p">)</span>
+        <span class="n">cmd_data_append</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_append</span><span class="p">)</span>
+
+        <span class="n">cmd_data_resample</span> <span class="o">=</span> <span class="n">cmd_data_subs</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;resample&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Resample dataset&#39;</span><span class="p">,</span>
+                                                     <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                     <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_args_model_or_data_input</span><span class="p">,</span>
+                                                              <span class="bp">self</span><span class="o">.</span><span class="n">_args_random</span><span class="p">])</span>
+        <span class="n">cmd_data_resample</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--group&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;COLUMN&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span>
+                                       <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Column to use for grouping (default is ID)&#39;</span><span class="p">)</span>
+        <span class="n">cmd_data_resample</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--resamples&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;NUMBER&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+                                       <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of resampled datasets (default 1)&#39;</span><span class="p">)</span>
+        <span class="n">cmd_data_resample</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--stratify&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;COLUMN&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                                       <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Column to use for stratification&#39;</span><span class="p">)</span>
+        <span class="n">cmd_data_resample</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--replace&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;store_true&#39;</span><span class="p">,</span>
+                                       <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Sample with replacement (default is without)&#39;</span><span class="p">)</span>
+        <span class="n">cmd_data_resample</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--sample_size&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;NUMBER&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">int</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+                                       <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Number of groups to sample for each resample&#39;</span><span class="p">)</span>
+        <span class="n">cmd_data_resample</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_resample</span><span class="p">)</span>
+
+        <span class="n">cmd_data_anon</span> <span class="o">=</span> <span class="n">cmd_data_subs</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;anonymize&#39;</span><span class="p">,</span> <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Anonymize dataset by reorder&#39;</span>
+                                                 <span class="s1">&#39; and renumber a specific data column&#39;</span><span class="p">,</span>
+                                                 <span class="n">description</span><span class="o">=</span><span class="s1">&#39;Anonymize dataset by resampling &#39;</span>
+                                                             <span class="s1">&#39;of the group column&#39;</span><span class="p">,</span>
+                                                 <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                                                 <span class="n">parents</span><span class="o">=</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_args_output</span><span class="p">])</span>
+        <span class="n">cmd_data_anon</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;dataset&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;FILE&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span>
+                                   <span class="n">help</span><span class="o">=</span><span class="s1">&#39;A csv file dataset&#39;</span><span class="p">)</span>
+        <span class="n">cmd_data_anon</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--group&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;COLUMN&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="s1">&#39;ID&#39;</span><span class="p">,</span>
+                                   <span class="n">help</span><span class="o">=</span><span class="s1">&#39;column to anonymize (default ID)&#39;</span><span class="p">)</span>
+        <span class="n">cmd_data_anon</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">data_anonymize</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_init_commands_misc</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parsers</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Initializes miscellanelous other (non-tool) subcommands.&quot;&quot;&quot;</span>
+
+        <span class="c1"># -- info ---------------------------------------------------------------------------</span>
+        <span class="n">cmd_info</span> <span class="o">=</span> <span class="n">parsers</span><span class="o">.</span><span class="n">add_parser</span><span class="p">(</span><span class="s1">&#39;info&#39;</span><span class="p">,</span> <span class="n">prog</span><span class="o">=</span><span class="s1">&#39;pharmpy info&#39;</span><span class="p">,</span>
+                                      <span class="n">help</span><span class="o">=</span><span class="s1">&#39;Show pharmpy information&#39;</span><span class="p">,</span>
+                                      <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">cmd_info</span><span class="o">.</span><span class="n">set_defaults</span><span class="p">(</span><span class="n">func</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">cmd_info</span><span class="p">)</span>
+
+    <span class="c1"># -- subcommand launchers ------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="CLI.cmd_print"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.cmd_print">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Subcommand for formatting/printing model components.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">data</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="ow">and</span> <span class="n">args</span><span class="o">.</span><span class="n">all</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">all</span> <span class="o">=</span> <span class="kc">True</span>
+
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">models</span><span class="p">):</span>
+            <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;[</span><span class="si">%d</span><span class="s1">/</span><span class="si">%d</span><span class="s1">] </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="p">(</span><span class="n">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">models</span><span class="p">),</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span>
+            <span class="n">dict_</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">data</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+                <span class="n">dict_</span><span class="p">[</span><span class="s1">&#39;dataset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+                <span class="n">dict_</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">random_variables</span> <span class="ow">or</span> <span class="n">args</span><span class="o">.</span><span class="n">all</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span>
+                <span class="n">dict_</span><span class="p">[</span><span class="s1">&#39;random_variables&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="n">dict_lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_keyval_pairs</span><span class="p">(</span><span class="n">dict_</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+            <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="s1">&#39;</span><span class="se">\t</span><span class="si">%s</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="n">line</span> <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">dict_lines</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lines</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">24</span><span class="p">:</span>
+            <span class="n">pydoc</span><span class="o">.</span><span class="n">pager</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="CLI.model_sample"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.model_sample">[docs]</a>    <span class="k">def</span> <span class="nf">model_sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.parameter_sampling</span> <span class="kn">import</span> <span class="n">sample_from_covariance_matrix</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">sample_from_covariance_matrix</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">params</span> <span class="ow">in</span> <span class="n">samples</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">params</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;sample_</span><span class="si">{</span><span class="n">row</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">write</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CLI.run_execute"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.run_execute">[docs]</a>    <span class="k">def</span> <span class="nf">run_execute</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A regular execute of one or more models&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.workflows.modelfit</span> <span class="kn">import</span> <span class="n">ModelfitWorkflow</span>
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">ModelfitWorkflow</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
+        <span class="n">wf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CLI.run_bootstrap"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.run_bootstrap">[docs]</a>    <span class="k">def</span> <span class="nf">run_bootstrap</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.workflows.bootstrap</span> <span class="kn">import</span> <span class="n">BootstrapWorkflow</span>
+        <span class="n">wf</span> <span class="o">=</span> <span class="n">BootstrapWorkflow</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">wf</span><span class="o">.</span><span class="n">start</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="CLI.private_frem"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.private_frem">[docs]</a>    <span class="k">def</span> <span class="nf">private_frem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Update parcov in model3b&quot;&quot;&quot;</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.methods.frem.method</span> <span class="kn">import</span> <span class="n">update_model3b_for_psn</span>
+        <span class="n">update_model3b_for_psn</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">rundir</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">ncovs</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CLI.data_write"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.data_write">[docs]</a>    <span class="k">def</span> <span class="nf">data_write</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Subcommand to write a dataset.&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model_or_dataset</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dataset</span>
+        <span class="k">except</span> <span class="n">plugin_utils</span><span class="o">.</span><span class="n">PluginError</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model_or_dataset</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="c1"># If no output_file supplied will use name of df</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">write_csv</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">force</span><span class="p">)</span>
+            <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Dataset written to </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error_exit</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CLI.data_print"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.data_print">[docs]</a>    <span class="k">def</span> <span class="nf">data_print</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Subcommand to print a dataset to stdout via pager</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model_or_dataset</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dataset</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model_or_dataset</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">error_exit</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">)</span>
+        <span class="n">pydoc</span><span class="o">.</span><span class="n">pager</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">to_string</span><span class="p">())</span></div>
+
+<div class="viewcode-block" id="CLI.data_filter"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.data_filter">[docs]</a>    <span class="k">def</span> <span class="nf">data_filter</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Subcommand to filter a dataset&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model_or_dataset</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dataset</span>
+        <span class="k">except</span> <span class="n">plugin_utils</span><span class="o">.</span><span class="n">PluginError</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model_or_dataset</span>
+        <span class="n">expression</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">expressions</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error_exit</span><span class="p">(</span><span class="ne">SyntaxError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid syntax of query: &quot;</span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">))</span>
+        <span class="k">except</span> <span class="ne">BaseException</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error_exit</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_model_or_dataset</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">model_or_dataset</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">force</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CLI.data_append"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.data_append">[docs]</a>    <span class="k">def</span> <span class="nf">data_append</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Subcommand to append a column to a dataset&quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model_or_dataset</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dataset</span>
+        <span class="k">except</span> <span class="n">plugin_utils</span><span class="o">.</span><span class="n">PluginError</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model_or_dataset</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">eval</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">SyntaxError</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error_exit</span><span class="p">(</span><span class="ne">SyntaxError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid syntax of expression: &quot;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">expression</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_model_or_dataset</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">model_or_dataset</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">force</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CLI.write_model_or_dataset"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.write_model_or_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">write_model_or_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_or_dataset</span><span class="p">,</span> <span class="n">new_df</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">force</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Write model or dataset to output_path or using default names</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model_or_dataset</span><span class="p">,</span> <span class="s1">&#39;pharmpy&#39;</span><span class="p">):</span>
+            <span class="c1"># Is a dataset</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="c1"># If no output_file supplied will use name of df</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">new_df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">write_csv</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+                <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Dataset written to </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileExistsError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">error_exit</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> Use -f  or --force to &#39;</span>
+                                                          <span class="s1">&#39;force an overwrite&#39;</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Is a model</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model_or_dataset</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">new_df</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+                        <span class="bp">self</span><span class="o">.</span><span class="n">bump_model_number</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="bp">self</span><span class="o">.</span><span class="n">bump_model_number</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">FileExistsError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">error_exit</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> Use -f or --force to &#39;</span>
+                                                          <span class="s1">&#39;force an overwrite&#39;</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="CLI.bump_model_number"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.bump_model_number">[docs]</a>    <span class="k">def</span> <span class="nf">bump_model_number</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; If model name ends in a number increase to next available file</span>
+<span class="sd">            else do nothing.</span>
+<span class="sd">            FIXME: Could be moved to model class. Need the name of the model and the source object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.*?)(\d+)$&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">stem</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">new_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stem</span><span class="si">}{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">new_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="n">new_name</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">new_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="k">break</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span></div>
+
+<div class="viewcode-block" id="CLI.data_resample"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.data_resample">[docs]</a>    <span class="k">def</span> <span class="nf">data_resample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Subcommand to resample a dataset.&quot;&quot;&quot;</span>
+        <span class="n">resampler</span> <span class="o">=</span> <span class="n">iterators</span><span class="o">.</span><span class="n">Resample</span><span class="p">(</span>
+                <span class="n">args</span><span class="o">.</span><span class="n">model_or_dataset</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">group</span><span class="p">,</span>
+                <span class="n">resamples</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">resamples</span><span class="p">,</span> <span class="n">stratify</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">stratify</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">replace</span><span class="p">,</span>
+                <span class="n">sample_size</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">sample_size</span><span class="p">,</span>
+                <span class="n">name_pattern</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">args</span><span class="o">.</span><span class="n">model_or_dataset</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_resample_</span><span class="se">{{}}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">resampled_obj</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">resampler</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">try</span><span class="p">:</span>
+                    <span class="n">resampled_obj</span><span class="o">.</span><span class="n">write</span><span class="p">()</span>
+                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+                    <span class="n">resampled_obj</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">write_csv</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">OSError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">error_exit</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">e</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CLI.data_anonymize"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.data_anonymize">[docs]</a>    <span class="k">def</span> <span class="nf">data_anonymize</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Subcommand to anonymize a dataset</span>
+<span class="sd">           anonymization is really a special resample case where the specified group</span>
+<span class="sd">           (usually the ID) is given new random unique values and reordering.</span>
+<span class="sd">           Will be default try to overwrite original file (but won&#39;t unless force)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_input_path</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="n">dataset</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">parse_columns</span><span class="o">=</span><span class="p">[</span><span class="n">args</span><span class="o">.</span><span class="n">group</span><span class="p">])</span>
+        <span class="n">resampler</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">iterators</span><span class="o">.</span><span class="n">Resample</span><span class="p">(</span><span class="n">dataset</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">group</span><span class="p">)</span>
+        <span class="n">df</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">resampler</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file</span><span class="p">:</span>
+            <span class="n">output_file</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">output_file</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">output_file</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">write_model_or_dataset</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">output_file</span><span class="p">,</span> <span class="n">args</span><span class="o">.</span><span class="n">force</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CLI.cmd_info"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.cmd_info">[docs]</a>    <span class="k">def</span> <span class="nf">cmd_info</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Subcommand to print Pharmpy info (and brag a little bit).&quot;&quot;&quot;</span>
+
+        <span class="n">lines</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">format_keyval_pairs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">install</span><span class="o">.</span><span class="n">_asdict</span><span class="p">(),</span> <span class="n">right_just</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">lines</span><span class="p">))</span></div>
+
+    <span class="c1"># -- helpers -------------------------------------------------------------------------------</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">logger</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns current CLI logger.</span>
+
+<span class="sd">        Initializes, too, if not already configured (= no handlers).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="n">logger</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">getLogger</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">logger</span><span class="o">.</span><span class="n">hasHandlers</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">logger</span>
+
+        <span class="n">msg</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stdout</span><span class="p">)</span>
+        <span class="n">err</span> <span class="o">=</span> <span class="n">logging</span><span class="o">.</span><span class="n">StreamHandler</span><span class="p">(</span><span class="n">sys</span><span class="o">.</span><span class="n">stderr</span><span class="p">)</span>
+
+        <span class="n">msg</span><span class="o">.</span><span class="n">addFilter</span><span class="p">(</span><span class="k">lambda</span> <span class="n">record</span><span class="p">:</span> <span class="n">record</span><span class="o">.</span><span class="n">levelno</span> <span class="o">&lt;=</span> <span class="n">logging</span><span class="o">.</span><span class="n">INFO</span><span class="p">)</span>
+        <span class="n">err</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">WARNING</span><span class="p">)</span>
+
+        <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span>
+        <span class="n">logger</span><span class="o">.</span><span class="n">addHandler</span><span class="p">(</span><span class="n">err</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">set_loglevel</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">NOTSET</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">logger</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">install</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;:class:`namedtuple` with information about install.&quot;&quot;&quot;</span>
+        <span class="n">Install</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;VersionInfo&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="s1">&#39;authors&#39;</span><span class="p">,</span> <span class="s1">&#39;directory&#39;</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">Install</span><span class="p">(</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
+                       <span class="s1">&#39;A list of authors can be found in the AUTHORS.rst&#39;</span><span class="p">,</span>
+                       <span class="nb">str</span><span class="p">(</span><span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">pharmpy</span><span class="o">.</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="p">))</span>
+
+<div class="viewcode-block" id="CLI.random_seed"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.random_seed">[docs]</a>    <span class="k">def</span> <span class="nf">random_seed</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">seed</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+            <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">seed</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="c1"># Cannot reraise the ValueError as it is caught by argparse</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error_exit</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">argparse</span><span class="o">.</span><span class="n">ArgumentTypeError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)))</span>
+        <span class="k">return</span> <span class="n">seed</span></div>
+
+<div class="viewcode-block" id="CLI.comma_list"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.comma_list">[docs]</a>    <span class="k">def</span> <span class="nf">comma_list</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">s</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">==</span> <span class="s1">&#39;&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+        <span class="k">return</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CLI.input_model"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.input_model">[docs]</a>    <span class="k">def</span> <span class="nf">input_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns :class:`~pharmpy.model.Model` from *path*.</span>
+
+<span class="sd">        Raises if not found or is dir, without tracebacks (see :func:`error_exit`).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_input_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">path</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CLI.input_model_or_dataset"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.input_model_or_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">input_model_or_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns :class:`~pharmpy.model.Model` or :class:`~pharmpy.data.PharmDataFrame` from *path*</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">check_input_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">Model</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">except</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">utils</span><span class="o">.</span><span class="n">PluginError</span><span class="p">:</span>
+            <span class="n">obj</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span></div>
+
+<div class="viewcode-block" id="CLI.check_input_path"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.check_input_path">[docs]</a>    <span class="k">def</span> <span class="nf">check_input_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resolves path to input file and checks existence.</span>
+
+<span class="sd">        Raises if not found or is dir, without tracebacks (see :func:`error_exit`).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+            <span class="n">exc</span> <span class="o">=</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="s1">&#39;No such input file: </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error_exit</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">exc</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">exc</span> <span class="o">=</span> <span class="ne">IsADirectoryError</span><span class="p">(</span><span class="s1">&#39;Is a directory (not an input file): </span><span class="si">%r</span><span class="s1">&#39;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error_exit</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="n">exc</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">path</span></div>
+
+<div class="viewcode-block" id="CLI.check_output_path"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.check_output_path">[docs]</a>    <span class="k">def</span> <span class="nf">check_output_path</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">force</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Resolves *path* to output file and checks existence.</span>
+
+<span class="sd">        Raises if *path* exists (and not *force*), without tracebacks (see :func:`error_exit`).</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
+        <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
+            <span class="k">pass</span>
+
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force</span><span class="p">:</span>
+            <span class="n">msg</span> <span class="o">=</span> <span class="s2">&quot;Output file exists: </span><span class="si">%r</span><span class="se">\n</span><span class="s2">Refusing to overwrite without --force.&quot;</span> <span class="o">%</span> <span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">error_exit</span><span class="p">(</span><span class="n">exception</span><span class="o">=</span><span class="ne">FileExistsError</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">path</span></div>
+
+<div class="viewcode-block" id="CLI.error_exit"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.error_exit">[docs]</a>    <span class="k">def</span> <span class="nf">error_exit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">exception</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">status</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Error exits with code *status*, with optional *msg* logged and *exception* raised.</span>
+
+<span class="sd">        Used for non-recoverables in CLI (raises without tracebacks) irrelevant to pharmpy.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="n">msg</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">msg</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">exception</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">hide_traceback</span><span class="p">(</span><span class="n">hide</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="n">exception</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">exit</span><span class="p">(</span><span class="n">status</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CLI.format_keyval_pairs"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.format_keyval_pairs">[docs]</a>    <span class="k">def</span> <span class="nf">format_keyval_pairs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">data_dict</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">right_just</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Formats lines from *data_dict*.&quot;&quot;&quot;</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">data_dict</span><span class="p">:</span>
+            <span class="k">return</span> <span class="p">[]</span>
+
+        <span class="n">key_width</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">field</span><span class="p">)</span> <span class="k">for</span> <span class="n">field</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">sort</span><span class="p">:</span>
+            <span class="n">data_dict</span> <span class="o">=</span> <span class="n">OrderedDict</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">data_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
+        <span class="k">if</span> <span class="n">right_just</span><span class="p">:</span>
+            <span class="n">line_format</span> <span class="o">=</span> <span class="s1">&#39;  </span><span class="si">%%%d</span><span class="s1">s</span><span class="se">\t</span><span class="si">%%</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="n">key_width</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">line_format</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%%</span><span class="s1">-</span><span class="si">%d</span><span class="s1">s</span><span class="se">\t</span><span class="si">%%</span><span class="s1">s&#39;</span> <span class="o">%</span> <span class="n">key_width</span>
+
+        <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">values</span> <span class="ow">in</span> <span class="n">data_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">values</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+                <span class="n">values</span> <span class="o">=</span> <span class="n">values</span><span class="o">.</span><span class="n">splitlines</span><span class="p">()</span>
+            <span class="n">keys</span> <span class="o">=</span> <span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="p">]</span><span class="o">*</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">values</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">keys</span><span class="p">,</span> <span class="n">values</span><span class="p">):</span>
+                <span class="n">lines</span> <span class="o">+=</span> <span class="p">[</span><span class="n">line_format</span> <span class="o">%</span> <span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)]</span>
+
+        <span class="k">return</span> <span class="n">lines</span></div>
+
+    <span class="c1"># -- configuration -------------------------------------------------------------------------</span>
+
+<div class="viewcode-block" id="CLI.set_loglevel"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.set_loglevel">[docs]</a>    <span class="k">def</span> <span class="nf">set_loglevel</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sets current loglevel (and message formatting).&quot;&quot;&quot;</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">setLevel</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">level</span> <span class="o">&lt;=</span> <span class="n">logging</span><span class="o">.</span><span class="n">DEBUG</span> <span class="ow">and</span> <span class="n">level</span> <span class="o">!=</span> <span class="n">logging</span><span class="o">.</span><span class="n">NOTSET</span><span class="p">:</span>
+            <span class="n">fmt</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">%(asctime)s</span><span class="s2">.</span><span class="si">%(msecs)03d</span><span class="s2"> </span><span class="si">%(filename)-25s</span><span class="s2"> </span><span class="si">%(lineno)4d</span><span class="s2"> </span><span class="si">%(levelname)-8s</span><span class="s2"> </span><span class="si">%(message)s</span><span class="s2">&quot;</span>
+            <span class="n">datefmt</span> <span class="o">=</span> <span class="s2">&quot;%H:%M:%S&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fmt</span> <span class="o">=</span> <span class="s1">&#39;</span><span class="si">%(message)s</span><span class="s1">&#39;</span>
+            <span class="n">datefmt</span> <span class="o">=</span> <span class="s2">&quot;%Y-%m-</span><span class="si">%d</span><span class="s2"> %H:%M:%S&quot;</span>
+        <span class="k">for</span> <span class="n">handler</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">handlers</span><span class="p">:</span>
+            <span class="n">handler</span><span class="o">.</span><span class="n">setFormatter</span><span class="p">(</span><span class="n">logging</span><span class="o">.</span><span class="n">Formatter</span><span class="p">(</span><span class="n">fmt</span><span class="p">,</span> <span class="n">datefmt</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Logging config: level=logging.</span><span class="si">%s</span><span class="s1">, fmt=</span><span class="si">%r</span><span class="s1">, datefmt=</span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span>
+                          <span class="n">logging</span><span class="o">.</span><span class="n">getLevelName</span><span class="p">(</span><span class="n">level</span><span class="p">),</span> <span class="n">fmt</span><span class="p">,</span> <span class="n">datefmt</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CLI.hide_traceback"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.CLI.hide_traceback">[docs]</a>    <span class="k">def</span> <span class="nf">hide_traceback</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">hide</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">original_hook</span><span class="o">=</span><span class="n">sys</span><span class="o">.</span><span class="n">excepthook</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Override default exception hook to hide all tracebacks.</span>
+
+<span class="sd">        .. note:: Even without traceback, the exception and message is shown.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">exc_only_hook</span><span class="p">(</span><span class="n">exception_type</span><span class="p">,</span> <span class="n">exception</span><span class="p">,</span> <span class="n">traceback</span><span class="p">):</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">critical</span><span class="p">(</span><span class="s1">&#39;</span><span class="si">%s</span><span class="s1">: </span><span class="si">%s</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">exception_type</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span> <span class="n">exception</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">hide</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Overriding sys.excepthook to hide tracebacks: </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">sys</span><span class="o">.</span><span class="n">excepthook</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">excepthook</span> <span class="o">=</span> <span class="n">exc_only_hook</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">logger</span><span class="o">.</span><span class="n">debug</span><span class="p">(</span><span class="s1">&#39;Restoring sys.excepthook to reset tracebacks: </span><span class="si">%r</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">original_hook</span><span class="p">)</span>
+            <span class="n">sys</span><span class="o">.</span><span class="n">excepthook</span> <span class="o">=</span> <span class="n">original_hook</span></div></div>
+
+
+<span class="c1"># -- entry point of main CLI (pharmpy) ---------------------------------------------------------</span>
+
+
+<div class="viewcode-block" id="main"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.main">[docs]</a><span class="k">def</span> <span class="nf">main</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Entry point of ``pharmpy`` CLI util and ``python3 -m pharmpy`` (via ``__main__.py``).&quot;&quot;&quot;</span>
+    <span class="n">CLI</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span></div>
+</pre></div>
+
+              </div>
+              
+              
+              <div class='prev-next-bottom'>
+                
+
+              </div>
+              
+          </main>
+          
+
+      </div>
+    </div>
+
+    <script src="../../_static/js/index.js"></script>
+    <footer class="footer mt-5 mt-md-0">
+  <div class="container">
+    <p>
+          &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
+        Last updated on May 27, 2020.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.<br/>
+    </p>
+  </div>
+</footer>
+  </body>
+</html>
