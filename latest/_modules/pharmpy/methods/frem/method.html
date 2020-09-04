@@ -1,29 +1,51 @@
 
-
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>pharmpy.methods.frem.method &#8212; Pharmpy 0.2.0 documentation</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
-    <link href="../../../../_static/css/index.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pharmpy.methods.frem.method &#8212; Pharmpy 0.5.0 documentation</title>
+    
+  <link rel="stylesheet" href="../../../../_static/css/index.d431a4ee1c1efae0e38bdfebc22debff.css">
+
+    
+  <link rel="stylesheet"
+    href="../../../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+  <link rel="stylesheet"
+    href="../../../../_static/vendor/open-sans_all/1.44.1/index.css">
+  <link rel="stylesheet"
+    href="../../../../_static/vendor/lato_latin-ext/1.44.1/index.css">
+
+    
     <link rel="stylesheet" href="../../../../_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="../../../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/thebelab.css" />
+    
+  <link rel="preload" as="script" href="../../../../_static/js/index.30270b6e4c972e43c488.js">
+
     <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
     <script src="../../../../_static/underscore.js"></script>
     <script src="../../../../_static/doctools.js"></script>
     <script src="../../../../_static/language_data.js"></script>
+    <script src="../../../../_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../../genindex.html" />
     <link rel="search" title="Search" href="../../../../search.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="docsearch:language" content="en">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
   </head>
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
     
@@ -141,11 +163,59 @@
               <div>
                 
   <h1>Source code for pharmpy.methods.frem.method</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span></span><span class="kn">import</span> <span class="nn">itertools</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">pharmpy.data</span> <span class="kn">import</span> <span class="n">ColumnType</span>
+<span class="kn">from</span> <span class="nn">pharmpy.data_structures</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
 
 <span class="kn">from</span> <span class="nn">.models</span> <span class="kn">import</span> <span class="n">create_model3b</span>
+
+
+<div class="viewcode-block" id="setup"><a class="viewcode-back" href="../../../../reference/pharmpy.methods.frem.method.html#pharmpy.methods.frem.method.setup">[docs]</a><span class="k">def</span> <span class="nf">setup</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">covariates</span><span class="p">):</span>
+    <span class="n">input_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+    <span class="n">covariates</span> <span class="o">=</span> <span class="n">check_covariates</span><span class="p">(</span><span class="n">input_model</span><span class="p">,</span> <span class="n">covariates</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">covariates</span></div>
+
+
+<div class="viewcode-block" id="check_covariates"><a class="viewcode-back" href="../../../../reference/pharmpy.methods.frem.method.html#pharmpy.methods.frem.method.check_covariates">[docs]</a><span class="k">def</span> <span class="nf">check_covariates</span><span class="p">(</span><span class="n">input_model</span><span class="p">,</span> <span class="n">covariates</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Perform checks of covariates and filter out inappropriate ones</span>
+
+<span class="sd">       1. A covariate has the same baseline value for all individuals</span>
+<span class="sd">       2. Two or more covariates have the exact same base line values</span>
+<span class="sd">       3. Warn for time varying covariates</span>
+
+<span class="sd">       Return a new list of covariates with &quot;bad&quot; ones removed</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">input_model</span><span class="o">.</span><span class="n">dataset</span>
+    <span class="n">data</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">column_type</span><span class="p">[</span><span class="n">covariates</span><span class="p">]</span> <span class="o">=</span> <span class="n">ColumnType</span><span class="o">.</span><span class="n">COVARIATE</span>
+    <span class="n">cov_bls</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">covariate_baselines</span>
+
+    <span class="n">tvar</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">time_varying_covariates</span>
+    <span class="k">if</span> <span class="n">tvar</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The covariates </span><span class="si">{</span><span class="n">tvar</span><span class="si">}</span><span class="s1"> are time varying, but FREM will only use the &#39;</span>
+                      <span class="sa">f</span><span class="s1">&#39;baseline values.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Covariates with only one baseline value</span>
+    <span class="n">unique</span> <span class="o">=</span> <span class="p">(</span><span class="n">cov_bls</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cov_bls</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">1</span><span class="p">:])</span><span class="o">.</span><span class="n">all</span><span class="p">()</span>
+    <span class="n">covset</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">(</span><span class="n">covariates</span><span class="p">)</span>
+    <span class="n">unique_covariates</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">(</span><span class="nb">list</span><span class="p">((</span><span class="n">unique</span><span class="p">[</span><span class="n">unique</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">)))</span>
+    <span class="n">covset</span> <span class="o">-=</span> <span class="n">unique_covariates</span>
+    <span class="k">if</span> <span class="n">unique_covariates</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The covariates </span><span class="si">{</span><span class="nb">list</span><span class="p">(</span><span class="n">unique_covariates</span><span class="p">)</span><span class="si">}</span><span class="s1"> have the same baseline value for &#39;</span>
+                      <span class="sa">f</span><span class="s1">&#39;all individuals and has been removed from the analysis.&#39;</span><span class="p">)</span>
+
+    <span class="c1"># Remove covariates that are equal</span>
+    <span class="n">new_covset</span> <span class="o">=</span> <span class="n">OrderedSet</span><span class="p">(</span><span class="n">covset</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">col1</span><span class="p">,</span> <span class="n">col2</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">combinations</span><span class="p">(</span><span class="n">covset</span><span class="p">,</span> <span class="mi">2</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">cov_bls</span><span class="p">[</span><span class="n">col1</span><span class="p">]</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">cov_bls</span><span class="p">[</span><span class="n">col2</span><span class="p">]):</span>
+            <span class="n">new_covset</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">col2</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;The baselines for covariates </span><span class="si">{</span><span class="n">col1</span><span class="si">}</span><span class="s1"> and </span><span class="si">{</span><span class="n">col2</span><span class="si">}</span><span class="s1"> are equal for all &#39;</span>
+                          <span class="sa">f</span><span class="s1">&#39;individuals. </span><span class="si">{</span><span class="n">col2</span><span class="si">}</span><span class="s1"> has been removed from the analysis.&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">new_covset</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="update_model3b_for_psn"><a class="viewcode-back" href="../../../../reference/pharmpy.methods.frem.method.html#pharmpy.methods.frem.method.update_model3b_for_psn">[docs]</a><span class="k">def</span> <span class="nf">update_model3b_for_psn</span><span class="p">(</span><span class="n">rundir</span><span class="p">,</span> <span class="n">ncovs</span><span class="p">):</span>
@@ -175,13 +245,16 @@
       </div>
     </div>
 
-    <script src="../../../../_static/js/index.js"></script>
+    
+  <script src="../../../../_static/js/index.30270b6e4c972e43c488.js"></script>
+
+
     <footer class="footer mt-5 mt-md-0">
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on May 27, 2020.<br/>
-        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.<br/>
+        Last updated on Sep 04, 2020.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>
 </footer>

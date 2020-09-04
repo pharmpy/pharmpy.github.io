@@ -1,29 +1,51 @@
 
-
 <!DOCTYPE html>
 
-<html xmlns="http://www.w3.org/1999/xhtml">
+<html>
   <head>
     <meta charset="utf-8" />
-    <title>pharmpy.model &#8212; Pharmpy 0.2.0 documentation</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.11.2/css/all.min.css" integrity="sha384-KA6wR/X5RY4zFAHpv/CnoG2UW1uogYfdnP67Uv7eULvTveboZJg0qUpmJZb5VqzN" crossorigin="anonymous">
-    <link href="../../_static/css/index.css" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>pharmpy.model &#8212; Pharmpy 0.5.0 documentation</title>
+    
+  <link rel="stylesheet" href="../../_static/css/index.d431a4ee1c1efae0e38bdfebc22debff.css">
+
+    
+  <link rel="stylesheet"
+    href="../../_static/vendor/fontawesome/5.13.0/css/all.min.css">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-solid-900.woff2">
+  <link rel="preload" as="font" type="font/woff2" crossorigin
+    href="../../_static/vendor/fontawesome/5.13.0/webfonts/fa-brands-400.woff2">
+
+    
+      
+  <link rel="stylesheet"
+    href="../../_static/vendor/open-sans_all/1.44.1/index.css">
+  <link rel="stylesheet"
+    href="../../_static/vendor/lato_latin-ext/1.44.1/index.css">
+
+    
     <link rel="stylesheet" href="../../_static/basic.css" type="text/css" />
     <link rel="stylesheet" href="../../_static/pygments.css" type="text/css" />
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    
+  <link rel="preload" as="script" href="../../_static/js/index.30270b6e4c972e43c488.js">
+
     <script id="documentation_options" data-url_root="../../" src="../../_static/documentation_options.js"></script>
     <script src="../../_static/jquery.js"></script>
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script src="../../_static/language_data.js"></script>
+    <script src="../../_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="docsearch:language" content="en">
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="docsearch:language" content="en" />
   </head>
   <body data-spy="scroll" data-target="#bd-toc-nav" data-offset="80">
     
@@ -158,7 +180,13 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">scipy.linalg</span>
 <span class="kn">import</span> <span class="nn">sympy</span>
+
+<span class="kn">from</span> <span class="nn">pharmpy</span> <span class="kn">import</span> <span class="n">ParameterSet</span><span class="p">,</span> <span class="n">RandomVariables</span>
+<span class="kn">from</span> <span class="nn">pharmpy.symbols</span> <span class="kn">import</span> <span class="n">real</span><span class="p">,</span> <span class="n">subs</span>
 
 
 <div class="viewcode-block" id="ModelException"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.ModelException">[docs]</a><span class="k">class</span> <span class="nc">ModelException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
@@ -227,19 +255,273 @@
 <div class="viewcode-block" id="Model.read_raw_dataset"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.read_raw_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">read_raw_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_columns</span><span class="o">=</span><span class="nb">tuple</span><span class="p">()):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
-<div class="viewcode-block" id="Model.create_symbol"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.create_symbol">[docs]</a>    <span class="k">def</span> <span class="nf">create_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stem</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.create_symbol"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.create_symbol">[docs]</a>    <span class="k">def</span> <span class="nf">create_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stem</span><span class="p">,</span> <span class="n">force_numbering</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a new unique variable symbol</span>
 
 <span class="sd">           stem - First part of the new variable name</span>
+<span class="sd">           force_numbering - Forces addition of number to name even if variable does</span>
+<span class="sd">                             not exist, e.g. COVEFF --&gt; COVEFF1</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="c1"># TODO: Also check parameter and rv names</span>
-        <span class="n">symbols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">]</span>
+        <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">]</span>
+        <span class="n">rvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="p">]</span>
+        <span class="n">dataset_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+
+        <span class="n">all_names</span> <span class="o">=</span> <span class="n">symbols</span> <span class="o">+</span> <span class="n">params</span> <span class="o">+</span> <span class="n">rvs</span> <span class="o">+</span> <span class="n">dataset_col</span>
+
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">stem</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_names</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force_numbering</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">real</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">stem</span><span class="p">))</span>
+
         <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">candidate</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stem</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">candidate</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">candidate</span>
-            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div></div>
+            <span class="n">candidate</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stem</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="k">if</span> <span class="n">candidate</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_names</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">real</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div>
+
+<div class="viewcode-block" id="Model.remove_unused_parameters_and_rvs"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.remove_unused_parameters_and_rvs">[docs]</a>    <span class="k">def</span> <span class="nf">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove any parameters and rvs that are not used in the model statements</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">free_symbols</span>
+
+        <span class="n">new_rvs</span> <span class="o">=</span> <span class="n">RandomVariables</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="p">:</span>
+            <span class="c1"># FIXME: change if rvs are random symbols in expressions</span>
+            <span class="k">if</span> <span class="n">real</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="n">symbols</span> <span class="ow">or</span> \
+                    <span class="ow">not</span> <span class="n">symbols</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">):</span>
+                <span class="n">new_rvs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">new_rvs</span>
+
+        <span class="n">new_params</span> <span class="o">=</span> <span class="n">ParameterSet</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="n">symb</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">symbol</span>
+            <span class="k">if</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">symbols</span> <span class="ow">or</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">new_rvs</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+                <span class="n">new_params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">new_params</span></div>
+
+    <span class="k">def</span> <span class="nf">_observation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">statements</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">stats</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;Y&#39;</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">expression</span>
+                <span class="k">break</span>
+
+        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">{</span><span class="n">stats</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">:</span> <span class="n">stats</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">expression</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">y</span>
+
+<div class="viewcode-block" id="Model.symbolic_population_prediction"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.symbolic_population_prediction">[docs]</a>    <span class="k">def</span> <span class="nf">symbolic_population_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Symbolic model population prediction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_individual_prediction</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">{</span><span class="n">eta</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+        <span class="k">return</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="Model.symbolic_individual_prediction"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.symbolic_individual_prediction">[docs]</a>    <span class="k">def</span> <span class="nf">symbolic_individual_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Symbolic model individual prediction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation</span><span class="p">()</span>
+
+        <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">ruv_rvs</span><span class="p">:</span>
+            <span class="c1"># FIXME: The rv symbol and the code symbol are different.</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">{</span><span class="n">eps</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+
+        <span class="k">return</span> <span class="n">y</span></div>
+
+<div class="viewcode-block" id="Model.population_prediction"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.population_prediction">[docs]</a>    <span class="k">def</span> <span class="nf">population_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Numeric population prediction</span>
+
+<span class="sd">            The prediction is evaluated at the current model parameter values</span>
+<span class="sd">            or optionally at the given parameter values.</span>
+<span class="sd">            The evaluation is done for each data record in the model dataset</span>
+<span class="sd">            or optionally using the dataset argument.</span>
+
+<span class="sd">            Return population prediction series</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_population_prediction</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span>
+
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">pred</span></div>
+
+<div class="viewcode-block" id="Model.individual_prediction"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.individual_prediction">[docs]</a>    <span class="k">def</span> <span class="nf">individual_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">etas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Numeric individual prediction</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_individual_prediction</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span>
+
+        <span class="n">idcol</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">id_label</span>
+
+        <span class="k">if</span> <span class="n">etas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_individual_estimates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">etas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_individual_estimates</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">etas</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span>
+                                    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">eta</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">])</span>
+
+        <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">curetas</span> <span class="o">=</span> <span class="n">etas</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="n">idcol</span><span class="p">]]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">row</span><span class="p">),</span> <span class="n">curetas</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">a</span>
+
+        <span class="n">ipred</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ipred</span></div>
+
+<div class="viewcode-block" id="Model.symbolic_eta_gradient"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.symbolic_eta_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">symbolic_eta_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">ruv_rvs</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">{</span><span class="n">eps</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;ETA(2)&#39;</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;OTHER&#39;</span><span class="p">)})</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;OTHER&#39;</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;ETA(2)&#39;</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ETA(2) hash: &quot;</span><span class="p">,</span> <span class="nb">hash</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;ETA(2)&#39;</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">assumptions0</span><span class="p">,</span> <span class="nb">hash</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">real</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">d</span></div>
+
+<div class="viewcode-block" id="Model.symbolic_eps_gradient"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.symbolic_eps_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">symbolic_eps_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation</span><span class="p">()</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">real</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">ruv_rvs</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">d</span></div>
+
+    <span class="k">def</span> <span class="nf">_replace_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">subs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">subs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">y</span>
+
+<div class="viewcode-block" id="Model.eta_gradient"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.eta_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">eta_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">etas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Numeric eta gradient</span>
+
+<span class="sd">           The gradient is evaluated given initial etas, parameters and the model dataset.</span>
+<span class="sd">           The arguments etas, parameters and dataset can optionally override those</span>
+<span class="sd">           of the model. Return a DataFrame of gradients.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_eta_gradient</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replace_parameters</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span>
+        <span class="n">idcol</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">id_label</span>
+
+        <span class="k">if</span> <span class="n">etas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_individual_estimates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">etas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_individual_estimates</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">etas</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span>
+                                    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">eta</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">])</span>
+
+        <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">curetas</span> <span class="o">=</span> <span class="n">etas</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="n">idcol</span><span class="p">]]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">row</span><span class="p">),</span> <span class="n">curetas</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">a</span>
+
+        <span class="n">derivative_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dF/d</span><span class="si">{</span><span class="n">eta</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">]</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;expand&#39;</span><span class="p">)</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="n">grad</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">derivative_names</span>
+        <span class="k">return</span> <span class="n">grad</span></div>
+
+<div class="viewcode-block" id="Model.eps_gradient"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.eps_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">eps_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">etas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Numeric epsilon gradient</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_eps_gradient</span><span class="p">()</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replace_parameters</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+        <span class="n">eps_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">eps</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">ruv_rvs</span><span class="p">]</span>
+        <span class="n">repl</span> <span class="o">=</span> <span class="p">{</span><span class="n">real</span><span class="p">(</span><span class="n">eps</span><span class="p">):</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="n">eps_names</span><span class="p">}</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">subs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">repl</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span>
+
+        <span class="n">idcol</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">id_label</span>
+
+        <span class="k">if</span> <span class="n">etas</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_individual_estimates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">etas</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_individual_estimates</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">etas</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span>
+                                    <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">eta</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">])</span>
+
+        <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+            <span class="n">row</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">curetas</span> <span class="o">=</span> <span class="n">etas</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="n">idcol</span><span class="p">]]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">row</span><span class="p">),</span> <span class="n">curetas</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
+            <span class="k">return</span> <span class="n">a</span>
+
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;expand&#39;</span><span class="p">)</span>
+        <span class="n">derivative_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dY/d</span><span class="si">{</span><span class="n">eps</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="n">eps_names</span><span class="p">]</span>
+        <span class="n">grad</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">grad</span><span class="p">)</span>
+        <span class="n">grad</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">derivative_names</span>
+        <span class="k">return</span> <span class="n">grad</span></div>
+
+<div class="viewcode-block" id="Model.weighted_residuals"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.weighted_residuals">[docs]</a>    <span class="k">def</span> <span class="nf">weighted_residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">covariance_matrix</span><span class="p">()</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">covariance_matrix</span><span class="p">(</span><span class="n">ruv</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">omega</span><span class="p">)</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span>
+        <span class="c1"># FIXME: Could have option to gradients to set all etas 0</span>
+        <span class="n">etas</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">ids</span><span class="p">,</span>
+                            <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="n">eta</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">])</span>
+        <span class="n">G</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eta_gradient</span><span class="p">(</span><span class="n">etas</span><span class="o">=</span><span class="n">etas</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="n">H</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">eps_gradient</span><span class="p">(</span><span class="n">etas</span><span class="o">=</span><span class="n">etas</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="n">F</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">population_prediction</span><span class="p">()</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">id_label</span><span class="p">]</span>
+        <span class="n">G</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="n">H</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="n">F</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">index</span>
+        <span class="n">WRES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">([])</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">ids</span><span class="p">:</span>
+            <span class="n">Gi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">G</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="n">i</span><span class="p">]])</span>
+            <span class="n">Hi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">H</span><span class="o">.</span><span class="n">loc</span><span class="p">[[</span><span class="n">i</span><span class="p">]])</span>
+            <span class="n">Fi</span> <span class="o">=</span> <span class="n">F</span><span class="p">[</span><span class="n">i</span><span class="p">:</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">values</span>
+            <span class="n">DVi</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;DV&#39;</span><span class="p">][</span><span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">id_label</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">])</span>
+            <span class="n">Ci</span> <span class="o">=</span> <span class="n">Gi</span> <span class="o">@</span> <span class="n">omega</span> <span class="o">@</span> <span class="n">Gi</span><span class="o">.</span><span class="n">T</span> <span class="o">+</span> <span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">Hi</span> <span class="o">@</span> <span class="n">sigma</span> <span class="o">@</span> <span class="n">Hi</span><span class="o">.</span><span class="n">T</span><span class="p">))</span>
+            <span class="n">WRESi</span> <span class="o">=</span> <span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">sqrtm</span><span class="p">(</span><span class="n">scipy</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">inv</span><span class="p">(</span><span class="n">Ci</span><span class="p">))</span> <span class="o">@</span> <span class="p">(</span><span class="n">DVi</span> <span class="o">-</span> <span class="n">Fi</span><span class="p">)</span>
+            <span class="n">WRES</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">concatenate</span><span class="p">((</span><span class="n">WRES</span><span class="p">,</span> <span class="n">WRESi</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">WRES</span><span class="p">)</span></div></div>
 </pre></div>
 
               </div>
@@ -256,13 +538,16 @@
       </div>
     </div>
 
-    <script src="../../_static/js/index.js"></script>
+    
+  <script src="../../_static/js/index.30270b6e4c972e43c488.js"></script>
+
+
     <footer class="footer mt-5 mt-md-0">
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on May 27, 2020.<br/>
-        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 2.4.4.<br/>
+        Last updated on Sep 04, 2020.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>
 </footer>
