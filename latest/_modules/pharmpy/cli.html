@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.cli &#8212; Pharmpy 0.5.0 documentation</title>
+    <title>pharmpy.cli &#8212; Pharmpy 0.6.0 documentation</title>
     
   <link rel="stylesheet" href="../../_static/css/index.d431a4ee1c1efae0e38bdfebc22debff.css">
 
@@ -60,6 +60,10 @@
     <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
       <ul id="navbar-main-elements" class="navbar-nav mr-auto">
         
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../index.html">Welcome to Pharmpy </a>
+        </li>
         
         <li class="nav-item ">
             <a class="nav-link" href="../../installation.html">Installation</a>
@@ -121,6 +125,8 @@
   
 
   <ul class="nav bd-sidenav">
+      
+      
       
       
       
@@ -221,7 +227,6 @@
 <span class="kn">import</span> <span class="nn">importlib</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
 <span class="kn">import</span> <span class="nn">pydoc</span>
-<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">sys</span>
 <span class="kn">import</span> <span class="nn">types</span>
 <span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">OrderedDict</span><span class="p">,</span> <span class="n">namedtuple</span>
@@ -391,34 +396,14 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
-                    <span class="n">bump_model_number</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+                    <span class="n">model</span><span class="o">.</span><span class="n">bump_model_number</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">bump_model_number</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">bump_model_number</span><span class="p">()</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">FileExistsError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
             <span class="n">error</span><span class="p">(</span><span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">e</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1"> Use -f or --force to &#39;</span>
                                   <span class="s1">&#39;force an overwrite&#39;</span><span class="p">))</span></div>
-
-
-<div class="viewcode-block" id="bump_model_number"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.bump_model_number">[docs]</a><span class="k">def</span> <span class="nf">bump_model_number</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; If model name ends in a number increase to next available file</span>
-<span class="sd">        else do nothing.</span>
-<span class="sd">        FIXME: Could be moved to model class. Need the name of the model and the source object</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">path</span> <span class="o">=</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
-    <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.*?)(\d+)$&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
-        <span class="n">stem</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-        <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
-            <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">new_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stem</span><span class="si">}{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
-            <span class="n">new_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="n">new_name</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">new_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
-                <span class="k">break</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span></div>
 
 
 <div class="viewcode-block" id="data_resample"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.data_resample">[docs]</a><span class="k">def</span> <span class="nf">data_resample</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
@@ -521,11 +506,53 @@
     <span class="n">write_model_or_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">force</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="model_absorption"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.model_absorption">[docs]</a><span class="k">def</span> <span class="nf">model_absorption</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
-    <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">absorption</span>
+<div class="viewcode-block" id="model_absorption_rate"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.model_absorption_rate">[docs]</a><span class="k">def</span> <span class="nf">model_absorption_rate</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">absorption_rate</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model</span>
-    <span class="n">absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">order</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">rate</span><span class="p">)</span>
+    <span class="n">absorption_rate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">order</span><span class="p">)</span>
     <span class="n">write_model_or_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">force</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="boxcox"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.boxcox">[docs]</a><span class="k">def</span> <span class="nf">boxcox</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Subcommand to apply boxcox transformation to specified etas of model.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">boxcox</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">etas</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">etas</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">etas</span>
+
+    <span class="n">boxcox</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">etas</span><span class="p">)</span>
+    <span class="n">write_model_or_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="tdist"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.tdist">[docs]</a><span class="k">def</span> <span class="nf">tdist</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Subcommand to apply t-distribution transformation to specified etas of model.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">tdist</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">etas</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">etas</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">etas</span>
+
+    <span class="n">tdist</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">etas</span><span class="p">)</span>
+    <span class="n">write_model_or_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="john_draper"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.john_draper">[docs]</a><span class="k">def</span> <span class="nf">john_draper</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Subcommand to apply John Draper transformation to specified etas of model.&quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">john_draper</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">model</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">etas</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="n">etas</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">etas</span>
+
+    <span class="n">john_draper</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">etas</span><span class="p">)</span>
+    <span class="n">write_model_or_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">output_file</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="results_bootstrap"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_bootstrap">[docs]</a><span class="k">def</span> <span class="nf">results_bootstrap</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
@@ -539,6 +566,15 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="results_cdd"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_cdd">[docs]</a><span class="k">def</span> <span class="nf">results_cdd</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">pharmpy.methods.cdd.results</span> <span class="kn">import</span> <span class="n">psn_cdd_results</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">error</span><span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="p">)))</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">psn_cdd_results</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.json&#39;</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.csv&#39;</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="results_frem"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_frem">[docs]</a><span class="k">def</span> <span class="nf">results_frem</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Generate frem results&quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">pharmpy.methods.frem.results</span> <span class="kn">import</span> <span class="n">psn_frem_results</span>
@@ -548,6 +584,15 @@
                            <span class="n">force_posdef_covmatrix</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">force_posdef_covmatrix</span><span class="p">,</span>
                            <span class="n">force_posdef_samples</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">force_posdef_samples</span><span class="p">)</span>
     <span class="n">res</span><span class="o">.</span><span class="n">add_plots</span><span class="p">()</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.json&#39;</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.csv&#39;</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="results_scm"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_scm">[docs]</a><span class="k">def</span> <span class="nf">results_scm</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">pharmpy.methods.scm.results</span> <span class="kn">import</span> <span class="n">psn_scm_results</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">error</span><span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="p">)))</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">psn_scm_results</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="p">)</span>
     <span class="n">res</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.json&#39;</span><span class="p">)</span>
     <span class="n">res</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.csv&#39;</span><span class="p">)</span></div>
 
@@ -817,18 +862,49 @@
             <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">model_explicit_odes</span><span class="p">,</span>
             <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">args_model_input</span><span class="p">,</span> <span class="n">args_output</span><span class="p">],</span>
                        <span class="p">}},</span>
-        <span class="p">{</span><span class="s1">&#39;absorption&#39;</span><span class="p">:</span> <span class="p">{</span>
+        <span class="p">{</span><span class="s1">&#39;absorption_rate&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Set absorption rate for a PK model&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Change absorption rate of a PK model to either 0th or 1th order&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">model_absorption</span><span class="p">,</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Change absorption rate of a PK model to either instant, 0th order, 1th &#39;</span>
+                           <span class="s1">&#39;order or sequential 0-order 1-order.&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">model_absorption_rate</span><span class="p">,</span>
             <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">args_model_input</span><span class="p">,</span> <span class="n">args_output</span><span class="p">],</span>
             <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;order&#39;</span><span class="p">,</span>
-                      <span class="s1">&#39;choices&#39;</span><span class="p">:</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span>
-                      <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-                      <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Order of absorption&#39;</span><span class="p">},</span>
-                     <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;--rate&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;choices&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;instant&#39;</span><span class="p">,</span> <span class="s1">&#39;ZO&#39;</span><span class="p">,</span> <span class="s1">&#39;FO&#39;</span><span class="p">,</span> <span class="s1">&#39;seq-ZO-FO&#39;</span><span class="p">],</span>
                       <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                      <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Symbol for absorption rate&#39;</span><span class="p">},</span>
+                      <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Order of absorption&#39;</span><span class="p">},</span>
+                     <span class="p">]}},</span>
+        <span class="p">{</span><span class="s1">&#39;boxcox&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Applies boxcox transformation&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Apply boxcox transformation on selected/all etas&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">boxcox</span><span class="p">,</span>
+            <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">args_model_input</span><span class="p">,</span> <span class="n">args_output</span><span class="p">],</span>
+            <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;--etas&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                      <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;List of etas, mark group of etas in single quote &#39;</span>
+                              <span class="s1">&#39;separated by spaces&#39;</span><span class="p">},</span>
+                     <span class="p">]}},</span>
+        <span class="p">{</span><span class="s1">&#39;tdist&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Applies t-distribution transformation&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Apply t-distribution transformation on selected/all etas&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">tdist</span><span class="p">,</span>
+            <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">args_model_input</span><span class="p">,</span> <span class="n">args_output</span><span class="p">],</span>
+            <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;--etas&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                      <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;List of etas, mark group of etas in single quote &#39;</span>
+                              <span class="s1">&#39;separated by spaces&#39;</span><span class="p">},</span>
+                     <span class="p">]}},</span>
+        <span class="p">{</span><span class="s1">&#39;john_draper&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Applies John Draper transformation&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Apply John Draper transformation on selected/all etas&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">john_draper</span><span class="p">,</span>
+            <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">args_model_input</span><span class="p">,</span> <span class="n">args_output</span><span class="p">],</span>
+            <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;--etas&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+                      <span class="s1">&#39;default&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span>
+                      <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;List of etas, mark group of etas in single quote &#39;</span>
+                              <span class="s1">&#39;separated by spaces&#39;</span><span class="p">},</span>
                      <span class="p">]}},</span>
     <span class="p">],</span> <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Model manipulations&#39;</span><span class="p">,</span>
        <span class="s1">&#39;title&#39;</span><span class="p">:</span> <span class="s1">&#39;Pharmpy model commands&#39;</span><span class="p">,</span>
@@ -842,6 +918,12 @@
             <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">args_input</span><span class="p">],</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[</span>
                    <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;--base&#39;</span><span class="p">,</span> <span class="s1">&#39;metavar&#39;</span><span class="p">:</span> <span class="s1">&#39;FILE&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">input_model</span><span class="p">,</span>
                     <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Base model&#39;</span><span class="p">}]}},</span>
+        <span class="p">{</span><span class="s1">&#39;cdd&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate cdd results&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate results from a PsN cdd run&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">results_cdd</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;psn_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;metavar&#39;</span><span class="p">:</span> <span class="s1">&#39;PsN directory&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+                 <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Path to PsN cdd run directory&#39;</span><span class="p">}]}},</span>
         <span class="p">{</span><span class="s1">&#39;frem&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate FREM results&#39;</span><span class="p">,</span>
             <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate results from a PsN frem run&#39;</span><span class="p">,</span>
@@ -874,6 +956,12 @@
             <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[</span>
                 <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;psn_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;metavar&#39;</span><span class="p">:</span> <span class="s1">&#39;PsN directory&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
                  <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Path to PsN run directory&#39;</span><span class="p">}]}},</span>
+        <span class="p">{</span><span class="s1">&#39;scm&#39;</span><span class="p">:</span> <span class="p">{</span>
+            <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate scm results&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate results from a PsN scm run&#39;</span><span class="p">,</span>
+            <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">results_scm</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;psn_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;metavar&#39;</span><span class="p">:</span> <span class="s1">&#39;PsN directory&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+                 <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Path to PsN scm run directory&#39;</span><span class="p">}]}},</span>
         <span class="p">{</span><span class="s1">&#39;summary&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Modelfit summary&#39;</span><span class="p">,</span>
             <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Print a summary of a model estimates to stdout.&#39;</span><span class="p">,</span>
@@ -927,7 +1015,7 @@
     <span class="n">formatter_class</span><span class="o">=</span><span class="n">formatter</span><span class="p">,</span>
     <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;0.5.0&#39;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;0.6.0&#39;</span><span class="p">)</span>
 
 <span class="c1"># subcommand parsers</span>
 <span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Pharmpy commands&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;COMMAND&#39;</span><span class="p">)</span>
@@ -969,7 +1057,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 04, 2020.<br/>
+        Last updated on Sep 18, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

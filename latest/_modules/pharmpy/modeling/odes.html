@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.5.0 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.6.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.d431a4ee1c1efae0e38bdfebc22debff.css">
 
@@ -60,6 +60,10 @@
     <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
       <ul id="navbar-main-elements" class="navbar-nav mr-auto">
         
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../index.html">Welcome to Pharmpy </a>
+        </li>
         
         <li class="nav-item ">
             <a class="nav-link" href="../../../installation.html">Installation</a>
@@ -136,6 +140,8 @@
       
       
       
+      
+      
     </ul>
 
 </nav>
@@ -163,7 +169,11 @@
               <div>
                 
   <h1>Source code for pharmpy.modeling.odes</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">ExplicitODESystem</span>
+<span></span><span class="kn">import</span> <span class="nn">sympy</span>
+
+<span class="kn">import</span> <span class="nn">pharmpy.symbols</span>
+<span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
+<span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">ExplicitODESystem</span><span class="p">,</span> <span class="n">Infusion</span>
 
 
 <div class="viewcode-block" id="explicit_odes"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.explicit_odes">[docs]</a><span class="k">def</span> <span class="nf">explicit_odes</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
@@ -180,10 +190,35 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="absorption"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.absorption">[docs]</a><span class="k">def</span> <span class="nf">absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">order</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set or change the absorption for a model</span>
+<span class="k">def</span> <span class="nf">_have_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if ode system describes a zero order absorption</span>
 
-<span class="sd">        order - 0 or 1</span>
+<span class="sd">       currently defined as having Infusion dose with rate not in dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="n">dosing</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+    <span class="n">dose</span> <span class="o">=</span> <span class="n">dosing</span><span class="o">.</span><span class="n">dose</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dose</span><span class="p">,</span> <span class="n">Infusion</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dose</span><span class="o">.</span><span class="n">rate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">dose</span><span class="o">.</span><span class="n">duration</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">dose</span><span class="o">.</span><span class="n">rate</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
+
+
+<div class="viewcode-block" id="absorption_rate"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.absorption_rate">[docs]</a><span class="k">def</span> <span class="nf">absorption_rate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">order</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set or change the absorption rate of a model</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model</span>
+<span class="sd">        Model to set or change absorption for</span>
+<span class="sd">    order</span>
+<span class="sd">        &#39;instant&#39;, &#39;ZO&#39;, &#39;FO&#39; or &#39;seq-ZO-FO&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
@@ -191,15 +226,60 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Setting absorption is not supported for ExplicitODESystem&quot;</span><span class="p">)</span>
 
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">order</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">order</span> <span class="o">==</span> <span class="s1">&#39;instant&#39;</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
+            <span class="n">to_comp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_compartment_flows</span><span class="p">(</span><span class="n">depot</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">to_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">depot</span><span class="o">.</span><span class="n">dose</span>
             <span class="n">ka</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">())</span>
             <span class="n">odes</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">depot</span><span class="p">)</span>
             <span class="n">symbols</span> <span class="o">=</span> <span class="n">ka</span><span class="o">.</span><span class="n">free_symbols</span>
-            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">:</span>
-                <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definition</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
+            <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
             <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span>
             <span class="n">model</span><span class="o">.</span><span class="n">remove_unused_parameters_and_rvs</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="n">_have_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+            <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+            <span class="n">old_symbols</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">free_symbols</span>
+            <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span>
+            <span class="n">unneeded_symbols</span> <span class="o">=</span> <span class="n">old_symbols</span> <span class="o">-</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">free_symbols</span>
+            <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">unneeded_symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">remove_unused_parameters_and_rvs</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="s1">&#39;ZO&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">_have_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+            <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+            <span class="n">symbols</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">free_symbols</span>
+            <span class="n">new_dose</span> <span class="o">=</span> <span class="n">Infusion</span><span class="p">(</span><span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span>
+                                <span class="n">duration</span><span class="o">=</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;MAT&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
+                <span class="n">to_comp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_compartment_flows</span><span class="p">(</span><span class="n">depot</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="n">to_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">new_dose</span>
+                <span class="n">ka</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">())</span>
+                <span class="n">odes</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">depot</span><span class="p">)</span>
+                <span class="n">symbols</span> <span class="o">|=</span> <span class="n">ka</span><span class="o">.</span><span class="n">free_symbols</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">new_dose</span>
+            <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
+            <span class="n">mat_param</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;TVMAT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mat_param</span><span class="p">)</span>
+            <span class="n">imat</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">mat_param</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">imat</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">remove_unused_parameters_and_rvs</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">order</span> <span class="o">==</span> <span class="s1">&#39;FO&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">depot</span><span class="p">:</span>
+            <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+            <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">add_compartment</span><span class="p">(</span><span class="s1">&#39;DEPOT&#39;</span><span class="p">)</span>
+            <span class="n">depot</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span>
+            <span class="n">symbols</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">free_symbols</span>
+            <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
+            <span class="n">mat_param</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;TVMAT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">mat_param</span><span class="p">)</span>
+            <span class="n">imat</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">mat_param</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">imat</span><span class="p">)</span>
+            <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">dose_comp</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;MAT&#39;</span><span class="p">))</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">remove_unused_parameters_and_rvs</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Requested order </span><span class="si">{</span><span class="n">order</span><span class="si">}</span><span class="s1"> but only orders &#39;</span>
+                         <span class="sa">f</span><span class="s1">&#39;instant, FO, ZO and seq-ZO-FO are supported&#39;</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
 </pre></div>
@@ -226,7 +306,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 04, 2020.<br/>
+        Last updated on Sep 18, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

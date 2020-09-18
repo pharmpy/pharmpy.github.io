@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.parse_utils.generic &#8212; Pharmpy 0.5.0 documentation</title>
+    <title>pharmpy.parse_utils.generic &#8212; Pharmpy 0.6.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.d431a4ee1c1efae0e38bdfebc22debff.css">
 
@@ -60,6 +60,10 @@
     <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
       <ul id="navbar-main-elements" class="navbar-nav mr-auto">
         
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../index.html">Welcome to Pharmpy </a>
+        </li>
         
         <li class="nav-item ">
             <a class="nav-link" href="../../../installation.html">Installation</a>
@@ -121,6 +125,8 @@
   
 
   <ul class="nav bd-sidenav">
+      
+      
       
       
       
@@ -453,20 +459,21 @@
 <div class="viewcode-block" id="AttrTree.remove_node"><a class="viewcode-back" href="../../../reference/pharmpy.parse_utils.generic.html#pharmpy.parse_utils.AttrTree.remove_node">[docs]</a>    <span class="k">def</span> <span class="nf">remove_node</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">node</span><span class="p">):</span>
         <span class="n">new_children</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">comment_flag</span> <span class="o">=</span> <span class="kc">False</span>
-
         <span class="k">for</span> <span class="n">child</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">children</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">rule</span> <span class="o">==</span> <span class="s1">&#39;COMMENT&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">rule</span> <span class="o">==</span> <span class="s1">&#39;COMMENT&#39;</span> <span class="ow">or</span> <span class="n">child</span><span class="o">.</span><span class="n">rule</span> <span class="o">==</span> <span class="s1">&#39;NEWLINE&#39;</span><span class="p">:</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">comment_flag</span><span class="p">:</span>
                     <span class="n">new_children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">child</span><span class="p">)</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n\n</span><span class="s1">&#39;</span><span class="p">):</span>
+                        <span class="n">new_children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">child</span><span class="p">)[</span><span class="mi">1</span><span class="p">:]))</span>
+                    <span class="n">comment_flag</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">elif</span> <span class="nb">str</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">eval</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">str</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">eval</span><span class="p">):</span>
                 <span class="n">new_children</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">child</span><span class="o">.</span><span class="n">rule</span> <span class="o">==</span> <span class="s1">&#39;statement&#39;</span><span class="p">:</span>
                     <span class="n">comment_flag</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">comment_flag</span> <span class="o">=</span> <span class="kc">True</span>
-
-        <span class="n">new_children_clean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_clean_ws</span><span class="p">(</span><span class="n">new_children</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="n">new_children_clean</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">children</span> <span class="o">=</span> <span class="n">new_children</span></div>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_newline_node</span><span class="p">():</span>
@@ -485,8 +492,7 @@
                     <span class="k">continue</span>
                 <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="n">last_index</span><span class="p">:</span>
                     <span class="k">continue</span>
-
-            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">{2,}&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">child</span><span class="o">.</span><span class="n">eval</span><span class="p">)):</span>
+            <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">{2,}&#39;</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">child</span><span class="p">)):</span>
                 <span class="n">new_children_clean</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_newline_node</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">new_children_clean</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">child</span><span class="p">)</span>
@@ -731,7 +737,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 04, 2020.<br/>
+        Last updated on Sep 18, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

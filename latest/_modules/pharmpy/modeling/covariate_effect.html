@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.covariate_effect &#8212; Pharmpy 0.5.0 documentation</title>
+    <title>pharmpy.modeling.covariate_effect &#8212; Pharmpy 0.6.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.d431a4ee1c1efae0e38bdfebc22debff.css">
 
@@ -60,6 +60,10 @@
     <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
       <ul id="navbar-main-elements" class="navbar-nav mr-auto">
         
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../../index.html">Welcome to Pharmpy </a>
+        </li>
         
         <li class="nav-item ">
             <a class="nav-link" href="../../../installation.html">Installation</a>
@@ -136,6 +140,8 @@
       
       
       
+      
+      
     </ul>
 
 </nav>
@@ -168,50 +174,72 @@
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">add</span><span class="p">,</span> <span class="n">mul</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">sympy</span>
 <span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">Eq</span><span class="p">,</span> <span class="n">Float</span><span class="p">,</span> <span class="n">Gt</span><span class="p">,</span> <span class="n">Le</span><span class="p">,</span> <span class="n">Piecewise</span><span class="p">,</span> <span class="n">exp</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
 <span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span>
-<span class="kn">from</span> <span class="nn">pharmpy.symbols</span> <span class="kn">import</span> <span class="n">real</span><span class="p">,</span> <span class="n">subs</span><span class="p">,</span> <span class="n">sympify</span>
+<span class="kn">from</span> <span class="nn">pharmpy.symbols</span> <span class="kn">import</span> <span class="n">symbol</span> <span class="k">as</span> <span class="n">S</span>
 
 
 <div class="viewcode-block" id="add_covariate_effect"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.add_covariate_effect">[docs]</a><span class="k">def</span> <span class="nf">add_covariate_effect</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Adds covariate effect to pharmpy model.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds covariate effect to :class:`pharmpy.model`. The following effects have templates:</span>
 
-<span class="sd">       effect - Supports linear (continuous and categorical covariates),</span>
-<span class="sd">                piecewise linear, exponential, and power function. Custom</span>
-<span class="sd">                effect may be used, where thetas are denoted as &#39;theta&#39;</span>
-<span class="sd">                (if multiple: &#39;theta1&#39;, &#39;theta2&#39; etc), covariate as &#39;cov&#39;,</span>
-<span class="sd">                and mean and median are written as they are.</span>
+<span class="sd">    - Linear function for continuous covariates (*lin*)</span>
+<span class="sd">    - Linear function for categorical covariates (*cat*)</span>
+<span class="sd">    - Piecewise linear function/&quot;hockey-stick&quot;, continuous covariates only (*piece_lin*)</span>
+<span class="sd">    - Exponential function, continuous covariates only (*exp*)</span>
+<span class="sd">    - Power function, continuous covariates only (*pow*)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model to add covariate effect to.</span>
+<span class="sd">    parameter : str</span>
+<span class="sd">        Name of parameter to add covariate effect to.</span>
+<span class="sd">    covariate : str</span>
+<span class="sd">        Name of covariate.</span>
+<span class="sd">    effect : str</span>
+<span class="sd">        Type of covariate effect. May be abbreviated covariate effect (see above) or custom.</span>
+<span class="sd">    operation : str, optional</span>
+<span class="sd">        Whether the covariate effect should be added or multiplied (default).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">mean</span> <span class="o">=</span> <span class="n">calculate_mean</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
-    <span class="n">median</span> <span class="o">=</span> <span class="n">calculate_median</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
+    <span class="n">mean</span> <span class="o">=</span> <span class="n">_calculate_mean</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
+    <span class="n">median</span> <span class="o">=</span> <span class="n">_calculate_median</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
+    <span class="n">std</span> <span class="o">=</span> <span class="n">_calculate_std</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
 
-    <span class="n">thetas</span> <span class="o">=</span> <span class="n">create_thetas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
-    <span class="n">covariate_effect</span> <span class="o">=</span> <span class="n">create_template</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="n">_create_thetas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
+    <span class="n">covariate_effect</span> <span class="o">=</span> <span class="n">_create_template</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
 
     <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
     <span class="n">param_statement</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
 
+    <span class="n">param_index</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">param_statement</span><span class="p">)</span>
+
     <span class="n">covariate_effect</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">thetas</span><span class="p">)</span>
-    <span class="n">statistic_statement</span> <span class="o">=</span> <span class="n">covariate_effect</span><span class="o">.</span><span class="n">create_statistics_statement</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">median</span><span class="p">)</span>
     <span class="n">effect_statement</span> <span class="o">=</span> <span class="n">covariate_effect</span><span class="o">.</span><span class="n">create_effect_statement</span><span class="p">(</span><span class="n">operation</span><span class="p">,</span> <span class="n">param_statement</span><span class="p">)</span>
 
-    <span class="n">param_index</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">param_statement</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">effect</span> <span class="o">!=</span> <span class="s1">&#39;cat&#39;</span><span class="p">:</span>
+        <span class="n">statistic_statement</span> <span class="o">=</span> <span class="n">covariate_effect</span><span class="o">.</span><span class="n">create_statistics_statement</span><span class="p">(</span><span class="n">covariate</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span>
+                                                                           <span class="n">median</span><span class="p">,</span> <span class="n">std</span><span class="p">)</span>
+        <span class="n">sset</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">param_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">statistic_statement</span><span class="p">)</span>
+        <span class="n">param_index</span> <span class="o">+=</span> <span class="mi">1</span>
+
     <span class="n">sset</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">param_index</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">covariate_effect</span><span class="o">.</span><span class="n">template</span><span class="p">)</span>
-    <span class="n">sset</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">param_index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">statistic_statement</span><span class="p">)</span>
-    <span class="n">sset</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">param_index</span> <span class="o">+</span> <span class="mi">3</span><span class="p">,</span> <span class="n">effect_statement</span><span class="p">)</span>
+    <span class="n">sset</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">param_index</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">effect_statement</span><span class="p">)</span>
 
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">sset</span>
-
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">sset</span></div>
 
 
-<div class="viewcode-block" id="create_thetas"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.create_thetas">[docs]</a><span class="k">def</span> <span class="nf">create_thetas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">covariate</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_create_thetas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">covariate</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates theta parameters and adds to parameter set of model.</span>
+
+<span class="sd">    Number of parameters depends on which covariate effect.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">effect</span> <span class="o">==</span> <span class="s1">&#39;piece_lin&#39;</span><span class="p">:</span>
         <span class="n">no_of_thetas</span> <span class="o">=</span> <span class="mi">2</span>
-    <span class="k">elif</span> <span class="n">effect</span> <span class="o">==</span> <span class="s1">&#39;lin_cat&#39;</span><span class="p">:</span>
-        <span class="n">no_of_thetas</span> <span class="o">=</span> <span class="n">count_categorical</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">effect</span> <span class="o">==</span> <span class="s1">&#39;cat&#39;</span><span class="p">:</span>
+        <span class="n">no_of_thetas</span> <span class="o">=</span> <span class="n">_count_categorical</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">no_of_thetas</span> <span class="o">=</span> <span class="mi">1</span>
 
@@ -219,10 +247,12 @@
 
     <span class="n">theta_names</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="n">theta_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="n">stem</span><span class="o">=</span><span class="s1">&#39;COVEFF&#39;</span><span class="p">,</span> <span class="n">force_numbering</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-    <span class="n">theta_lower</span><span class="p">,</span> <span class="n">theta_upper</span> <span class="o">=</span> <span class="n">choose_param_inits</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
+    <span class="n">init</span><span class="p">,</span> <span class="n">theta_lower</span><span class="p">,</span> <span class="n">theta_upper</span> <span class="o">=</span> <span class="n">_choose_param_inits</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span>
+                                                         <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span>
+                                                         <span class="n">covariate</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">no_of_thetas</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">pset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">theta_name</span><span class="p">,</span> <span class="n">theta_upper</span><span class="p">,</span> <span class="n">theta_lower</span><span class="p">))</span>
+        <span class="n">pset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">theta_name</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">theta_lower</span><span class="p">,</span> <span class="n">theta_upper</span><span class="p">))</span>
         <span class="n">theta_names</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">theta_name</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">cov_eff_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d&#39;</span><span class="p">,</span> <span class="n">theta_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
@@ -234,55 +264,82 @@
 
     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">pset</span>
 
-    <span class="k">return</span> <span class="n">theta_names</span></div>
+    <span class="k">return</span> <span class="n">theta_names</span>
 
 
-<div class="viewcode-block" id="count_categorical"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.count_categorical">[docs]</a><span class="k">def</span> <span class="nf">count_categorical</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_count_categorical</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets most common level per individual of specified covariate.&quot;&quot;&quot;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)[</span><span class="n">covariate</span><span class="p">]</span>
     <span class="n">counts</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="k">lambda</span> <span class="n">ids</span><span class="p">:</span> <span class="n">ids</span><span class="o">.</span><span class="n">value_counts</span><span class="p">(</span><span class="n">dropna</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
 
-    <span class="k">return</span> <span class="n">counts</span></div>
+    <span class="k">return</span> <span class="n">counts</span>
 
 
-<div class="viewcode-block" id="calculate_mean"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.calculate_mean">[docs]</a><span class="k">def</span> <span class="nf">calculate_mean</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">baselines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_calculate_mean</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">baselines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate mean. Can be set to use baselines, otherwise it is</span>
+<span class="sd">    calculated first per individual, then for the group.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">baselines</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">df</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="calculate_median"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.calculate_median">[docs]</a><span class="k">def</span> <span class="nf">calculate_median</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">baselines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_calculate_median</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">baselines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate median. Can be set to use baselines, otherwise it is</span>
+<span class="sd">    calculated first per individual, then for the group.&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">baselines</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">baselines</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="o">.</span><span class="n">median</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
 
 
-<div class="viewcode-block" id="choose_param_inits"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.choose_param_inits">[docs]</a><span class="k">def</span> <span class="nf">choose_param_inits</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">covariate</span><span class="p">):</span>
-    <span class="n">lower_expected</span> <span class="o">=</span> <span class="mf">0.1</span>
-    <span class="n">upper_expected</span> <span class="o">=</span> <span class="mi">100</span>
+<span class="k">def</span> <span class="nf">_calculate_std</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">baselines</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate median. Can be set to use baselines, otherwise it is</span>
+<span class="sd">    calculated first per individual, then for the group.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">baselines</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">baselines</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_choose_param_inits</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">covariate</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Chooses inits for parameters. If the effect is exponential, the</span>
+<span class="sd">    bounds need to be dynamic.&quot;&quot;&quot;</span>
+    <span class="n">lower</span> <span class="o">=</span> <span class="o">-</span><span class="mi">100000</span>
+    <span class="n">upper</span> <span class="o">=</span> <span class="mi">100000</span>
+    <span class="n">init</span> <span class="o">=</span> <span class="mf">0.001</span>
+
     <span class="k">if</span> <span class="n">effect</span> <span class="o">==</span> <span class="s1">&#39;exp&#39;</span><span class="p">:</span>
-        <span class="n">min_diff</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">calculate_median</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
-        <span class="n">max_diff</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">calculate_median</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
+        <span class="n">min_diff</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">-</span> <span class="n">_calculate_median</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
+        <span class="n">max_diff</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">max</span><span class="p">()</span> <span class="o">-</span> <span class="n">_calculate_median</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
+
+        <span class="n">lower_expected</span> <span class="o">=</span> <span class="mf">0.01</span>
+        <span class="n">upper_expected</span> <span class="o">=</span> <span class="mi">100</span>
+
         <span class="k">if</span> <span class="n">min_diff</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">max_diff</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">lower_expected</span><span class="p">,</span> <span class="n">upper_expected</span>
+            <span class="n">lower</span> <span class="o">=</span> <span class="n">lower_expected</span>
+            <span class="n">upper</span> <span class="o">=</span> <span class="n">upper_expected</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">log_base</span> <span class="o">=</span> <span class="mi">10</span>
             <span class="n">lower</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lower_expected</span><span class="p">,</span> <span class="n">log_base</span><span class="p">)</span><span class="o">/</span><span class="n">max_diff</span><span class="p">,</span>
                         <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">upper_expected</span><span class="p">,</span> <span class="n">log_base</span><span class="p">)</span><span class="o">/</span><span class="n">min_diff</span><span class="p">)</span>
             <span class="n">upper</span> <span class="o">=</span> <span class="nb">min</span><span class="p">(</span><span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">lower_expected</span><span class="p">,</span> <span class="n">log_base</span><span class="p">)</span><span class="o">/</span><span class="n">min_diff</span><span class="p">,</span>
                         <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">upper_expected</span><span class="p">,</span> <span class="n">log_base</span><span class="p">)</span><span class="o">/</span><span class="n">max_diff</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span>
+
+            <span class="k">if</span> <span class="n">lower</span> <span class="o">&gt;</span> <span class="n">init</span> <span class="ow">or</span> <span class="n">init</span> <span class="o">&gt;</span> <span class="n">upper</span><span class="p">:</span>
+                <span class="n">init</span> <span class="o">=</span> <span class="p">(</span><span class="n">upper</span> <span class="o">+</span> <span class="n">lower</span><span class="p">)</span><span class="o">/</span><span class="mi">2</span>
+        <span class="k">return</span> <span class="n">init</span><span class="p">,</span> <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">lower_expected</span><span class="p">,</span> <span class="n">upper_expected</span></div>
+        <span class="k">return</span> <span class="n">init</span><span class="p">,</span> <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span>
 
 
-<div class="viewcode-block" id="create_template"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.create_template">[docs]</a><span class="k">def</span> <span class="nf">create_template</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">effect</span> <span class="o">==</span> <span class="s1">&#39;lin_cont&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">CovariateEffect</span><span class="o">.</span><span class="n">linear_continuous</span><span class="p">()</span>
-    <span class="k">elif</span> <span class="n">effect</span> <span class="o">==</span> <span class="s1">&#39;lin_cat&#39;</span><span class="p">:</span>
-        <span class="n">counts</span> <span class="o">=</span> <span class="n">count_categorical</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">CovariateEffect</span><span class="o">.</span><span class="n">linear_categorical</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_create_template</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Creates Covariate class objects with effect template.&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">effect</span> <span class="o">==</span> <span class="s1">&#39;lin&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">CovariateEffect</span><span class="o">.</span><span class="n">linear</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">effect</span> <span class="o">==</span> <span class="s1">&#39;cat&#39;</span><span class="p">:</span>
+        <span class="n">counts</span> <span class="o">=</span> <span class="n">_count_categorical</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CovariateEffect</span><span class="o">.</span><span class="n">categorical</span><span class="p">(</span><span class="n">counts</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">effect</span> <span class="o">==</span> <span class="s1">&#39;piece_lin&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">CovariateEffect</span><span class="o">.</span><span class="n">piecewise_linear</span><span class="p">()</span>
     <span class="k">elif</span> <span class="n">effect</span> <span class="o">==</span> <span class="s1">&#39;exp&#39;</span><span class="p">:</span>
@@ -291,35 +348,51 @@
         <span class="k">return</span> <span class="n">CovariateEffect</span><span class="o">.</span><span class="n">power</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">symbol</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;symbol&#39;</span><span class="p">)</span>
-        <span class="n">expression</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">effect</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">CovariateEffect</span><span class="p">(</span><span class="n">Assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">))</span></div>
+        <span class="n">expression</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">effect</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">CovariateEffect</span><span class="p">(</span><span class="n">Assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">))</span>
 
 
-<div class="viewcode-block" id="S"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.S">[docs]</a><span class="k">def</span> <span class="nf">S</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
-    <span class="k">return</span> <span class="n">real</span><span class="p">(</span><span class="n">x</span><span class="p">)</span></div>
+<span class="k">class</span> <span class="nc">CovariateEffect</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Covariate effect consisting of new assignments.</span>
 
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    template</span>
+<span class="sd">        Assignment based on covariate effect</span>
+<span class="sd">    statistic_type</span>
+<span class="sd">        Mean or median, depends on which covariate effect</span>
 
-<div class="viewcode-block" id="CovariateEffect"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.CovariateEffect">[docs]</a><span class="k">class</span> <span class="nc">CovariateEffect</span><span class="p">:</span>
+<span class="sd">    :meta private:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="n">template</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">statistic_type</span> <span class="o">=</span> <span class="kc">None</span>
 
-<div class="viewcode-block" id="CovariateEffect.apply"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.CovariateEffect.apply">[docs]</a>    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">thetas</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">thetas</span><span class="p">):</span>
         <span class="n">effect_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">parameter</span><span class="si">}{</span><span class="n">covariate</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="n">effect_name</span><span class="p">)</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">thetas</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="s1">&#39;cov&#39;</span><span class="p">:</span> <span class="n">covariate</span><span class="p">})</span>
 
         <span class="n">template_str</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">]</span>
         <span class="k">if</span> <span class="s1">&#39;mean&#39;</span> <span class="ow">in</span> <span class="n">template_str</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">parameter</span><span class="si">}</span><span class="s1">_MEAN&#39;</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="s1">&#39;mean&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">covariate</span><span class="si">}</span><span class="s1">_MEAN&#39;</span><span class="p">})</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">statistic_type</span> <span class="o">=</span> <span class="s1">&#39;mean&#39;</span>
         <span class="k">elif</span> <span class="s1">&#39;median&#39;</span> <span class="ow">in</span> <span class="n">template_str</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="s1">&#39;median&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">parameter</span><span class="si">}</span><span class="s1">_MEDIAN&#39;</span><span class="p">})</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">statistic_type</span> <span class="o">=</span> <span class="s1">&#39;median&#39;</span></div>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="s1">&#39;median&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">covariate</span><span class="si">}</span><span class="s1">_MEDIAN&#39;</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statistic_type</span> <span class="o">=</span> <span class="s1">&#39;median&#39;</span>
+        <span class="k">elif</span> <span class="s1">&#39;std&#39;</span> <span class="ow">in</span> <span class="n">template_str</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="s1">&#39;std&#39;</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">covariate</span><span class="si">}</span><span class="s1">_STD&#39;</span><span class="p">})</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">statistic_type</span> <span class="o">=</span> <span class="s1">&#39;std&#39;</span>
 
-<div class="viewcode-block" id="CovariateEffect.create_effect_statement"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.CovariateEffect.create_effect_statement">[docs]</a>    <span class="k">def</span> <span class="nf">create_effect_statement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation_str</span><span class="p">,</span> <span class="n">statement_original</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_effect_statement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">operation_str</span><span class="p">,</span> <span class="n">statement_original</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates statement for addition or multiplication of covariate</span>
+<span class="sd">        to parameter, e.g. (if parameter is CL and covariate is WGT):</span>
+
+<span class="sd">            CL = CLWGT + TVCL*EXP(ETA(1))&quot;&quot;&quot;</span>
         <span class="n">operation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_get_operation</span><span class="p">(</span><span class="n">operation_str</span><span class="p">)</span>
 
         <span class="n">symbol</span> <span class="o">=</span> <span class="n">statement_original</span><span class="o">.</span><span class="n">symbol</span>
@@ -327,31 +400,37 @@
 
         <span class="n">statement_new</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">operation</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">symbol</span><span class="p">))</span>
 
-        <span class="k">return</span> <span class="n">statement_new</span></div>
+        <span class="k">return</span> <span class="n">statement_new</span>
 
-<div class="viewcode-block" id="CovariateEffect.create_statistics_statement"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.CovariateEffect.create_statistics_statement">[docs]</a>    <span class="k">def</span> <span class="nf">create_statistics_statement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">median</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create_statistics_statement</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">median</span><span class="p">,</span> <span class="n">std</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Creates statement where value of mean/median is explicit.&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistic_type</span> <span class="o">==</span> <span class="s1">&#39;mean&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">parameter</span><span class="si">}</span><span class="s1">_MEAN&#39;</span><span class="p">),</span> <span class="n">Float</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">parameter</span><span class="si">}</span><span class="s1">_MEDIAN&#39;</span><span class="p">),</span> <span class="n">Float</span><span class="p">(</span><span class="n">median</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span></div>
+            <span class="k">return</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">covariate</span><span class="si">}</span><span class="s1">_MEAN&#39;</span><span class="p">),</span> <span class="n">Float</span><span class="p">(</span><span class="n">mean</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistic_type</span> <span class="o">==</span> <span class="s1">&#39;median&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">covariate</span><span class="si">}</span><span class="s1">_MEDIAN&#39;</span><span class="p">),</span> <span class="n">Float</span><span class="p">(</span><span class="n">median</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
+        <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">statistic_type</span> <span class="o">==</span> <span class="s1">&#39;std&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">covariate</span><span class="si">}</span><span class="s1">_STD&#39;</span><span class="p">),</span> <span class="n">Float</span><span class="p">(</span><span class="n">std</span><span class="p">,</span> <span class="mi">6</span><span class="p">))</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_get_operation</span><span class="p">(</span><span class="n">operation_str</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Gets sympy operation based on string&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="n">operation_str</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">mul</span>
         <span class="k">elif</span> <span class="n">operation_str</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">add</span>
 
-<div class="viewcode-block" id="CovariateEffect.linear_continuous"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.CovariateEffect.linear_continuous">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">linear_continuous</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">linear</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Linear continuous template (for continuous covariates).&quot;&quot;&quot;</span>
         <span class="n">symbol</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;symbol&#39;</span><span class="p">)</span>
         <span class="n">expression</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;theta&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;cov&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;median&#39;</span><span class="p">))</span>
         <span class="n">template</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CovariateEffect.linear_categorical"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.CovariateEffect.linear_categorical">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">linear_categorical</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">counts</span><span class="p">):</span>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">categorical</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">counts</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Linear categorical template (for categorical covariates).&quot;&quot;&quot;</span>
         <span class="n">symbol</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;symbol&#39;</span><span class="p">)</span>
         <span class="n">most_common</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="n">counts</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()]</span>
         <span class="n">categories</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
@@ -375,10 +454,12 @@
 
         <span class="n">template</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CovariateEffect.piecewise_linear"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.CovariateEffect.piecewise_linear">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">piecewise_linear</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Piecewise linear (&quot;hockey-stick&quot;) template (for continuous</span>
+<span class="sd">        covariates).&quot;&quot;&quot;</span>
         <span class="n">symbol</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;symbol&#39;</span><span class="p">)</span>
         <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span> <span class="o">+</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;theta1&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;cov&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;median&#39;</span><span class="p">)),</span>
                   <span class="mi">1</span> <span class="o">+</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;theta2&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;cov&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;median&#39;</span><span class="p">))]</span>
@@ -389,26 +470,29 @@
 
         <span class="n">template</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CovariateEffect.exponential"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.CovariateEffect.exponential">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">exponential</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Exponential template (for continuous covariates).&quot;&quot;&quot;</span>
         <span class="n">symbol</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;symbol&#39;</span><span class="p">)</span>
         <span class="n">expression</span> <span class="o">=</span> <span class="n">exp</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;theta&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;cov&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;median&#39;</span><span class="p">)))</span>
         <span class="n">template</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CovariateEffect.power"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.CovariateEffect.power">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">power</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Power template (for continuous covariates).&quot;&quot;&quot;</span>
         <span class="n">symbol</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;symbol&#39;</span><span class="p">)</span>
         <span class="n">expression</span> <span class="o">=</span> <span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;cov&#39;</span><span class="p">)</span><span class="o">/</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;median&#39;</span><span class="p">))</span><span class="o">**</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;theta&#39;</span><span class="p">)</span>
         <span class="n">template</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span>
 
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">)</span></div>
+        <span class="sd">&quot;&quot;&quot;String representation of class.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="p">)</span>
 </pre></div>
 
               </div>
@@ -433,7 +517,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 04, 2020.<br/>
+        Last updated on Sep 18, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

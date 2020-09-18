@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.statements &#8212; Pharmpy 0.5.0 documentation</title>
+    <title>pharmpy.statements &#8212; Pharmpy 0.6.0 documentation</title>
     
   <link rel="stylesheet" href="../../_static/css/index.d431a4ee1c1efae0e38bdfebc22debff.css">
 
@@ -60,6 +60,10 @@
     <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
       <ul id="navbar-main-elements" class="navbar-nav mr-auto">
         
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../index.html">Welcome to Pharmpy </a>
+        </li>
         
         <li class="nav-item ">
             <a class="nav-link" href="../../installation.html">Installation</a>
@@ -136,6 +140,8 @@
       
       
       
+      
+      
     </ul>
 
 </nav>
@@ -173,8 +179,14 @@
 
 
 <div class="viewcode-block" id="Assignment"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.Assignment">[docs]</a><span class="k">class</span> <span class="nc">Assignment</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Representation of variable assignment</span>
-<span class="sd">       similar to sympy.codegen.Assignment</span>
+    <span class="sd">&quot;&quot;&quot;Representation of variable assignment, similar to :class:`sympy.codegen.Assignment`</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    symbol : sympy.Symbol</span>
+<span class="sd">        Symbol of statement</span>
+<span class="sd">    expression</span>
+<span class="sd">        Expression of statement</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot; symbol can be either string or sympy symbol</span>
@@ -184,14 +196,17 @@
             <span class="n">symbol</span><span class="o">.</span><span class="n">is_Symbol</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="n">symbol</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="n">symbols</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span>
 
 <div class="viewcode-block" id="Assignment.subs"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.Assignment.subs">[docs]</a>    <span class="k">def</span> <span class="nf">subs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Substitute old into new of rhs. Inplace</span>
+        <span class="sd">&quot;&quot;&quot;Substitute symbols in assignment.</span>
+
+<span class="sd">        substitutions - dictionary with old-new pair (can be type str or</span>
+<span class="sd">                        sympy symbol)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="n">symbols</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">symbols</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">,</span> <span class="n">simultaneous</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">,</span> <span class="n">simultaneous</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">free_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -210,7 +225,7 @@
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">expression</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="p">)</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">definition</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s1"> := &#39;</span>
+        <span class="n">definition</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span><span class="si">}</span><span class="s1"> := &#39;</span>
         <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lines</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">line</span> <span class="o">==</span> <span class="n">lines</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]:</span>
@@ -314,15 +329,23 @@
 <div class="viewcode-block" id="CompartmentalSystem"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem">[docs]</a><span class="k">class</span> <span class="nc">CompartmentalSystem</span><span class="p">(</span><span class="n">ODESystem</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;System of ODEs descibed as a compartmental system</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_g</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
 
-<div class="viewcode-block" id="CompartmentalSystem.rename_symbol"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem.rename_symbol">[docs]</a>    <span class="k">def</span> <span class="nf">rename_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">):</span>
-        <span class="k">pass</span></div>
+<div class="viewcode-block" id="CompartmentalSystem.subs"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem.subs">[docs]</a>    <span class="k">def</span> <span class="nf">subs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">):</span>
+        <span class="n">g_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span>
+        <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="s1">&#39;rate&#39;</span><span class="p">):</span>
+            <span class="n">rate_sub</span> <span class="o">=</span> <span class="n">rate</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">,</span> <span class="n">simultaneous</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="n">g_copy</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="n">g_copy</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">rate_sub</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">_g</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="n">g_copy</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">free_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">free</span> <span class="o">=</span> <span class="p">{</span><span class="n">symbols</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)}</span>
+        <span class="n">free</span> <span class="o">=</span> <span class="p">{</span><span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)}</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="s1">&#39;rate&#39;</span><span class="p">):</span>
             <span class="n">free</span> <span class="o">|=</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
@@ -335,7 +358,8 @@
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">)</span> <span class="ow">and</span> \
-            <span class="n">nx</span><span class="o">.</span><span class="n">to_dict_of_dicts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span> <span class="o">==</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_dict_of_dicts</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span>
+            <span class="n">nx</span><span class="o">.</span><span class="n">to_dict_of_dicts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span> <span class="o">==</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_dict_of_dicts</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span> <span class="ow">and</span> \
+            <span class="bp">self</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span><span class="o">.</span><span class="n">dose</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span><span class="o">.</span><span class="n">dose</span>
 
     <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
         <span class="n">newone</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)()</span>
@@ -356,12 +380,37 @@
 <div class="viewcode-block" id="CompartmentalSystem.get_flow"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem.get_flow">[docs]</a>    <span class="k">def</span> <span class="nf">get_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">edges</span><span class="p">[</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">][</span><span class="s1">&#39;rate&#39;</span><span class="p">]</span></div>
 
+<div class="viewcode-block" id="CompartmentalSystem.get_compartment_flows"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem.get_compartment_flows">[docs]</a>    <span class="k">def</span> <span class="nf">get_compartment_flows</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compartment</span><span class="p">,</span> <span class="n">out</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Generate all flows going out or in to a compartment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">flows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">neighbors</span><span class="p">(</span><span class="n">compartment</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">out</span><span class="p">:</span>
+                <span class="n">flow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">compartment</span><span class="p">,</span> <span class="n">node</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">flow</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">node</span><span class="p">,</span> <span class="n">compartment</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">flow</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">flows</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">node</span><span class="p">,</span> <span class="n">flow</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">flows</span></div>
+
+<div class="viewcode-block" id="CompartmentalSystem.find_compartment"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem.find_compartment">[docs]</a>    <span class="k">def</span> <span class="nf">find_compartment</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">comp</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">comp</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span></div>
+
 <div class="viewcode-block" id="CompartmentalSystem.find_output"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem.find_output">[docs]</a>    <span class="k">def</span> <span class="nf">find_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">zeroout</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">out_degree</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">out_degree</span><span class="p">()</span> <span class="k">if</span> <span class="n">out_degree</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">zeroout</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">zeroout</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;More than one or zero output compartments&#39;</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CompartmentalSystem.find_dosing"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem.find_dosing">[docs]</a>    <span class="k">def</span> <span class="nf">find_dosing</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">node</span></div>
 
 <div class="viewcode-block" id="CompartmentalSystem.find_central"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem.find_central">[docs]</a>    <span class="k">def</span> <span class="nf">find_central</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
@@ -407,18 +456,43 @@
         <span class="n">amts</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">amount</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">amts</span><span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A list of the names of all compartments</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">]</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">zero_order_inputs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;A vector of all zero order inputs to each compartment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="p">,</span> <span class="n">Infusion</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                    <span class="n">expr</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">rate</span>
+                    <span class="n">cond</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span> <span class="o">/</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">rate</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">expr</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span> <span class="o">/</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">duration</span>
+                    <span class="n">cond</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">duration</span>
+                <span class="n">infusion_func</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Piecewise</span><span class="p">((</span><span class="n">expr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">&lt;</span> <span class="n">cond</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+                <span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">infusion_func</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
+
 <div class="viewcode-block" id="CompartmentalSystem.to_explicit_odes"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem.to_explicit_odes">[docs]</a>    <span class="k">def</span> <span class="nf">to_explicit_odes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">t</span> <span class="o">=</span> <span class="n">symbols</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
-        <span class="n">amount_funcs</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">amt</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">amt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">amounts</span><span class="p">])</span>
-        <span class="n">derivatives</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">sympy</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">amount_funcs</span><span class="p">])</span>
-        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compartmental_matrix</span> <span class="o">@</span> <span class="n">amount_funcs</span>
+        <span class="n">amount_funcs</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">amt</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">amt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">amounts</span><span class="p">])</span>
+        <span class="n">derivatives</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">sympy</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">amount_funcs</span><span class="p">])</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zero_order_inputs</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compartmental_matrix</span> <span class="o">@</span> <span class="n">amount_funcs</span> <span class="o">+</span> <span class="n">inputs</span>
         <span class="n">eqs</span> <span class="o">=</span> <span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="p">)</span> <span class="k">for</span> <span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">derivatives</span><span class="p">,</span> <span class="n">a</span><span class="p">)]</span>
         <span class="n">ics</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">ics</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">amount</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">):</span>
+                <span class="n">ics</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">amount</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">ics</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">amount</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">symbol</span>
+                <span class="n">ics</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">amount</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">return</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">ics</span></div>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -542,23 +616,48 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">amount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">symbols</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;A_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;A_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Bolus"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.Bolus">[docs]</a><span class="k">class</span> <span class="nc">Bolus</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="n">symbols</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">symbol</span><span class="p">))</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">=</span> <span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">amount</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">free_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="p">}</span>
+        <span class="k">return</span> <span class="p">{</span><span class="bp">self</span><span class="o">.</span><span class="n">amount</span><span class="p">}</span>
 
     <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
-        <span class="n">newone</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
+        <span class="n">newone</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">newone</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">symbol</span></div>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">amount</span></div>
+
+
+<div class="viewcode-block" id="Infusion"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.Infusion">[docs]</a><span class="k">class</span> <span class="nc">Infusion</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">rate</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">duration</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need rate or duration for Infusion&#39;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rate</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">free_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">symbs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">symbs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="k">return</span> <span class="n">symbs</span> <span class="o">|</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount</span><span class="o">.</span><span class="n">free_symbols</span>
+
+    <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">rate</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">duration</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Infusion</span><span class="p">)</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">rate</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">rate</span> <span class="ow">and</span> \
+                <span class="bp">self</span><span class="o">.</span><span class="n">duration</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">duration</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">amount</span></div>
 
 
 <div class="viewcode-block" id="ModelStatements"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.ModelStatements">[docs]</a><span class="k">class</span> <span class="nc">ModelStatements</span><span class="p">(</span><span class="nb">list</span><span class="p">):</span>
@@ -573,7 +672,11 @@
         <span class="k">return</span> <span class="n">symbols</span>
 
 <div class="viewcode-block" id="ModelStatements.subs"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.ModelStatements.subs">[docs]</a>    <span class="k">def</span> <span class="nf">subs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Substitute old expression for new in all rhs of assignments&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Substitute symbols in all statements.</span>
+
+<span class="sd">        substitutions - dictionary with old-new pair (can be type str or</span>
+<span class="sd">                        sympy symbol)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">assignment</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="n">assignment</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">)</span></div>
 
@@ -585,41 +688,47 @@
                 <span class="n">statement</span> <span class="o">=</span> <span class="n">s</span>
         <span class="k">return</span> <span class="n">statement</span></div>
 
-<div class="viewcode-block" id="ModelStatements.remove_symbol_definition"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.ModelStatements.remove_symbol_definition">[docs]</a>    <span class="k">def</span> <span class="nf">remove_symbol_definition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">statement</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove symbol definition and dependencies not used elsewhere</span>
-
-<span class="sd">            statement is the statement from which the symbol was removed</span>
+<div class="viewcode-block" id="ModelStatements.remove_symbol_definitions"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.ModelStatements.remove_symbol_definitions">[docs]</a>    <span class="k">def</span> <span class="nf">remove_symbol_definitions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">statement</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Remove symbol remove_symbol_definitions and dependencies not used elsewhere. statement</span>
+<span class="sd">        is the statement from which the symbol was removed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">removed_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span>
-        <span class="n">depinds</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_statement_and_deps</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">removed_ind</span><span class="p">)</span>
-        <span class="n">depsymbs</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">depinds</span><span class="p">]</span>
+        <span class="n">depinds</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">:</span>
+            <span class="n">depinds</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_statement_and_deps</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">removed_ind</span><span class="p">)</span>
+        <span class="n">depsymbs</span> <span class="o">=</span> <span class="p">{</span><span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">depinds</span><span class="p">}</span>
         <span class="n">keep</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">ind</span><span class="p">,</span> <span class="n">symb</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">depinds</span><span class="p">,</span> <span class="n">depsymbs</span><span class="p">):</span>
-            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]:</span>
-                <span class="k">if</span> <span class="n">ind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">depinds</span> <span class="ow">and</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="p">:</span>
-                    <span class="n">keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">depsymbs</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">depinds</span><span class="p">:</span>
+                <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">candidate</span><span class="p">:</span>
+                    <span class="n">final</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">for</span> <span class="n">stat_ind</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">final</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
+                <span class="n">stat</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">stat_ind</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">stat_ind</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">depinds</span> <span class="ow">and</span> <span class="n">candidate</span> <span class="ow">in</span> <span class="n">stat</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="p">:</span>
+                    <span class="n">indices</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">depinds</span> <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">candidate</span><span class="p">]</span>
+                    <span class="n">keep</span> <span class="o">+=</span> <span class="n">indices</span>
                     <span class="k">break</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">depinds</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">depinds</span><span class="p">)):</span>
             <span class="k">if</span> <span class="n">i</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">keep</span><span class="p">:</span>
                 <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
 
     <span class="k">def</span> <span class="nf">_find_statement_and_deps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Find all statements and their dependencies before a certain statement</span>
+        <span class="sd">&quot;&quot;&quot;Find indices of the last symbol definition and its dependenceis before a</span>
+<span class="sd">           certain statement</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># Find index of final assignment of symbol before before</span>
-        <span class="n">statement</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ind</span><span class="p">)):</span>       <span class="c1"># Might want to include the before for generality</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">ind</span><span class="p">)):</span>
             <span class="n">statement</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">symbol</span> <span class="o">==</span> <span class="n">statement</span><span class="o">.</span><span class="n">symbol</span><span class="p">:</span>
                 <span class="k">break</span>
-        <span class="k">if</span> <span class="n">statement</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ModelStatements</span><span class="p">([])</span>
-        <span class="n">found</span> <span class="o">=</span> <span class="p">[</span><span class="n">i</span><span class="p">]</span>
-        <span class="n">remaining</span> <span class="o">=</span> <span class="n">statement</span><span class="o">.</span><span class="n">rhs_symbols</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="p">{</span><span class="n">i</span><span class="p">}</span>
+        <span class="n">remaining</span> <span class="o">=</span> <span class="n">statement</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span><span class="p">)):</span>
             <span class="n">statement</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">statement</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">remaining</span><span class="p">:</span>
-                <span class="n">found</span> <span class="o">=</span> <span class="p">[</span><span class="n">j</span><span class="p">]</span> <span class="o">+</span> <span class="n">found</span>
+                <span class="n">found</span> <span class="o">|=</span> <span class="p">{</span><span class="n">j</span><span class="p">}</span>
                 <span class="n">remaining</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">statement</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
                 <span class="n">remaining</span> <span class="o">|=</span> <span class="n">statement</span><span class="o">.</span><span class="n">rhs_symbols</span>
         <span class="k">return</span> <span class="n">found</span>
@@ -632,6 +741,19 @@
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
                 <span class="k">return</span> <span class="n">s</span>
         <span class="k">return</span> <span class="kc">None</span>
+
+<div class="viewcode-block" id="ModelStatements.add_before_odes"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.ModelStatements.add_before_odes">[docs]</a>    <span class="k">def</span> <span class="nf">add_before_odes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statement</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Add a statement just before the ODE system</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">statement</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ModelStatements.copy"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.ModelStatements.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
@@ -677,7 +799,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 04, 2020.<br/>
+        Last updated on Sep 18, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

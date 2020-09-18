@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model &#8212; Pharmpy 0.5.0 documentation</title>
+    <title>pharmpy.model &#8212; Pharmpy 0.6.0 documentation</title>
     
   <link rel="stylesheet" href="../../_static/css/index.d431a4ee1c1efae0e38bdfebc22debff.css">
 
@@ -60,6 +60,10 @@
     <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
       <ul id="navbar-main-elements" class="navbar-nav mr-auto">
         
+        
+        <li class="nav-item ">
+            <a class="nav-link" href="../../index.html">Welcome to Pharmpy </a>
+        </li>
         
         <li class="nav-item ">
             <a class="nav-link" href="../../installation.html">Installation</a>
@@ -136,6 +140,8 @@
       
       
       
+      
+      
     </ul>
 
 </nav>
@@ -178,15 +184,15 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">scipy.linalg</span>
-<span class="kn">import</span> <span class="nn">sympy</span>
 
+<span class="kn">import</span> <span class="nn">pharmpy.symbols</span>
 <span class="kn">from</span> <span class="nn">pharmpy</span> <span class="kn">import</span> <span class="n">ParameterSet</span><span class="p">,</span> <span class="n">RandomVariables</span>
-<span class="kn">from</span> <span class="nn">pharmpy.symbols</span> <span class="kn">import</span> <span class="n">real</span><span class="p">,</span> <span class="n">subs</span>
 
 
 <div class="viewcode-block" id="ModelException"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.ModelException">[docs]</a><span class="k">class</span> <span class="nc">ModelException</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
@@ -225,8 +231,14 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot name model file as no path argument was supplied and the&#39;</span>
                                  <span class="s1">&#39;model has no name.&#39;</span><span class="p">)</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="n">filename</span>
+            <span class="n">new_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Set new name given filename, but after we&#39;ve checked for existence</span>
+            <span class="n">new_name</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">stem</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
             <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;File </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1"> already exists.&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">new_name</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">update_source</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">path</span></div>
@@ -255,12 +267,34 @@
 <div class="viewcode-block" id="Model.read_raw_dataset"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.read_raw_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">read_raw_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_columns</span><span class="o">=</span><span class="nb">tuple</span><span class="p">()):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
+<div class="viewcode-block" id="Model.bump_model_number"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.bump_model_number">[docs]</a>    <span class="k">def</span> <span class="nf">bump_model_number</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;If the model name ends in a number increase it to next available file</span>
+<span class="sd">           else do nothing.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.*?)(\d+)$&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+            <span class="n">stem</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">new_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stem</span><span class="si">}{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">new_path</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="n">new_name</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">source</span><span class="o">.</span><span class="n">filename_extension</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">new_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="k">break</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span></div>
+
 <div class="viewcode-block" id="Model.create_symbol"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.create_symbol">[docs]</a>    <span class="k">def</span> <span class="nf">create_symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stem</span><span class="p">,</span> <span class="n">force_numbering</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a new unique variable symbol</span>
 
-<span class="sd">           stem - First part of the new variable name</span>
-<span class="sd">           force_numbering - Forces addition of number to name even if variable does</span>
-<span class="sd">                             not exist, e.g. COVEFF --&gt; COVEFF1</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        stem : str</span>
+<span class="sd">            First part of the new variable name</span>
+<span class="sd">        force_numbering : bool</span>
+<span class="sd">            Forces addition of number to name even if variable does not exist, e.g.</span>
+<span class="sd">            COVEFF --&gt; COVEFF1</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">]</span>
         <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">]</span>
@@ -270,13 +304,13 @@
         <span class="n">all_names</span> <span class="o">=</span> <span class="n">symbols</span> <span class="o">+</span> <span class="n">params</span> <span class="o">+</span> <span class="n">rvs</span> <span class="o">+</span> <span class="n">dataset_col</span>
 
         <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">stem</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_names</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force_numbering</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">real</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">stem</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">stem</span><span class="p">))</span>
 
         <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">candidate</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stem</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="k">if</span> <span class="n">candidate</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_names</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">real</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
             <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div>
 
 <div class="viewcode-block" id="Model.remove_unused_parameters_and_rvs"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.remove_unused_parameters_and_rvs">[docs]</a>    <span class="k">def</span> <span class="nf">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -287,7 +321,7 @@
         <span class="n">new_rvs</span> <span class="o">=</span> <span class="n">RandomVariables</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="p">:</span>
             <span class="c1"># FIXME: change if rvs are random symbols in expressions</span>
-            <span class="k">if</span> <span class="n">real</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="n">symbols</span> <span class="ow">or</span> \
+            <span class="k">if</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="n">symbols</span> <span class="ow">or</span> \
                     <span class="ow">not</span> <span class="n">symbols</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">):</span>
                 <span class="n">new_rvs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">new_rvs</span>
@@ -307,7 +341,7 @@
                 <span class="k">break</span>
 
         <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">{</span><span class="n">stats</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">:</span> <span class="n">stats</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">expression</span><span class="p">})</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">stats</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">:</span> <span class="n">stats</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">expression</span><span class="p">})</span>
 
         <span class="k">return</span> <span class="n">y</span>
 
@@ -316,7 +350,7 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_individual_prediction</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">{</span><span class="n">eta</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">eta</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">y</span></div>
 
 <div class="viewcode-block" id="Model.symbolic_individual_prediction"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.symbolic_individual_prediction">[docs]</a>    <span class="k">def</span> <span class="nf">symbolic_individual_prediction</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -326,7 +360,7 @@
 
         <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">ruv_rvs</span><span class="p">:</span>
             <span class="c1"># FIXME: The rv symbol and the code symbol are different.</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">{</span><span class="n">eps</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">eps</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
 
         <span class="k">return</span> <span class="n">y</span></div>
 
@@ -342,19 +376,19 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_population_prediction</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span>
+                <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">dataset</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span>
 
-        <span class="n">pred</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">row</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">())),</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">pred</span></div>
 
@@ -363,9 +397,9 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_individual_prediction</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">dataset</span>
@@ -384,7 +418,7 @@
         <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
             <span class="n">row</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
             <span class="n">curetas</span> <span class="o">=</span> <span class="n">etas</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="n">idcol</span><span class="p">]]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">row</span><span class="p">),</span> <span class="n">curetas</span><span class="p">))</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">curetas</span><span class="p">))</span>
             <span class="k">return</span> <span class="n">a</span>
 
         <span class="n">ipred</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -393,27 +427,20 @@
 <div class="viewcode-block" id="Model.symbolic_eta_gradient"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.symbolic_eta_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">symbolic_eta_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">ruv_rvs</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">{</span><span class="n">eps</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
-        <span class="n">expr</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;ETA(2)&#39;</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;OTHER&#39;</span><span class="p">)})</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;OTHER&#39;</span><span class="p">)))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;ETA(2)&#39;</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
-        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;ETA(2) hash: &quot;</span><span class="p">,</span> <span class="nb">hash</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;ETA(2)&#39;</span><span class="p">,</span> <span class="n">real</span><span class="o">=</span><span class="kc">True</span><span class="p">)))</span>
-        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">y</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
-            <span class="nb">print</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">assumptions0</span><span class="p">,</span> <span class="nb">hash</span><span class="p">(</span><span class="n">s</span><span class="p">))</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">real</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">eps</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="mi">0</span><span class="p">})</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">d</span></div>
 
 <div class="viewcode-block" id="Model.symbolic_eps_gradient"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.symbolic_eps_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">symbolic_eps_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation</span><span class="p">()</span>
-        <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">real</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">ruv_rvs</span><span class="p">]</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">[</span><span class="n">y</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">name</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">ruv_rvs</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">d</span></div>
 
     <span class="k">def</span> <span class="nf">_replace_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">subs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">subs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">y</span>
 
 <div class="viewcode-block" id="Model.eta_gradient"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.eta_gradient">[docs]</a>    <span class="k">def</span> <span class="nf">eta_gradient</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">etas</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -442,7 +469,7 @@
         <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
             <span class="n">row</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
             <span class="n">curetas</span> <span class="o">=</span> <span class="n">etas</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="n">idcol</span><span class="p">]]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-            <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">row</span><span class="p">),</span> <span class="n">curetas</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">curetas</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">a</span>
 
         <span class="n">derivative_names</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;dF/d</span><span class="si">{</span><span class="n">eta</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span> <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">]</span>
@@ -457,8 +484,8 @@
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbolic_eps_gradient</span><span class="p">()</span>
         <span class="n">y</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_replace_parameters</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
         <span class="n">eps_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">eps</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">ruv_rvs</span><span class="p">]</span>
-        <span class="n">repl</span> <span class="o">=</span> <span class="p">{</span><span class="n">real</span><span class="p">(</span><span class="n">eps</span><span class="p">):</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="n">eps_names</span><span class="p">}</span>
-        <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">subs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">repl</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
+        <span class="n">repl</span> <span class="o">=</span> <span class="p">{</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">eps</span><span class="p">):</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="n">eps_names</span><span class="p">}</span>
+        <span class="n">y</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">repl</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">df</span> <span class="o">=</span> <span class="n">dataset</span>
@@ -477,7 +504,7 @@
         <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
             <span class="n">row</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
             <span class="n">curetas</span> <span class="o">=</span> <span class="n">etas</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">row</span><span class="p">[</span><span class="n">idcol</span><span class="p">]]</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
-            <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">subs</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">row</span><span class="p">),</span> <span class="n">curetas</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
+            <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">x</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">row</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">curetas</span><span class="p">))</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">y</span><span class="p">]</span>
             <span class="k">return</span> <span class="n">a</span>
 
         <span class="n">grad</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">result_type</span><span class="o">=</span><span class="s1">&#39;expand&#39;</span><span class="p">)</span>
@@ -494,8 +521,8 @@
                 <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span>
-        <span class="n">omega</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">omega</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
-        <span class="n">sigma</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="n">omega</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
         <span class="n">omega</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">omega</span><span class="p">)</span>
         <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -546,7 +573,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 04, 2020.<br/>
+        Last updated on Sep 18, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>
