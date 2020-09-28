@@ -176,6 +176,7 @@
 
 <span class="kn">import</span> <span class="nn">pharmpy.symbols</span> <span class="k">as</span> <span class="nn">symbols</span>
 <span class="kn">from</span> <span class="nn">pharmpy.data_structures</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
+<span class="kn">from</span> <span class="nn">pharmpy.math</span> <span class="kn">import</span> <span class="n">is_near_target</span>
 
 
 <div class="viewcode-block" id="ParameterSet"><a class="viewcode-back" href="../../reference/pharmpy.parameter.html#pharmpy.ParameterSet">[docs]</a><span class="k">class</span> <span class="nc">ParameterSet</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">):</span>
@@ -191,6 +192,7 @@
 
 <span class="sd">        params[&#39;THETA(1)&#39;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
         <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">index</span><span class="p">:</span>
@@ -217,6 +219,15 @@
         <span class="n">fix</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">fix</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;value&#39;</span><span class="p">:</span> <span class="n">values</span><span class="p">,</span> <span class="s1">&#39;lower&#39;</span><span class="p">:</span> <span class="n">lower</span><span class="p">,</span> <span class="s1">&#39;upper&#39;</span><span class="p">:</span> <span class="n">upper</span><span class="p">,</span> <span class="s1">&#39;fix&#39;</span><span class="p">:</span> <span class="n">fix</span><span class="p">},</span>
                             <span class="n">index</span><span class="o">=</span><span class="n">symbols</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="ParameterSet.values_near_bounds"><a class="viewcode-back" href="../../reference/pharmpy.parameter.html#pharmpy.ParameterSet.values_near_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">values_near_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">values</span><span class="p">,</span> <span class="n">zero_limit</span><span class="p">,</span> <span class="n">significant_digits</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot; Logical Series of whether values are near the respective boundaries</span>
+<span class="sd">            values : Series of floats with index a subset of parameter names</span>
+<span class="sd">            :returns: Logical Series with same index as values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+            <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">p</span><span class="p">]</span><span class="o">.</span><span class="n">any_boundary_near_value</span><span class="p">(</span><span class="n">values</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">p</span><span class="p">],</span> <span class="n">zero_limit</span><span class="p">,</span> <span class="n">significant_digits</span><span class="p">)</span>
+             <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">index</span><span class="p">],</span> <span class="n">index</span><span class="o">=</span><span class="n">values</span><span class="o">.</span><span class="n">index</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -304,6 +315,7 @@
 <span class="sd">        will keep its bounds even if a fixed parameter is actually constrained to one single</span>
 <span class="sd">        value. This is so that unfixing will take back the previous bounds.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fix</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init</span> <span class="o">=</span> <span class="n">init</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
@@ -356,6 +368,14 @@
                              <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">new_init</span><span class="si">}</span><span class="s1"> ∉ </span><span class="si">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Interval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lower</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper</span><span class="p">))</span><span class="si">}</span><span class="s1">&#39;</span>
                              <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Unconstrain the parameter before setting an initial estimate.&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init</span> <span class="o">=</span> <span class="n">new_init</span>
+
+<div class="viewcode-block" id="Parameter.any_boundary_near_value"><a class="viewcode-back" href="../../reference/pharmpy.parameter.html#pharmpy.Parameter.any_boundary_near_value">[docs]</a>    <span class="k">def</span> <span class="nf">any_boundary_near_value</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">,</span> <span class="n">zero_limit</span><span class="p">,</span> <span class="n">significant_digits</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Is any boundary near this value</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lower</span> <span class="o">&gt;</span> <span class="o">-</span><span class="n">sympy</span><span class="o">.</span><span class="n">oo</span><span class="p">)</span> <span class="ow">and</span>
+                <span class="n">is_near_target</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower</span><span class="p">,</span> <span class="n">zero_limit</span><span class="p">,</span> <span class="n">significant_digits</span><span class="p">))</span> <span class="ow">or</span> \
+            <span class="p">(</span><span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">upper</span> <span class="o">&lt;</span> <span class="n">sympy</span><span class="o">.</span><span class="n">oo</span><span class="p">)</span> <span class="ow">and</span>
+             <span class="n">is_near_target</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper</span><span class="p">,</span> <span class="n">zero_limit</span><span class="p">,</span> <span class="n">significant_digits</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="Parameter.unconstrain"><a class="viewcode-back" href="../../reference/pharmpy.parameter.html#pharmpy.Parameter.unconstrain">[docs]</a>    <span class="k">def</span> <span class="nf">unconstrain</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all constraints of a parameter</span>
@@ -413,7 +433,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 18, 2020.<br/>
+        Last updated on Sep 28, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

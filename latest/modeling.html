@@ -172,6 +172,12 @@
               </li>
           
         
+          
+              <li class="">
+                  <a href="using_r.html">Using R</a>
+              </li>
+          
+        
       
       
       
@@ -199,7 +205,31 @@
     <ul class="nav section-nav flex-column">
     
         <li class="nav-item toc-entry toc-h2">
-            <a href="#pk-models-and-ode-systems" class="nav-link">PK models and ODE systems</a>
+            <a href="#pk-models-and-ode-systems" class="nav-link">PK models and ODE systems</a><ul class="nav section-nav flex-column">
+                
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#absorption-rate" class="nav-link">Absorption rate</a><ul class="nav section-nav flex-column">
+                
+        <li class="nav-item toc-entry toc-h4">
+            <a href="#bolus-absorption" class="nav-link">Bolus absorption</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h4">
+            <a href="#zero-order" class="nav-link">Zero order</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h4">
+            <a href="#first-order" class="nav-link">First order</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h4">
+            <a href="#sequential-zero-order-then-first-order" class="nav-link">Sequential zero-order then first-order</a>
+        </li>
+    
+            </ul>
+        </li>
+    
+            </ul>
         </li>
     
         <li class="nav-item toc-entry toc-h2">
@@ -239,18 +269,54 @@
                 
   <div class="section" id="modeling">
 <h1>Modeling<a class="headerlink" href="#modeling" title="Permalink to this headline">¶</a></h1>
-<p>While the <a class="reference internal" href="reference/pharmpy.model.html#pharmpy.model.Model" title="pharmpy.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.Model</span></code></a> class can be directly manipulated with low level operations the modeling module offers higher level operations and transformations for building a model. These transformations are also available via the Pharmpy command line interface.</p>
-<div class="section" id="pk-models-and-ode-systems">
-<h2>PK models and ODE systems<a class="headerlink" href="#pk-models-and-ode-systems" title="Permalink to this headline">¶</a></h2>
+<p>While the <a class="reference internal" href="reference/pharmpy.model.html#pharmpy.model.Model" title="pharmpy.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.Model</span></code></a> class can be directly manipulated
+with low level operations the modeling module offers higher level operations and transformations for building a model.
+These transformations are also available via the Pharmpy command line interface.</p>
 <div class="jupyter_cell docutils container">
 <div class="cell_output docutils container">
 </div>
 </div>
+<p>The following model is the start model for the examples.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy</span> <span class="kn">import</span> <span class="n">Model</span>
 
-<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno_real.mod&quot;</span><span class="p">)</span>
+<span class="n">model_ref</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
+<span class="nb">print</span><span class="p">(</span><span class="n">model_ref</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>$PROBLEM PHENOBARB SIMPLE MODEL
+$DATA pheno.dta IGNORE=@
+$INPUT ID TIME AMT WGT APGR DV
+$SUBROUTINE ADVAN1 TRANS2
+
+$PK
+CL=THETA(1)*EXP(ETA(1))
+V=THETA(2)*EXP(ETA(2))
+S1=V
+
+$ERROR
+Y=F+F*EPS(1)
+
+$THETA (0,0.00469307) ; TVCL
+$THETA (0,1.00916) ; TVV
+$OMEGA 0.0309626  ; IVCL
+$OMEGA 0.031128  ; IVV
+$SIGMA 0.013241
+
+$ESTIMATION METHOD=1 INTERACTION
+
+</pre></div>
+</div>
+</div>
+</div>
+<div class="section" id="pk-models-and-ode-systems">
+<h2>PK models and ODE systems<a class="headerlink" href="#pk-models-and-ode-systems" title="Permalink to this headline">¶</a></h2>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -269,11 +335,14 @@
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>┌───────┐       ┌──────┐
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Bolus(AMT)
+┌───────┐       ┌──────┐
 │CENTRAL│──CL/V→│OUTPUT│
 └───────┘       └──────┘
 
-⎧d                  -CL⋅A_CENTRAL(t) 
+</pre></div>
+</div>
+<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>⎧d                  -CL⋅A_CENTRAL(t) 
 ⎪──(A_CENTRAL(t)) = ─────────────────
 ⎪dt                         V        
 ⎨d                 CL⋅A_CENTRAL(t)
@@ -290,50 +359,119 @@
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>$PROBLEM PHENOBARB SIMPLE MODEL
-$DATA &#39;pheno.dta&#39; IGNORE=@
-$INPUT ID TIME AMT WGT APGR DV FA1 FA2
-$SUBROUTINE ADVAN6
-
-$MODEL TOL=3 COMPARTMENT=(CENTRAL DEFDOSE)
-$PK
-IF(AMT.GT.0) BTIME=TIME
-TAD=TIME-BTIME
-TVCL=THETA(1)*WGT
-TVV=THETA(2)*WGT
-IF(APGR.LT.5) TVV=TVV*(1+THETA(3))
-CL=TVCL*EXP(ETA(1))
-V=TVV*EXP(ETA(2))
-S1=V
-
-$DES
-DADT(1) = -A(1)*CL/V
-$ERROR
-W=F
-Y=F+W*EPS(1)
-IPRED=F
-IRES=DV-IPRED
-IWRES=IRES/W
-
-$THETA (0,0.00469307) ; PTVCL
-$THETA (0,1.00916) ; PTVV
-$THETA (-.99,.1)
-$OMEGA DIAGONAL(2)
- 0.0309626  ;       IVCL
- 0.031128  ;        IVV
-
-$SIGMA 1e-7
-$ESTIMATION METHOD=1 INTERACTION
-$COVARIANCE UNCONDITIONAL
-$TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
-       NOPRINT ONEHEADER FILE=sdtab1
-
+<div class="output text_html"><p><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#feffd2>$SUBROUTINE ADVAN6 TOL=3</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$MODEL COMPARTMENT=(CENTRAL DEFDOSE)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$DES</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>DADT(1) = -A(1)*CL/V</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>Y=F+F*EPS(1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br></p></div></div>
+</div>
+<div class="section" id="absorption-rate">
+<h3>Absorption rate<a class="headerlink" href="#absorption-rate" title="Permalink to this headline">¶</a></h3>
+<p>The <a class="reference internal" href="reference/pharmpy.modeling.html#pharmpy.modeling.absorption_rate" title="pharmpy.modeling.absorption_rate"><code class="xref py py-func docutils literal notranslate"><span class="pre">pharmpy.modeling.absorption_rate()</span></code></a> can be used to set the absorption rate.</p>
+<div class="section" id="bolus-absorption">
+<h4>Bolus absorption<a class="headerlink" href="#bolus-absorption" title="Permalink to this headline">¶</a></h4>
+<p>Let us use a model with bolus absorption as a starting point.</p>
+<div class="graphviz"><img src="_images/graphviz-adca8da70de19450437d47a635f03077ccb5cf2d.png" alt="digraph fo {
+  rankdir = LR
+  node [shape=box]
+  S [label=&quot;S&quot;, style=invis, width=0, height=0, margin=0];
+  Output [label=&quot;O&quot;, style=invis, width=0, height=0, margin=0];
+  &quot;Central&quot; -&gt; Output [label=K];
+  S -&gt; &quot;Central&quot; [label=&quot;Bolus&quot;];
+}" class="graphviz" /></div>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">absorption_rate</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
 </pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+</div>
+</div>
+<p>This type of absorption can be created with</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">absorption_rate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;bolus&#39;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><p><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>Y=F+F*EPS(1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br></p></div></div>
+</div>
+</div>
+<div class="section" id="zero-order">
+<h4>Zero order<a class="headerlink" href="#zero-order" title="Permalink to this headline">¶</a></h4>
+<p>Let us now change to zero order absorption.</p>
+<div class="graphviz"><img src="_images/graphviz-71151396ff2667b8354e5baf5cf89a78336429f8.png" alt="digraph fo {
+  rankdir = LR
+  node [shape=box]
+  S [label=&quot;S&quot;, style=invis, width=0, height=0, margin=0];
+  Output [label=&quot;O&quot;, style=invis, width=0, height=0, margin=0];
+  &quot;Central&quot; -&gt; Output [label=K];
+  S -&gt; &quot;Central&quot; [label=Infusion];
+}" class="graphviz" /></div>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">absorption_rate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;ZO&#39;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">(</span><span class="n">nofiles</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><p><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#feffd2>$INPUT ID TIME AMT WGT APGR DV RATE</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>MAT = THETA(3)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>D1 = 2*MAT</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>Y=F+F*EPS(1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$THETA  (0,0.1) ; TVMAT</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br></p></div></div>
+</div>
+</div>
+<div class="section" id="first-order">
+<h4>First order<a class="headerlink" href="#first-order" title="Permalink to this headline">¶</a></h4>
+<p>First order absorption would mean adding an absorption (depot) compartment like this</p>
+<div class="graphviz"><img src="_images/graphviz-5b17b629be01431a12950eaa3bb907da6806cf40.png" alt="digraph fo {
+  rankdir = LR
+  node [shape=box]
+  S [label=&quot;S&quot;, style=invis, width=0, height=0, margin=0];
+  Output [label=&quot;O&quot;, style=invis, width=0, height=0, margin=0];
+  &quot;Depot&quot; -&gt; &quot;Central&quot; [label=Ka];
+  &quot;Central&quot; -&gt; Output [label=K];
+  S -&gt; &quot;Depot&quot; [label=Bolus];
+}" class="graphviz" /></div>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">absorption_rate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;FO&#39;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">(</span><span class="n">nofiles</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><p><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#feffd2>$SUBROUTINE ADVAN2 TRANS2</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>MAT = THETA(3)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>S2 = V</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>KA = 1/MAT</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>Y=F+F*EPS(1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$THETA  (0,0.1) ; TVMAT</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br></p></div></div>
+</div>
+</div>
+<div class="section" id="sequential-zero-order-then-first-order">
+<h4>Sequential zero-order then first-order<a class="headerlink" href="#sequential-zero-order-then-first-order" title="Permalink to this headline">¶</a></h4>
+<p>Sequential zero-order absorption followed by first-order absorption will have an infusion dose into the depot compartment</p>
+<div class="graphviz"><img src="_images/graphviz-d2ef2147ca7125c5f934ff3d00d07289b3ee3362.png" alt="digraph fo {
+  rankdir = LR
+  node [shape=box]
+  S [label=&quot;S&quot;, style=invis, width=0, height=0, margin=0];
+  Output [label=&quot;O&quot;, style=invis, width=0, height=0, margin=0];
+  &quot;Depot&quot; -&gt; &quot;Central&quot; [label=Ka];
+  &quot;Central&quot; -&gt; Output [label=K];
+  S -&gt; &quot;Depot&quot; [label=Infusion];
+}" class="graphviz" /></div>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">absorption_rate</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;seq-ZO-FO&#39;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">(</span><span class="n">nofiles</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><p><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#feffd2>$INPUT ID TIME AMT WGT APGR DV RATE</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#feffd2>$SUBROUTINE ADVAN2 TRANS2</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>MDT = THETA(4)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>MAT = THETA(3)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>S2 = V</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>KA = 1/MAT</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>D1 = 2*MDT</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>Y=F+F*EPS(1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$THETA  (0,0.1) ; TVMAT</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$THETA  (0,0.1) ; TVMDT</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br></p></div></div>
 </div>
 </div>
 </div>
@@ -342,7 +480,7 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 <h2>Adding covariate effects<a class="headerlink" href="#adding-covariate-effects" title="Permalink to this headline">¶</a></h2>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno_real.mod&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -353,7 +491,7 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">add_covariate_effect</span>
-<span class="n">add_covariate_effect</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="s1">&#39;WGT&#39;</span><span class="p">,</span> <span class="s1">&#39;lin&#39;</span><span class="p">)</span>
+<span class="n">add_covariate_effect</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="s1">&#39;WGT&#39;</span><span class="p">,</span> <span class="s1">&#39;pow&#39;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -361,64 +499,23 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 </div>
 </div>
 <p>Here, <em>CL</em> indicates the name of the parameter onto which you want to apply the effect, <em>WGT</em> is the covariate, and
-<em>lin</em> (linear function on continuous covariates) is the effect you want to apply.
+<em>pow</em> (power function) is the effect you want to apply.
 See <a class="reference internal" href="reference/pharmpy.modeling.html#pharmpy.modeling.add_covariate_effect" title="pharmpy.modeling.add_covariate_effect"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.modeling.add_covariate_effect</span></code></a> for effects with available templates.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>$PROBLEM PHENOBARB SIMPLE MODEL
-$DATA &#39;pheno.dta&#39; IGNORE=@
-$INPUT ID TIME AMT WGT APGR DV FA1 FA2
-$SUBROUTINE ADVAN1 TRANS2
-
-$PK
-IF(AMT.GT.0) BTIME=TIME
-TAD=TIME-BTIME
-TVCL=THETA(1)*WGT
-TVV=THETA(2)*WGT
-IF(APGR.LT.5) TVV=TVV*(1+THETA(3))
-CL=TVCL*EXP(ETA(1))
-WGT_MEDIAN = 1.30000
-CLWGT = (WGT - WGT_MEDIAN)*THETA(4) + 1
-CL = CLWGT*TVCL*EXP(ETA(1))
-V=TVV*EXP(ETA(2))
-S1=V
-
-$ERROR
-W=F
-Y=F+W*EPS(1)
-IPRED=F
-IRES=DV-IPRED
-IWRES=IRES/W
-
-$THETA (0,0.00469307) ; PTVCL
-$THETA (0,1.00916) ; PTVV
-$THETA (-.99,.1)
-$THETA  (-100000,0.001,100000) ; COVEFF1
-$OMEGA DIAGONAL(2)
- 0.0309626  ;       IVCL
- 0.031128  ;        IVV
-
-$SIGMA 1e-7
-$ESTIMATION METHOD=1 INTERACTION
-$COVARIANCE UNCONDITIONAL
-$TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
-       NOPRINT ONEHEADER FILE=sdtab1
-
-</pre></div>
-</div>
-</div>
+<div class="output text_html"><p><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>WGT_MEDIAN = 1.30000</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>CLWGT = (WGT/WGT_MEDIAN)**THETA(3)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>CL = CL*CLWGT</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>Y=F+F*EPS(1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$THETA  (-100,0.001,100000) ; COVEFF1</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br></p></div></div>
 </div>
 <p>Pharmpy also supports user formatted covariate effects.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno_real.mod&quot;</span><span class="p">)</span>
-<span class="n">user_effect</span> <span class="o">=</span> <span class="s1">&#39;median - cov + theta&#39;</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
+<span class="n">user_effect</span> <span class="o">=</span> <span class="s1">&#39;((cov/std) - median) * theta&#39;</span>
 <span class="n">add_covariate_effect</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="s1">&#39;WGT&#39;</span><span class="p">,</span> <span class="n">user_effect</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -432,53 +529,12 @@ the names to be substituted with the correct values.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>$PROBLEM PHENOBARB SIMPLE MODEL
-$DATA &#39;pheno.dta&#39; IGNORE=@
-$INPUT ID TIME AMT WGT APGR DV FA1 FA2
-$SUBROUTINE ADVAN1 TRANS2
-
-$PK
-IF(AMT.GT.0) BTIME=TIME
-TAD=TIME-BTIME
-TVCL=THETA(1)*WGT
-TVV=THETA(2)*WGT
-IF(APGR.LT.5) TVV=TVV*(1+THETA(3))
-CL=TVCL*EXP(ETA(1))
-WGT_MEDIAN = 1.30000
-CLWGT = -WGT + WGT_MEDIAN + THETA(4)
-CL = CLWGT*TVCL*EXP(ETA(1))
-V=TVV*EXP(ETA(2))
-S1=V
-
-$ERROR
-W=F
-Y=F+W*EPS(1)
-IPRED=F
-IRES=DV-IPRED
-IWRES=IRES/W
-
-$THETA (0,0.00469307) ; PTVCL
-$THETA (0,1.00916) ; PTVV
-$THETA (-.99,.1)
-$THETA  (-100000,0.001,100000) ; COVEFF1
-$OMEGA DIAGONAL(2)
- 0.0309626  ;       IVCL
- 0.031128  ;        IVV
-
-$SIGMA 1e-7
-$ESTIMATION METHOD=1 INTERACTION
-$COVARIANCE UNCONDITIONAL
-$TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
-       NOPRINT ONEHEADER FILE=sdtab1
-
-</pre></div>
-</div>
-</div>
+<div class="output text_html"><p><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>WGT_MEDIAN = 1.30000</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>WGT_STD = 0.704565</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>CLWGT = (WGT/WGT_STD - WGT_MEDIAN)*THETA(3)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>CL = CL*CLWGT</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>Y=F+F*EPS(1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$THETA  (-100000,0.001,100000) ; COVEFF1</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br></p></div></div>
 </div>
 </div>
 <div class="section" id="transformation-of-etas">
@@ -487,7 +543,7 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 <h3>Boxcox<a class="headerlink" href="#boxcox" title="Permalink to this headline">¶</a></h3>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno_real.mod&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
@@ -500,107 +556,27 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">boxcox</span>
 <span class="n">boxcox</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ETA(1)&#39;</span><span class="p">])</span>
 <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>$PROBLEM PHENOBARB SIMPLE MODEL
-$DATA &#39;pheno.dta&#39; IGNORE=@
-$INPUT ID TIME AMT WGT APGR DV FA1 FA2
-$SUBROUTINE ADVAN1 TRANS2
-
-$PK
-ETAB1 = (EXP(ETA(1))**THETA(4) - 1)/THETA(4)
-IF(AMT.GT.0) BTIME=TIME
-TAD=TIME-BTIME
-TVCL=THETA(1)*WGT
-TVV=THETA(2)*WGT
-IF(APGR.LT.5) TVV=TVV*(1+THETA(3))
-CL = TVCL*EXP(ETAB1)
-V=TVV*EXP(ETA(2))
-S1=V
-
-$ERROR
-W=F
-Y=F+W*EPS(1)
-IPRED=F
-IRES=DV-IPRED
-IWRES=IRES/W
-
-$THETA (0,0.00469307) ; PTVCL
-$THETA (0,1.00916) ; PTVV
-$THETA (-.99,.1)
-$THETA  (-3,0.01,3) ; lambda1
-$OMEGA DIAGONAL(2)
- 0.0309626  ;       IVCL
- 0.031128  ;        IVV
-
-$SIGMA 1e-7
-$ESTIMATION METHOD=1 INTERACTION
-$COVARIANCE UNCONDITIONAL
-$TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
-       NOPRINT ONEHEADER FILE=sdtab1
-
-</pre></div>
-</div>
-</div>
+<div class="output text_html"><p><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>ETAB1 = (EXP(ETA(1))**THETA(3) - 1)/THETA(3)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#feffd2>CL = THETA(1)*EXP(ETAB1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>Y=F+F*EPS(1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$THETA  (-3,0.01,3) ; lambda1</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br></p></div></div>
 </div>
 <p>This can be done for one or multiple etas. The new model will have new statements where <em>ETAB1</em> is a boxcox
 transformation of <em>ETA(1)</em>.</p>
 <p>If no list is provided, all etas will be updated.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno_real.mod&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
 <span class="n">boxcox</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>$PROBLEM PHENOBARB SIMPLE MODEL
-$DATA &#39;pheno.dta&#39; IGNORE=@
-$INPUT ID TIME AMT WGT APGR DV FA1 FA2
-$SUBROUTINE ADVAN1 TRANS2
-
-$PK
-ETAB1 = (EXP(ETA(1))**THETA(4) - 1)/THETA(4)
-ETAB2 = (EXP(ETA(2))**THETA(5) - 1)/THETA(5)
-IF(AMT.GT.0) BTIME=TIME
-TAD=TIME-BTIME
-TVCL=THETA(1)*WGT
-TVV=THETA(2)*WGT
-IF(APGR.LT.5) TVV=TVV*(1+THETA(3))
-CL = TVCL*EXP(ETAB1)
-V = TVV*EXP(ETAB2)
-S1=V
-
-$ERROR
-W=F
-Y=F+W*EPS(1)
-IPRED=F
-IRES=DV-IPRED
-IWRES=IRES/W
-
-$THETA (0,0.00469307) ; PTVCL
-$THETA (0,1.00916) ; PTVV
-$THETA (-.99,.1)
-$THETA  (-3,0.01,3) ; lambda1
-$THETA  (-3,0.01,3) ; lambda2
-$OMEGA DIAGONAL(2)
- 0.0309626  ;       IVCL
- 0.031128  ;        IVV
-
-$SIGMA 1e-7
-$ESTIMATION METHOD=1 INTERACTION
-$COVARIANCE UNCONDITIONAL
-$TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
-       NOPRINT ONEHEADER FILE=sdtab1
-
-</pre></div>
-</div>
-</div>
+<div class="output text_html"><p><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>ETAB1 = (EXP(ETA(1))**THETA(3) - 1)/THETA(3)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>ETAB2 = (EXP(ETA(2))**THETA(4) - 1)/THETA(4)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#feffd2>CL = THETA(1)*EXP(ETAB1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#feffd2>V = THETA(2)*EXP(ETAB2)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>Y=F+F*EPS(1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$THETA  (-3,0.01,3) ; lambda1</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$THETA  (-3,0.01,3) ; lambda2</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br></p></div></div>
 </div>
 </div>
 <div class="section" id="approximate-t-distribution">
@@ -609,55 +585,16 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 is similarly a list of etas, and if no list is provided all etas will be transformed.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno_real.mod&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">tdist</span>
 <span class="n">tdist</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ETA(1)&#39;</span><span class="p">])</span>
 <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>$PROBLEM PHENOBARB SIMPLE MODEL
-$DATA &#39;pheno.dta&#39; IGNORE=@
-$INPUT ID TIME AMT WGT APGR DV FA1 FA2
-$SUBROUTINE ADVAN1 TRANS2
-
-$PK
-ETAT1 = ((ETA(1)**2 + 1)/(4*THETA(4)) + (5*ETA(1)**4 + 16*ETA(1)**2 + 3)/(96*THETA(4)**2) + (3*ETA(1)**6 + 19*ETA(1)**4 + 17*ETA(1)**2 - 15)/(384*THETA(4)**3) + 1)*ETA(1)
-IF(AMT.GT.0) BTIME=TIME
-TAD=TIME-BTIME
-TVCL=THETA(1)*WGT
-TVV=THETA(2)*WGT
-IF(APGR.LT.5) TVV=TVV*(1+THETA(3))
-CL = TVCL*EXP(ETAT1)
-V=TVV*EXP(ETA(2))
-S1=V
-
-$ERROR
-W=F
-Y=F+W*EPS(1)
-IPRED=F
-IRES=DV-IPRED
-IWRES=IRES/W
-
-$THETA (0,0.00469307) ; PTVCL
-$THETA (0,1.00916) ; PTVV
-$THETA (-.99,.1)
-$THETA  (3,80,100) ; df1
-$OMEGA DIAGONAL(2)
- 0.0309626  ;       IVCL
- 0.031128  ;        IVV
-
-$SIGMA 1e-7
-$ESTIMATION METHOD=1 INTERACTION
-$COVARIANCE UNCONDITIONAL
-$TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
-       NOPRINT ONEHEADER FILE=sdtab1
-
-</pre></div>
-</div>
-</div>
+<div class="output text_html"><p><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>ETAT1 = ((ETA(1)**2 + 1)/(4*THETA(3)) + (5*ETA(1)**4 + 16*ETA(1)**2 + 3)/(96*THETA(3)**2) + (3*ETA(1)**6 + 19*ETA(1)**4 + 17*ETA(1)**2 - 15)/(384*THETA(3)**3) + 1)*ETA(1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#feffd2>CL = THETA(1)*EXP(ETAT1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>Y=F+F*EPS(1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$THETA  (3,80,100) ; df1</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br></p></div></div>
 </div>
 </div>
 <div class="section" id="john-draper">
@@ -666,55 +603,16 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 provided all etas will be transformed.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno_real.mod&quot;</span><span class="p">)</span>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">john_draper</span>
 <span class="n">john_draper</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;ETA(1)&#39;</span><span class="p">])</span>
 <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
-<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>$PROBLEM PHENOBARB SIMPLE MODEL
-$DATA &#39;pheno.dta&#39; IGNORE=@
-$INPUT ID TIME AMT WGT APGR DV FA1 FA2
-$SUBROUTINE ADVAN1 TRANS2
-
-$PK
-ETAD1 = ((ABS(ETA(1)) + 1)**THETA(4) - 1)*ABS(ETA(1))/(ETA(1)*THETA(4))
-IF(AMT.GT.0) BTIME=TIME
-TAD=TIME-BTIME
-TVCL=THETA(1)*WGT
-TVV=THETA(2)*WGT
-IF(APGR.LT.5) TVV=TVV*(1+THETA(3))
-CL = TVCL*EXP(ETAD1)
-V=TVV*EXP(ETA(2))
-S1=V
-
-$ERROR
-W=F
-Y=F+W*EPS(1)
-IPRED=F
-IRES=DV-IPRED
-IWRES=IRES/W
-
-$THETA (0,0.00469307) ; PTVCL
-$THETA (0,1.00916) ; PTVV
-$THETA (-.99,.1)
-$THETA  (-3,0.01,3) ; lambda1
-$OMEGA DIAGONAL(2)
- 0.0309626  ;       IVCL
- 0.031128  ;        IVV
-
-$SIGMA 1e-7
-$ESTIMATION METHOD=1 INTERACTION
-$COVARIANCE UNCONDITIONAL
-$TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
-       NOPRINT ONEHEADER FILE=sdtab1
-
-</pre></div>
-</div>
-</div>
+<div class="output text_html"><p><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>ETAD1 = ((ABS(ETA(1)) + 1)**THETA(3) - 1)*ABS(ETA(1))/(ETA(1)*THETA(3))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#feffd2>CL = THETA(1)*EXP(ETAD1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>Y=F+F*EPS(1)</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;background-color:#d6f3e8>$THETA  (-3,0.01,3) ; lambda1</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:87.5%;font-family:monospace;></text><br></p></div></div>
 </div>
 </div>
 </div>
@@ -745,7 +643,7 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 18, 2020.<br/>
+        Last updated on Sep 28, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

@@ -169,15 +169,19 @@
               <div>
                 
   <h1>Source code for pharmpy.methods.bootstrap.results</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
 <span class="kn">import</span> <span class="nn">pharmpy.visualization</span>
+<span class="kn">from</span> <span class="nn">pharmpy.methods.psn_helpers</span> <span class="kn">import</span> <span class="n">cmd_line_model_path</span><span class="p">,</span> <span class="n">model_paths</span>
+<span class="kn">from</span> <span class="nn">pharmpy.model_factory</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">Results</span>
 
 
 <div class="viewcode-block" id="BootstrapResults"><a class="viewcode-back" href="../../../../reference/pharmpy.methods.bootstrap.results.html#pharmpy.methods.bootstrap.BootstrapResults">[docs]</a><span class="k">class</span> <span class="nc">BootstrapResults</span><span class="p">(</span><span class="n">Results</span><span class="p">):</span>
-    <span class="c1"># FIXME: Could inherit from results that take multiple runs like bootstrap, cdd etc.</span>
+    <span class="c1"># FIXME: Should inherit from results that take multiple runs like bootstrap, cdd etc.</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">bootstrap_models</span><span class="p">,</span> <span class="n">original_model</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">original_model</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">bootstrap_models</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># FIXME: this is a special case for now for json handling before we have modelfit json</span>
@@ -263,6 +267,21 @@
 <div class="viewcode-block" id="BootstrapResults.plot_ofv"><a class="viewcode-back" href="../../../../reference/pharmpy.methods.bootstrap.results.html#pharmpy.methods.bootstrap.BootstrapResults.plot_ofv">[docs]</a>    <span class="k">def</span> <span class="nf">plot_ofv</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">plot</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">visualization</span><span class="o">.</span><span class="n">histogram</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">ofv</span><span class="p">,</span> <span class="n">title</span><span class="o">=</span><span class="s1">&#39;Bootstrap OFV&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">plot</span></div></div>
+
+
+<div class="viewcode-block" id="psn_bootstrap_results"><a class="viewcode-back" href="../../../../reference/pharmpy.methods.bootstrap.results.html#pharmpy.methods.bootstrap.psn_bootstrap_results">[docs]</a><span class="k">def</span> <span class="nf">psn_bootstrap_results</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot; Create bootstrapresults from a PsN bootstrap run</span>
+
+<span class="sd">        :param path: Path to PsN boostrap run directory</span>
+<span class="sd">        :return: A :class:`BootstrapResults` object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">Model</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model_paths</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;bs_pr1_*.mod&#39;</span><span class="p">)]</span>
+    <span class="n">base_model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">cmd_line_model_path</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
+    <span class="c1"># FIXME: should have a calculate results function</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">BootstrapResults</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">original_model</span><span class="o">=</span><span class="n">base_model</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>
 
               </div>
@@ -287,7 +306,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 18, 2020.<br/>
+        Last updated on Sep 28, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

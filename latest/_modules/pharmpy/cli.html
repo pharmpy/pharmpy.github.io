@@ -557,13 +557,12 @@
 
 <div class="viewcode-block" id="results_bootstrap"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_bootstrap">[docs]</a><span class="k">def</span> <span class="nf">results_bootstrap</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Subcommand to generate bootstrap results&quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">models</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">:</span>
-        <span class="n">error</span><span class="p">(</span><span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Need at least the original model and 2&#39;</span>
-                         <span class="s1">&#39;other models&#39;</span><span class="p">))</span>
-    <span class="kn">from</span> <span class="nn">pharmpy.methods.bootstrap.results</span> <span class="kn">import</span> <span class="n">BootstrapResults</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="n">BootstrapResults</span><span class="p">(</span><span class="n">original_model</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">base</span><span class="p">,</span>
-                           <span class="n">bootstrap_models</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">models</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="n">res</span><span class="p">)</span></div>
+    <span class="kn">from</span> <span class="nn">pharmpy.methods.bootstrap.results</span> <span class="kn">import</span> <span class="n">psn_bootstrap_results</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">error</span><span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="p">)))</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">psn_bootstrap_results</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.json&#39;</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.csv&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="results_cdd"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_cdd">[docs]</a><span class="k">def</span> <span class="nf">results_cdd</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
@@ -864,14 +863,14 @@
                        <span class="p">}},</span>
         <span class="p">{</span><span class="s1">&#39;absorption_rate&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Set absorption rate for a PK model&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Change absorption rate of a PK model to either instant, 0th order, 1th &#39;</span>
+            <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Change absorption rate of a PK model to either bolus, 0th order, 1th &#39;</span>
                            <span class="s1">&#39;order or sequential 0-order 1-order.&#39;</span><span class="p">,</span>
             <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">model_absorption_rate</span><span class="p">,</span>
             <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">args_model_input</span><span class="p">,</span> <span class="n">args_output</span><span class="p">],</span>
-            <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;order&#39;</span><span class="p">,</span>
-                      <span class="s1">&#39;choices&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;instant&#39;</span><span class="p">,</span> <span class="s1">&#39;ZO&#39;</span><span class="p">,</span> <span class="s1">&#39;FO&#39;</span><span class="p">,</span> <span class="s1">&#39;seq-ZO-FO&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;rate&#39;</span><span class="p">,</span>
+                      <span class="s1">&#39;choices&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;bolus&#39;</span><span class="p">,</span> <span class="s1">&#39;ZO&#39;</span><span class="p">,</span> <span class="s1">&#39;FO&#39;</span><span class="p">,</span> <span class="s1">&#39;seq-ZO-FO&#39;</span><span class="p">],</span>
                       <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-                      <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Order of absorption&#39;</span><span class="p">},</span>
+                      <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Absorption rate&#39;</span><span class="p">},</span>
                      <span class="p">]}},</span>
         <span class="p">{</span><span class="s1">&#39;boxcox&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Applies boxcox transformation&#39;</span><span class="p">,</span>
@@ -914,10 +913,9 @@
         <span class="p">{</span><span class="s1">&#39;bootstrap&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate bootstrap results&#39;</span><span class="p">,</span>
             <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate results from a PsN bootstrap run&#39;</span><span class="p">,</span>
-            <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">results_bootstrap</span><span class="p">,</span>
-            <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">args_input</span><span class="p">],</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[</span>
-                   <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;--base&#39;</span><span class="p">,</span> <span class="s1">&#39;metavar&#39;</span><span class="p">:</span> <span class="s1">&#39;FILE&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">input_model</span><span class="p">,</span>
-                    <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Base model&#39;</span><span class="p">}]}},</span>
+            <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">results_bootstrap</span><span class="p">,</span> <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[</span>
+                <span class="p">{</span><span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;psn_dir&#39;</span><span class="p">,</span> <span class="s1">&#39;metavar&#39;</span><span class="p">:</span> <span class="s1">&#39;PsN directory&#39;</span><span class="p">,</span> <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+                 <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Path to PsN bootstrap run directory&#39;</span><span class="p">}]}},</span>
         <span class="p">{</span><span class="s1">&#39;cdd&#39;</span><span class="p">:</span> <span class="p">{</span>
             <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate cdd results&#39;</span><span class="p">,</span>
             <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate results from a PsN cdd run&#39;</span><span class="p">,</span>
@@ -1057,7 +1055,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 18, 2020.<br/>
+        Last updated on Sep 28, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>
