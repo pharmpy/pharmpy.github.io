@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.eta_additions &#8212; Pharmpy 0.6.0 documentation</title>
+    <title>pharmpy.modeling.eta_additions &#8212; Pharmpy 0.9.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.d431a4ee1c1efae0e38bdfebc22debff.css">
 
@@ -60,10 +60,6 @@
     <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
       <ul id="navbar-main-elements" class="navbar-nav mr-auto">
         
-        
-        <li class="nav-item ">
-            <a class="nav-link" href="../../../index.html">Welcome to Pharmpy </a>
-        </li>
         
         <li class="nav-item ">
             <a class="nav-link" href="../../../installation.html">Installation</a>
@@ -140,8 +136,6 @@
       
       
       
-      
-      
     </ul>
 
 </nav>
@@ -169,7 +163,9 @@
               <div>
                 
   <h1>Source code for pharmpy.modeling.eta_additions</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">sympy</span>
+<span></span><span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">add</span><span class="p">,</span> <span class="n">mul</span>
+
+<span class="kn">import</span> <span class="nn">sympy</span>
 <span class="kn">import</span> <span class="nn">sympy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
@@ -177,29 +173,119 @@
 <span class="kn">from</span> <span class="nn">pharmpy.symbols</span> <span class="kn">import</span> <span class="n">symbol</span> <span class="k">as</span> <span class="n">S</span>
 
 
-<div class="viewcode-block" id="add_etas"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.eta_additions.html#pharmpy.modeling.add_etas">[docs]</a><span class="k">def</span> <span class="nf">add_etas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
+<div class="viewcode-block" id="add_etas"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.eta_additions.html#pharmpy.modeling.add_etas">[docs]</a><span class="k">def</span> <span class="nf">add_etas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Adds etas to :class:`pharmpy.model`. Effects that currently have templates are:</span>
+
+<span class="sd">    - Additive (*add*)</span>
+<span class="sd">    - Proportional (*prop*)</span>
+<span class="sd">    - Exponential (*exp*)</span>
+<span class="sd">    - Logit (*logit*)</span>
+
+<span class="sd">    For all except exponential the operation input is not needed. Otherwise user specified</span>
+<span class="sd">    input is supported.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model to add new etas to.</span>
+<span class="sd">    parameter : str</span>
+<span class="sd">        Name of parameter to add new etas to.</span>
+<span class="sd">    expression : str</span>
+<span class="sd">        Effect on eta. Either abbreviated (see above) or custom.</span>
+<span class="sd">    operation : str, optional</span>
+<span class="sd">        Whether the new eta should be added or multiplied (default).</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IIV_</span><span class="si">{</span><span class="n">parameter</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">eta</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;ETA_</span><span class="si">{</span><span class="n">parameter</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">omega</span><span class="p">))</span>
+    <span class="n">eta</span><span class="o">.</span><span class="n">variability_level</span> <span class="o">=</span> <span class="n">VariabilityLevel</span><span class="o">.</span><span class="n">IIV</span>
+
     <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
-
-    <span class="n">omega</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;omega&#39;</span><span class="p">)</span>
-    <span class="n">new_eta</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;eta&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">omega</span><span class="p">))</span>
-    <span class="n">new_eta</span><span class="o">.</span><span class="n">variability_level</span> <span class="o">=</span> <span class="n">VariabilityLevel</span><span class="o">.</span><span class="n">IIV</span>
-
-    <span class="n">rvs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_eta</span><span class="p">)</span>
+    <span class="n">rvs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">rvs</span>
 
-    <span class="n">new_eta_param</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">new_eta</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
     <span class="n">params</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
-    <span class="n">params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">new_eta_param</span><span class="p">)</span>
-
+    <span class="n">params</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">omega</span><span class="p">),</span> <span class="mf">0.1</span><span class="p">))</span>
     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">params</span>
 
     <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">get_pred_pk_record</span><span class="p">()</span><span class="o">.</span><span class="n">statements</span>
     <span class="n">statement</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
-    <span class="n">expression_new</span> <span class="o">=</span> <span class="n">statement</span><span class="o">.</span><span class="n">expression</span> <span class="o">*</span> <span class="n">S</span><span class="p">(</span><span class="n">new_eta</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
-    <span class="n">statement</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">expression_new</span>
+    <span class="n">eta_addition</span> <span class="o">=</span> <span class="n">_create_template</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">)</span>
+    <span class="n">eta_addition</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">statement</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">eta</span><span class="p">)</span>
 
-    <span class="n">model</span><span class="o">.</span><span class="n">get_pred_pk_record</span><span class="p">()</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">sset</span></div>
+    <span class="n">statement</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">eta_addition</span><span class="o">.</span><span class="n">template</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">get_pred_pk_record</span><span class="p">()</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">sset</span>
+
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<span class="k">def</span> <span class="nf">_create_template</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
+    <span class="n">operation_func</span> <span class="o">=</span> <span class="n">_get_operation_func</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">expression</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EtaAddition</span><span class="o">.</span><span class="n">additive</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">expression</span> <span class="o">==</span> <span class="s1">&#39;prop&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EtaAddition</span><span class="o">.</span><span class="n">proportional</span><span class="p">()</span>
+    <span class="k">elif</span> <span class="n">expression</span> <span class="o">==</span> <span class="s1">&#39;exp&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EtaAddition</span><span class="o">.</span><span class="n">exponential</span><span class="p">(</span><span class="n">operation_func</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">expression</span> <span class="o">==</span> <span class="s1">&#39;log&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">EtaAddition</span><span class="o">.</span><span class="n">logit</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">expression</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;original </span><span class="si">{</span><span class="n">operation</span><span class="si">}</span><span class="s1"> </span><span class="si">{</span><span class="n">expression</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">EtaAddition</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_get_operation_func</span><span class="p">(</span><span class="n">operation</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Gets sympy operation based on string&quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">operation</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">mul</span>
+    <span class="k">elif</span> <span class="n">operation</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">add</span>
+
+
+<span class="k">class</span> <span class="nc">EtaAddition</span><span class="p">:</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Eta addition consisting of expression.</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    template</span>
+<span class="sd">        Expression consisting of original statement +/* new eta with effect.</span>
+
+<span class="sd">    :meta private:</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">template</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="n">template</span>
+
+    <span class="k">def</span> <span class="nf">apply</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">original</span><span class="p">,</span> <span class="n">eta</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">template</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">template</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="s1">&#39;original&#39;</span><span class="p">:</span> <span class="n">original</span><span class="p">,</span> <span class="s1">&#39;eta_new&#39;</span><span class="p">:</span> <span class="n">eta</span><span class="p">})</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">additive</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;original&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">proportional</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;original&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">exponential</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">operation</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;original&#39;</span><span class="p">),</span> <span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">)))</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
+
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">logit</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;original&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">))))</span>
+
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
 </pre></div>
 
               </div>
@@ -224,7 +310,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 28, 2020.<br/>
+        Last updated on Oct 26, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

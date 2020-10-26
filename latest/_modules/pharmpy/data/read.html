@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.data.read &#8212; Pharmpy 0.6.0 documentation</title>
+    <title>pharmpy.data.read &#8212; Pharmpy 0.9.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.d431a4ee1c1efae0e38bdfebc22debff.css">
 
@@ -60,10 +60,6 @@
     <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
       <ul id="navbar-main-elements" class="navbar-nav mr-auto">
         
-        
-        <li class="nav-item ">
-            <a class="nav-link" href="../../../index.html">Welcome to Pharmpy </a>
-        </li>
         
         <li class="nav-item ">
             <a class="nav-link" href="../../../installation.html">Installation</a>
@@ -140,8 +136,6 @@
       
       
       
-      
-      
     </ul>
 
 </nav>
@@ -184,20 +178,20 @@
 
 
 <div class="viewcode-block" id="NMTRANDataIO"><a class="viewcode-back" href="../../../reference/pharmpy.data.read.html#pharmpy.data.NMTRANDataIO">[docs]</a><span class="k">class</span> <span class="nc">NMTRANDataIO</span><span class="p">(</span><span class="n">StringIO</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; An IO class that is a prefilter for pandas.read_table.</span>
-<span class="sd">        Things that must be done before using pandas will be done here.</span>
-<span class="sd">        Currently it takes care of filtering out ignored rows and handles special delimiter cases</span>
+    <span class="sd">&quot;&quot;&quot;An IO class that is a prefilter for pandas.read_table.</span>
+<span class="sd">    Things that must be done before using pandas will be done here.</span>
+<span class="sd">    Currently it takes care of filtering out ignored rows and handles special delimiter cases</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename_or_io</span><span class="p">,</span> <span class="n">ignore_character</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot; filename_or_io is a string with a path, a path object or any IO object, i.e. StringIO</span>
-<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;filename_or_io is a string with a path, a path object or any IO object, i.e. StringIO&quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">ignore_character</span><span class="p">:</span>
             <span class="n">ignore_character</span> <span class="o">=</span> <span class="s1">&#39;#&#39;</span>
         <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">filename_or_io</span><span class="p">,</span> <span class="s1">&#39;read&#39;</span><span class="p">):</span>
             <span class="n">contents</span> <span class="o">=</span> <span class="n">filename_or_io</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">filename_or_io</span><span class="p">),</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">datafile</span><span class="p">:</span>
-                <span class="n">contents</span> <span class="o">=</span> <span class="n">datafile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>      <span class="c1"># All variations of newlines are converted into \n</span>
+                <span class="n">contents</span> <span class="o">=</span> <span class="n">datafile</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>  <span class="c1"># All variations of newlines are converted into \n</span>
 
         <span class="k">if</span> <span class="n">ignore_character</span> <span class="o">==</span> <span class="s1">&#39;@&#39;</span><span class="p">:</span>
             <span class="c1"># FIXME: Does this really handle the final line with no new line?</span>
@@ -206,23 +200,27 @@
             <span class="n">comment_regexp</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;^[&#39;</span> <span class="o">+</span> <span class="n">ignore_character</span> <span class="o">+</span> <span class="s1">&#39;].*</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">)</span>
         <span class="n">contents</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">sub</span><span class="p">(</span><span class="n">comment_regexp</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">contents</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39; \t&#39;</span><span class="p">,</span> <span class="n">contents</span><span class="p">):</span>     <span class="c1"># Space before TAB not allowed (see documentation)</span>
-            <span class="k">raise</span> <span class="n">DatasetError</span><span class="p">(</span><span class="s2">&quot;The dataset contains a TAB preceeded by a space, &quot;</span>
-                               <span class="s2">&quot;which is not allowed by NM-TRAN&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39; \t&#39;</span><span class="p">,</span> <span class="n">contents</span><span class="p">):</span>  <span class="c1"># Space before TAB not allowed (see documentation)</span>
+            <span class="k">raise</span> <span class="n">DatasetError</span><span class="p">(</span>
+                <span class="s2">&quot;The dataset contains a TAB preceeded by a space, &quot;</span>
+                <span class="s2">&quot;which is not allowed by NM-TRAN&quot;</span>
+            <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^[ \t]*\n$&#39;</span><span class="p">,</span> <span class="n">contents</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">):</span>       <span class="c1"># Blank lines</span>
-            <span class="k">raise</span> <span class="n">DatasetError</span><span class="p">(</span><span class="s2">&quot;The dataset contains one or more blank lines. This is not &quot;</span>
-                               <span class="s2">&quot;allowed by NM-TRAN without the BLANKOK option&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^[ \t]*\n$&#39;</span><span class="p">,</span> <span class="n">contents</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">MULTILINE</span><span class="p">):</span>  <span class="c1"># Blank lines</span>
+            <span class="k">raise</span> <span class="n">DatasetError</span><span class="p">(</span>
+                <span class="s2">&quot;The dataset contains one or more blank lines. This is not &quot;</span>
+                <span class="s2">&quot;allowed by NM-TRAN without the BLANKOK option&quot;</span>
+            <span class="p">)</span>
 
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">contents</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="convert_fortran_number"><a class="viewcode-back" href="../../../reference/pharmpy.data.read.html#pharmpy.data.convert_fortran_number">[docs]</a><span class="k">def</span> <span class="nf">convert_fortran_number</span><span class="p">(</span><span class="n">number_string</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;This function will try to convert the number_string from the general fortran exponential format</span>
-<span class="sd">       into an np.float64. It covers &quot;1d1&quot;, &quot;1D1&quot;, &quot;a+b&quot;, &quot;a-b&quot;, &quot;+&quot; and &quot;-&quot;. All other cases will</span>
-<span class="sd">       return None to signal that the number_string is not of the special form.</span>
+<span class="sd">    into an np.float64. It covers &quot;1d1&quot;, &quot;1D1&quot;, &quot;a+b&quot;, &quot;a-b&quot;, &quot;+&quot; and &quot;-&quot;. All other cases will</span>
+<span class="sd">    return None to signal that the number_string is not of the special form.</span>
 
-<span class="sd">       Move somewhere else. Will be used in output parsing as well</span>
+<span class="sd">    Move somewhere else. Will be used in output parsing as well</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">y</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">(</span><span class="n">number_string</span><span class="p">)</span>
@@ -267,8 +265,7 @@
 
 
 <span class="k">def</span> <span class="nf">_make_ids_unique</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">columns</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot; Check if id numbers are reused and make renumber. If not simply pass through the dataset.</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Check if id numbers are reused and make renumber. If not simply pass through the dataset.&quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">id_label</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">id_label</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -277,8 +274,10 @@
         <span class="n">id_series</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">id_label</span><span class="p">]</span>
         <span class="n">id_change</span> <span class="o">=</span> <span class="n">id_series</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">id_series</span><span class="p">[</span><span class="n">id_change</span><span class="p">])</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">ids</span><span class="p">):</span>
-            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;Dataset contains non-unique id numbers. Renumbering starting from 1&quot;</span><span class="p">,</span>
-                          <span class="n">DatasetWarning</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="s2">&quot;Dataset contains non-unique id numbers. Renumbering starting from 1&quot;</span><span class="p">,</span>
+                <span class="n">DatasetWarning</span><span class="p">,</span>
+            <span class="p">)</span>
             <span class="n">df</span><span class="p">[</span><span class="n">df</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">id_label</span><span class="p">]</span> <span class="o">=</span> <span class="n">id_change</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">df</span>
 
@@ -350,8 +349,10 @@
                 <span class="k">elif</span> <span class="n">tp</span> <span class="o">==</span> <span class="s1">&#39;OP_STR_NE&#39;</span><span class="p">:</span>
                     <span class="n">operator</span> <span class="o">=</span> <span class="s1">&#39;!=&#39;</span>
                     <span class="n">operator_type</span> <span class="o">=</span> <span class="nb">str</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="p">((</span><span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">))</span> <span class="ow">or</span>
-                                <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">))):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">3</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s2">&quot;&#39;&quot;</span><span class="p">))</span>
+            <span class="ow">or</span> <span class="p">(</span><span class="n">value</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">value</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;&quot;&#39;</span><span class="p">))</span>
+        <span class="p">):</span>
             <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">operator_type</span> <span class="o">==</span> <span class="nb">str</span><span class="p">:</span>
@@ -375,8 +376,7 @@
 
 
 <div class="viewcode-block" id="infer_column_type"><a class="viewcode-back" href="../../../reference/pharmpy.data.read.html#pharmpy.data.infer_column_type">[docs]</a><span class="k">def</span> <span class="nf">infer_column_type</span><span class="p">(</span><span class="n">colname</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;If possible infer the column type from the column name else use unknown</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;If possible infer the column type from the column name else use unknown&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;ID&#39;</span> <span class="ow">or</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;L1&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">ColumnType</span><span class="o">.</span><span class="n">ID</span>
     <span class="k">elif</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;DV&#39;</span><span class="p">:</span>
@@ -421,34 +421,50 @@
 <span class="c1">#    &quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="read_nonmem_dataset"><a class="viewcode-back" href="../../../reference/pharmpy.data.read.html#pharmpy.data.read_nonmem_dataset">[docs]</a><span class="k">def</span> <span class="nf">read_nonmem_dataset</span><span class="p">(</span><span class="n">path_or_io</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">ignore_character</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">,</span> <span class="n">colnames</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span>
-                        <span class="n">coltypes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">null_value</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="p">,</span> <span class="n">parse_columns</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span>
-                        <span class="n">ignore</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">accept</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="read_nonmem_dataset"><a class="viewcode-back" href="../../../reference/pharmpy.data.read.html#pharmpy.data.read_nonmem_dataset">[docs]</a><span class="k">def</span> <span class="nf">read_nonmem_dataset</span><span class="p">(</span>
+    <span class="n">path_or_io</span><span class="p">,</span>
+    <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+    <span class="n">ignore_character</span><span class="o">=</span><span class="s1">&#39;#&#39;</span><span class="p">,</span>
+    <span class="n">colnames</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span>
+    <span class="n">coltypes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">drop</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">null_value</span><span class="o">=</span><span class="s1">&#39;0&#39;</span><span class="p">,</span>
+    <span class="n">parse_columns</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span>
+    <span class="n">ignore</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">accept</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Read a nonmem dataset from file</span>
-<span class="sd">        column types will be inferred from the column names</span>
+<span class="sd">     column types will be inferred from the column names</span>
 
-<span class="sd">       raw - minimal processing, data will be kept in string format.</span>
-<span class="sd">       ignore_character</span>
-<span class="sd">       colnames - List or tuple of names to give each column given in order. Names need to be unique</span>
-<span class="sd">       drop - A list or tuple of booleans of which columns to drop</span>
-<span class="sd">       null_value - Value to use for NULL, i.e. empty records or padding</span>
-<span class="sd">       parse_columns - Only applicable when raw=True. A list of columns to parse.</span>
-<span class="sd">       ignore/accept - List of ignore/accept expressions</span>
+<span class="sd">    raw - minimal processing, data will be kept in string format.</span>
+<span class="sd">    ignore_character</span>
+<span class="sd">    colnames - List or tuple of names to give each column given in order. Names need to be unique</span>
+<span class="sd">    drop - A list or tuple of booleans of which columns to drop</span>
+<span class="sd">    null_value - Value to use for NULL, i.e. empty records or padding</span>
+<span class="sd">    parse_columns - Only applicable when raw=True. A list of columns to parse.</span>
+<span class="sd">    ignore/accept - List of ignore/accept expressions</span>
 
-<span class="sd">        The following postprocessing operations are done to a non-raw dataset</span>
-<span class="sd">        1. Convert ordinary floating point numbers to float64</span>
-<span class="sd">        2. Convert numbers of special fortran format to float64</span>
-<span class="sd">        3. Convert None, &#39;.&#39;, empty string to the NULL value</span>
-<span class="sd">        4. Convert Inf/NaN properly</span>
-<span class="sd">        5. Pad with null_token columns if $INPUT has more columns than the dataset</span>
-<span class="sd">        6. Strip away superfluous columns from the dataset</span>
+<span class="sd">     The following postprocessing operations are done to a non-raw dataset</span>
+<span class="sd">     1. Convert ordinary floating point numbers to float64</span>
+<span class="sd">     2. Convert numbers of special fortran format to float64</span>
+<span class="sd">     3. Convert None, &#39;.&#39;, empty string to the NULL value</span>
+<span class="sd">     4. Convert Inf/NaN properly</span>
+<span class="sd">     5. Pad with null_token columns if $INPUT has more columns than the dataset</span>
+<span class="sd">     6. Strip away superfluous columns from the dataset</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">colnames</span><span class="p">)</span> <span class="o">&gt;</span> <span class="nb">len</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">colnames</span><span class="p">)):</span>
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s1">&#39;Column names are not unique&#39;</span><span class="p">)</span>
 
     <span class="n">file_io</span> <span class="o">=</span> <span class="n">NMTRANDataIO</span><span class="p">(</span><span class="n">path_or_io</span><span class="p">,</span> <span class="n">ignore_character</span><span class="p">)</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span><span class="n">file_io</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39; *, *| *[\t] *| +&#39;</span><span class="p">,</span> <span class="n">na_filter</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-                       <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;python&#39;</span><span class="p">,</span> <span class="n">quoting</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">object</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_table</span><span class="p">(</span>
+        <span class="n">file_io</span><span class="p">,</span>
+        <span class="n">sep</span><span class="o">=</span><span class="sa">r</span><span class="s1">&#39; *, *| *[\t] *| +&#39;</span><span class="p">,</span>
+        <span class="n">na_filter</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">header</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">engine</span><span class="o">=</span><span class="s1">&#39;python&#39;</span><span class="p">,</span>
+        <span class="n">quoting</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="n">np</span><span class="o">.</span><span class="n">object</span><span class="p">,</span>
+    <span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">data</span><span class="o">.</span><span class="n">PharmDataFrame</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
 
     <span class="n">diff_cols</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">colnames</span><span class="p">)</span>
@@ -459,10 +475,10 @@
             <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="kc">None</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">diff_cols</span> <span class="o">&lt;</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">raw</span><span class="p">:</span>
-            <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">colnames</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)]</span>
+            <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">colnames</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)]</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">diff_cols</span><span class="p">)):</span>    <span class="c1"># Create empty columns.</span>
-                <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">null_value</span>       <span class="c1"># FIXME assure no name collisions here</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">diff_cols</span><span class="p">)):</span>  <span class="c1"># Create empty columns.</span>
+                <span class="n">df</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;__</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">]&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">null_value</span>  <span class="c1"># FIXME assure no name collisions here</span>
             <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">colnames</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">df</span><span class="o">.</span><span class="n">columns</span> <span class="o">=</span> <span class="n">colnames</span>
@@ -493,8 +509,9 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">raw</span><span class="p">:</span>
         <span class="n">parse_columns</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
         <span class="c1"># FIXME: This is instead of proper handling of these columns</span>
-        <span class="n">parse_columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parse_columns</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="s1">&#39;DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;DAT1&#39;</span><span class="p">,</span>
-                                                               <span class="s1">&#39;DAT2&#39;</span><span class="p">,</span> <span class="s1">&#39;DAT3&#39;</span><span class="p">]]</span>
+        <span class="n">parse_columns</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parse_columns</span> <span class="k">if</span> <span class="n">x</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="s1">&#39;DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;DAT1&#39;</span><span class="p">,</span> <span class="s1">&#39;DAT2&#39;</span><span class="p">,</span> <span class="s1">&#39;DAT3&#39;</span><span class="p">]</span>
+        <span class="p">]</span>
     <span class="k">for</span> <span class="n">column</span> <span class="ow">in</span> <span class="n">parse_columns</span><span class="p">:</span>
         <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">column</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_convert_data_item</span><span class="p">,</span> <span class="n">args</span><span class="o">=</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">null_value</span><span class="p">),))</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">_make_ids_unique</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">parse_columns</span><span class="p">)</span>
@@ -503,8 +520,7 @@
 
 
 <div class="viewcode-block" id="read_csv"><a class="viewcode-back" href="../../../reference/pharmpy.data.read.html#pharmpy.data.read_csv">[docs]</a><span class="k">def</span> <span class="nf">read_csv</span><span class="p">(</span><span class="n">path_or_io</span><span class="p">,</span> <span class="n">raw</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">parse_columns</span><span class="o">=</span><span class="nb">tuple</span><span class="p">()):</span>
-    <span class="sd">&quot;&quot;&quot;Read a csv with header into a PharmDataFrame</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Read a csv with header into a PharmDataFrame&quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">raw</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span><span class="n">path_or_io</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -544,7 +560,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 28, 2020.<br/>
+        Last updated on Oct 26, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

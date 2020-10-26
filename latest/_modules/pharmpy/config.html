@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.config &#8212; Pharmpy 0.6.0 documentation</title>
+    <title>pharmpy.config &#8212; Pharmpy 0.9.0 documentation</title>
     
   <link rel="stylesheet" href="../../_static/css/index.d431a4ee1c1efae0e38bdfebc22debff.css">
 
@@ -60,10 +60,6 @@
     <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
       <ul id="navbar-main-elements" class="navbar-nav mr-auto">
         
-        
-        <li class="nav-item ">
-            <a class="nav-link" href="../../index.html">Welcome to Pharmpy </a>
-        </li>
         
         <li class="nav-item ">
             <a class="nav-link" href="../../installation.html">Installation</a>
@@ -140,8 +136,6 @@
       
       
       
-      
-      
     </ul>
 
 </nav>
@@ -183,13 +177,23 @@
     <span class="n">appname</span> <span class="o">=</span> <span class="s1">&#39;Pharmpy&#39;</span>
     <span class="n">filename</span> <span class="o">=</span> <span class="s1">&#39;pharmpy.conf&#39;</span>
     <span class="n">config</span> <span class="o">=</span> <span class="n">configparser</span><span class="o">.</span><span class="n">ConfigParser</span><span class="p">()</span>
-    <span class="n">user_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">appdirs</span><span class="o">.</span><span class="n">user_config_dir</span><span class="p">(</span><span class="n">appname</span><span class="p">))</span> <span class="o">/</span> <span class="n">filename</span>
-    <span class="k">if</span> <span class="n">user_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-        <span class="n">config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">user_path</span><span class="p">)</span>
+    <span class="n">env_path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">getenv</span><span class="p">(</span><span class="s1">&#39;PHARMPYCONFIGPATH&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">env_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">env_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">env_path</span><span class="p">)</span> <span class="o">/</span> <span class="n">filename</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">env_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s1">&#39;Environment variable PHARMPYCONFIGPATH is set but directory does &#39;</span>
+                <span class="s1">&#39;not contain a configuration file&#39;</span>
+            <span class="p">)</span>
+        <span class="n">config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">env_path</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">site_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">appdirs</span><span class="o">.</span><span class="n">site_config_dir</span><span class="p">(</span><span class="n">appname</span><span class="p">))</span> <span class="o">/</span> <span class="n">filename</span>
-        <span class="k">if</span> <span class="n">site_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">user_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">appdirs</span><span class="o">.</span><span class="n">user_config_dir</span><span class="p">(</span><span class="n">appname</span><span class="p">))</span> <span class="o">/</span> <span class="n">filename</span>
+        <span class="k">if</span> <span class="n">user_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
             <span class="n">config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">user_path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">site_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">appdirs</span><span class="o">.</span><span class="n">site_config_dir</span><span class="p">(</span><span class="n">appname</span><span class="p">))</span> <span class="o">/</span> <span class="n">filename</span>
+            <span class="k">if</span> <span class="n">site_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+                <span class="n">config</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="n">user_path</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">config</span></div>
 
 
@@ -209,8 +213,10 @@
 
     <span class="k">def</span> <span class="fm">__set__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">instance</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Trying to set configuration item </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> using object of wrong &#39;</span>
-                            <span class="sa">f</span><span class="s1">&#39;type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s1"> is not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Trying to set configuration item </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> using object of wrong &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;type: </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">value</span><span class="p">)</span><span class="si">}</span><span class="s1"> is not </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">default</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
         <span class="n">instance</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span></div>
 
 
@@ -225,8 +231,8 @@
 
 
 <div class="viewcode-block" id="ConfigurationContext"><a class="viewcode-back" href="../../reference/pharmpy.config.html#pharmpy.config.ConfigurationContext">[docs]</a><span class="k">class</span> <span class="nc">ConfigurationContext</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Context to temporarily set configuration options</span>
-<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Context to temporarily set configuration options&quot;&quot;&quot;</span>
+
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">config</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">config</span> <span class="o">=</span> <span class="n">config</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">kwargs</span>
@@ -267,7 +273,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Sep 28, 2020.<br/>
+        Last updated on Oct 26, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>
