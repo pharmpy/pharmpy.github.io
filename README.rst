@@ -2,7 +2,7 @@
 Pharmpy website |logo|
 ======================
 
-.. |logo| image:: docs/Pharmpy_logo.svg
+.. |logo| image:: latest/_static/Pharmpy_logo.svg
    :width: 100
 
 https://pharmpy.github.io
