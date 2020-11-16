@@ -5,9 +5,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.methods.scm.results &#8212; Pharmpy 0.9.0 documentation</title>
+    <title>pharmpy.methods.scm.results &#8212; Pharmpy 0.10.0 documentation</title>
     
-  <link rel="stylesheet" href="../../../../_static/css/index.d431a4ee1c1efae0e38bdfebc22debff.css">
+  <link rel="stylesheet" href="../../../../_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
     
   <link rel="stylesheet"
@@ -30,8 +30,9 @@
     <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/custom.css" />
     
-  <link rel="preload" as="script" href="../../../../_static/js/index.30270b6e4c972e43c488.js">
+  <link rel="preload" as="script" href="../../../../_static/js/index.3da636dd464baa7582d2.js">
 
     <script id="documentation_options" data-url_root="../../../../" src="../../../../_static/documentation_options.js"></script>
     <script src="../../../../_static/jquery.js"></script>
@@ -52,7 +53,11 @@
     <nav class="navbar navbar-light navbar-expand-lg bg-light fixed-top bd-navbar" id="navbar-main">
 <div class="container-xl">
 
+    <a class="navbar-brand" href="../../../../index.html">
     
+      <p class="title">Pharmpy</p>
+    
+    </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbar-menu" aria-controls="navbar-menu" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -108,37 +113,27 @@
       <div class="row">
           
           <div class="col-12 col-md-3 bd-sidebar">
+<div id="searchbox" style="display: none" role="search">
+  <h3 id="searchlabel">Quick search</h3>
+    <div class="searchformwrapper">
+    <form class="search" action="../../../../search.html" method="get">
+      <input type="text" name="q" aria-labelledby="searchlabel" />
+      <input type="submit" value="Go" />
+    </form>
+    </div>
+</div>
+<script>$('#searchbox').show(0);</script>
+<h3><a href="../../../../index.html">Table of Contents</a></h3>
+<ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../../installation.html">Installation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../getting_started.html">Getting started</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../user_guide.html">User guide</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../reference/modules.html">Documentation</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../../license.html">License</a></li>
+</ul>
 
-<form class="bd-search d-flex align-items-center" action="../../../../search.html" method="get">
-  <i class="icon fas fa-search"></i>
-  <input type="search" class="form-control" name="q" id="search-input" placeholder="Search the docs ..." aria-label="Search the docs ..." autocomplete="off" >
-</form>
-
-
-<nav class="bd-links" id="bd-docs-nav" aria-label="Main navigation">
-
-  <div class="bd-toc-item active">
-  
-
-  <ul class="nav bd-sidenav">
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-      
-    </ul>
-
-</nav>
           </div>
           
 
@@ -170,6 +165,7 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
+<span class="kn">from</span> <span class="nn">pharmpy</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.methods.psn_helpers</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">arguments_from_command</span><span class="p">,</span>
     <span class="n">options_from_command</span><span class="p">,</span>
@@ -782,6 +778,34 @@
     <span class="k">return</span> <span class="n">parcov</span></div>
 
 
+<div class="viewcode-block" id="add_covariate_effects"><a class="viewcode-back" href="../../../../reference/pharmpy.methods.scm.results.html#pharmpy.methods.scm.add_covariate_effects">[docs]</a><span class="k">def</span> <span class="nf">add_covariate_effects</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">steps</span>
+    <span class="k">if</span> <span class="s1">&#39;delta_df&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">steps</span><span class="p">:</span>
+        <span class="k">return</span>
+
+    <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">row</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">row</span><span class="o">.</span><span class="n">is_backward</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">degrees</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">delta_df</span>
+        <span class="n">model_name</span> <span class="o">=</span> <span class="n">row</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span>
+        <span class="p">)</span>  <span class="c1"># FIXME: The dash should not have been in the table!</span>
+        <span class="n">model_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="n">row</span><span class="o">.</span><span class="n">directory</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1">.mod&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">model_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">model_path</span><span class="p">)</span>
+        <span class="n">varpars</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">all_thetas</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">varpars</span><span class="p">]</span>
+        <span class="n">new_thetas</span> <span class="o">=</span> <span class="n">all_thetas</span><span class="p">[</span><span class="o">-</span><span class="n">degrees</span><span class="p">:]</span>
+        <span class="n">covariate_effects</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">new_thetas</span>
+        <span class="p">}</span>
+        <span class="k">return</span> <span class="n">covariate_effects</span>
+
+    <span class="n">steps</span><span class="p">[</span><span class="s1">&#39;covariate_effects&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">steps</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="psn_scm_results"><a class="viewcode-back" href="../../../../reference/pharmpy.methods.scm.results.html#pharmpy.methods.scm.psn_scm_results">[docs]</a><span class="k">def</span> <span class="nf">psn_scm_results</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Create scm results from a PsN SCM run</span>
 
@@ -804,7 +828,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">IOError</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;Could not find test_relations in scm config file&#39;</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">SCMResults</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="n">psn_scm_parse_logfile</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">parcov_dictionary</span><span class="p">))</span></div>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">SCMResults</span><span class="p">(</span><span class="n">steps</span><span class="o">=</span><span class="n">psn_scm_parse_logfile</span><span class="p">(</span><span class="n">logfile</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">parcov_dictionary</span><span class="p">))</span>
+    <span class="n">add_covariate_effects</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>
 
               </div>
@@ -822,14 +848,14 @@
     </div>
 
     
-  <script src="../../../../_static/js/index.30270b6e4c972e43c488.js"></script>
+  <script src="../../../../_static/js/index.3da636dd464baa7582d2.js"></script>
 
 
     <footer class="footer mt-5 mt-md-0">
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Oct 26, 2020.<br/>
+        Last updated on Nov 16, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>
