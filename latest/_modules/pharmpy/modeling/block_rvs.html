@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.10.0 documentation</title>
+    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.11.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
@@ -271,11 +271,18 @@
 <span class="k">def</span> <span class="nf">_choose_param_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
     <span class="n">rvs_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">]</span>
+
+    <span class="n">etas</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">rvs</span><span class="p">)):</span>
+        <span class="n">elem</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">covariance_matrix</span><span class="p">()</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">i</span><span class="p">)</span><span class="o">.</span><span class="n">col</span><span class="p">(</span><span class="n">i</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">elem</span><span class="p">)</span> <span class="ow">in</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">]:</span>
+            <span class="n">etas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rvs_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
     <span class="n">sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">init</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span><span class="p">)])</span>
 
     <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">ie</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_estimates</span>
-        <span class="n">eta_corr</span> <span class="o">=</span> <span class="n">ie</span><span class="p">[</span><span class="n">rvs_names</span><span class="p">]</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
+        <span class="n">eta_corr</span> <span class="o">=</span> <span class="n">ie</span><span class="p">[</span><span class="n">etas</span><span class="p">]</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
         <span class="n">cov</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">corr2cov</span><span class="p">(</span><span class="n">eta_corr</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">sd</span><span class="p">)</span>
         <span class="n">cov</span><span class="p">[</span><span class="n">cov</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0001</span>
         <span class="n">cov</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">nearest_posdef</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
@@ -306,7 +313,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Nov 16, 2020.<br/>
+        Last updated on Nov 20, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model &#8212; Pharmpy 0.10.0 documentation</title>
+    <title>pharmpy.model &#8212; Pharmpy 0.11.0 documentation</title>
     
   <link rel="stylesheet" href="../../_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
@@ -196,9 +196,28 @@
 <div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Attribute: name</span>
-<span class="sd">       prediction_symbol</span>
 <span class="sd">       dependent_variable_symbol</span>
+<span class="sd">       parameters</span>
+<span class="sd">       random_variables</span>
+<span class="sd">       statements</span>
+<span class="sd">       dataset</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="Model.to_base_model"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.to_base_model">[docs]</a>    <span class="k">def</span> <span class="nf">to_base_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert a model into the base model class&quot;&quot;&quot;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">dependent_variable_symbol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependent_variable_symbol</span>
+        <span class="k">return</span> <span class="n">model</span></div>
+
+    <span class="k">def</span> <span class="nf">_repr_html_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">stat</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">_repr_html_</span><span class="p">()</span>
+        <span class="n">rvs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;hr&gt;</span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s1">&lt;hr&gt;$</span><span class="si">{</span><span class="n">rvs</span><span class="si">}</span><span class="s1">$&lt;hr&gt;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">_repr_html_</span><span class="p">()</span><span class="si">}</span><span class="s1">&lt;hr&gt;&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">modelfit_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -254,10 +273,6 @@
 <div class="viewcode-block" id="Model.update_individual_estimates"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.update_individual_estimates">[docs]</a>    <span class="k">def</span> <span class="nf">update_individual_estimates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_individual_estimates</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">individual_estimates</span></div>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span>
-
 <div class="viewcode-block" id="Model.read_raw_dataset"><a class="viewcode-back" href="../../reference/pharmpy.model.html#pharmpy.model.Model.read_raw_dataset">[docs]</a>    <span class="k">def</span> <span class="nf">read_raw_dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parse_columns</span><span class="o">=</span><span class="nb">tuple</span><span class="p">()):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">()</span></div>
 
@@ -295,8 +310,6 @@
         <span class="n">rvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="p">]</span>
         <span class="n">dataset_col</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
         <span class="n">misc</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">dependent_variable_symbol</span><span class="p">]</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">prediction_symbol</span><span class="p">:</span>
-            <span class="n">misc</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">prediction_symbol</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
         <span class="n">all_names</span> <span class="o">=</span> <span class="n">symbols</span> <span class="o">+</span> <span class="n">params</span> <span class="o">+</span> <span class="n">rvs</span> <span class="o">+</span> <span class="n">dataset_col</span> <span class="o">+</span> <span class="n">misc</span>
 
@@ -576,7 +589,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Nov 16, 2020.<br/>
+        Last updated on Nov 20, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.statements &#8212; Pharmpy 0.10.0 documentation</title>
+    <title>pharmpy.statements &#8212; Pharmpy 0.11.0 documentation</title>
     
   <link rel="stylesheet" href="../../_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
@@ -231,7 +231,12 @@
         <span class="k">return</span> <span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s1"> := </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s1"> := </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="si">}</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+
+    <span class="k">def</span> <span class="nf">_repr_latex_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">sym</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">sym</span><span class="si">}</span><span class="s1"> := </span><span class="si">{</span><span class="n">expr</span><span class="si">}</span><span class="s1">$&#39;</span></div>
 
 
 <div class="viewcode-block" id="ODESystem"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.ODESystem">[docs]</a><span class="k">class</span> <span class="nc">ODESystem</span><span class="p">:</span>
@@ -326,7 +331,18 @@
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ExplicitODESystem</span><span class="p">)</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">odes</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">odes</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ics</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">ics</span>
-        <span class="p">)</span></div>
+        <span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_repr_latex_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">odes</span><span class="p">:</span>
+            <span class="n">ode_repr</span> <span class="o">=</span> <span class="n">ode</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ode_repr</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">ics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ics_eq</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="n">ics_repr</span> <span class="o">=</span> <span class="n">ics_eq</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ics_repr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">r</span><span class="s1">&#39;\begin</span><span class="si">{cases}</span><span class="s1"> &#39;</span> <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39; </span><span class="se">\\</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39; \end</span><span class="si">{cases}</span><span class="s1">&#39;</span></div>
 
 
 <div class="viewcode-block" id="CompartmentalSystem"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem">[docs]</a><span class="k">class</span> <span class="nc">CompartmentalSystem</span><span class="p">(</span><span class="n">ODESystem</span><span class="p">):</span>
@@ -598,6 +614,11 @@
         <span class="sd">&quot;&quot;&quot;Get the number of compartments including output&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">_repr_html_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># Use Unicode art for now. There should be ways of drawing networkx</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;pre&gt;</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s1">&lt;/pre&gt;&#39;</span>
+
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
         <span class="n">output_box</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -639,7 +660,7 @@
             <span class="n">bottom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curdepot</span> <span class="o">+</span> <span class="n">central_box</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">flow</span> <span class="o">+</span> <span class="n">output_box</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
         <span class="n">lower</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">periphs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">periphs</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">periphs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">down_arrow</span> <span class="o">=</span> <span class="n">vertical_arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">periphs</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
             <span class="n">up_arrow</span> <span class="o">=</span> <span class="n">vertical_arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">central</span><span class="p">)),</span> <span class="n">down</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">up_arrow</span><span class="p">)):</span>
@@ -944,7 +965,22 @@
         <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
         <span class="k">for</span> <span class="n">statement</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="n">s</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">s</span></div>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="k">def</span> <span class="nf">_repr_html_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">html</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\begin{align*}&#39;</span>
+        <span class="k">for</span> <span class="n">statement</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="s1">&#39;_repr_html_&#39;</span><span class="p">):</span>
+                <span class="n">html</span> <span class="o">+=</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">end{align*}&#39;</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">statement</span><span class="o">.</span><span class="n">_repr_html_</span><span class="p">()</span>
+                <span class="n">html</span> <span class="o">+=</span> <span class="n">s</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">begin{align*}&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">statement</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()</span><span class="si">}</span><span class="s1">$&#39;</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;:=&#39;</span><span class="p">,</span> <span class="s1">&#39;&amp;:=&#39;</span><span class="p">)</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;$&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+                <span class="n">s</span> <span class="o">=</span> <span class="n">s</span> <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">&#39;</span>
+                <span class="n">html</span> <span class="o">+=</span> <span class="n">s</span>
+        <span class="k">return</span> <span class="n">html</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\\</span><span class="s1">end{align*}&#39;</span></div>
 </pre></div>
 
               </div>
@@ -969,7 +1005,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Nov 16, 2020.<br/>
+        Last updated on Nov 20, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

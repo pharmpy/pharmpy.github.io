@@ -20,3 +20,5 @@ Submodules
    pharmpy.modeling.eta_transformations
    pharmpy.modeling.iiv_on_ruv
    pharmpy.modeling.odes
+   pharmpy.modeling.remove_iiv
+   pharmpy.modeling.remove_iov

@@ -74,6 +74,15 @@ The functions for fixing/unfixing parameters take either a list of parameter nam
    fix_parameters(model, ['THETA(1)', 'THETA(2)'])
    unfix_parameters(model, 'THETA(1)')
 
+Add parameter
+=============
+
+.. jupyter-execute::
+
+   model = Model(path / 'pheno.mod')
+   add_parameter(model, 'MAT')
+   update_source(model)
+   print_model_diff(model_ref, model)
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 PK models and ODE systems
@@ -103,9 +112,6 @@ For NONMEM models this means going from any of the compartmental ADVANS (ADVAN1-
 Absorption rate
 ~~~~~~~~~~~~~~~
 
-The :py:func:`pharmpy.modeling.absorption_rate` can be used to set the absorption rate.
-
-
 Bolus absorption
 ==================
 
@@ -124,14 +130,14 @@ Let us use a model with bolus absorption as a starting point.
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import absorption_rate
+   from pharmpy.modeling import bolus_absorption
    model = Model(path / "pheno.mod")
 
 This type of absorption can be created with:
 
 .. jupyter-execute::
 
-    absorption_rate(model, 'bolus')
+    bolus_absorption(model)
     model.update_source()
     print_model_diff(model_ref, model)
 
@@ -154,7 +160,8 @@ Let us now change to zero order absorption.
 
 .. jupyter-execute::
 
-   absorption_rate(model, 'ZO')
+   from pharmpy.modeling import zero_order_absorption
+   zero_order_absorption(model)
    model.update_source(nofiles=True)
    print_model_diff(model_ref, model)
 
@@ -177,7 +184,8 @@ First order absorption would mean adding an absorption (depot) compartment like 
 
 .. jupyter-execute::
 
-   absorption_rate(model, 'FO')
+   from pharmpy.modeling import first_order_absorption
+   first_order_absorption(model)
    model.update_source(nofiles=True)
    print_model_diff(model_ref, model)
 
@@ -200,7 +208,8 @@ Sequential zero-order absorption followed by first-order absorption will have an
 
 .. jupyter-execute::
 
-   absorption_rate(model, 'seq-ZO-FO')
+   from pharmpy.modeling import seq_zo_fo_absorption
+   seq_zo_fo_absorption(model)
    model.update_source(nofiles=True)
    print_model_diff(model_ref, model)
 
@@ -252,6 +261,37 @@ Similarly, to remove lag time:
 Elimination rate
 ~~~~~~~~~~~~~~~~
 
+First-order elimination
+=======================
+
+.. jupyter-execute::
+   :hide-output:
+
+   model = Model(path / "pheno.mod")
+
+.. jupyter-execute::
+
+   from pharmpy.modeling import first_order_elimination
+   first_order_elimination(model)
+   model.update_source()
+   print_model_diff(model_ref, model)
+
+
+Zero-order elimination
+======================
+
+.. jupyter-execute::
+   :hide-output:
+
+   model = Model(path / "pheno.mod")
+
+.. jupyter-execute::
+
+   from pharmpy.modeling import zero_order_elimination
+   zero_order_elimination(model)
+   model.update_source()
+   print_model_diff(model_ref, model)
+
 Michaelis-Menten elimination
 ============================
 
@@ -267,6 +307,20 @@ Michaelis-Menten elimination
    model.update_source()
    print_model_diff(model_ref, model)
 
+Combined Michaelis-Menten + First-Order elimination
+===================================================
+
+.. jupyter-execute::
+   :hide-output:
+
+   model = Model(path / "pheno.mod")
+
+.. jupyter-execute::
+
+   from pharmpy.modeling import combined_mm_fo_elimination
+   combined_mm_fo_elimination(model)
+   model.update_source()
+   print_model_diff(model_ref, model)
 
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Adding covariate effects
@@ -424,6 +478,48 @@ The new etas need to be denoted as *eta_new*.
    model.update_source()
    print_model_diff(model_ref, model)
 
+~~~~~~~~~~~~~
+Removing etas
+~~~~~~~~~~~~~
+
+Remove IIVs
+~~~~~~~~~~~
+
+.. jupyter-execute::
+
+   model = Model(path / "pheno.mod")
+
+Etas can also be removed by providing a list of etas and/or name of parameters to remove IIV from.
+
+.. jupyter-execute::
+
+   from pharmpy.modeling import remove_iiv
+   remove_iiv(model, ['ETA(1)', 'V'])
+   model.update_source()
+   print_model_diff(model_ref, model)
+
+If you want to remove all etas, leave argument empty.
+
+.. jupyter-execute::
+
+   model = Model(path / "pheno.mod")
+   from pharmpy.modeling import remove_iiv
+   remove_iiv(model)
+   model.update_source()
+   print_model_diff(model_ref, model)
+
+Remove IOVs
+~~~~~~~~~~~
+
+You can remove IOVs as well, however all IOV omegas will be removed.
+
+.. jupyter-execute::
+   :hide-output:
+
+   model = Model(path / "pheno.mod")
+   from pharmpy.modeling import remove_iov
+   remove_iov(model)
+   model.update_source()
 
 ~~~~~~~~~~~~~~~
 The error model
@@ -442,9 +538,9 @@ Removing the error model
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import error_model
+   from pharmpy.modeling import remove_error
 
-   error_model(model, 'none')
+   remove_error(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
@@ -458,9 +554,9 @@ Setting an additive error model
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import error_model
+   from pharmpy.modeling import additive_error
 
-   error_model(model, 'additive')
+   additive_error(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
@@ -474,9 +570,9 @@ Setting a proportional error model
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import error_model
+   from pharmpy.modeling import proportional_error
 
-   error_model(model, 'proportional')
+   proportional_error(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
@@ -490,9 +586,9 @@ Setting a combined additive and proportional error model
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import error_model
+   from pharmpy.modeling import combined_error
 
-   error_model(model, 'combined')
+   combined_error(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
