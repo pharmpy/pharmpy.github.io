@@ -166,7 +166,21 @@
     <ul class="nav section-nav flex-column">
     
         <li class="nav-item toc-entry toc-h2">
-            <a href="#the-frem-postprocessing-and-results" class="nav-link">The FREM postprocessing and results</a>
+            <a href="#the-frem-postprocessing-and-results" class="nav-link">The FREM postprocessing and results</a><ul class="nav section-nav flex-column">
+                
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#covariate-effects" class="nav-link">Covariate effects</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#individual-covariate-effects" class="nav-link">Individual covariate effects</a>
+        </li>
+    
+        <li class="nav-item toc-entry toc-h3">
+            <a href="#unexplained-variability" class="nav-link">Unexplained variability</a>
+        </li>
+    
+            </ul>
         </li>
     
     </ul>
@@ -189,24 +203,54 @@
 \[\]</div>
 <div class="section" id="the-frem-postprocessing-and-results">
 <h2>The FREM postprocessing and results<a class="headerlink" href="#the-frem-postprocessing-and-results" title="Permalink to this headline">¶</a></h2>
-<p>All FREM postprocessing use the results from the final FREM model (model_4) only. Let us denote the FREM matrix <span class="math notranslate nohighlight">\(\Omega\)</span>. This matrix is then a partition as follows:</p>
+<p>The postprocessing starts after estimating the parameters $P$ of the FREM model together with their uncertainty covariance matrix <span class="math notranslate nohighlight">\(Cov(P)\)</span>. Let us denote the random variables representing the model parameters <span class="math notranslate nohighlight">\(\eta_i\)</span> for <span class="math notranslate nohighlight">\(1 \leq i \leq n_{par}\)</span> and the random variables for the covariates
+<span class="math notranslate nohighlight">\(\eta_k\)</span> for <span class="math notranslate nohighlight">\(n_{par} + 1 \leq k \leq n_{cov} + n_{par}\)</span>. Then</p>
 <div class="math notranslate nohighlight">
-\[\Omega =\]</div>
-<p>The first step is to find the parameter uncertainty of the parameters of the</p>
+\[\begin{split}\begin{bmatrix}
+    \eta_1 \\
+    \vdots \\
+        \eta_{n_{par}} \\
+        \eta_{n_{par} + 1} \\
+        \vdots \\
+        \eta_{n_{par} + n_{cov}} \\
+ \end{bmatrix}
+\sim \mathcal{N}(\mu, \Omega)\end{split}\]</div>
+<p>where</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}    \mu =
+\begin{bmatrix}
+    0 \\
+    \vdots \\
+    0 \\
+    \overline{C}_{1} \\
+    \vdots \\
+        \overline{C}_{n_{cov}} \\
+\end{bmatrix}
+=
+\begin{bmatrix}
+    \mu_1 \\
+    \mu_2 \\
+\end{bmatrix}\end{split}\]</div>
+<p>and</p>
+<div class="math notranslate nohighlight">
+\[\begin{split} \Omega =
+ \begin{bmatrix}
+     \omega_{11} &amp; \omega_{21} &amp; \cdots &amp; \omega_{n1} \\
+     \omega_{21} &amp; \omega_{22} &amp; \cdots &amp; \omega_{n2} \\
+     \vdots &amp; \vdots &amp; \ddots &amp; \vdots \\
+     \omega_{n1} &amp; \omega_{n2} &amp; \cdots &amp; \omega_{nn} \\
+ \end{bmatrix} =
+ \begin{bmatrix}
+     \Omega_{11} &amp; \Omega_{12} \\
+     \Omega_{21} &amp; \Omega_{22} \\
+\end{bmatrix}\end{split}\]</div>
+<p><span class="math notranslate nohighlight">\(\overline{C}_k\)</span> is the covariate reference. For continuous covariates the reference is the mean of the baselines and for categoricals it is the non-mode value of the baselines.
+The latter partition being for parameters (index 1) and covariates (index 2), i.e.
+<span class="math notranslate nohighlight">\(\Omega_{11}\)</span> is the original parameter matrix, <span class="math notranslate nohighlight">\(\Omega_{22}\)</span> is the covariate matrix and <span class="math notranslate nohighlight">\(\Omega_{21}\)</span> and <span class="math notranslate nohighlight">\(\Omega_{12}^T\)</span> is the parameter-covariate covariance block.</p>
+<div class="section" id="covariate-effects">
+<h3>Covariate effects<a class="headerlink" href="#covariate-effects" title="Permalink to this headline">¶</a></h3>
+<p>The effects of each covariate on each parameter is calculated with uncertainty and summarized in the <cite>covariate_effects</cite> table.</p>
 <div class="jupyter_cell docutils container">
-<div class="cell_output docutils container">
-</div>
-</div>
-<div class="jupyter_cell jupyter_container docutils container">
-<div class="cell_input code_cell docutils container">
-<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy</span> <span class="kn">import</span> <span class="n">Model</span>
-
-<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno_real.mod&quot;</span><span class="p">)</span>
-<span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
-<span class="n">df</span>
-</pre></div>
-</div>
-</div>
 <div class="cell_output docutils container">
 <div class="output text_html"><div>
 <style scoped>
@@ -226,142 +270,474 @@
   <thead>
     <tr style="text-align: right;">
       <th></th>
-      <th>ID</th>
-      <th>TIME</th>
-      <th>AMT</th>
-      <th>WGT</th>
-      <th>APGR</th>
-      <th>DV</th>
-      <th>FA1</th>
-      <th>FA2</th>
+      <th></th>
+      <th></th>
+      <th>p5</th>
+      <th>mean</th>
+      <th>p95</th>
+    </tr>
+    <tr>
+      <th>parameter</th>
+      <th>covariate</th>
+      <th>condition</th>
+      <th></th>
+      <th></th>
+      <th></th>
     </tr>
   </thead>
   <tbody>
     <tr>
-      <th>0</th>
-      <td>1.0</td>
-      <td>0.</td>
-      <td>25.0</td>
-      <td>1.4</td>
-      <td>7.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>1.0</td>
+      <th rowspan="4" valign="top">CL</th>
+      <th rowspan="2" valign="top">APGR</th>
+      <th>5th</th>
+      <td>0.933505</td>
+      <td>1.117697</td>
+      <td>1.322990</td>
     </tr>
     <tr>
-      <th>1</th>
-      <td>1.0</td>
-      <td>2.0</td>
-      <td>0.0</td>
-      <td>1.4</td>
-      <td>7.0</td>
-      <td>17.3</td>
-      <td>0.0</td>
-      <td>0.0</td>
+      <th>95th</th>
+      <td>0.875509</td>
+      <td>0.952097</td>
+      <td>1.033224</td>
     </tr>
     <tr>
-      <th>2</th>
-      <td>1.0</td>
-      <td>12.5</td>
-      <td>3.5</td>
-      <td>1.4</td>
-      <td>7.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>1.0</td>
+      <th rowspan="2" valign="top">WGT</th>
+      <th>5th</th>
+      <td>0.862639</td>
+      <td>0.945197</td>
+      <td>1.033187</td>
     </tr>
     <tr>
-      <th>3</th>
-      <td>1.0</td>
-      <td>24.5</td>
-      <td>3.5</td>
-      <td>1.4</td>
-      <td>7.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>1.0</td>
+      <th>95th</th>
+      <td>0.935912</td>
+      <td>1.131972</td>
+      <td>1.349542</td>
     </tr>
     <tr>
-      <th>4</th>
-      <td>1.0</td>
-      <td>37.0</td>
-      <td>3.5</td>
-      <td>1.4</td>
-      <td>7.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>1.0</td>
+      <th rowspan="4" valign="top">V</th>
+      <th rowspan="2" valign="top">APGR</th>
+      <th>5th</th>
+      <td>0.754533</td>
+      <td>0.862055</td>
+      <td>0.982723</td>
     </tr>
     <tr>
+      <th>95th</th>
+      <td>1.008313</td>
+      <td>1.075471</td>
+      <td>1.143149</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">WGT</th>
+      <th>5th</th>
+      <td>0.945805</td>
+      <td>1.008079</td>
+      <td>1.082750</td>
+    </tr>
+    <tr>
+      <th>95th</th>
+      <td>0.851042</td>
+      <td>0.989127</td>
+      <td>1.119676</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>The effects are given as fractions where 1 means no effect and are calculated conditioned on the 5th and 95th percentile of the covariate values respectively.</p>
+<p>Assume that the estimated parameter vector is joint normally distributed with mean vector <span class="math notranslate nohighlight">\(P\)</span> and covariance matrix <span class="math notranslate nohighlight">\(Cov(P)\)</span>. Then the marginal distribution of the <span class="math notranslate nohighlight">\(\omega_{ij}\)</span> of <span class="math notranslate nohighlight">\(\Omega\)</span> will also be joint normally distributed. Sample 1000 times from this marginal distribution to get <span class="math notranslate nohighlight">\(\omega_{ijk}\)</span> and <span class="math notranslate nohighlight">\(\Omega_k\)</span> for <span class="math notranslate nohighlight">\(1\leq k \leq 1000\)</span>.</p>
+<p>If the covariate etas were scaled in the FREM model the scaling needs to be applied to all <span class="math notranslate nohighlight">\(\Omega_k\)</span> by first creating the scaling matrix</p>
+<div class="math notranslate nohighlight">
+\[\begin{split}    S=
+\begin{bmatrix}
+    1 &amp; &amp; &amp; &amp; \\
+    &amp; 1 &amp; &amp; &amp; \\
+    &amp; &amp; \ddots &amp; &amp;\\
+    &amp; &amp; &amp; \sigma_1 &amp;\\
+    &amp; &amp; &amp; &amp; \sigma_2 \\
+\end{bmatrix}\end{split}\]</div>
+<p>where <span class="math notranslate nohighlight">\(\sigma_i\)</span> is the standard deviation of the i:th covariate in the data, and then get each scaled matrix as <span class="math notranslate nohighlight">\(S \Omega_k S\)</span>.</p>
+<p>Do for each sample:
+For each covariate <span class="math notranslate nohighlight">\(k\)</span> create the marginal distribution of all parameters and that single covariate. Calculate the means of the parameters given the covariate values in the 5th and 95th percentile of the dataset in turn. The vector of the means would be given by the conditional joint normal distribution as:</p>
+<div class="math notranslate nohighlight">
+\[\bar{\mu} = \mu_1 + \Omega_{12}\Omega_{22}^{-1}(a - \mu_2)\]</div>
+<p>where <span class="math notranslate nohighlight">\(a\)</span> is the given value of the covariate.</p>
+<p>For each parameter and covariate calculate the mean, 5:th and 95:th percentile over all conditional parameter means. These are the covariate effects and their uncertainties. I.e. the conditional mean of the parameter given in turn the 5th and the 95th percentile of the covariate data. Since we currently assume log-normally distributed individual parameters each mean is exponentiated.</p>
+<p>The covariate effect plots give the covariate effects in percent with uncertainty for each parameter and covariate in turn. The red figures are the 5th and 95th percentile covariate values.</p>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_html">
+<div id="altair-viz-632347d38f3447c8bdd029bc71d0c3f2"></div>
+<script type="text/javascript">
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-632347d38f3447c8bdd029bc71d0c3f2") {
+      outputDiv = document.getElementById("altair-viz-632347d38f3447c8bdd029bc71d0c3f2");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm//vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm//vega-lite@4.8.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm//vega-embed@6?noext",
+    };
+
+    function loadScript(lib) {
+      return new Promise(function(resolve, reject) {
+        var s = document.createElement('script');
+        s.src = paths[lib];
+        s.async = true;
+        s.onload = () => resolve(paths[lib]);
+        s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+        document.getElementsByTagName("head")[0].appendChild(s);
+      });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else if (typeof vegaEmbed === "function") {
+      displayChart(vegaEmbed);
+    } else {
+      loadScript("vega")
+        .then(() => loadScript("vega-lite"))
+        .then(() => loadScript("vega-embed"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"config": {"axis": {"labelFontSize": 11, "titleFontSize": 13}, "legend": {"labelFontSize": 12, "titleFontSize": 13}}, "vconcat": [{"data": {"name": "data-5d6a9e8d6770411c2532a20bc80590b0"}, "facet": {"row": {"type": "nominal", "field": "covariate", "title": null}}, "spec": {"layer": [{"mark": {"type": "errorbar", "ticks": true}, "encoding": {"x": {"type": "quantitative", "field": "p5", "scale": {"zero": false}, "title": "Effect size in percent"}, "x2": {"field": "p95"}, "y": {"type": "nominal", "field": "condition", "title": null}}}, {"mark": {"type": "rule", "color": "gray", "strokeDash": [10, 4]}, "encoding": {"x": {"type": "quantitative", "field": "xzero"}}, "transform": [{"calculate": "0", "as": "xzero"}]}, {"mark": {"type": "point", "color": "black", "filled": true}, "encoding": {"x": {"type": "quantitative", "field": "mean"}, "y": {"type": "nominal", "field": "condition"}}}, {"mark": {"type": "text", "color": "red", "dy": -15}, "encoding": {"text": {"type": "quantitative", "field": "value"}, "x": {"type": "quantitative", "field": "mean"}, "y": {"type": "nominal", "field": "condition"}}}], "height": 100, "width": 700}, "columns": 1.0, "resolve": {"scale": {"y": "independent"}}, "title": "CL"}, {"data": {"name": "data-8a7106560b5bd0fd00bf6d7b7673e5a0"}, "facet": {"row": {"type": "nominal", "field": "covariate", "title": null}}, "spec": {"layer": [{"mark": {"type": "errorbar", "ticks": true}, "encoding": {"x": {"type": "quantitative", "field": "p5", "scale": {"zero": false}, "title": "Effect size in percent"}, "x2": {"field": "p95"}, "y": {"type": "nominal", "field": "condition", "title": null}}}, {"mark": {"type": "rule", "color": "gray", "strokeDash": [10, 4]}, "encoding": {"x": {"type": "quantitative", "field": "xzero"}}, "transform": [{"calculate": "0", "as": "xzero"}]}, {"mark": {"type": "point", "color": "black", "filled": true}, "encoding": {"x": {"type": "quantitative", "field": "mean"}, "y": {"type": "nominal", "field": "condition"}}}, {"mark": {"type": "text", "color": "red", "dy": -15}, "encoding": {"text": {"type": "quantitative", "field": "value"}, "x": {"type": "quantitative", "field": "mean"}, "y": {"type": "nominal", "field": "condition"}}}], "height": 100, "width": 700}, "columns": 1.0, "resolve": {"scale": {"y": "independent"}}, "title": "V"}], "resolve": {"scale": {"x": "shared"}}, "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json", "datasets": {"data-5d6a9e8d6770411c2532a20bc80590b0": [{"covariate": "APGR", "condition": "5th", "p5": -6.649542060000002, "mean": 11.769676139999996, "p95": 32.29904997999999, "value": 1.0}, {"covariate": "APGR", "condition": "95th", "p5": -12.449111699999992, "mean": -4.790260579999995, "p95": 3.3224474400000092, "value": 9.0}, {"covariate": "WGT", "condition": "5th", "p5": -13.736071509999991, "mean": -5.480291849999997, "p95": 3.3186531799999974, "value": 0.7000000000000001}, {"covariate": "WGT", "condition": "95th", "p5": -6.408818649999992, "mean": 13.197245930000001, "p95": 34.954163179999995, "value": 3.2}], "data-8a7106560b5bd0fd00bf6d7b7673e5a0": [{"covariate": "APGR", "condition": "5th", "p5": -24.546745650000002, "mean": -13.794540259999998, "p95": -1.7277136999999887, "value": 1.0}, {"covariate": "APGR", "condition": "95th", "p5": 0.8312721400000056, "mean": 7.5470898999999925, "p95": 14.314933180000011, "value": 9.0}, {"covariate": "WGT", "condition": "5th", "p5": -5.419496540000002, "mean": 0.8078571900000053, "p95": 8.275035060000002, "value": 0.7000000000000001}, {"covariate": "WGT", "condition": "95th", "p5": -14.89584746, "mean": -1.0872843699999968, "p95": 11.967611599999994, "value": 3.2}]}}, {"mode": "vega-lite"});
+</script></div></div>
+</div>
+</div>
+<div class="section" id="individual-covariate-effects">
+<h3>Individual covariate effects<a class="headerlink" href="#individual-covariate-effects" title="Permalink to this headline">¶</a></h3>
+<p>The combined effects of all covariates on the parameters of each individual is calculated with uncertainty and summarized in the <cite>individual_effects</cite> table.</p>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>observed</th>
+      <th>p5</th>
+      <th>p95</th>
+    </tr>
+    <tr>
+      <th>ID</th>
+      <th>parameter</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="2" valign="top">1.0</th>
+      <th>CL</th>
+      <td>0.974788</td>
+      <td>0.954839</td>
+      <td>0.991003</td>
+    </tr>
+    <tr>
+      <th>V</th>
+      <td>1.022011</td>
+      <td>1.002592</td>
+      <td>1.039157</td>
+    </tr>
+    <tr>
+      <th rowspan="2" valign="top">2.0</th>
+      <th>CL</th>
+      <td>0.932221</td>
+      <td>0.869374</td>
+      <td>0.996220</td>
+    </tr>
+    <tr>
+      <th>V</th>
+      <td>1.086308</td>
+      <td>1.010492</td>
+      <td>1.152672</td>
+    </tr>
+    <tr>
+      <th>3.0</th>
+      <th>CL</th>
+      <td>1.009154</td>
+      <td>0.997035</td>
+      <td>1.021956</td>
+    </tr>
+    <tr>
+      <th>...</th>
       <th>...</th>
       <td>...</td>
       <td>...</td>
       <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
-      <td>...</td>
     </tr>
     <tr>
-      <th>739</th>
-      <td>59.0</td>
-      <td>108.3</td>
-      <td>3.0</td>
-      <td>1.1</td>
-      <td>6.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>1.0</td>
+      <th>57.0</th>
+      <th>V</th>
+      <td>0.971302</td>
+      <td>0.925135</td>
+      <td>1.014011</td>
     </tr>
     <tr>
-      <th>740</th>
-      <td>59.0</td>
-      <td>120.5</td>
-      <td>3.0</td>
-      <td>1.1</td>
-      <td>6.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>1.0</td>
+      <th rowspan="2" valign="top">58.0</th>
+      <th>CL</th>
+      <td>0.949360</td>
+      <td>0.910159</td>
+      <td>0.988151</td>
     </tr>
     <tr>
-      <th>741</th>
-      <td>59.0</td>
-      <td>132.3</td>
-      <td>3.0</td>
-      <td>1.1</td>
-      <td>6.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>1.0</td>
+      <th>V</th>
+      <td>1.055101</td>
+      <td>1.007310</td>
+      <td>1.096896</td>
     </tr>
     <tr>
-      <th>742</th>
-      <td>59.0</td>
-      <td>144.8</td>
-      <td>3.0</td>
-      <td>1.1</td>
-      <td>6.0</td>
-      <td>0.0</td>
-      <td>1.0</td>
-      <td>1.0</td>
+      <th rowspan="2" valign="top">59.0</th>
+      <th>CL</th>
+      <td>0.976535</td>
+      <td>0.927461</td>
+      <td>1.021978</td>
     </tr>
     <tr>
-      <th>743</th>
-      <td>59.0</td>
-      <td>146.8</td>
-      <td>0.0</td>
-      <td>1.1</td>
-      <td>6.0</td>
-      <td>40.2</td>
-      <td>0.0</td>
-      <td>0.0</td>
+      <th>V</th>
+      <td>0.998062</td>
+      <td>0.971921</td>
+      <td>1.039129</td>
     </tr>
   </tbody>
 </table>
-<p>744 rows × 8 columns</p>
+<p>118 rows × 3 columns</p>
 </div></div></div>
+</div>
+<p>The conditional distribution as above is calculated for the estimated parameters (observed in the table) and the samples (that gives p5 and p95). The same <span class="math notranslate nohighlight">\(\mu\)</span> and <span class="math notranslate nohighlight">\(\Omega\)</span> are used, but the given condition is instead the covariate baseline as estimated from the model for each individual.</p>
+<p>The plot shows the individuals with the lowest and the highest percentual covariate effect and the uncertainty.</p>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_html">
+<div id="altair-viz-225df1f2f5c946908451bbd29d35373c"></div>
+<script type="text/javascript">
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-225df1f2f5c946908451bbd29d35373c") {
+      outputDiv = document.getElementById("altair-viz-225df1f2f5c946908451bbd29d35373c");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm//vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm//vega-lite@4.8.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm//vega-embed@6?noext",
+    };
+
+    function loadScript(lib) {
+      return new Promise(function(resolve, reject) {
+        var s = document.createElement('script');
+        s.src = paths[lib];
+        s.async = true;
+        s.onload = () => resolve(paths[lib]);
+        s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+        document.getElementsByTagName("head")[0].appendChild(s);
+      });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else if (typeof vegaEmbed === "function") {
+      displayChart(vegaEmbed);
+    } else {
+      loadScript("vega")
+        .then(() => loadScript("vega-lite"))
+        .then(() => loadScript("vega-embed"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"config": {"axis": {"labelFontSize": 11, "titleFontSize": 13}, "legend": {"labelFontSize": 12, "titleFontSize": 13}}, "vconcat": [{"layer": [{"mark": {"type": "point", "color": "black", "filled": true, "size": 40}, "encoding": {"x": {"type": "quantitative", "field": "observed"}, "y": {"type": "nominal", "field": "ID", "sort": ["51", "48", "37", "16", "46", "2", "52", "39", "38", "49", "...", "31", "9", "58", "14", "22", "8", "11", "4", "15", "53", "33", "1", "10", "5", "44", "59", "50", "13", "54", "30", "20", "56", "12", "7", "18", "41", "17", "21", "3", "6", "47", "55", "36", "42", "40", "45", "57", "27", "28", "25", "34", "43", "26", "19", "32", "35", "23", "24"]}}}, {"mark": {"type": "errorbar", "ticks": true}, "encoding": {"tooltip": [{"type": "nominal", "field": "ID"}, {"type": "quantitative", "field": "p5"}, {"type": "quantitative", "field": "observed"}, {"type": "quantitative", "field": "p95"}, {"type": "quantitative", "field": "APGR"}, {"type": "quantitative", "field": "WGT"}], "x": {"type": "quantitative", "field": "p5", "scale": {"zero": false}, "title": "Effect size in percent"}, "x2": {"field": "p95"}, "y": {"type": "nominal", "field": "ID", "sort": ["51", "48", "37", "16", "46", "2", "52", "39", "38", "49", "...", "31", "9", "58", "14", "22", "8", "11", "4", "15", "53", "33", "1", "10", "5", "44", "59", "50", "13", "54", "30", "20", "56", "12", "7", "18", "41", "17", "21", "3", "6", "47", "55", "36", "42", "40", "45", "57", "27", "28", "25", "34", "43", "26", "19", "32", "35", "23", "24"], "title": "ID"}}}, {"mark": {"type": "rule", "color": "gray", "strokeDash": [10, 2]}, "encoding": {"x": {"type": "quantitative", "field": "xzero"}}, "transform": [{"calculate": "0", "as": "xzero"}]}], "data": {"name": "data-7dcf443396cfe9b4b5af7db23da15409"}, "title": "Individuals for parameter CL", "transform": [{"window": [{"op": "row_number", "field": "observed", "as": "rank"}], "sort": [{"field": "observed", "order": "ascending"}]}, {"window": [{"op": "row_number", "field": "observed", "as": "nrank"}], "sort": [{"field": "observed", "order": "descending"}]}, {"filter": "datum.rank <= 10 | datum.nrank <= 11"}, {"calculate": "datum.nrank == 11 ? '...' : datum.ID", "as": "ID"}, {"calculate": "datum.nrank == 11 ? '...' : datum.p5", "as": "p5"}, {"calculate": "datum.nrank == 11 ? '...' : datum.p95", "as": "p95"}, {"calculate": "datum.nrank == 11 ? '...' : datum.observed", "as": "observed"}], "width": 700}, {"layer": [{"mark": {"type": "point", "color": "black", "filled": true, "size": 40}, "encoding": {"x": {"type": "quantitative", "field": "observed"}, "y": {"type": "nominal", "field": "ID", "sort": ["24", "19", "43", "23", "25", "45", "40", "34", "35", "55", "...", "56", "36", "6", "17", "18", "7", "57", "3", "12", "20", "13", "50", "59", "4", "21", "41", "1", "10", "5", "44", "15", "32", "8", "11", "26", "14", "29", "52", "28", "30", "54", "33", "53", "42", "22", "47", "58", "31", "9", "49", "38", "46", "48", "2", "16", "37", "51", "39"]}}}, {"mark": {"type": "errorbar", "ticks": true}, "encoding": {"tooltip": [{"type": "nominal", "field": "ID"}, {"type": "quantitative", "field": "p5"}, {"type": "quantitative", "field": "observed"}, {"type": "quantitative", "field": "p95"}, {"type": "quantitative", "field": "APGR"}, {"type": "quantitative", "field": "WGT"}], "x": {"type": "quantitative", "field": "p5", "scale": {"zero": false}, "title": "Effect size in percent"}, "x2": {"field": "p95"}, "y": {"type": "nominal", "field": "ID", "sort": ["24", "19", "43", "23", "25", "45", "40", "34", "35", "55", "...", "56", "36", "6", "17", "18", "7", "57", "3", "12", "20", "13", "50", "59", "4", "21", "41", "1", "10", "5", "44", "15", "32", "8", "11", "26", "14", "29", "52", "28", "30", "54", "33", "53", "42", "22", "47", "58", "31", "9", "49", "38", "46", "48", "2", "16", "37", "51", "39"], "title": "ID"}}}, {"mark": {"type": "rule", "color": "gray", "strokeDash": [10, 2]}, "encoding": {"x": {"type": "quantitative", "field": "xzero"}}, "transform": [{"calculate": "0", "as": "xzero"}]}], "data": {"name": "data-9181d21d2558517bf122e33602033aa2"}, "title": "Individuals for parameter V", "transform": [{"window": [{"op": "row_number", "field": "observed", "as": "rank"}], "sort": [{"field": "observed", "order": "ascending"}]}, {"window": [{"op": "row_number", "field": "observed", "as": "nrank"}], "sort": [{"field": "observed", "order": "descending"}]}, {"filter": "datum.rank <= 10 | datum.nrank <= 11"}, {"calculate": "datum.nrank == 11 ? '...' : datum.ID", "as": "ID"}, {"calculate": "datum.nrank == 11 ? '...' : datum.p5", "as": "p5"}, {"calculate": "datum.nrank == 11 ? '...' : datum.p95", "as": "p95"}, {"calculate": "datum.nrank == 11 ? '...' : datum.observed", "as": "observed"}], "width": 700}], "resolve": {"scale": {"x": "shared"}}, "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json", "datasets": {"data-7dcf443396cfe9b4b5af7db23da15409": [{"ID": "51", "observed": -11.261031799999998, "p5": -19.42691207999999, "p95": -4.264623919999999, "APGR": 800.0, "WGT": -9.999999999999998}, {"ID": "48", "observed": -10.368814969999995, "p5": -19.08073767999999, "p95": -2.995767859999998, "APGR": 700.0, "WGT": -29.999999999999993}, {"ID": "37", "observed": -9.04710729999999, "p5": -15.418156309999997, "p95": -2.791193039999995, "APGR": 800.0, "WGT": 19.999999999999996}, {"ID": "16", "observed": -9.04710729999999, "p5": -15.418156309999997, "p95": -2.791193039999995, "APGR": 800.0, "WGT": 19.999999999999996}, {"ID": "46", "observed": -7.374893819999995, "p5": -12.941975139999995, "p95": -2.783536139999998, "APGR": 700.0, "WGT": 10.000000000000009}, {"ID": "2", "observed": -6.777949809999995, "p5": -13.06260239, "p95": -0.3779969599999933, "APGR": 800.0, "WGT": 50.0}, {"ID": "52", "observed": -6.443610109999998, "p5": -13.06530966999999, "p95": -0.8397963800000019, "APGR": 600.0, "WGT": -9.999999999999998}, {"ID": "39", "observed": -6.177138640000002, "p5": -16.481476689999997, "p95": 4.384521779999995, "APGR": 900.0, "WGT": 89.99999999999999}, {"ID": "38", "observed": -5.840640320000001, "p5": -10.151918579999997, "p95": -1.9002907299999983, "APGR": 700.0, "WGT": 30.000000000000004}, {"ID": "49", "observed": -5.840640320000001, "p5": -10.151918579999997, "p95": -1.9002907299999983, "APGR": 700.0, "WGT": 30.000000000000004}, {"ID": "29", "observed": -5.6719527399999965, "p5": -11.367133759999993, "p95": -0.910596879999992, "APGR": 600.0, "WGT": 0.0}, {"ID": "31", "observed": -5.064015119999999, "p5": -8.984131549999997, "p95": -1.1849061399999972, "APGR": 700.0, "WGT": 39.99999999999999}, {"ID": "9", "observed": -5.064015119999999, "p5": -8.984131549999997, "p95": -1.1849061399999972, "APGR": 700.0, "WGT": 39.99999999999999}, {"ID": "58", "observed": -5.064015119999999, "p5": -8.984131549999997, "p95": -1.1849061399999972, "APGR": 700.0, "WGT": 39.99999999999999}, {"ID": "14", "observed": -4.893930709999994, "p5": -9.635760679999994, "p95": -1.0378166099999975, "APGR": 600.0, "WGT": 10.000000000000009}, {"ID": "22", "observed": -4.280979889999992, "p5": -8.244736069999991, "p95": -0.3136147699999925, "APGR": 700.0, "WGT": 50.0}, {"ID": "8", "observed": -4.109497060000001, "p5": -7.851876139999991, "p95": -1.104140209999993, "APGR": 600.0, "WGT": 19.999999999999996}, {"ID": "11", "observed": -4.109497060000001, "p5": -7.851876139999991, "p95": -1.104140209999993, "APGR": 600.0, "WGT": 19.999999999999996}, {"ID": "4", "observed": -3.9377024400000016, "p5": -10.82286577, "p95": 2.6092005400000007, "APGR": 500.0, "WGT": -9.999999999999998}, {"ID": "15", "observed": -3.3185878199999963, "p5": -6.087312820000001, "p95": -1.0600940199999909, "APGR": 600.0, "WGT": 30.000000000000004}, {"ID": "53", "observed": -2.695482919999992, "p5": -7.626706849999998, "p95": 2.040608359999996, "APGR": 700.0, "WGT": 70.00000000000001}, {"ID": "33", "observed": -2.695482919999992, "p5": -7.626706849999998, "p95": 2.040608359999996, "APGR": 700.0, "WGT": 70.00000000000001}, {"ID": "1", "observed": -2.5211607599999963, "p5": -4.516062079999994, "p95": -0.8997450799999918, "APGR": 600.0, "WGT": 39.99999999999999}, {"ID": "10", "observed": -2.5211607599999963, "p5": -4.516062079999994, "p95": -0.8997450799999918, "APGR": 600.0, "WGT": 39.99999999999999}, {"ID": "5", "observed": -2.5211607599999963, "p5": -4.516062079999994, "p95": -0.8997450799999918, "APGR": 600.0, "WGT": 39.99999999999999}, {"ID": "44", "observed": -2.5211607599999963, "p5": -4.516062079999994, "p95": -0.8997450799999918, "APGR": 600.0, "WGT": 39.99999999999999}, {"ID": "59", "observed": -2.346520529999996, "p5": -7.253932299999999, "p95": 2.1978109299999993, "APGR": 500.0, "WGT": 10.000000000000009}, {"ID": "50", "observed": -2.346520529999996, "p5": -7.253932299999999, "p95": 2.1978109299999993, "APGR": 500.0, "WGT": 10.000000000000009}, {"ID": "13", "observed": -2.346520529999996, "p5": -7.253932299999999, "p95": 2.1978109299999993, "APGR": 500.0, "WGT": 10.000000000000009}, {"ID": "54", "observed": -1.8929165099999978, "p5": -7.471534189999995, "p95": 3.6438307200000075, "APGR": 700.0, "WGT": 80.0}, {"ID": "30", "observed": -1.8929165099999978, "p5": -7.471534189999995, "p95": 3.6438307200000075, "APGR": 700.0, "WGT": 80.0}, {"ID": "20", "observed": -1.5410701799999926, "p5": -5.407534930000002, "p95": 2.178774140000006, "APGR": 500.0, "WGT": 19.999999999999996}, {"ID": "56", "observed": -1.1879500599999981, "p5": -13.131215099999993, "p95": 12.571698370000007, "APGR": 300.0, "WGT": -39.99999999999999}, {"ID": "12", "observed": -0.7289821799999929, "p5": -3.5770422999999885, "p95": 2.0630278699999893, "APGR": 500.0, "WGT": 30.000000000000004}, {"ID": "7", "observed": -0.5511312499999921, "p5": -7.634639489999994, "p95": 7.2106267299999915, "APGR": 400.0, "WGT": 0.0}, {"ID": "18", "observed": -0.5511312499999921, "p5": -7.634639489999994, "p95": 7.2106267299999915, "APGR": 400.0, "WGT": 0.0}, {"ID": "41", "observed": -0.08918758999999499, "p5": -2.751838639999993, "p95": 2.591168629999996, "APGR": 600.0, "WGT": 70.00000000000001}, {"ID": "17", "observed": 0.26912175000000094, "p5": -6.003917650000002, "p95": 7.144920620000006, "APGR": 400.0, "WGT": 10.000000000000009}, {"ID": "21", "observed": 0.7348755200000001, "p5": -2.7297002399999992, "p95": 4.440259219999998, "APGR": 600.0, "WGT": 80.0}, {"ID": "3", "observed": 0.9153532600000069, "p5": -0.2965314799999952, "p95": 2.195623949999992, "APGR": 500.0, "WGT": 50.0}, {"ID": "6", "observed": 1.0961460299999892, "p5": -4.4060088399999975, "p95": 7.1501277499999905, "APGR": 400.0, "WGT": 19.999999999999996}, {"ID": "47", "observed": 2.0374821699999934, "p5": -11.629456029999997, "p95": 18.048722139999995, "APGR": 800.0, "WGT": 160.0}, {"ID": "55", "observed": 2.9548542799999966, "p5": -5.415972559999993, "p95": 12.67222254, "APGR": 300.0, "WGT": 10.000000000000009}, {"ID": "36", "observed": 3.618364620000003, "p5": -0.24800799999999956, "p95": 7.852324900000007, "APGR": 400.0, "WGT": 50.0}, {"ID": "42", "observed": 3.7276794300000082, "p5": -11.666872179999999, "p95": 22.58016650000001, "APGR": 800.0, "WGT": 179.99999999999997}, {"ID": "40", "observed": 5.712493540000008, "p5": -5.005524059999999, "p95": 18.85395364, "APGR": 200.0, "WGT": 10.000000000000009}, {"ID": "45", "observed": 5.901854169999998, "p5": -8.99334396, "p95": 24.512069540000002, "APGR": 100.0, "WGT": -19.999999999999996}, {"ID": "57", "observed": 6.0135823099999985, "p5": 0.5347117599999951, "p95": 13.33841093000001, "APGR": 500.0, "WGT": 110.00000000000001}, {"ID": "27", "observed": 7.079478219999991, "p5": 2.5610922999999897, "p95": 13.157660530000005, "APGR": 400.0, "WGT": 89.99999999999999}, {"ID": "28", "observed": 7.192405340000008, "p5": -12.066284779999991, "p95": 32.09250628, "APGR": 800.0, "WGT": 220.00000000000003}, {"ID": "25", "observed": 7.848898599999998, "p5": -10.179326309999992, "p95": 30.97722383999999, "APGR": 0.0, "WGT": -29.999999999999993}, {"ID": "34", "observed": 8.156122999999994, "p5": 1.6479317800000004, "p95": 15.349142420000007, "APGR": 300.0, "WGT": 70.00000000000001}, {"ID": "43", "observed": 9.63533353999999, "p5": -7.0155142199999965, "p95": 31.465410719999998, "APGR": 0.0, "WGT": -9.999999999999998}, {"ID": "26", "observed": 9.866751439999998, "p5": -12.27809473, "p95": 40.090093599999996, "APGR": 800.0, "WGT": 250.0}, {"ID": "19", "observed": 10.539610770000007, "p5": -5.892791419999998, "p95": 31.258407980000015, "APGR": 0.0, "WGT": 0.0}, {"ID": "32", "observed": 10.772924599999989, "p5": -12.38388318, "p95": 43.10103487000001, "APGR": 800.0, "WGT": 260.0}, {"ID": "35", "observed": 12.489109499999994, "p5": 2.6784433200000013, "p95": 26.448904210000013, "APGR": 400.0, "WGT": 150.0}, {"ID": "23", "observed": 24.587326840000003, "p5": 6.802539750000003, "p95": 51.32608899000002, "APGR": 200.0, "WGT": 210.0}, {"ID": "24", "observed": 28.979501789999993, "p5": 8.34404729, "p95": 60.50412618000001, "APGR": 100.0, "WGT": 220.00000000000003}], "data-9181d21d2558517bf122e33602033aa2": [{"ID": "24", "observed": -17.012079940000003, "p5": -29.683618189999994, "p95": -0.41793985999999395, "APGR": 100.0, "WGT": 220.00000000000003}, {"ID": "19", "observed": -14.661807859999998, "p5": -24.066979469999993, "p95": 0.20886393999999253, "APGR": 0.0, "WGT": 0.0}, {"ID": "43", "observed": -14.429557179999996, "p5": -23.947034869999996, "p95": 0.7762652100000045, "APGR": 0.0, "WGT": -9.999999999999998}, {"ID": "23", "observed": -14.091912070000001, "p5": -25.734369709999992, "p95": 0.13354616000000874, "APGR": 200.0, "WGT": 210.0}, {"ID": "25", "observed": -13.963154560000001, "p5": -23.79242254999999, "p95": 1.807301140000006, "APGR": 0.0, "WGT": -29.999999999999993}, {"ID": "45", "observed": -11.418505660000001, "p5": -19.7241413, "p95": 1.8156668999999903, "APGR": 100.0, "WGT": -19.999999999999996}, {"ID": "40", "observed": -9.293000249999995, "p5": -15.831931649999998, "p95": 0.5298610699999928, "APGR": 200.0, "WGT": 10.000000000000009}, {"ID": "34", "observed": -7.870732069999997, "p5": -13.146357549999998, "p95": -1.0976881399999971, "APGR": 300.0, "WGT": 70.00000000000001}, {"ID": "35", "observed": -6.933381289999996, "p5": -14.513043660000003, "p95": 1.1296080299999955, "APGR": 400.0, "WGT": 150.0}, {"ID": "55", "observed": -6.356065869999994, "p5": -11.305402329999993, "p95": 1.1025830499999945, "APGR": 300.0, "WGT": 10.000000000000009}, {"ID": "27", "observed": -5.403308039999999, "p5": -9.433400739999998, "p95": -0.5424377899999944, "APGR": 400.0, "WGT": 89.99999999999999}, {"ID": "56", "observed": -5.074837659999998, "p5": -11.629844769999998, "p95": 5.17972458, "APGR": 300.0, "WGT": -39.99999999999999}, {"ID": "36", "observed": -4.369307619999995, "p5": -7.403922109999995, "p95": -0.5258752599999972, "APGR": 400.0, "WGT": 50.0}, {"ID": "6", "observed": -3.586396979999995, "p5": -6.829157119999996, "p95": 1.136218609999995, "APGR": 400.0, "WGT": 19.999999999999996}, {"ID": "17", "observed": -3.324004199999997, "p5": -6.830564929999994, "p95": 2.136521180000006, "APGR": 400.0, "WGT": 10.000000000000009}, {"ID": "18", "observed": -3.0608991699999977, "p5": -6.986580369999995, "p95": 2.8355548900000027, "APGR": 400.0, "WGT": 0.0}, {"ID": "7", "observed": -3.0608991699999977, "p5": -6.986580369999995, "p95": 2.8355548900000027, "APGR": 400.0, "WGT": 0.0}, {"ID": "57", "observed": -2.8698355899999917, "p5": -7.486473379999992, "p95": 1.4010994299999968, "APGR": 500.0, "WGT": 110.00000000000001}, {"ID": "3", "observed": -1.272952659999993, "p5": -2.1902647799999952, "p95": -0.0635367799999953, "APGR": 500.0, "WGT": 50.0}, {"ID": "12", "observed": -0.7348441999999955, "p5": -2.2559571599999995, "p95": 1.5010026599999948, "APGR": 500.0, "WGT": 30.000000000000004}, {"ID": "20", "observed": -0.4646927399999945, "p5": -2.4967292199999935, "p95": 2.689871860000004, "APGR": 500.0, "WGT": 19.999999999999996}, {"ID": "13", "observed": -0.1938041399999979, "p5": -2.8079451099999986, "p95": 3.91291653000001, "APGR": 500.0, "WGT": 10.000000000000009}, {"ID": "50", "observed": -0.1938041399999979, "p5": -2.8079451099999986, "p95": 3.91291653000001, "APGR": 500.0, "WGT": 10.000000000000009}, {"ID": "59", "observed": -0.1938041399999979, "p5": -2.8079451099999986, "p95": 3.91291653000001, "APGR": 500.0, "WGT": 10.000000000000009}, {"ID": "4", "observed": 0.3501848400000007, "p5": -3.5562263999999955, "p95": 6.55268913, "APGR": 500.0, "WGT": -9.999999999999998}, {"ID": "21", "observed": 1.0960107400000085, "p5": -1.6993142699999964, "p95": 3.059302709999989, "APGR": 600.0, "WGT": 80.0}, {"ID": "41", "observed": 1.3711449000000098, "p5": -0.8748350199999977, "p95": 2.914920880000005, "APGR": 600.0, "WGT": 70.00000000000001}, {"ID": "1", "observed": 2.2010521399999927, "p5": 0.2591673399999994, "p95": 3.915703259999992, "APGR": 600.0, "WGT": 39.99999999999999}, {"ID": "10", "observed": 2.2010521399999927, "p5": 0.2591673399999994, "p95": 3.915703259999992, "APGR": 600.0, "WGT": 39.99999999999999}, {"ID": "5", "observed": 2.2010521399999927, "p5": 0.2591673399999994, "p95": 3.915703259999992, "APGR": 600.0, "WGT": 39.99999999999999}, {"ID": "44", "observed": 2.2010521399999927, "p5": 0.2591673399999994, "p95": 3.915703259999992, "APGR": 600.0, "WGT": 39.99999999999999}, {"ID": "15", "observed": 2.4791936900000033, "p5": 0.03415615999999844, "p95": 4.763563810000004, "APGR": 600.0, "WGT": 30.000000000000004}, {"ID": "32", "observed": 2.6043438999999946, "p5": -15.821742789999993, "p95": 17.021406589999998, "APGR": 800.0, "WGT": 260.0}, {"ID": "8", "observed": 2.7580941699999917, "p5": -0.20795839999999677, "p95": 5.7790188300000045, "APGR": 600.0, "WGT": 19.999999999999996}, {"ID": "11", "observed": 2.7580941699999917, "p5": -0.20795839999999677, "p95": 5.7790188300000045, "APGR": 600.0, "WGT": 19.999999999999996}, {"ID": "26", "observed": 2.883581039999994, "p5": -14.86492037, "p95": 16.606918240000002, "APGR": 800.0, "WGT": 250.0}, {"ID": "14", "observed": 3.037751710000003, "p5": -0.5851185699999983, "p95": 6.874991459999991, "APGR": 600.0, "WGT": 10.000000000000009}, {"ID": "29", "observed": 3.318172330000002, "p5": -0.9338224299999975, "p95": 8.030286799999997, "APGR": 600.0, "WGT": 0.0}, {"ID": "52", "observed": 3.599356119999997, "p5": -1.2991498799999945, "p95": 9.18065991999999, "APGR": 600.0, "WGT": -9.999999999999998}, {"ID": "28", "observed": 3.725880250000002, "p5": -11.860532349999996, "p95": 15.57070345, "APGR": 800.0, "WGT": 220.00000000000003}, {"ID": "30", "observed": 4.369323170000006, "p5": -0.7016868299999923, "p95": 8.113780669999993, "APGR": 700.0, "WGT": 80.0}, {"ID": "54", "observed": 4.369323170000006, "p5": -0.7016868299999923, "p95": 8.113780669999993, "APGR": 700.0, "WGT": 80.0}, {"ID": "33", "observed": 4.6533656999999895, "p5": -0.1854665500000019, "p95": 8.296226200000012, "APGR": 700.0, "WGT": 70.00000000000001}, {"ID": "53", "observed": 4.6533656999999895, "p5": -0.1854665500000019, "p95": 8.296226200000012, "APGR": 700.0, "WGT": 70.00000000000001}, {"ID": "42", "observed": 4.8596556999999985, "p5": -7.795054989999994, "p95": 14.52940048, "APGR": 800.0, "WGT": 179.99999999999997}, {"ID": "22", "observed": 5.22377435000001, "p5": 0.6495199600000001, "p95": 9.075862740000007, "APGR": 700.0, "WGT": 50.0}, {"ID": "47", "observed": 5.4312024499999945, "p5": -5.943222689999994, "p95": 14.11540134, "APGR": 800.0, "WGT": 160.0}, {"ID": "58", "observed": 5.510143889999997, "p5": 0.7310271399999957, "p95": 9.68958325, "APGR": 700.0, "WGT": 39.99999999999999}, {"ID": "31", "observed": 5.510143889999997, "p5": 0.7310271399999957, "p95": 9.68958325, "APGR": 700.0, "WGT": 39.99999999999999}, {"ID": "9", "observed": 5.510143889999997, "p5": 0.7310271399999957, "p95": 9.68958325, "APGR": 700.0, "WGT": 39.99999999999999}, {"ID": "49", "observed": 5.797291180000008, "p5": 0.8416716199999952, "p95": 10.182225129999999, "APGR": 700.0, "WGT": 30.000000000000004}, {"ID": "38", "observed": 5.797291180000008, "p5": 0.8416716199999952, "p95": 10.182225129999999, "APGR": 700.0, "WGT": 30.000000000000004}, {"ID": "46", "observed": 6.3739363699999885, "p5": 0.5661417900000076, "p95": 11.690760249999999, "APGR": 700.0, "WGT": 10.000000000000009}, {"ID": "48", "observed": 7.536674920000008, "p5": -0.3938455999999979, "p95": 15.88422073, "APGR": 700.0, "WGT": -29.999999999999993}, {"ID": "2", "observed": 8.630767760000001, "p5": 1.0491967399999913, "p95": 15.267170590000001, "APGR": 800.0, "WGT": 50.0}, {"ID": "16", "observed": 9.520107589999993, "p5": 1.3066997299999938, "p95": 16.96139725000001, "APGR": 800.0, "WGT": 19.999999999999996}, {"ID": "37", "observed": 9.520107589999993, "p5": 1.3066997299999938, "p95": 16.96139725000001, "APGR": 800.0, "WGT": 19.999999999999996}, {"ID": "51", "observed": 10.416728920000008, "p5": 1.1453216400000077, "p95": 19.19453246, "APGR": 800.0, "WGT": -9.999999999999998}, {"ID": "39", "observed": 10.93544932999999, "p5": -0.3847594899999973, "p95": 19.872497989999992, "APGR": 900.0, "WGT": 89.99999999999999}]}}, {"mode": "vega-lite"});
+</script></div></div>
+</div>
+</div>
+<div class="section" id="unexplained-variability">
+<h3>Unexplained variability<a class="headerlink" href="#unexplained-variability" title="Permalink to this headline">¶</a></h3>
+<p>The unexplained variability is calculated and summarized in the <cite>unexplained_variability</cite> table.</p>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_html"><div>
+<style scoped>
+    .dataframe tbody tr th:only-of-type {
+        vertical-align: middle;
+    }
+
+    .dataframe tbody tr th {
+        vertical-align: top;
+    }
+
+    .dataframe thead th {
+        text-align: right;
+    }
+</style>
+<table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th></th>
+      <th>sd_observed</th>
+      <th>sd_5th</th>
+      <th>sd_95th</th>
+    </tr>
+    <tr>
+      <th>parameter</th>
+      <th>covariate</th>
+      <th></th>
+      <th></th>
+      <th></th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th rowspan="4" valign="top">CL</th>
+      <th>none</th>
+      <td>0.198361</td>
+      <td>0.123692</td>
+      <td>0.253647</td>
+    </tr>
+    <tr>
+      <th>APGR</th>
+      <td>0.193280</td>
+      <td>0.101030</td>
+      <td>0.248596</td>
+    </tr>
+    <tr>
+      <th>WGT</th>
+      <td>0.193635</td>
+      <td>0.116110</td>
+      <td>0.233371</td>
+    </tr>
+    <tr>
+      <th>all</th>
+      <td>0.185098</td>
+      <td>0.087409</td>
+      <td>0.224845</td>
+    </tr>
+    <tr>
+      <th rowspan="4" valign="top">V</th>
+      <th>none</th>
+      <td>0.161054</td>
+      <td>0.122617</td>
+      <td>0.200987</td>
+    </tr>
+    <tr>
+      <th>APGR</th>
+      <td>0.146886</td>
+      <td>0.114754</td>
+      <td>0.179581</td>
+    </tr>
+    <tr>
+      <th>WGT</th>
+      <td>0.161045</td>
+      <td>0.115102</td>
+      <td>0.198816</td>
+    </tr>
+    <tr>
+      <th>all</th>
+      <td>0.145728</td>
+      <td>0.107139</td>
+      <td>0.175758</td>
+    </tr>
+  </tbody>
+</table>
+</div></div></div>
+</div>
+<p>For each sample the conditional distribution is calculated given no covariates, each covariate in turn and all covariates at the same time. The variability will be given by the conditional covariance matrix that can be calculated as:</p>
+<div class="math notranslate nohighlight">
+\[\bar{\Omega} = \Omega_{11} - \Omega_{12} \Omega_{22}^{-1} \Omega_{21} =  \Omega_{11} - \Omega_{21}^T \Omega_{22}^{-1} \Omega_{21}\]</div>
+<p>The presented results are the 5th and 95th percetiles of the standard deviations of the parameters from <span class="math notranslate nohighlight">\(\bar{\Omega}\)</span>. The observed standard deviation is the conditional</p>
+<p>The plot display the original unexplained variability with the uncertainty for all parameter and covariate combinations.</p>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_html">
+<div id="altair-viz-3a584eeffa46461da54e3a887c61a514"></div>
+<script type="text/javascript">
+  (function(spec, embedOpt){
+    let outputDiv = document.currentScript.previousElementSibling;
+    if (outputDiv.id !== "altair-viz-3a584eeffa46461da54e3a887c61a514") {
+      outputDiv = document.getElementById("altair-viz-3a584eeffa46461da54e3a887c61a514");
+    }
+    const paths = {
+      "vega": "https://cdn.jsdelivr.net/npm//vega@5?noext",
+      "vega-lib": "https://cdn.jsdelivr.net/npm//vega-lib?noext",
+      "vega-lite": "https://cdn.jsdelivr.net/npm//vega-lite@4.8.1?noext",
+      "vega-embed": "https://cdn.jsdelivr.net/npm//vega-embed@6?noext",
+    };
+
+    function loadScript(lib) {
+      return new Promise(function(resolve, reject) {
+        var s = document.createElement('script');
+        s.src = paths[lib];
+        s.async = true;
+        s.onload = () => resolve(paths[lib]);
+        s.onerror = () => reject(`Error loading script: ${paths[lib]}`);
+        document.getElementsByTagName("head")[0].appendChild(s);
+      });
+    }
+
+    function showError(err) {
+      outputDiv.innerHTML = `<div class="error" style="color:red;">${err}</div>`;
+      throw err;
+    }
+
+    function displayChart(vegaEmbed) {
+      vegaEmbed(outputDiv, spec, embedOpt)
+        .catch(err => showError(`Javascript Error: ${err.message}<br>This usually means there's a typo in your chart specification. See the javascript console for the full traceback.`));
+    }
+
+    if(typeof define === "function" && define.amd) {
+      requirejs.config({paths});
+      require(["vega-embed"], displayChart, err => showError(`Error loading script: ${err.message}`));
+    } else if (typeof vegaEmbed === "function") {
+      displayChart(vegaEmbed);
+    } else {
+      loadScript("vega")
+        .then(() => loadScript("vega-lite"))
+        .then(() => loadScript("vega-embed"))
+        .catch(showError)
+        .then(() => displayChart(vegaEmbed));
+    }
+  })({"config": {"axis": {"labelFontSize": 11, "titleFontSize": 13}, "legend": {"labelFontSize": 12, "titleFontSize": 13}}, "vconcat": [{"layer": [{"mark": {"type": "point", "color": "black", "filled": true, "size": 40}, "encoding": {"x": {"type": "quantitative", "field": "sd_observed"}, "y": {"type": "nominal", "field": "covariate", "sort": ["none", "APGR", "WGT", "all"]}}}, {"mark": {"type": "errorbar", "ticks": true}, "encoding": {"tooltip": [{"type": "quantitative", "field": "sd_5th"}, {"type": "quantitative", "field": "sd_observed"}, {"type": "quantitative", "field": "sd_95th"}, {"type": "nominal", "field": "covariate"}], "x": {"type": "quantitative", "field": "sd_5th", "scale": {"zero": false}, "title": "SD of unexplained variability"}, "x2": {"field": "sd_95th"}, "y": {"type": "nominal", "field": "covariate", "sort": ["none", "APGR", "WGT", "all"], "title": "covariate"}}}, {"mark": {"type": "rule", "color": "gray", "strokeDash": [10, 2]}, "encoding": {"x": {"type": "quantitative", "field": "xzero"}}, "transform": [{"calculate": "0", "as": "xzero"}]}], "data": {"name": "data-d61ef6cfb858d4ceffed5650f60c547f"}, "title": "Unexplained variability on CL", "width": 700}, {"layer": [{"mark": {"type": "point", "color": "black", "filled": true, "size": 40}, "encoding": {"x": {"type": "quantitative", "field": "sd_observed"}, "y": {"type": "nominal", "field": "covariate", "sort": ["none", "APGR", "WGT", "all"]}}}, {"mark": {"type": "errorbar", "ticks": true}, "encoding": {"tooltip": [{"type": "quantitative", "field": "sd_5th"}, {"type": "quantitative", "field": "sd_observed"}, {"type": "quantitative", "field": "sd_95th"}, {"type": "nominal", "field": "covariate"}], "x": {"type": "quantitative", "field": "sd_5th", "scale": {"zero": false}, "title": "SD of unexplained variability"}, "x2": {"field": "sd_95th"}, "y": {"type": "nominal", "field": "covariate", "sort": ["none", "APGR", "WGT", "all"], "title": "covariate"}}}, {"mark": {"type": "rule", "color": "gray", "strokeDash": [10, 2]}, "encoding": {"x": {"type": "quantitative", "field": "xzero"}}, "transform": [{"calculate": "0", "as": "xzero"}]}], "data": {"name": "data-55fbc421d33cf90da459c4ad1b333683"}, "title": "Unexplained variability on V", "width": 700}], "resolve": {"scale": {"x": "shared"}}, "$schema": "https://vega.github.io/schema/vega-lite/v4.8.1.json", "datasets": {"data-d61ef6cfb858d4ceffed5650f60c547f": [{"covariate": "none", "sd_observed": 0.1983605303, "sd_5th": 0.12369158100000001, "sd_95th": 0.25364744710000003}, {"covariate": "APGR", "sd_observed": 0.1932795441, "sd_5th": 0.1010301562, "sd_95th": 0.2485956068}, {"covariate": "WGT", "sd_observed": 0.19363500620000001, "sd_5th": 0.11610959350000001, "sd_95th": 0.23337111370000002}, {"covariate": "all", "sd_observed": 0.18509792160000002, "sd_5th": 0.0874086141, "sd_95th": 0.22484515940000002}], "data-55fbc421d33cf90da459c4ad1b333683": [{"covariate": "none", "sd_observed": 0.1610543387, "sd_5th": 0.12261666110000001, "sd_95th": 0.2009873318}, {"covariate": "APGR", "sd_observed": 0.1468864112, "sd_5th": 0.1147543164, "sd_95th": 0.17958129690000002}, {"covariate": "WGT", "sd_observed": 0.16104541490000002, "sd_5th": 0.1151021234, "sd_95th": 0.1988164378}, {"covariate": "all", "sd_observed": 0.14572821290000001, "sd_5th": 0.1071390237, "sd_95th": 0.1757582043}]}}, {"mode": "vega-lite"});
+</script></div></div>
+</div>
 </div>
 </div>
 </div>
@@ -391,7 +767,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Nov 20, 2020.<br/>
+        Last updated on Dec 04, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>
