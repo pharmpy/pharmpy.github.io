@@ -5,3 +5,10 @@ pharmpy.cli module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.cli
+   :parts: 4
+

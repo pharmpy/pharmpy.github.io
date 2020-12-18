@@ -5,3 +5,10 @@ pharmpy.parse\_utils.generic module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.parse_utils.generic
+   :parts: 4
+

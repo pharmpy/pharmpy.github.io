@@ -1,11 +1,6 @@
 pharmpy.methods.modelfit package
 ================================
 
-.. automodule:: pharmpy.methods.modelfit
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Submodules
 ----------
 
@@ -14,3 +9,18 @@ Submodules
 
    pharmpy.methods.modelfit.method
    pharmpy.methods.modelfit.run
+
+Module contents
+---------------
+
+.. automodule:: pharmpy.methods.modelfit
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.methods.modelfit
+   :parts: 4
+

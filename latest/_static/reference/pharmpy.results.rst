@@ -5,3 +5,10 @@ pharmpy.results module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.results
+   :parts: 4
+

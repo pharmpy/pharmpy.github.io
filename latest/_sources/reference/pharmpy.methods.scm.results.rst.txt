@@ -5,3 +5,10 @@ pharmpy.methods.scm.results module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.methods.scm.results
+   :parts: 4
+

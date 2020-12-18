@@ -1,11 +1,6 @@
 pharmpy package
 ===============
 
-.. automodule:: pharmpy
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Subpackages
 -----------
 
@@ -37,3 +32,18 @@ Submodules
    pharmpy.statements
    pharmpy.symbols
    pharmpy.visualization
+
+Module contents
+---------------
+
+.. automodule:: pharmpy
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy
+   :parts: 4
+

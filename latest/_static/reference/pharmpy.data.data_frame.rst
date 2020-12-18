@@ -5,3 +5,10 @@ pharmpy.data.data\_frame module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.data.data_frame
+   :parts: 4
+

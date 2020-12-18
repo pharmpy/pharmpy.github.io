@@ -5,3 +5,10 @@ pharmpy.methods.cdd.results module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.methods.cdd.results
+   :parts: 4
+

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.11.0 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.12.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
@@ -67,10 +67,6 @@
         
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../installation.html">Installation</a>
-        </li>
-        
-        <li class="nav-item ">
             <a class="nav-link" href="../../../getting_started.html">Getting started</a>
         </li>
         
@@ -79,11 +75,11 @@
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../reference/modules.html">Documentation</a>
+            <a class="nav-link" href="../../../reference/modules.html">API reference</a>
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../development.html">Development</a>
+            <a class="nav-link" href="../../../development.html">Contribute</a>
         </li>
         
         <li class="nav-item ">
@@ -125,11 +121,10 @@
 <script>$('#searchbox').show(0);</script>
 <h3><a href="../../../index.html">Table of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
@@ -158,22 +153,26 @@
               <div>
                 
   <h1>Source code for pharmpy.modeling.odes</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">sympy</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:meta private:</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">sympy</span>
 
 <span class="kn">import</span> <span class="nn">pharmpy.symbols</span>
 <span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
 <span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">ExplicitODESystem</span><span class="p">,</span> <span class="n">Infusion</span>
 
 
-<div class="viewcode-block" id="add_parameter"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.add_parameter">[docs]</a><span class="k">def</span> <span class="nf">add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<div class="viewcode-block" id="add_parameter"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.add_parameter">[docs]</a><span class="k">def</span> <span class="nf">add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add an individual or pk parameter to a model&quot;&quot;&quot;</span>
     <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<span class="k">def</span> <span class="nf">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.1</span><span class="p">):</span>
     <span class="n">pops</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;POP_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">pop_param</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">pops</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">pop_param</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">pops</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">pop_param</span><span class="p">)</span>
     <span class="n">symb</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
     <span class="n">ass</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symb</span><span class="p">,</span> <span class="n">pop_param</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
@@ -181,7 +180,7 @@
     <span class="k">return</span> <span class="n">symb</span>
 
 
-<div class="viewcode-block" id="explicit_odes"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.explicit_odes">[docs]</a><span class="k">def</span> <span class="nf">explicit_odes</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="explicit_odes"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.explicit_odes">[docs]</a><span class="k">def</span> <span class="nf">explicit_odes</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Convert model from compartmental system to explicit ODE system</span>
 <span class="sd">    or do nothing if it already has an explicit ODE system</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -195,11 +194,13 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="first_order_elimination"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.first_order_elimination">[docs]</a><span class="k">def</span> <span class="nf">first_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="first_order_elimination"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.first_order_elimination">[docs]</a><span class="k">def</span> <span class="nf">first_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="zero_order_elimination"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.zero_order_elimination">[docs]</a><span class="k">def</span> <span class="nf">zero_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="zero_order_elimination"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.zero_order_elimination">[docs]</a><span class="k">def</span> <span class="nf">zero_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sets elimination to zero order. Initial estimate for KM is set to 1% of smallest</span>
+<span class="sd">    observation.&quot;&quot;&quot;</span>
     <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">obs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">observations</span>
     <span class="n">init</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">/</span> <span class="mi">100</span>  <span class="c1"># 1% of smallest observation</span>
@@ -208,32 +209,40 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="michaelis_menten_elimination"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.michaelis_menten_elimination">[docs]</a><span class="k">def</span> <span class="nf">michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="michaelis_menten_elimination"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.michaelis_menten_elimination">[docs]</a><span class="k">def</span> <span class="nf">michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sets elimination to Michaelis-Menten. Initial estimate for CLMM is set to CL and KM is set to</span>
+<span class="sd">    :math:`2*max(DV)`.&quot;&quot;&quot;</span>
     <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="combined_mm_fo_elimination"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.combined_mm_fo_elimination">[docs]</a><span class="k">def</span> <span class="nf">combined_mm_fo_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="mixed_mm_fo_elimination"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.mixed_mm_fo_elimination">[docs]</a><span class="k">def</span> <span class="nf">mixed_mm_fo_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Sets elimination to mixed Michaelis-Menten and first order. Initial estimate for CLMM is set</span>
+<span class="sd">    to CL/2 and KM is set to :math:`2*max(DV)`.&quot;&quot;&quot;</span>
     <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
 <span class="k">def</span> <span class="nf">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="n">km</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;KM&#39;</span><span class="p">)</span>
-    <span class="n">clmm</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">)</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">()</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
     <span class="n">old_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
     <span class="n">numer</span><span class="p">,</span> <span class="n">denom</span> <span class="o">=</span> <span class="n">old_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
+
+    <span class="n">km_init</span><span class="p">,</span> <span class="n">clmm_init</span> <span class="o">=</span> <span class="n">_get_mm_inits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">numer</span><span class="p">,</span> <span class="n">combined</span><span class="p">)</span>
+
+    <span class="n">km</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;KM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">km_init</span><span class="p">)</span>
+    <span class="n">clmm</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">clmm_init</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">denom</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">combined</span><span class="p">:</span>
             <span class="n">cl</span> <span class="o">=</span> <span class="n">numer</span>
         <span class="n">vc</span> <span class="o">=</span> <span class="n">denom</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">combined</span><span class="p">:</span>
-            <span class="n">cl</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">)</span>
-        <span class="n">vc</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;VC&#39;</span><span class="p">)</span>
+            <span class="n">cl</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="n">clmm_init</span><span class="p">)</span>
+        <span class="n">vc</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;VC&#39;</span><span class="p">)</span>  <span class="c1"># FIXME: decide better initial estimate</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">combined</span><span class="p">:</span>
         <span class="n">cl</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -245,15 +254,31 @@
     <span class="k">return</span> <span class="n">model</span>
 
 
-<div class="viewcode-block" id="set_transit_compartments"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.set_transit_compartments">[docs]</a><span class="k">def</span> <span class="nf">set_transit_compartments</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set the number of transit compartments of model&quot;&quot;&quot;</span>
+<span class="k">def</span> <span class="nf">_get_mm_inits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rate_numer</span><span class="p">,</span> <span class="n">combined</span><span class="p">):</span>
+    <span class="n">pset</span><span class="p">,</span> <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">clmm_init</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">extract_params_from_symb</span><span class="p">(</span><span class="n">rate_numer</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">pset</span><span class="p">)</span><span class="o">.</span><span class="n">init</span>
+
+    <span class="k">if</span> <span class="n">combined</span><span class="p">:</span>
+        <span class="n">clmm_init</span> <span class="o">/=</span> <span class="mi">2</span>
+
+    <span class="n">dv_max</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">km_init</span> <span class="o">=</span> <span class="n">dv_max</span> <span class="o">*</span> <span class="mi">2</span>
+
+    <span class="k">return</span> <span class="n">km_init</span><span class="p">,</span> <span class="n">clmm_init</span>
+
+
+<div class="viewcode-block" id="set_transit_compartments"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.set_transit_compartments">[docs]</a><span class="k">def</span> <span class="nf">set_transit_compartments</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">n</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set the number of transit compartments of model. Initial estimate for absorption rate is</span>
+<span class="sd">    set the previous rate if available, otherwise it is set to the time of first observation/2</span>
+<span class="sd">    is used.&quot;&quot;&quot;</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">transits</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_transit_compartments</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">transits</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span><span class="p">:</span>
         <span class="k">pass</span>
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">transits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
+        <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">))</span>
         <span class="n">rate</span> <span class="o">=</span> <span class="n">n</span> <span class="o">/</span> <span class="n">mdt_symb</span>
         <span class="n">comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
         <span class="n">dose</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">dose</span>
@@ -293,12 +318,14 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="add_lag_time"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.add_lag_time">[docs]</a><span class="k">def</span> <span class="nf">add_lag_time</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Add lag time to the dose compartment of model&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="add_lag_time"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.add_lag_time">[docs]</a><span class="k">def</span> <span class="nf">add_lag_time</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add lag time to the dose compartment of model. Initial estimate for lag time is set the</span>
+<span class="sd">    previous lag time if available, otherwise it is set to the time of first observation/2 is</span>
+<span class="sd">    used.&quot;&quot;&quot;</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
     <span class="n">old_lag_time</span> <span class="o">=</span> <span class="n">dosing_comp</span><span class="o">.</span><span class="n">lag_time</span>
-    <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
+    <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">))</span>
     <span class="n">dosing_comp</span><span class="o">.</span><span class="n">lag_time</span> <span class="o">=</span> <span class="n">mdt_symb</span>
     <span class="k">if</span> <span class="n">old_lag_time</span><span class="p">:</span>
         <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">old_lag_time</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
@@ -306,8 +333,8 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="remove_lag_time"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.remove_lag_time">[docs]</a><span class="k">def</span> <span class="nf">remove_lag_time</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Remove lag time from the dose compartment of model&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="remove_lag_time"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.remove_lag_time">[docs]</a><span class="k">def</span> <span class="nf">remove_lag_time</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove lag time from the dose compartment of model.&quot;&quot;&quot;</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
     <span class="n">lag_time</span> <span class="o">=</span> <span class="n">dosing_comp</span><span class="o">.</span><span class="n">lag_time</span>
@@ -319,8 +346,10 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="zero_order_absorption"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.zero_order_absorption">[docs]</a><span class="k">def</span> <span class="nf">zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set or change to zero order absorption rate</span>
+<div class="viewcode-block" id="zero_order_absorption"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.zero_order_absorption">[docs]</a><span class="k">def</span> <span class="nf">zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set or change to zero order absorption rate. Initial estimate for absorption rate is set</span>
+<span class="sd">    the previous rate if available, otherwise it is set to the time of first observation/2 is</span>
+<span class="sd">    used.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -351,8 +380,9 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="first_order_absorption"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.first_order_absorption">[docs]</a><span class="k">def</span> <span class="nf">first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set or change to first order absorption rate</span>
+<div class="viewcode-block" id="first_order_absorption"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.first_order_absorption">[docs]</a><span class="k">def</span> <span class="nf">first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set or change to first order absorption rate. Initial estimate for absorption rate is set</span>
+<span class="sd">    the previous rate if available, otherwise it is set to the time of first observation/2 is used.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -379,8 +409,8 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="bolus_absorption"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.bolus_absorption">[docs]</a><span class="k">def</span> <span class="nf">bolus_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set or change to bolus absorption rate</span>
+<div class="viewcode-block" id="bolus_absorption"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.bolus_absorption">[docs]</a><span class="k">def</span> <span class="nf">bolus_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set or change to bolus absorption rate.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -410,8 +440,10 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="seq_zo_fo_absorption"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.seq_zo_fo_absorption">[docs]</a><span class="k">def</span> <span class="nf">seq_zo_fo_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Set or change to sequential zero order first order absorption rate</span>
+<div class="viewcode-block" id="seq_zo_fo_absorption"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.seq_zo_fo_absorption">[docs]</a><span class="k">def</span> <span class="nf">seq_zo_fo_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Set or change to sequential zero order first order absorption rate. Initial estimate for</span>
+<span class="sd">    absorption rate is set the previous rate if available, otherwise it is set to the time of</span>
+<span class="sd">    first observation/2 is used.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -439,7 +471,7 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="have_zero_order_absorption"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.have_zero_order_absorption">[docs]</a><span class="k">def</span> <span class="nf">have_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">have_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Check if ode system describes a zero order absorption</span>
 
 <span class="sd">    currently defined as having Infusion dose with rate not in dataset</span>
@@ -456,48 +488,83 @@
             <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">return</span> <span class="kc">False</span></div>
+    <span class="k">return</span> <span class="kc">False</span>
 
 
-<div class="viewcode-block" id="add_zero_order_absorption"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.add_zero_order_absorption">[docs]</a><span class="k">def</span> <span class="nf">add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Add zero order absorption to a compartment.</span>
+<span class="k">def</span> <span class="nf">add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Add zero order absorption to a compartment. Initial estimate for absorption rate is set</span>
+<span class="sd">    the previous rate if available, otherwise it is set to the time of first observation/2 is used.</span>
 <span class="sd">    Disregards what is currently in the model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span>
+    <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="n">new_dose</span> <span class="o">=</span> <span class="n">Infusion</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">mat_symb</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">to_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">new_dose</span></div>
+    <span class="n">to_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">new_dose</span>
 
 
-<div class="viewcode-block" id="add_first_order_absorption"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.add_first_order_absorption">[docs]</a><span class="k">def</span> <span class="nf">add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add first order absorption</span>
 <span class="sd">    Disregards what is currently in the model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">add_compartment</span><span class="p">(</span><span class="s1">&#39;DEPOT&#39;</span><span class="p">)</span>
     <span class="n">depot</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">dose</span>
-    <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">)</span>
+    <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">))</span>
     <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">mat_symb</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">depot</span></div>
+    <span class="k">return</span> <span class="n">depot</span>
 
 
-<div class="viewcode-block" id="add_peripheral_compartment"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.odes.html#pharmpy.modeling.add_peripheral_compartment">[docs]</a><span class="k">def</span> <span class="nf">add_peripheral_compartment</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">param_name</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s1">&#39;MDT&#39;</span><span class="p">:</span>
+            <span class="n">param_prev</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">lag_time</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">param_prev</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">extract_params_from_symb</span><span class="p">(</span><span class="n">param_name</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">param_prev</span><span class="o">.</span><span class="n">init</span>
+    <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
+        <span class="k">pass</span>
+
+    <span class="n">dt</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
+    <span class="n">time_label</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">idv_label</span>
+    <span class="n">obs</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">observations</span>
+    <span class="n">time_min</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">time_label</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s1">&#39;MDT&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">time_min</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">elif</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s1">&#39;MAT&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">time_min</span><span class="p">)</span> <span class="o">*</span> <span class="mi">2</span>
+
+
+<div class="viewcode-block" id="add_peripheral_compartment"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.add_peripheral_compartment">[docs]</a><span class="k">def</span> <span class="nf">add_peripheral_compartment</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">per</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_peripherals</span><span class="p">()</span>
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">per</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="n">q</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;Q</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">qp</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;QP</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">vp</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;VP</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">()</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
     <span class="n">elimination_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
     <span class="n">numer</span><span class="p">,</span> <span class="n">denom</span> <span class="o">=</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">denom</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">vc</span> <span class="o">=</span> <span class="n">denom</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">pass</span>
+    <span class="n">vc</span> <span class="o">=</span> <span class="n">denom</span>
     <span class="n">peripheral</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">add_compartment</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PERIPHERAL</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">peripheral</span><span class="p">,</span> <span class="n">q</span> <span class="o">/</span> <span class="n">vc</span><span class="p">)</span>
-    <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">peripheral</span><span class="p">,</span> <span class="n">q</span> <span class="o">/</span> <span class="n">vp</span><span class="p">)</span>
+    <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">peripheral</span><span class="p">,</span> <span class="n">qp</span> <span class="o">/</span> <span class="n">vc</span><span class="p">)</span>
+    <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">,</span> <span class="n">qp</span> <span class="o">/</span> <span class="n">vp</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="remove_peripheral_compartment"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.remove_peripheral_compartment">[docs]</a><span class="k">def</span> <span class="nf">remove_peripheral_compartment</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="n">peripherals</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_peripherals</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">peripherals</span><span class="p">:</span>
+        <span class="n">last_peripheral</span> <span class="o">=</span> <span class="n">peripherals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">()</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">last_peripheral</span><span class="p">)</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">symbols</span> <span class="o">|=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">last_peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">odes</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">last_peripheral</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">remove_unused_parameters_and_rvs</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
 </pre></div>
 
@@ -523,7 +590,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Nov 20, 2020.<br/>
+        Last updated on Dec 18, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

@@ -1,11 +1,6 @@
 pharmpy.methods.linearize package
 =================================
 
-.. automodule:: pharmpy.methods.linearize
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Submodules
 ----------
 
@@ -13,3 +8,18 @@ Submodules
    :maxdepth: 2
 
    pharmpy.methods.linearize.results
+
+Module contents
+---------------
+
+.. automodule:: pharmpy.methods.linearize
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.methods.linearize
+   :parts: 4
+

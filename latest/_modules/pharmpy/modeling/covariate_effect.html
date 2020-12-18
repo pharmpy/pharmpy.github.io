@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.covariate_effect &#8212; Pharmpy 0.11.0 documentation</title>
+    <title>pharmpy.modeling.covariate_effect &#8212; Pharmpy 0.12.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
@@ -67,10 +67,6 @@
         
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../installation.html">Installation</a>
-        </li>
-        
-        <li class="nav-item ">
             <a class="nav-link" href="../../../getting_started.html">Getting started</a>
         </li>
         
@@ -79,11 +75,11 @@
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../reference/modules.html">Documentation</a>
+            <a class="nav-link" href="../../../reference/modules.html">API reference</a>
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../development.html">Development</a>
+            <a class="nav-link" href="../../../development.html">Contribute</a>
         </li>
         
         <li class="nav-item ">
@@ -125,11 +121,10 @@
 <script>$('#searchbox').show(0);</script>
 <h3><a href="../../../index.html">Table of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
@@ -158,7 +153,11 @@
               <div>
                 
   <h1>Source code for pharmpy.modeling.covariate_effect</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span></span><span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">:meta private:</span>
+<span class="sd">&quot;&quot;&quot;</span>
+
+<span class="kn">import</span> <span class="nn">math</span>
 <span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">add</span><span class="p">,</span> <span class="n">mul</span>
@@ -172,15 +171,37 @@
 <span class="kn">from</span> <span class="nn">pharmpy.symbols</span> <span class="kn">import</span> <span class="n">symbol</span> <span class="k">as</span> <span class="n">S</span>
 
 
-<div class="viewcode-block" id="add_covariate_effect"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.covariate_effect.html#pharmpy.modeling.add_covariate_effect">[docs]</a><span class="k">def</span> <span class="nf">add_covariate_effect</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="add_covariate_effect"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.add_covariate_effect">[docs]</a><span class="k">def</span> <span class="nf">add_covariate_effect</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds covariate effect to :class:`pharmpy.model`. The following effects have templates:</span>
 
 <span class="sd">    - Linear function for continuous covariates (*lin*)</span>
+<span class="sd">        - Initial estimate: 0.001</span>
+<span class="sd">        - Upper bound: 100,000 if the median of the covariate is equal to the minimum, otherwise</span>
+<span class="sd">          :math:`1/(median - min)`</span>
+<span class="sd">        - Lower bound: -100,000 if the median of the covariate is equal to the maximum, otherwise</span>
+<span class="sd">          :math:`1/(median - max)`</span>
 <span class="sd">    - Linear function for categorical covariates (*cat*)</span>
+<span class="sd">        - Initial estimate: 0.001</span>
+<span class="sd">        - Upper bound: 100,000</span>
+<span class="sd">        - Lower bound: -100,000</span>
 <span class="sd">    - Piecewise linear function/&quot;hockey-stick&quot;, continuous covariates only (*piece_lin*)</span>
+<span class="sd">        - Initial estimate: 0.001</span>
+<span class="sd">        - Upper bound: for first state 1/(median - minimum), otherwise 100,000</span>
+<span class="sd">        - Lower bound: for first state -100,000, otherwise 1/(median - maximum)</span>
 <span class="sd">    - Exponential function, continuous covariates only (*exp*)</span>
+<span class="sd">        - Initial estimate: 0.001 unless lower bound &gt; 0.001 or upper bound &lt; 0.001. In that case</span>
+<span class="sd">          :math:`init = (upper - lower)/2`, if init = 0: :math:`init = upper/2`</span>
+<span class="sd">        - Upper bound: if :math:`min - median = 0` or :math:`max - median = 0`, upper bound is 100.</span>
+<span class="sd">          Otherwise the upper bound is</span>
+<span class="sd">          :math:`min(log(0.01)/(min - median), log(100)/(max - median))`</span>
+<span class="sd">        - Lower bound: if :math:`min - median = 0` or :math:`max - median = 0`, lower bound is 0.01.</span>
+<span class="sd">          Otherwise the lower bound is</span>
+<span class="sd">          :math:`max(log(0.01)/(max - median), log(100)/(min - median))`</span>
 <span class="sd">    - Power function, continuous covariates only (*pow*)</span>
+<span class="sd">        - Initial estimate: 0.001</span>
+<span class="sd">        - Upper bound: 100,000</span>
+<span class="sd">        - Lower bound: -100</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -470,9 +491,8 @@
     <span class="k">def</span> <span class="nf">categorical</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">counts</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Linear categorical template (for categorical covariates).&quot;&quot;&quot;</span>
         <span class="n">symbol</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;symbol&#39;</span><span class="p">)</span>
-        <span class="n">most_common</span> <span class="o">=</span> <span class="n">counts</span><span class="p">[</span><span class="n">counts</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()]</span>
+        <span class="n">most_common</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">mode</span><span class="p">()</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="n">categories</span> <span class="o">=</span> <span class="n">counts</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-
         <span class="n">values</span> <span class="o">=</span> <span class="p">[</span><span class="mi">1</span><span class="p">]</span>
 
         <span class="k">if</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">most_common</span><span class="p">):</span>
@@ -558,7 +578,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Nov 20, 2020.<br/>
+        Last updated on Dec 18, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

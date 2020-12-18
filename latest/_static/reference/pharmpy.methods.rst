@@ -1,11 +1,6 @@
 pharmpy.methods package
 =======================
 
-.. automodule:: pharmpy.methods
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Subpackages
 -----------
 
@@ -28,3 +23,18 @@ Submodules
 
    pharmpy.methods.common
    pharmpy.methods.psn_helpers
+
+Module contents
+---------------
+
+.. automodule:: pharmpy.methods
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.methods
+   :parts: 4
+

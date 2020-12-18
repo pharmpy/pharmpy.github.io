@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>sympy.core.symbol &#8212; Pharmpy 0.11.0 documentation</title>
+    <title>sympy.core.symbol &#8212; Pharmpy 0.12.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
@@ -67,10 +67,6 @@
         
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../installation.html">Installation</a>
-        </li>
-        
-        <li class="nav-item ">
             <a class="nav-link" href="../../../getting_started.html">Getting started</a>
         </li>
         
@@ -79,11 +75,11 @@
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../reference/modules.html">Documentation</a>
+            <a class="nav-link" href="../../../reference/modules.html">API reference</a>
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../development.html">Development</a>
+            <a class="nav-link" href="../../../development.html">Contribute</a>
         </li>
         
         <li class="nav-item ">
@@ -125,11 +121,10 @@
 <script>$('#searchbox').show(0);</script>
 <h3><a href="../../../index.html">Table of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
@@ -160,7 +155,7 @@
   <h1>Source code for sympy.core.symbol</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">sympy.core.assumptions</span> <span class="kn">import</span> <span class="n">StdFactKB</span><span class="p">,</span> <span class="n">_assume_defined</span>
 <span class="kn">from</span> <span class="nn">sympy.core.compatibility</span> <span class="kn">import</span> <span class="n">is_sequence</span><span class="p">,</span> <span class="n">ordered</span>
-<span class="kn">from</span> <span class="nn">.basic</span> <span class="kn">import</span> <span class="n">Basic</span>
+<span class="kn">from</span> <span class="nn">.basic</span> <span class="kn">import</span> <span class="n">Basic</span><span class="p">,</span> <span class="n">Atom</span>
 <span class="kn">from</span> <span class="nn">.sympify</span> <span class="kn">import</span> <span class="n">sympify</span>
 <span class="kn">from</span> <span class="nn">.singleton</span> <span class="kn">import</span> <span class="n">S</span>
 <span class="kn">from</span> <span class="nn">.expr</span> <span class="kn">import</span> <span class="n">Expr</span><span class="p">,</span> <span class="n">AtomicExpr</span>
@@ -175,6 +170,33 @@
 <span class="kn">import</span> <span class="nn">re</span> <span class="k">as</span> <span class="nn">_re</span>
 <span class="kn">import</span> <span class="nn">random</span>
 
+<span class="k">class</span> <span class="nc">Str</span><span class="p">(</span><span class="n">Atom</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Represents string in SymPy.</span>
+
+<span class="sd">    Explanation</span>
+<span class="sd">    ===========</span>
+
+<span class="sd">    Previously, ``Symbol`` was used where string is needed in ``args`` of SymPy</span>
+<span class="sd">    objects, e.g. denoting the name of the instance. However, since ``Symbol``</span>
+<span class="sd">    represents mathematical scalar, this class should be used instead.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,)</span>
+
+    <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;name should be a string, not </span><span class="si">%s</span><span class="s2">&quot;</span> <span class="o">%</span> <span class="nb">repr</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="n">name</span><span class="p">)))</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="k">return</span> <span class="n">obj</span>
+
+    <span class="k">def</span> <span class="nf">__getnewargs__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,)</span>
+
+    <span class="k">def</span> <span class="nf">_hashable_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,)</span>
+
 
 <span class="k">def</span> <span class="nf">_filter_assumptions</span><span class="p">(</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Split the given dict into assumptions and non-assumptions.</span>
@@ -187,7 +209,6 @@
     <span class="n">Symbol</span><span class="o">.</span><span class="n">_sanitize</span><span class="p">(</span><span class="n">assumptions</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">assumptions</span><span class="p">,</span> <span class="n">nonassumptions</span>
 
-
 <span class="k">def</span> <span class="nf">_symbol</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">matching_symbol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">assumptions</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return s if s is a Symbol, else if s is a string, return either</span>
 <span class="sd">    the matching_symbol if the names are the same or else a new symbol</span>
@@ -197,7 +218,7 @@
 <span class="sd">    Examples</span>
 <span class="sd">    ========</span>
 
-<span class="sd">    &gt;&gt;&gt; from sympy import Symbol, Dummy</span>
+<span class="sd">    &gt;&gt;&gt; from sympy import Symbol</span>
 <span class="sd">    &gt;&gt;&gt; from sympy.core.symbol import _symbol</span>
 <span class="sd">    &gt;&gt;&gt; _symbol(&#39;y&#39;)</span>
 <span class="sd">    y</span>
@@ -254,33 +275,47 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;symbol must be string for symbol name or Symbol&#39;</span><span class="p">)</span>
 
-
-<span class="k">def</span> <span class="nf">_uniquely_named_symbol</span><span class="p">(</span><span class="n">xname</span><span class="p">,</span> <span class="n">exprs</span><span class="o">=</span><span class="p">(),</span> <span class="n">compare</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">modify</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">assumptions</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">uniquely_named_symbol</span><span class="p">(</span><span class="n">xname</span><span class="p">,</span> <span class="n">exprs</span><span class="o">=</span><span class="p">(),</span> <span class="n">compare</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">modify</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">assumptions</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Return a symbol which, when printed, will have a name unique</span>
 <span class="sd">    from any other already in the expressions given. The name is made</span>
-<span class="sd">    unique by prepending underscores (default) but this can be</span>
+<span class="sd">    unique by appending numbers (default) but this can be</span>
 <span class="sd">    customized with the keyword &#39;modify&#39;.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ==========</span>
 
 <span class="sd">        xname : a string or a Symbol (when symbol xname &lt;- str(xname))</span>
+
 <span class="sd">        compare : a single arg function that takes a symbol and returns</span>
 <span class="sd">            a string to be compared with xname (the default is the str</span>
 <span class="sd">            function which indicates how the name will look when it</span>
 <span class="sd">            is printed, e.g. this includes underscores that appear on</span>
 <span class="sd">            Dummy symbols)</span>
+
 <span class="sd">        modify : a single arg function that changes its string argument</span>
-<span class="sd">            in some way (the default is to prepend underscores)</span>
+<span class="sd">            in some way (the default is to append numbers)</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    ========</span>
 
-<span class="sd">    &gt;&gt;&gt; from sympy.core.symbol import _uniquely_named_symbol as usym, Dummy</span>
+<span class="sd">    &gt;&gt;&gt; from sympy.core.symbol import uniquely_named_symbol</span>
 <span class="sd">    &gt;&gt;&gt; from sympy.abc import x</span>
-<span class="sd">    &gt;&gt;&gt; usym(&#39;x&#39;, x)</span>
-<span class="sd">    _x</span>
+<span class="sd">    &gt;&gt;&gt; uniquely_named_symbol(&#39;x&#39;, x)</span>
+<span class="sd">    x0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">sympy.core.function</span> <span class="kn">import</span> <span class="n">AppliedUndef</span>
+
+    <span class="k">def</span> <span class="nf">numbered_string_incr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
+        <span class="k">while</span> <span class="n">i</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">isdigit</span><span class="p">():</span>
+                <span class="k">break</span>
+            <span class="n">i</span> <span class="o">-=</span> <span class="mi">1</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">s</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:]</span> <span class="ow">or</span> <span class="n">start</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">s</span><span class="p">[:</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">n</span>
+
     <span class="n">default</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">xname</span><span class="p">):</span>
         <span class="n">xname</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="n">xname</span>
@@ -289,20 +324,25 @@
         <span class="k">return</span> <span class="n">_symbol</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="o">**</span><span class="n">assumptions</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">exprs</span><span class="p">):</span>
         <span class="n">exprs</span> <span class="o">=</span> <span class="p">[</span><span class="n">exprs</span><span class="p">]</span>
-    <span class="n">syms</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">free_symbols</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">exprs</span><span class="p">])</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">((</span>
+        <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">exprs</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">atoms</span><span class="p">(</span><span class="n">Symbol</span><span class="p">)]</span> <span class="o">+</span>
+        <span class="p">[</span><span class="n">i</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">exprs</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">e</span><span class="o">.</span><span class="n">atoms</span><span class="p">(</span><span class="n">AppliedUndef</span><span class="p">)]))</span>
     <span class="k">if</span> <span class="n">modify</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">modify</span> <span class="o">=</span> <span class="k">lambda</span> <span class="n">s</span><span class="p">:</span> <span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">s</span>
-    <span class="k">while</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">compare</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">syms</span><span class="p">):</span>
+        <span class="n">modify</span> <span class="o">=</span> <span class="n">numbered_string_incr</span>
+    <span class="k">while</span> <span class="nb">any</span><span class="p">(</span><span class="n">x</span> <span class="o">==</span> <span class="n">compare</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">names</span><span class="p">):</span>
         <span class="n">x</span> <span class="o">=</span> <span class="n">modify</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">_symbol</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="o">**</span><span class="n">assumptions</span><span class="p">)</span>
-
+<span class="n">_uniquely_named_symbol</span> <span class="o">=</span> <span class="n">uniquely_named_symbol</span>
 
 <span class="k">class</span> <span class="nc">Symbol</span><span class="p">(</span><span class="n">AtomicExpr</span><span class="p">,</span> <span class="n">Boolean</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Assumptions:</span>
 <span class="sd">       commutative = True</span>
 
-<span class="sd">    You can override the default assumptions in the constructor:</span>
+<span class="sd">    You can override the default assumptions in the constructor.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ========</span>
 
 <span class="sd">    &gt;&gt;&gt; from sympy import symbols</span>
 <span class="sd">    &gt;&gt;&gt; A,B = symbols(&#39;A,B&#39;, commutative = False)</span>
@@ -433,7 +473,9 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">class_key</span><span class="p">(),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,)),</span> <span class="n">S</span><span class="o">.</span><span class="n">One</span><span class="o">.</span><span class="n">sort_key</span><span class="p">(),</span> <span class="n">S</span><span class="o">.</span><span class="n">One</span>
 
     <span class="k">def</span> <span class="nf">as_dummy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="n">Dummy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="c1"># only put commutativity in explicitly if it is False</span>
+        <span class="k">return</span> <span class="n">Dummy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_commutative</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">False</span> \
+            <span class="k">else</span> <span class="n">Dummy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">commutative</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_commutative</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">as_real_imag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">hints</span><span class="p">):</span>
         <span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">im</span><span class="p">,</span> <span class="n">re</span>
@@ -463,6 +505,9 @@
 
 <span class="k">class</span> <span class="nc">Dummy</span><span class="p">(</span><span class="n">Symbol</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Dummy symbols are each unique, even if they have the same name:</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    ========</span>
 
 <span class="sd">    &gt;&gt;&gt; from sympy import Dummy</span>
 <span class="sd">    &gt;&gt;&gt; Dummy(&quot;x&quot;) == Dummy(&quot;x&quot;)</span>
@@ -536,8 +581,10 @@
 
 <span class="sd">    name : str</span>
 <span class="sd">        Name of the Wild instance.</span>
+
 <span class="sd">    exclude : iterable, optional</span>
 <span class="sd">        Instances in ``exclude`` will not be matched.</span>
+
 <span class="sd">    properties : iterable of functions, optional</span>
 <span class="sd">        Functions, each taking an expressions as input</span>
 <span class="sd">        and returns a ``bool``. All functions in ``properties``</span>
@@ -650,7 +697,7 @@
 
 <span class="n">_range</span> <span class="o">=</span> <span class="n">_re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="s1">&#39;([0-9]*:[0-9]+|[a-zA-Z]?:[a-zA-Z])&#39;</span><span class="p">)</span>
 
-<span class="k">def</span> <span class="nf">symbols</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">symbols</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="o">*</span><span class="p">,</span> <span class="bp">cls</span><span class="o">=</span><span class="n">Symbol</span><span class="p">,</span> <span class="o">**</span><span class="n">args</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Transform strings into instances of :class:`Symbol` class.</span>
 
@@ -801,7 +848,6 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
             <span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">:</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">()</span>
 
-        <span class="bp">cls</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;cls&#39;</span><span class="p">,</span> <span class="n">Symbol</span><span class="p">)</span>
         <span class="n">seq</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;seq&#39;</span><span class="p">,</span> <span class="n">as_seq</span><span class="p">)</span>
 
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
@@ -867,6 +913,9 @@
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Create symbols and inject them into the global namespace.</span>
 
+<span class="sd">    Explanation</span>
+<span class="sd">    ===========</span>
+
 <span class="sd">    This calls :func:`symbols` with the same arguments and puts the results</span>
 <span class="sd">    into the *global* namespace. It&#39;s recommended not to use :func:`var` in</span>
 <span class="sd">    library code, where :func:`symbols` has to be used::</span>
@@ -878,17 +927,17 @@
 
 <span class="sd">    &gt;&gt;&gt; var(&#39;x&#39;)</span>
 <span class="sd">    x</span>
-<span class="sd">    &gt;&gt;&gt; x</span>
+<span class="sd">    &gt;&gt;&gt; x # noqa: F821</span>
 <span class="sd">    x</span>
 
 <span class="sd">    &gt;&gt;&gt; var(&#39;a,ab,abc&#39;)</span>
 <span class="sd">    (a, ab, abc)</span>
-<span class="sd">    &gt;&gt;&gt; abc</span>
+<span class="sd">    &gt;&gt;&gt; abc # noqa: F821</span>
 <span class="sd">    abc</span>
 
 <span class="sd">    &gt;&gt;&gt; var(&#39;x,y&#39;, real=True)</span>
 <span class="sd">    (x, y)</span>
-<span class="sd">    &gt;&gt;&gt; x.is_real and y.is_real</span>
+<span class="sd">    &gt;&gt;&gt; x.is_real and y.is_real # noqa: F821</span>
 <span class="sd">    True</span>
 
 <span class="sd">    See :func:`symbols` documentation for more details on what kinds of</span>
@@ -1011,7 +1060,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Nov 20, 2020.<br/>
+        Last updated on Dec 18, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

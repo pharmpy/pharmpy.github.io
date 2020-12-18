@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.random_variables &#8212; Pharmpy 0.11.0 documentation</title>
+    <title>pharmpy.random_variables &#8212; Pharmpy 0.12.0 documentation</title>
     
   <link rel="stylesheet" href="../../_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
@@ -67,10 +67,6 @@
         
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../installation.html">Installation</a>
-        </li>
-        
-        <li class="nav-item ">
             <a class="nav-link" href="../../getting_started.html">Getting started</a>
         </li>
         
@@ -79,11 +75,11 @@
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../reference/modules.html">Documentation</a>
+            <a class="nav-link" href="../../reference/modules.html">API reference</a>
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../development.html">Development</a>
+            <a class="nav-link" href="../../development.html">Contribute</a>
         </li>
         
         <li class="nav-item ">
@@ -125,11 +121,10 @@
 <script>$('#searchbox').show(0);</script>
 <h3><a href="../../index.html">Table of Contents</a></h3>
 <ul>
-<li class="toctree-l1"><a class="reference internal" href="../../installation.html">Installation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../reference/modules.html">Documentation</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../development.html">Development</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../reference/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../development.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 </ul>
@@ -162,6 +157,7 @@
 <span class="kn">import</span> <span class="nn">itertools</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">symengine</span>
 <span class="kn">import</span> <span class="nn">sympy</span>
 <span class="kn">import</span> <span class="nn">sympy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
@@ -403,10 +399,9 @@
 <span class="sd">        ----------</span>
 <span class="sd">        rv : RandomSymbol</span>
 <span class="sd">            Random symbol to find associated rvs for (i.e. rvs with same distribution).&quot;&quot;&quot;</span>
-        <span class="n">dists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">()</span>
         <span class="n">joined_rvs</span> <span class="o">=</span> <span class="p">[]</span>
 
-        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="n">dists</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">dist</span> <span class="o">==</span> <span class="n">rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="p">:</span>
                 <span class="n">joined_rvs</span> <span class="o">+=</span> <span class="n">rvs</span>
 
@@ -430,7 +425,6 @@
         <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">associated_rvs</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">rv</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">rv_to_extract</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="n">rv_extracted</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">cov</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]))</span>
                 <span class="n">rv_extracted</span><span class="o">.</span><span class="n">variability_level</span> <span class="o">=</span> <span class="n">VariabilityLevel</span><span class="o">.</span><span class="n">IIV</span>
@@ -451,10 +445,41 @@
             <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rv_remaining</span><span class="p">:</span>
                 <span class="n">rv</span><span class="o">.</span><span class="n">variability_level</span> <span class="o">=</span> <span class="n">VariabilityLevel</span><span class="o">.</span><span class="n">IIV</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rv_remaining</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rv_extracted</span><span class="p">)</span>
+        <span class="n">split_block</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv_extracted</span><span class="p">,</span> <span class="n">rv_remaining</span><span class="p">]</span>
+        <span class="n">split_block</span> <span class="o">=</span> <span class="n">split_block</span><span class="o">.</span><span class="n">reverse</span><span class="p">()</span> <span class="k">if</span> <span class="n">index_to_remove</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">split_block</span>
+
+        <span class="n">rvs_new</span> <span class="o">=</span> <span class="n">RandomVariables</span><span class="p">()</span>
+
+        <span class="n">has_added_changed_block</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">associated_rvs</span><span class="p">:</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">has_added_changed_block</span><span class="p">:</span>
+                    <span class="p">{</span><span class="n">rvs_new</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rv_block</span><span class="p">)</span> <span class="k">for</span> <span class="n">rv_block</span> <span class="ow">in</span> <span class="n">split_block</span><span class="p">}</span>
+                    <span class="n">has_added_changed_block</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">rvs_new</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
+
+        <span class="bp">self</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">rvs_new</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">rv_extracted</span></div>
+
+<div class="viewcode-block" id="RandomVariables.are_consecutive"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.RandomVariables.are_consecutive">[docs]</a>    <span class="k">def</span> <span class="nf">are_consecutive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">subset</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Determines if subset has same order as full set (self). If totally different,</span>
+<span class="sd">        False will be returned.&quot;&quot;&quot;</span>
+        <span class="n">rvs_self</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">rvs</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">()],</span> <span class="p">[])</span>
+        <span class="n">rvs_subset</span> <span class="o">=</span> <span class="nb">sum</span><span class="p">([</span><span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">for</span> <span class="n">rvs</span> <span class="ow">in</span> <span class="n">subset</span><span class="o">.</span><span class="n">distributions</span><span class="p">()],</span> <span class="p">[])</span>
+
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs_self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">rv</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">rvs_subset</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs_subset</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="k">return</span> <span class="kc">True</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">elif</span> <span class="n">i</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">return</span> <span class="kc">False</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">ruv_rvs</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -533,7 +558,7 @@
                     <span class="n">M</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">fill</span>
         <span class="k">elif</span> <span class="n">create_cov_params</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">rows</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">cols</span><span class="p">)):</span>
-                <span class="k">if</span> <span class="n">M</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">row</span> <span class="o">&lt;</span> <span class="n">col</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">M</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">row</span> <span class="o">&gt;</span> <span class="n">col</span><span class="p">:</span>
                     <span class="n">param_1</span> <span class="o">=</span> <span class="n">M</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">row</span><span class="p">]</span>
                     <span class="n">param_2</span> <span class="o">=</span> <span class="n">M</span><span class="p">[</span><span class="n">col</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span>
                     <span class="n">cov_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;COV</span><span class="si">{</span><span class="n">cov_number</span><span class="si">}</span><span class="s1">&#39;</span>
@@ -633,7 +658,60 @@
                     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)):</span>
                         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
                             <span class="n">nearest</span><span class="p">[</span><span class="n">dist</span><span class="o">.</span><span class="n">sigma</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">B</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">nearest</span></div></div>
+        <span class="k">return</span> <span class="n">nearest</span></div>
+
+<div class="viewcode-block" id="RandomVariables.expression"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.RandomVariables.expression">[docs]</a>    <span class="k">def</span> <span class="nf">expression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">parameters</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Replace all symbols with same names as rvs with the corresponding rvs</span>
+<span class="sd">        or indexed variables for joint distributions and replace parameter values</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">joint_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;__J</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">mu</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">mu</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+                <span class="n">sigma</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">sigma</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+                <span class="n">x</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">joint_name</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+                <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">symbol</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">):</span> <span class="n">x</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">rv</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rvs</span><span class="p">)})</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">mean</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+                <span class="n">std</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">std</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+                <span class="n">d</span><span class="p">[</span><span class="n">symbol</span><span class="p">(</span><span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)]</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">std</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="RandomVariables.sample"><a class="viewcode-back" href="../../reference/pharmpy.random_variables.html#pharmpy.RandomVariables.sample">[docs]</a>    <span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Sample the value of an expression&quot;&quot;&quot;</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
+        <span class="n">replacement_expression</span> <span class="o">=</span> <span class="n">expr</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">samples</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sym</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Indexed</span><span class="p">):</span>
+                <span class="c1"># Need to handled indexed RV specially due to sympy issue #20541</span>
+                <span class="n">new_symbs</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="n">sym</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">sigma</span><span class="o">.</span><span class="n">cols</span><span class="p">):</span>
+                    <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;__x</span><span class="si">{</span><span class="n">k</span><span class="si">}</span><span class="s1">&#39;</span>
+                    <span class="n">new_sym</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_sym</span><span class="p">)</span>
+                    <span class="n">new_symbs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                    <span class="n">replacement_expression</span> <span class="o">=</span> <span class="n">replacement_expression</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">sym</span><span class="p">:</span> <span class="n">new_sym</span><span class="p">})</span>
+                    <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">sym</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">samples</span><span class="p">[</span><span class="n">new_symbs</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sym</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">rv</span><span class="o">.</span><span class="n">RandomSymbol</span><span class="p">):</span>
+                <span class="c1"># free_symbols include both the indexed and the non-indexed RV symbol</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;__x</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">new_sym</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+                <span class="n">symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_sym</span><span class="p">)</span>
+                <span class="n">replacement_expression</span> <span class="o">=</span> <span class="n">replacement_expression</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">sym</span><span class="p">:</span> <span class="n">new_sym</span><span class="p">})</span>
+                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">a</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">sym</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">n</span><span class="p">)</span>
+                <span class="n">samples</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">lambdify</span><span class="p">([</span><span class="nb">tuple</span><span class="p">(</span><span class="n">symbols</span><span class="p">)],</span> <span class="n">replacement_expression</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">func</span>  <span class="c1"># FIXME: Continue here</span></div></div>
 
 
 <span class="c1"># pharmpy sets a parametrization attribute to the sympy distributions</span>
@@ -701,7 +779,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Nov 20, 2020.<br/>
+        Last updated on Dec 18, 2020.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

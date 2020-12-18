@@ -1,6 +1,9 @@
-===========
-Development
-===========
+==========
+Contribute
+==========
+
+.. warning::
+   This information is mostly outdated and will be updated shortly.
 
 .. toctree::
    :maxdepth: 4

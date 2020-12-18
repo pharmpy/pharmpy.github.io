@@ -5,3 +5,10 @@ pharmpy.methods.bootstrap.method module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.methods.bootstrap.method
+   :parts: 4
+

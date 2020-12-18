@@ -5,3 +5,10 @@ pharmpy.methods.modelfit.method module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.methods.modelfit.method
+   :parts: 4
+

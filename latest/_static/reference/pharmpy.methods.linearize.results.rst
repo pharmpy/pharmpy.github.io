@@ -5,3 +5,10 @@ pharmpy.methods.linearize.results module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.methods.linearize.results
+   :parts: 4
+

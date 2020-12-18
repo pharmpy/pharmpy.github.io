@@ -1,11 +1,6 @@
 pharmpy.methods.bootstrap package
 =================================
 
-.. automodule:: pharmpy.methods.bootstrap
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Submodules
 ----------
 
@@ -14,3 +9,18 @@ Submodules
 
    pharmpy.methods.bootstrap.method
    pharmpy.methods.bootstrap.results
+
+Module contents
+---------------
+
+.. automodule:: pharmpy.methods.bootstrap
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.methods.bootstrap
+   :parts: 4
+

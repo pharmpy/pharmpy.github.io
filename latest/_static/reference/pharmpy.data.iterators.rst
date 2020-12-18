@@ -5,3 +5,10 @@ pharmpy.data.iterators module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.data.iterators
+   :parts: 4
+

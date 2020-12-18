@@ -5,3 +5,10 @@ pharmpy.random\_variables module
    :members:
    :undoc-members:
    :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.random_variables
+   :parts: 4
+

@@ -1,11 +1,6 @@
 pharmpy.methods.cdd package
 ===========================
 
-.. automodule:: pharmpy.methods.cdd
-   :members:
-   :undoc-members:
-   :show-inheritance:
-
 Submodules
 ----------
 
@@ -13,3 +8,18 @@ Submodules
    :maxdepth: 2
 
    pharmpy.methods.cdd.results
+
+Module contents
+---------------
+
+.. automodule:: pharmpy.methods.cdd
+   :members:
+   :undoc-members:
+   :show-inheritance:
+
+Inheritance Diagram
+-------------------
+
+.. inheritance-diagram:: pharmpy.methods.cdd
+   :parts: 4
+
