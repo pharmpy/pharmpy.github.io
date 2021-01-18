@@ -14,6 +14,7 @@ Subpackages
    pharmpy.methods.modelfit
    pharmpy.methods.qa
    pharmpy.methods.scm
+   pharmpy.methods.simfit
 
 Submodules
 ----------

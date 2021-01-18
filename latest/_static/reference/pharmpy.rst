@@ -31,6 +31,7 @@ Submodules
    pharmpy.source
    pharmpy.statements
    pharmpy.symbols
+   pharmpy.unicode
    pharmpy.visualization
 
 Module contents

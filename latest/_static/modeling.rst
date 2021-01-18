@@ -31,8 +31,10 @@ Basic modelling
 ~~~~~~~~~~~~~~~
 
 Many basic model manipulation tasks that could also be done using methods on model objects have been included in the modeling module. This
-makes it possible to do most common model manipulations using a functional interface that is easy to chain into a pipeline. Note that all
-manipulations are done in place, i.e. the model referenced by the input argument will be changed.
+makes it possible to do most common model manipulations using a functional interface that is easy to chain into a pipeline.
+
+.. warning::
+   Note that all manipulations are done in place, i.e. the model referenced by the input argument will be changed.
 
 Reading, writing and updating source models
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -45,6 +47,17 @@ Read model from file
 
    from pharmpy.modeling import *
    model = read_model(path / 'pheno.mod')
+
+Read model from string
+======================
+
+If the model code is in a string variable it can be read in directly.
+
+.. jupyter-execute::
+    :hide-output:
+
+    code = '$PROBLEM base model\n$INPUT ID DV TIME\n$DATA file.csv IGNORE=@\n$PRED Y = THETA(1) + ETA(1) + ERR(1)\n$THETA 0.1\n$OMEGA 0.01\n$SIGMA 1\n$ESTIMATION METHOD=1' 
+    model = read_model_from_string(code)
 
 Update model source
 ===================
@@ -108,10 +121,11 @@ The ODE system of a PK model can be converted from having a compartmental descri
    explicit_odes(model)
    print(model.statements.ode_system)
 
-For NONMEM models this means going from any of the compartmental ADVANS (ADVAN1-4, ADVAN10-12) to coding using an explicit $DES.
+For NONMEM models this means going from any of the compartmental ADVANs (ADVAN1-4, ADVAN10-12) to coding using an explicit $DES. The exact solver to use (i.e. the specific ADVAN to use) can be set using the function `set_ode_solver`.
 
 .. jupyter-execute::
 
+   set_ode_solver(model, 'ADVAN13')
    model.update_source()
    print_model_diff(model_ref, model)
 

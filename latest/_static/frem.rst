@@ -10,7 +10,7 @@ Pharmpy currently handles the postprocessing, plotting and creation of model_3b 
 The FREM postprocessing and results
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The postprocessing starts after estimating the parameters $P$ of the FREM model together with their uncertainty covariance matrix :math:`Cov(P)`. Let us denote the random variables representing the model parameters :math:`\eta_i` for :math:`1 \leq i \leq n_{par}` and the random variables for the covariates
+The postprocessing starts after estimating the parameters :math:`P` of the FREM model together with their uncertainty covariance matrix :math:`Cov(P)`. Let us denote the random variables representing the model parameters :math:`\eta_i` for :math:`1 \leq i \leq n_{par}` and the random variables for the covariates
 :math:`\eta_k` for :math:`n_{par} + 1 \leq k \leq n_{cov} + n_{par}`. Then
 
 .. math::
@@ -115,6 +115,16 @@ The covariate effect plots give the covariate effects in percent with uncertaint
     res.plot_covariate_effects()
 
 
+Parameter covariate coefficients
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The parameter covariate coefficients for each covariate separately and for all taken together is available in `coefficients`. The definition for one coefficient is 
+`Cov(Par, Covariate) / Var(Covariate)` and generalized for all together the matrix :math:`\Sigma_{12}\Sigma_{22}^{-1}`
+
+.. jupyter-execute::
+    :hide-code:
+
+    res.coefficients
 
 Individual covariate effects
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -160,3 +170,50 @@ The plot display the original unexplained variability with the uncertainty for a
     :hide-code:
 
     res.plot_unexplained_variability()
+
+All variability parameters given the estimated parameters conditioned on each covariate in turn can be found in `parameter_variability`.
+
+.. jupyter-execute::
+    :hide-code:
+
+    res.parameter_variability
+
+
+Parameter estimates
+~~~~~~~~~~~~~~~~~~~
+
+The parameter initial estimates and final estimates of the base model, all intermediate models and the FREM model are tabled in `parameter_inits_and_estimates`.
+
+.. jupyter-execute::
+    :hide-code:
+
+    res.parameter_inits_and_estimates
+
+Relative difference between of the base model parameters estimates and the final model parameter estimates are calculated in `base_parameter_change`.
+
+.. jupyter-execute::
+    :hide-code:
+
+    res.base_parameter_change
+
+
+OFV
+~~~
+
+OFV of the base model, all intermediate models and the final FREM model are collected into `ofv`.
+
+.. jupyter-execute::
+    :hide-code:
+
+    res.ofv
+
+Estimated covariate values
+~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The FREM model also gives an estimate of the covariate values themselves. Ideally these values should be close to the ones in the dataset. Summary statistics for the estimated
+covariate values are put into `estimated_covariates`.
+
+.. jupyter-execute::
+    :hide-code:
+
+    res.estimated_covariates

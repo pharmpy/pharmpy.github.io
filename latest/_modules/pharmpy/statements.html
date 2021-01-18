@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.statements &#8212; Pharmpy 0.12.0 documentation</title>
+    <title>pharmpy.statements &#8212; Pharmpy 0.13.0 documentation</title>
     
   <link rel="stylesheet" href="../../_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
@@ -41,7 +41,7 @@
     <script src="../../_static/language_data.js"></script>
     <script src="../../_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
     <link rel="search" title="Search" href="../../search.html" />
@@ -154,12 +154,14 @@
                 
   <h1>Source code for pharmpy.statements</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">copy</span>
-<span class="kn">import</span> <span class="nn">math</span>
 
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
 <span class="kn">import</span> <span class="nn">sympy</span>
+<span class="kn">from</span> <span class="nn">sympy.printing.str</span> <span class="kn">import</span> <span class="n">StrPrinter</span>
 
 <span class="kn">import</span> <span class="nn">pharmpy.symbols</span> <span class="k">as</span> <span class="nn">symbols</span>
+<span class="kn">import</span> <span class="nn">pharmpy.unicode</span> <span class="k">as</span> <span class="nn">unicode</span>
+<span class="kn">from</span> <span class="nn">pharmpy.random_variables</span> <span class="kn">import</span> <span class="n">VariabilityLevel</span>
 
 
 <div class="viewcode-block" id="Assignment"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.Assignment">[docs]</a><span class="k">class</span> <span class="nc">Assignment</span><span class="p">:</span>
@@ -231,11 +233,73 @@
     <span class="k">def</span> <span class="nf">_repr_latex_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">sym</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">_repr_latex_</span><span class="p">()[</span><span class="mi">1</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">sym</span><span class="si">}</span><span class="s1"> := </span><span class="si">{</span><span class="n">expr</span><span class="si">}</span><span class="s1">$&#39;</span></div>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">sym</span><span class="si">}</span><span class="s1"> := </span><span class="si">{</span><span class="n">expr</span><span class="si">}</span><span class="s1">$&#39;</span>
+
+<div class="viewcode-block" id="Assignment.print_custom"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.Assignment.print_custom">[docs]</a>    <span class="k">def</span> <span class="nf">print_custom</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">trans</span><span class="p">):</span>
+        <span class="n">expr_ordered</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">order_terms</span><span class="p">(</span><span class="n">rvs</span><span class="p">,</span> <span class="n">trans</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">expr_ordered</span><span class="si">}</span><span class="s1">&#39;</span></div>
+
+<div class="viewcode-block" id="Assignment.order_terms"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.Assignment.order_terms">[docs]</a>    <span class="k">def</span> <span class="nf">order_terms</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">trans</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Order terms such that random variables are placed last. Currently only supports</span>
+<span class="sd">        additions.&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Add</span><span class="p">)</span> <span class="ow">or</span> <span class="n">rvs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span>
+
+        <span class="n">rvs_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">]</span>
+
+        <span class="k">if</span> <span class="n">trans</span><span class="p">:</span>
+            <span class="n">trans_rvs</span> <span class="o">=</span> <span class="p">{</span><span class="n">v</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">k</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">trans</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">k</span><span class="p">)</span> <span class="ow">in</span> <span class="n">rvs_names</span><span class="p">}</span>
+
+        <span class="n">expr_args</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">args</span>
+        <span class="n">terms_iiv_iov</span><span class="p">,</span> <span class="n">terms_ruv</span><span class="p">,</span> <span class="n">terms</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
+
+        <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">expr_args</span><span class="p">:</span>
+            <span class="n">arg_symbs</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">arg</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">]</span>
+            <span class="n">rvs_intersect</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">rvs_names</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">arg_symbs</span><span class="p">)</span>
+
+            <span class="k">if</span> <span class="n">trans</span><span class="p">:</span>
+                <span class="n">trans_intersect</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">trans_rvs</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">arg_symbs</span><span class="p">)</span>
+                <span class="n">rvs_intersect</span><span class="o">.</span><span class="n">update</span><span class="p">({</span><span class="n">trans_rvs</span><span class="p">[</span><span class="n">rv</span><span class="p">]</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">trans_intersect</span><span class="p">})</span>
+
+            <span class="k">if</span> <span class="n">rvs_intersect</span><span class="p">:</span>
+                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs_intersect</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">rv_name</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">rvs_intersect</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+                    <span class="n">variability_level</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="n">rv_name</span><span class="p">]</span><span class="o">.</span><span class="n">variability_level</span>
+                    <span class="k">if</span> <span class="n">variability_level</span> <span class="o">==</span> <span class="n">VariabilityLevel</span><span class="o">.</span><span class="n">RUV</span><span class="p">:</span>
+                        <span class="n">terms_ruv</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+                        <span class="k">continue</span>
+                <span class="n">terms_iiv_iov</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">terms</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">terms_iiv_iov</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">terms_ruv</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">expression</span>
+
+        <span class="k">def</span> <span class="nf">arg_len</span><span class="p">(</span><span class="n">symb</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">len</span><span class="p">([</span><span class="n">s</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">symb</span><span class="o">.</span><span class="n">args</span><span class="p">])</span>
+
+        <span class="n">terms_iiv_iov</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">arg_len</span><span class="p">)</span>
+        <span class="n">terms_ruv</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="n">arg_len</span><span class="p">)</span>
+        <span class="n">terms</span> <span class="o">+=</span> <span class="n">terms_iiv_iov</span> <span class="o">+</span> <span class="n">terms_ruv</span>
+
+        <span class="n">new_order</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="o">*</span><span class="n">terms</span><span class="p">,</span> <span class="n">evaluate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">expr_ordered</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">UnevaluatedExpr</span><span class="p">(</span><span class="n">new_order</span><span class="p">)</span>
+
+        <span class="k">return</span> <span class="n">StrPrinter</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">order</span><span class="o">=</span><span class="s2">&quot;none&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">doprint</span><span class="p">(</span><span class="n">expr_ordered</span><span class="p">)</span></div></div>
 
 
 <div class="viewcode-block" id="ODESystem"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.ODESystem">[docs]</a><span class="k">class</span> <span class="nc">ODESystem</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Base class and placeholder for ODE systems of different forms&quot;&quot;&quot;</span>
+    <span class="sd">&quot;&quot;&quot;Base class and placeholder for ODE systems of different forms</span>
+
+<span class="sd">    Attributes</span>
+<span class="sd">    ----------</span>
+<span class="sd">    solver : str</span>
+<span class="sd">        Solver to use when numerically solving the ode system</span>
+<span class="sd">        Currently supports NONMEM ADVANs</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">free_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -252,7 +316,10 @@
         <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="s1">&#39;ODESystem()&#39;</span></div>
+        <span class="k">return</span> <span class="s1">&#39;ODESystem()&#39;</span>
+
+    <span class="k">def</span> <span class="nf">_repr_html</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_bracket</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
@@ -281,6 +348,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">odes</span><span class="p">,</span> <span class="n">ics</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">odes</span> <span class="o">=</span> <span class="n">odes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">ics</span> <span class="o">=</span> <span class="n">ics</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">free_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -326,6 +394,7 @@
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ExplicitODESystem</span><span class="p">)</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">odes</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">odes</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">ics</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">ics</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">solver</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_repr_latex_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -347,6 +416,7 @@
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_g</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+        <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">()</span>
 
 <div class="viewcode-block" id="CompartmentalSystem.subs"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem.subs">[docs]</a>    <span class="k">def</span> <span class="nf">subs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">):</span>
         <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">edges</span><span class="o">.</span><span class="n">data</span><span class="p">(</span><span class="s1">&#39;rate&#39;</span><span class="p">):</span>
@@ -379,6 +449,7 @@
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">)</span>
             <span class="ow">and</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_dict_of_dicts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span> <span class="o">==</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_dict_of_dicts</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span><span class="o">.</span><span class="n">dose</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span><span class="o">.</span><span class="n">dose</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">solver</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">__deepcopy__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">memo</span><span class="p">):</span>
@@ -620,97 +691,67 @@
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
-        <span class="n">output_box</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">output_box</span> <span class="o">=</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">central</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_central</span><span class="p">()</span>
-        <span class="n">central_box</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="n">central</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">central_box</span> <span class="o">=</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">central</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">depot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_depot</span><span class="p">()</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
-            <span class="n">depot_box</span> <span class="o">=</span> <span class="n">box</span><span class="p">(</span><span class="n">depot</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">depot_central_arrow</span> <span class="o">=</span> <span class="n">arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">central</span><span class="p">)))</span>
+            <span class="n">comp</span> <span class="o">=</span> <span class="n">depot</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">comp</span> <span class="o">=</span> <span class="n">central</span>
+        <span class="n">transits</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">while</span> <span class="n">current</span> <span class="o">!=</span> <span class="n">comp</span><span class="p">:</span>
+            <span class="n">transits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>
+            <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">current</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">periphs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_peripherals</span><span class="p">()</span>
-        <span class="n">periph_box</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">periphs</span><span class="p">:</span>
-            <span class="n">periph_box</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">box</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
-
-        <span class="n">upper</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">nrows</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">periphs</span><span class="p">)</span>
+        <span class="n">ncols</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">transits</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">2</span> <span class="k">if</span> <span class="n">depot</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span> <span class="o">+</span> <span class="mi">3</span>
+        <span class="n">grid</span> <span class="o">=</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">nrows</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">main_row</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">main_row</span> <span class="o">=</span> <span class="mi">2</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">transit</span> <span class="ow">in</span> <span class="n">transits</span><span class="p">:</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">transit</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">transit</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
+            <span class="p">)</span>
+            <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">depot</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">depot</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])))</span>
+            <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">central_col</span> <span class="o">=</span> <span class="n">col</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">central_box</span><span class="p">)</span>
+        <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">))))</span>
+        <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
+        <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">output_box</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">periphs</span><span class="p">:</span>
-            <span class="n">upper</span> <span class="o">+=</span> <span class="n">box</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-            <span class="n">up_arrow</span> <span class="o">=</span> <span class="n">vertical_arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">periphs</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="n">down</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="n">down_arrow</span> <span class="o">=</span> <span class="n">vertical_arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">central</span><span class="p">)))</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">up_arrow</span><span class="p">)):</span>
-                <span class="n">upper</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">up_arrow</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;  &#39;</span> <span class="o">+</span> <span class="n">down_arrow</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-
-        <span class="n">bottom</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">central_output_arrow</span> <span class="o">=</span> <span class="n">arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)))</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">output_box</span><span class="p">)):</span>
-            <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="n">flow</span> <span class="o">=</span> <span class="n">central_output_arrow</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">flow</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">central_output_arrow</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                    <span class="n">ab</span> <span class="o">=</span> <span class="n">depot_central_arrow</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">ab</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">depot_central_arrow</span><span class="p">)</span>
-                <span class="n">curdepot</span> <span class="o">=</span> <span class="n">depot_box</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">ab</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">curdepot</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-
-            <span class="n">bottom</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">curdepot</span> <span class="o">+</span> <span class="n">central_box</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="n">flow</span> <span class="o">+</span> <span class="n">output_box</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-
-        <span class="n">lower</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">periphs</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">periphs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">down_arrow</span> <span class="o">=</span> <span class="n">vertical_arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">periphs</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
-            <span class="n">up_arrow</span> <span class="o">=</span> <span class="n">vertical_arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">central</span><span class="p">)),</span> <span class="n">down</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">up_arrow</span><span class="p">)):</span>
-                <span class="n">lower</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">up_arrow</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">+</span> <span class="s1">&#39;  &#39;</span> <span class="o">+</span> <span class="n">down_arrow</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
-            <span class="n">lower</span> <span class="o">+=</span> <span class="n">box</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-
-        <span class="n">upper_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="k">if</span> <span class="n">upper</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
-                <span class="n">pad</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">depot_box</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">depot_central_arrow</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">pad</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">upper</span><span class="p">:</span>
-                <span class="n">upper_str</span> <span class="o">+=</span> <span class="n">pad</span> <span class="o">+</span> <span class="n">line</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
-
-        <span class="n">lower_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="k">if</span> <span class="n">lower</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
-                <span class="n">pad</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">depot_box</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">depot_central_arrow</span><span class="p">))</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">pad</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-            <span class="k">for</span> <span class="n">line</span> <span class="ow">in</span> <span class="n">lower</span><span class="p">:</span>
-                <span class="n">lower_str</span> <span class="o">+=</span> <span class="n">pad</span> <span class="o">+</span> <span class="n">line</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">central_col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="mi">1</span><span class="p">,</span>
+                <span class="n">central_col</span><span class="p">,</span>
+                <span class="n">unicode</span><span class="o">.</span><span class="n">DualVerticalArrows</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">periphs</span><span class="p">[</span><span class="mi">0</span><span class="p">])),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">central</span><span class="p">))</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">periphs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">central_col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
+                <span class="mi">3</span><span class="p">,</span>
+                <span class="n">central_col</span><span class="p">,</span>
+                <span class="n">unicode</span><span class="o">.</span><span class="n">DualVerticalArrows</span><span class="p">(</span>
+                    <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="n">central</span><span class="p">)),</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">periphs</span><span class="p">[</span><span class="mi">1</span><span class="p">]))</span>
+                <span class="p">),</span>
+            <span class="p">)</span>
 
         <span class="n">dose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span><span class="o">.</span><span class="n">dose</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">dose</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">upper_str</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">bottom</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="n">lower_str</span></div>
-
-
-<div class="viewcode-block" id="box"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.box">[docs]</a><span class="k">def</span> <span class="nf">box</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Draw unicode box around string and return new string&quot;&quot;&quot;</span>
-    <span class="n">upper</span> <span class="o">=</span> <span class="s1">&#39;┌&#39;</span> <span class="o">+</span> <span class="s1">&#39;─&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;┐&#39;</span>
-    <span class="n">mid</span> <span class="o">=</span> <span class="s1">&#39;│&#39;</span> <span class="o">+</span> <span class="n">s</span> <span class="o">+</span> <span class="s1">&#39;│&#39;</span>
-    <span class="n">lower</span> <span class="o">=</span> <span class="s1">&#39;└&#39;</span> <span class="o">+</span> <span class="s1">&#39;─&#39;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;┘&#39;</span>
-    <span class="k">return</span> <span class="p">[</span><span class="n">upper</span><span class="p">,</span> <span class="n">mid</span><span class="p">,</span> <span class="n">lower</span><span class="p">]</span></div>
-
-
-<div class="viewcode-block" id="arrow"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.arrow">[docs]</a><span class="k">def</span> <span class="nf">arrow</span><span class="p">(</span><span class="n">flow</span><span class="p">,</span> <span class="n">right</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">right</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;─&#39;</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">flow</span> <span class="o">+</span> <span class="s1">&#39;→&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="s1">&#39;←&#39;</span> <span class="o">+</span> <span class="n">flow</span> <span class="o">+</span> <span class="s1">&#39;─&#39;</span> <span class="o">*</span> <span class="mi">2</span></div>
-
-
-<div class="viewcode-block" id="vertical_arrow"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.vertical_arrow">[docs]</a><span class="k">def</span> <span class="nf">vertical_arrow</span><span class="p">(</span><span class="n">flow</span><span class="p">,</span> <span class="n">down</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
-    <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">flow</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
-    <span class="n">before</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">floor</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-    <span class="n">after</span> <span class="o">=</span> <span class="s1">&#39; &#39;</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">ceil</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">down</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">before</span> <span class="o">+</span> <span class="s1">&#39;│&#39;</span> <span class="o">+</span> <span class="n">after</span><span class="p">,</span> <span class="n">flow</span><span class="p">,</span> <span class="n">before</span> <span class="o">+</span> <span class="s1">&#39;↓&#39;</span> <span class="o">+</span> <span class="n">after</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">[</span><span class="n">before</span> <span class="o">+</span> <span class="s1">&#39;↑&#39;</span> <span class="o">+</span> <span class="n">after</span><span class="p">,</span> <span class="n">flow</span><span class="p">,</span> <span class="n">before</span> <span class="o">+</span> <span class="s1">&#39;│&#39;</span> <span class="o">+</span> <span class="n">after</span><span class="p">]</span></div>
+        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">dose</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Compartment"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.Compartment">[docs]</a><span class="k">class</span> <span class="nc">Compartment</span><span class="p">:</span>
@@ -1027,7 +1068,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Dec 18, 2020.<br/>
+        Last updated on Jan 18, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

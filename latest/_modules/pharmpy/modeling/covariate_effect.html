@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.covariate_effect &#8212; Pharmpy 0.12.0 documentation</title>
+    <title>pharmpy.modeling.covariate_effect &#8212; Pharmpy 0.13.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
@@ -41,7 +41,7 @@
     <script src="../../../_static/language_data.js"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.18.0/dist/embed-amd.js"></script>
+    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -228,7 +228,7 @@
     <span class="n">statistics</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_calculate_std</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
 
     <span class="n">covariate_effect</span> <span class="o">=</span> <span class="n">_create_template</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
-    <span class="n">thetas</span> <span class="o">=</span> <span class="n">_create_thetas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">covariate_effect</span><span class="o">.</span><span class="n">template</span><span class="p">)</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="n">_create_thetas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">covariate_effect</span><span class="o">.</span><span class="n">template</span><span class="p">)</span>
 
     <span class="n">param_statement</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
 
@@ -248,7 +248,7 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<span class="k">def</span> <span class="nf">_create_thetas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">template</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_create_thetas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">template</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Creates theta parameters and adds to parameter set of model.</span>
 
 <span class="sd">    Number of parameters depends on how many thetas have been declared.&quot;&quot;&quot;</span>
@@ -257,22 +257,20 @@
     <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
 
     <span class="n">theta_names</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="n">theta_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="n">stem</span><span class="o">=</span><span class="s1">&#39;COVEFF&#39;</span><span class="p">,</span> <span class="n">force_numbering</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
 
     <span class="k">if</span> <span class="n">no_of_thetas</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">inits</span> <span class="o">=</span> <span class="n">_choose_param_inits</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
 
+        <span class="n">theta_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;POP_</span><span class="si">{</span><span class="n">parameter</span><span class="si">}{</span><span class="n">covariate</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="n">pset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">theta_name</span><span class="p">,</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;init&#39;</span><span class="p">],</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;lower&#39;</span><span class="p">],</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">]))</span>
         <span class="n">theta_names</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">theta_name</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">cov_eff_number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">findall</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;\d&#39;</span><span class="p">,</span> <span class="n">theta_name</span><span class="p">)[</span><span class="mi">0</span><span class="p">])</span>
-
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">no_of_thetas</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="n">inits</span> <span class="o">=</span> <span class="n">_choose_param_inits</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
 
+            <span class="n">theta_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;POP_</span><span class="si">{</span><span class="n">parameter</span><span class="si">}{</span><span class="n">covariate</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="n">pset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="n">theta_name</span><span class="p">,</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;init&#39;</span><span class="p">],</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;lower&#39;</span><span class="p">],</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">]))</span>
             <span class="n">theta_names</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;theta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">theta_name</span>
-            <span class="n">theta_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;COVEFF</span><span class="si">{</span><span class="n">cov_eff_number</span> <span class="o">+</span> <span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span>
 
     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">pset</span>
 
@@ -578,7 +576,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Dec 18, 2020.<br/>
+        Last updated on Jan 18, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>
