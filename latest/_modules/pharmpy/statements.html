@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.statements &#8212; Pharmpy 0.13.0 documentation</title>
+    <title>pharmpy.statements &#8212; Pharmpy 0.14.0 documentation</title>
     
   <link rel="stylesheet" href="../../_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
 
@@ -620,11 +620,16 @@
         <span class="n">dod</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_dict_of_dicts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span>
         <span class="n">size</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
         <span class="n">f</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">size</span><span class="p">)</span>
+        <span class="n">nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
+        <span class="c1"># Put output last</span>
+        <span class="n">nodes</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
+        <span class="n">nodes</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">output</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
-            <span class="n">from_comp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">)[</span><span class="n">i</span><span class="p">]</span>
+            <span class="n">from_comp</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="n">diagsum</span> <span class="o">=</span> <span class="mi">0</span>
             <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">size</span><span class="p">):</span>
-                <span class="n">to_comp</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">)[</span><span class="n">j</span><span class="p">]</span>
+                <span class="n">to_comp</span> <span class="o">=</span> <span class="n">nodes</span><span class="p">[</span><span class="n">j</span><span class="p">]</span>
                 <span class="k">try</span><span class="p">:</span>
                     <span class="n">rate</span> <span class="o">=</span> <span class="n">dod</span><span class="p">[</span><span class="n">from_comp</span><span class="p">][</span><span class="n">to_comp</span><span class="p">][</span><span class="s1">&#39;rate&#39;</span><span class="p">]</span>
                 <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -662,14 +667,17 @@
                 <span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
 
-<div class="viewcode-block" id="CompartmentalSystem.to_explicit_odes"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem.to_explicit_odes">[docs]</a>    <span class="k">def</span> <span class="nf">to_explicit_odes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="CompartmentalSystem.to_explicit_odes"><a class="viewcode-back" href="../../reference/pharmpy.statements.html#pharmpy.CompartmentalSystem.to_explicit_odes">[docs]</a>    <span class="k">def</span> <span class="nf">to_explicit_odes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">skip_output</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="n">amount_funcs</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">amt</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">amt</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">amounts</span><span class="p">])</span>
         <span class="n">derivatives</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">sympy</span><span class="o">.</span><span class="n">Derivative</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">amount_funcs</span><span class="p">])</span>
         <span class="n">inputs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">zero_order_inputs</span>
         <span class="n">a</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">compartmental_matrix</span> <span class="o">@</span> <span class="n">amount_funcs</span> <span class="o">+</span> <span class="n">inputs</span>
         <span class="n">eqs</span> <span class="o">=</span> <span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="p">)</span> <span class="k">for</span> <span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">derivatives</span><span class="p">,</span> <span class="n">a</span><span class="p">)]</span>
         <span class="n">ics</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">skip_output</span> <span class="ow">and</span> <span class="n">node</span> <span class="o">==</span> <span class="n">output</span><span class="p">:</span>
+                <span class="k">continue</span>
             <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">lag_time</span><span class="p">:</span>
                     <span class="n">time</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">lag_time</span>
@@ -678,6 +686,8 @@
                 <span class="n">ics</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">amount</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="n">time</span><span class="p">)]</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">ics</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">amount</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="mi">0</span><span class="p">)]</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">skip_output</span><span class="p">:</span>
+            <span class="n">eqs</span> <span class="o">=</span> <span class="n">eqs</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">ics</span></div>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1068,7 +1078,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Jan 18, 2021.<br/>
+        Last updated on Jan 25, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

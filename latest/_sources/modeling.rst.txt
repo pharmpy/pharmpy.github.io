@@ -56,7 +56,7 @@ If the model code is in a string variable it can be read in directly.
 .. jupyter-execute::
     :hide-output:
 
-    code = '$PROBLEM base model\n$INPUT ID DV TIME\n$DATA file.csv IGNORE=@\n$PRED Y = THETA(1) + ETA(1) + ERR(1)\n$THETA 0.1\n$OMEGA 0.01\n$SIGMA 1\n$ESTIMATION METHOD=1' 
+    code = '$PROBLEM base model\n$INPUT ID DV TIME\n$DATA file.csv IGNORE=@\n$PRED Y = THETA(1) + ETA(1) + ERR(1)\n$THETA 0.1\n$OMEGA 0.01\n$SIGMA 1\n$ESTIMATION METHOD=1'
     model = read_model_from_string(code)
 
 Update model source
@@ -486,21 +486,24 @@ provided all etas will be transformed. See :py:func:`pharmpy.modeling.john_drape
 Adding new etas
 ~~~~~~~~~~~~~~~
 
+Adding IIVs
+~~~~~~~~~~~
+
 .. jupyter-execute::
 
    model = Model(path / "pheno.mod")
 
-Etas may be added to a model.
+IIVs may be added to a model.
 
 .. jupyter-execute::
    :hide-output:
 
-   from pharmpy.modeling import add_etas
-   add_etas(model, 'S1', 'exp', operation='*')
+   from pharmpy.modeling import add_iiv
+   add_iiv(model, 'S1', 'exp', operation='*')
 
-In this example, *S1* is the parameter to add the eta to, *exp* is the effect on the new eta (see
-:py:class:`pharmpy.modeling.add_etas` for available templates and how intial estimates are chosen). The
-operation denotes whether the new eta should be added or multipled (default).
+In this example, *S1* is the parameter to add the IIV to, *exp* is the effect on the new eta (see
+:py:class:`pharmpy.modeling.add_iiv` for available templates and how initial estimates are chosen). The
+operation denotes whether the new eta should be added or multiplied (default).
 
 .. jupyter-execute::
 
@@ -513,7 +516,7 @@ already defined by the effect.
 .. jupyter-execute::
 
    model = Model(path / "pheno.mod")
-   add_etas(model, 'S1', 'prop')
+   add_iiv(model, 'S1', 'prop')
    model.update_source()
    print_model_diff(model_ref, model)
 
@@ -525,7 +528,7 @@ specified effects.
 
    model = Model(path / "pheno.mod")
    user_effect = 'eta_new**2'
-   add_etas(model, 'S1', user_effect, operation='*')
+   add_iiv(model, 'S1', user_effect, operation='*')
 
 The new etas need to be denoted as *eta_new*.
 
@@ -533,6 +536,91 @@ The new etas need to be denoted as *eta_new*.
 
    model.update_source()
    print_model_diff(model_ref, model)
+
+You can also provide a custom eta name, i.e the name of the internal representation of the eta in Pharmpy.
+
+.. jupyter-execute::
+
+   model = Model(path / "pheno.mod")
+   add_iiv(model, 'S1', 'exp', eta_name='ETA(3)')
+   model.update_source()
+   model.random_variables
+
+
+Adding IOVs
+~~~~~~~~~~~
+
+.. jupyter-execute::
+
+   model = Model(path / "pheno.mod")
+
+.. jupyter-execute::
+   :hide-output:
+   :hide-code:
+
+   import numpy as np
+   model.dataset['FA1'] = np.random.randint(0, 2, len(model.dataset.index))
+
+Similarly, you can also add IOVs to your model.
+
+.. jupyter-execute::
+   :hide-output:
+
+   from pharmpy.modeling import add_iov
+   add_iov(model, 'FA1', ['ETA(1)'])
+
+In this example, *FA1* is the name of the occasion column, and the etas on which you wish to add the IOV on are
+provided as a list. See :py:class:`pharmpy.modeling.add_iov` for information on how initial estimates are chosen.
+
+.. jupyter-execute::
+
+   model.update_source()
+   print_model_diff(model_ref, model)
+
+The name of the parameter may also be provided as an argument, and a mix of eta names and parameter names is
+supported.
+
+.. jupyter-execute::
+
+   model = Model(path / "pheno.mod")
+
+.. jupyter-execute::
+   :hide-output:
+   :hide-code:
+
+   model.dataset['FA1'] = np.random.randint(0, 2, len(model.dataset.index))
+
+.. jupyter-execute::
+
+   add_iov(model, 'FA1', ['CL', 'ETA(2)'])
+   model.update_source()
+   print_model_diff(model_ref, model)
+
+.. _add_iov_custom_names:
+
+Custom eta names are supported, meaning that the internal representation of the eta in Pharmpy can be set via
+the eta_names argument.
+
+.. warning::
+The number of names must be equal to the number of created etas (i.e. the number of
+input etas times the number of categories for occasion).
+
+.. jupyter-execute::
+
+   model = Model(path / "pheno.mod")
+
+.. jupyter-execute::
+   :hide-output:
+   :hide-code:
+
+   model.dataset['FA1'] = np.random.randint(0, 2, len(model.dataset.index))
+
+.. jupyter-execute::
+
+   add_iov(model, 'FA1', ['ETA(1)'], eta_names=['ETA(3)', 'ETA(4)'])
+   model.update_source()
+   model.random_variables
+
 
 ~~~~~~~~~~~~~
 Removing etas
@@ -694,6 +782,15 @@ transformed.
 
 See :py:func:`pharmpy.modeling.iiv_on_ruv`.
 
+Custom eta names are supported the same way as when :ref:`adding IOVs<add_iov_custom_names>`.
+
+.. jupyter-execute::
+
+   model = Model(path / "pheno.mod")
+   iiv_on_ruv(model, ['EPS(1)'], eta_names=['ETA(3)'])
+   model.random_variables
+
+
 Power effects on RUVs
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -754,5 +851,3 @@ pharmpy model. See :py:func:`pharmpy.modeling.update_inits`.
 
    update_inits(model, force_individual_estimates=True)
    model.update_source(nofiles=True)
-   print_model_diff(model_ref, model)
-
