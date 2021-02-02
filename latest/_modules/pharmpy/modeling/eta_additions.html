@@ -5,9 +5,9 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.eta_additions &#8212; Pharmpy 0.14.0 documentation</title>
+    <title>pharmpy.modeling.eta_additions &#8212; Pharmpy 0.15.6 documentation</title>
     
-  <link rel="stylesheet" href="../../../_static/css/index.73d71520a4ca3b99cfee5594769eaaae.css">
+  <link rel="stylesheet" href="../../../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
 
     
   <link rel="stylesheet"
@@ -32,7 +32,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
     
-  <link rel="preload" as="script" href="../../../_static/js/index.3da636dd464baa7582d2.js">
+  <link rel="preload" as="script" href="../../../_static/js/index.d3f166471bb80abb5163.js">
 
     <script id="documentation_options" data-url_root="../../../" src="../../../_static/documentation_options.js"></script>
     <script src="../../../_static/jquery.js"></script>
@@ -169,7 +169,7 @@
 <span class="kn">from</span> <span class="nn">pharmpy.symbols</span> <span class="kn">import</span> <span class="n">symbol</span> <span class="k">as</span> <span class="n">S</span>
 
 
-<div class="viewcode-block" id="add_iiv"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.add_iiv">[docs]</a><span class="k">def</span> <span class="nf">add_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">eta_name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="add_iiv"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.add_iiv">[docs]</a><span class="k">def</span> <span class="nf">add_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_parameters</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">eta_names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Adds IIVs to :class:`pharmpy.model`. Effects that currently have templates are:</span>
 
@@ -185,32 +185,50 @@
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model to add new IIVs to.</span>
-<span class="sd">    parameter : str</span>
-<span class="sd">        Name of parameter to add new IIVs to.</span>
-<span class="sd">    expression : str</span>
-<span class="sd">        Effect on eta. Either abbreviated (see above) or custom.</span>
-<span class="sd">    operation : str, optional</span>
+<span class="sd">    list_of_parameters : str, list</span>
+<span class="sd">        Name/names of parameter to add new IIVs to.</span>
+<span class="sd">    expression : str, list</span>
+<span class="sd">        Effect/effects on eta. Either abbreviated (see above) or custom.</span>
+<span class="sd">    operation : str, list, optional</span>
 <span class="sd">        Whether the new IIV should be added or multiplied (default).</span>
-<span class="sd">    eta_name: str, optional</span>
-<span class="sd">        Custom name of new eta</span>
+<span class="sd">    eta_names: str, list, optional</span>
+<span class="sd">        Custom name/names of new eta</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rvs</span><span class="p">,</span> <span class="n">pset</span><span class="p">,</span> <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
 
-    <span class="n">omega</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IIV_</span><span class="si">{</span><span class="n">parameter</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">eta_name</span><span class="p">:</span>
-        <span class="n">eta_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;ETA_</span><span class="si">{</span><span class="n">parameter</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">parameter</span><span class="p">,</span> <span class="n">additional_options</span> <span class="o">=</span> <span class="n">_change_to_list</span><span class="p">(</span>
+        <span class="n">list_of_parameters</span><span class="p">,</span> <span class="p">[</span><span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">eta_names</span><span class="p">]</span>
+    <span class="p">)</span>
+    <span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">eta_names</span> <span class="o">=</span> <span class="n">additional_options</span>
 
-    <span class="n">eta</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">eta_name</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">omega</span><span class="p">))</span>
-    <span class="n">eta</span><span class="o">.</span><span class="n">variability_level</span> <span class="o">=</span> <span class="n">VariabilityLevel</span><span class="o">.</span><span class="n">IIV</span>
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">eta_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">eta_name</span> <span class="ow">in</span> <span class="n">eta_names</span><span class="p">):</span>
+        <span class="n">eta_names</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="n">rvs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span>
-    <span class="n">pset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">omega</span><span class="p">),</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.09</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">additional_options</span> <span class="k">if</span> <span class="n">opt</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;The number of provided expressions and operations must either be equal &#39;</span>
+            <span class="s1">&#39;to the number of parameters or equal to 1&#39;</span>
+        <span class="p">)</span>
 
-    <span class="n">statement</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
-    <span class="n">eta_addition</span> <span class="o">=</span> <span class="n">_create_template</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">)</span>
-    <span class="n">eta_addition</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">statement</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">eta</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parameter</span><span class="p">)):</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IIV_</span><span class="si">{</span><span class="n">parameter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">eta_names</span><span class="p">:</span>
+            <span class="n">eta_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;ETA_</span><span class="si">{</span><span class="n">parameter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">eta_name</span> <span class="o">=</span> <span class="n">eta_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-    <span class="n">statement</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">eta_addition</span><span class="o">.</span><span class="n">template</span>
+        <span class="n">eta</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">eta_name</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">omega</span><span class="p">))</span>
+        <span class="n">eta</span><span class="o">.</span><span class="n">variability_level</span> <span class="o">=</span> <span class="n">VariabilityLevel</span><span class="o">.</span><span class="n">IIV</span>
+
+        <span class="n">rvs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span>
+        <span class="n">pset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">omega</span><span class="p">),</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.09</span><span class="p">))</span>
+
+        <span class="n">statement</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">parameter</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+
+        <span class="n">eta_addition</span> <span class="o">=</span> <span class="n">_create_template</span><span class="p">(</span><span class="n">expression</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">operation</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">eta_addition</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">statement</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">eta</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+        <span class="n">statement</span><span class="o">.</span><span class="n">expression</span> <span class="o">=</span> <span class="n">eta_addition</span><span class="o">.</span><span class="n">template</span>
 
     <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">rvs</span>
     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">pset</span>
@@ -230,7 +248,7 @@
 <span class="sd">        Pharmpy model to add new IOVs to.</span>
 <span class="sd">    occ : str</span>
 <span class="sd">        Name of occasion column.</span>
-<span class="sd">    list_of_parameters : list</span>
+<span class="sd">    list_of_parameters : str, list</span>
 <span class="sd">        List of names of parameters and random variables. Accepts random variable names, parameter</span>
 <span class="sd">        names, or a mix of both.</span>
 <span class="sd">    eta_names: list</span>
@@ -238,7 +256,12 @@
 <span class="sd">        categories for occasion.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rvs</span><span class="p">,</span> <span class="n">pset</span><span class="p">,</span> <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
-    <span class="n">etas</span> <span class="o">=</span> <span class="n">_get_etas</span><span class="p">(</span><span class="n">rvs</span><span class="p">,</span> <span class="n">sset</span><span class="p">,</span> <span class="n">list_of_parameters</span><span class="p">)</span>
+    <span class="n">params</span><span class="p">,</span> <span class="n">additional_options</span> <span class="o">=</span> <span class="n">_change_to_list</span><span class="p">(</span><span class="n">list_of_parameters</span><span class="p">,</span> <span class="p">[</span><span class="n">eta_names</span><span class="p">])</span>
+
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">additional_options</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">eta_names</span> <span class="o">=</span> <span class="n">additional_options</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+
+    <span class="n">etas</span> <span class="o">=</span> <span class="n">_get_etas</span><span class="p">(</span><span class="n">rvs</span><span class="p">,</span> <span class="n">sset</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
     <span class="n">iovs</span><span class="p">,</span> <span class="n">etais</span> <span class="o">=</span> <span class="n">ModelStatements</span><span class="p">(),</span> <span class="n">ModelStatements</span><span class="p">()</span>
 
     <span class="n">categories</span> <span class="o">=</span> <span class="n">_get_occ_levels</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">occ</span><span class="p">)</span>
@@ -285,6 +308,24 @@
     <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">pset</span><span class="p">,</span> <span class="n">iovs</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
+
+
+<span class="k">def</span> <span class="nf">_change_to_list</span><span class="p">(</span><span class="n">list_of_params</span><span class="p">,</span> <span class="n">additional_options</span><span class="p">):</span>
+    <span class="n">additional_options_as_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="n">list_of_params</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">list_of_params</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">additional_options</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">option</span><span class="p">:</span>
+                <span class="n">option</span> <span class="o">=</span> <span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_params</span><span class="p">)</span>
+            <span class="n">additional_options_as_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">list_of_params</span><span class="p">:</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">list_of_params</span><span class="p">]</span>
+        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">additional_options</span><span class="p">:</span>
+            <span class="n">additional_options_as_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">option</span><span class="p">])</span>
+
+    <span class="k">return</span> <span class="n">params</span><span class="p">,</span> <span class="n">additional_options_as_list</span>
 
 
 <span class="k">def</span> <span class="nf">_create_template</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
@@ -407,14 +448,14 @@
     </div>
 
     
-  <script src="../../../_static/js/index.3da636dd464baa7582d2.js"></script>
+  <script src="../../../_static/js/index.d3f166471bb80abb5163.js"></script>
 
 
     <footer class="footer mt-5 mt-md-0">
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Jan 25, 2021.<br/>
+        Last updated on Feb 02, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>
