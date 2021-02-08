@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.15.6 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.16.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
 
@@ -538,17 +538,68 @@
 
 
 <div class="viewcode-block" id="add_peripheral_compartment"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.add_peripheral_compartment">[docs]</a><span class="k">def</span> <span class="nf">add_peripheral_compartment</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Add a peripheral distribution compartment to model</span>
+
+<span class="sd">    The rate of flow from the central to the peripheral compartment</span>
+<span class="sd">    will be parameterized as QPn / VC where VC is the volume of the central compartment.</span>
+<span class="sd">    The rate of flow from the peripheral to the central compartment</span>
+<span class="sd">    will be parameterized as QPn / VPn where VPn is the volumne of the added peripheral</span>
+<span class="sd">    compartment.</span>
+
+<span class="sd">    Initial estimates:</span>
+
+<span class="sd">    ==  ===================================================</span>
+<span class="sd">    n</span>
+<span class="sd">    ==  ===================================================</span>
+<span class="sd">    1   :math:`\mathsf{CL} = \mathsf{CL&#39;}`, :math:`\mathsf{VC} = \mathsf{VC&#39;}`,</span>
+<span class="sd">        :math:`\mathsf{QP1} = \mathsf{CL&#39;}` and :math:`\mathsf{VP1} = \mathsf{VC&#39;} \cdot 0.05`</span>
+<span class="sd">    2   :math:`\mathsf{QP1} = \mathsf{QP1&#39; / 2}`, :math:`\mathsf{VP1} = \mathsf{VP1&#39;}`,</span>
+<span class="sd">        :math:`\mathsf{QP2} = \mathsf{QP1&#39; / 2}` and :math:`\mathsf{VP2} = \mathsf{VP1&#39;}`</span>
+<span class="sd">    ==  ===================================================</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">per</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_peripherals</span><span class="p">()</span>
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">per</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
-    <span class="n">qp</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;QP</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">vp</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;VP</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">()</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
     <span class="n">elimination_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
-    <span class="n">numer</span><span class="p">,</span> <span class="n">denom</span> <span class="o">=</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
-    <span class="n">vc</span> <span class="o">=</span> <span class="n">denom</span>
+    <span class="n">cl</span><span class="p">,</span> <span class="n">vc</span> <span class="o">=</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">full_cl</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
+        <span class="n">full_vc</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">vc</span><span class="p">)</span>
+        <span class="n">pop_cl_candidates</span> <span class="o">=</span> <span class="n">full_cl</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+        <span class="n">pop_cl</span> <span class="o">=</span> <span class="n">pop_cl_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">pop_vc_candidates</span> <span class="o">=</span> <span class="n">full_vc</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+        <span class="n">pop_vc</span> <span class="o">=</span> <span class="n">pop_vc_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">pop_cl_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_cl</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
+        <span class="n">pop_vc_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vc</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
+        <span class="n">qp_init</span> <span class="o">=</span> <span class="n">pop_cl_init</span>
+        <span class="n">vp_init</span> <span class="o">=</span> <span class="n">pop_vc_init</span> <span class="o">*</span> <span class="mf">0.05</span>
+    <span class="k">elif</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">per1</span> <span class="o">=</span> <span class="n">per</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">from_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">per1</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>
+        <span class="n">qp1</span><span class="p">,</span> <span class="n">vp1</span> <span class="o">=</span> <span class="n">from_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
+        <span class="n">full_qp1</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">qp1</span><span class="p">)</span>
+        <span class="n">full_vp1</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">vp1</span><span class="p">)</span>
+        <span class="n">pop_qp1_candidates</span> <span class="o">=</span> <span class="n">full_qp1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+        <span class="n">pop_qp1</span> <span class="o">=</span> <span class="n">pop_qp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">pop_vp1_candidates</span> <span class="o">=</span> <span class="n">full_vp1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+        <span class="n">pop_vp1</span> <span class="o">=</span> <span class="n">pop_vp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">pop_qp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_qp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
+        <span class="n">pop_vp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_qp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="n">pop_qp1_init</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">qp_init</span> <span class="o">=</span> <span class="n">pop_qp1_init</span> <span class="o">/</span> <span class="mi">2</span>
+        <span class="n">vp_init</span> <span class="o">=</span> <span class="n">pop_vp1_init</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">qp_init</span> <span class="o">=</span> <span class="mf">0.1</span>
+        <span class="n">vp_init</span> <span class="o">=</span> <span class="mf">0.1</span>
+
+    <span class="n">qp</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;QP</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">qp_init</span><span class="p">)</span>
+    <span class="n">vp</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;VP</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">vp_init</span><span class="p">)</span>
     <span class="n">peripheral</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">add_compartment</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PERIPHERAL</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">peripheral</span><span class="p">,</span> <span class="n">qp</span> <span class="o">/</span> <span class="n">vc</span><span class="p">)</span>
     <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">,</span> <span class="n">qp</span> <span class="o">/</span> <span class="n">vp</span><span class="p">)</span>
@@ -556,11 +607,78 @@
 
 
 <div class="viewcode-block" id="remove_peripheral_compartment"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.remove_peripheral_compartment">[docs]</a><span class="k">def</span> <span class="nf">remove_peripheral_compartment</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Remove a peripheral distribution compartment from model</span>
+
+<span class="sd">    Initial estimates:</span>
+
+<span class="sd">    ==  ===================================================</span>
+<span class="sd">    n</span>
+<span class="sd">    ==  ===================================================</span>
+<span class="sd">    2   :math:`\mathsf{CL} = \mathsf{CL&#39;}`,</span>
+<span class="sd">        :math:`\mathsf{QP1} = \mathsf{CL&#39;}` and :math:`\mathsf{VP1} = \mathsf{VC&#39;} \cdot 0.05`</span>
+<span class="sd">    3   :math:`\mathsf{QP1} = (\mathsf{QP1&#39;} + \mathsf{QP2&#39;}) / 2`,</span>
+<span class="sd">        :math:`\mathsf{VP1} = \mathsf{VP1&#39;} + \mathsf{VP2&#39;}`</span>
+<span class="sd">    ==  ===================================================</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">peripherals</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_peripherals</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">peripherals</span><span class="p">:</span>
         <span class="n">last_peripheral</span> <span class="o">=</span> <span class="n">peripherals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
         <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peripherals</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
+            <span class="n">elimination_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+            <span class="n">cl</span><span class="p">,</span> <span class="n">vc</span> <span class="o">=</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
+            <span class="n">from_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">last_peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>
+            <span class="n">qp1</span><span class="p">,</span> <span class="n">vp1</span> <span class="o">=</span> <span class="n">from_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
+            <span class="n">full_cl</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
+            <span class="n">full_vc</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">vc</span><span class="p">)</span>
+            <span class="n">full_qp1</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">qp1</span><span class="p">)</span>
+            <span class="n">full_vp1</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">vp1</span><span class="p">)</span>
+            <span class="n">pop_cl_candidates</span> <span class="o">=</span> <span class="n">full_cl</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+            <span class="n">pop_cl</span> <span class="o">=</span> <span class="n">pop_cl_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">pop_vc_candidates</span> <span class="o">=</span> <span class="n">full_vc</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+            <span class="n">pop_vc</span> <span class="o">=</span> <span class="n">pop_vc_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">pop_qp1_candidates</span> <span class="o">=</span> <span class="n">full_qp1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+            <span class="n">pop_qp1</span> <span class="o">=</span> <span class="n">pop_qp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">pop_vp1_candidates</span> <span class="o">=</span> <span class="n">full_vp1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+            <span class="n">pop_vp1</span> <span class="o">=</span> <span class="n">pop_vp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">pop_vc_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vc</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
+            <span class="n">pop_cl_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_cl</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
+            <span class="n">pop_qp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_qp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
+            <span class="n">pop_vp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
+            <span class="n">new_vc_init</span> <span class="o">=</span> <span class="n">pop_vc_init</span> <span class="o">+</span> <span class="n">pop_qp1_init</span> <span class="o">/</span> <span class="n">pop_cl_init</span> <span class="o">*</span> <span class="n">pop_vp1_init</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vc</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="n">new_vc_init</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">peripherals</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">first_peripheral</span> <span class="o">=</span> <span class="n">peripherals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">from1_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">first_peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>
+            <span class="n">qp1</span><span class="p">,</span> <span class="n">vp1</span> <span class="o">=</span> <span class="n">from1_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
+            <span class="n">from2_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">last_peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>
+            <span class="n">qp2</span><span class="p">,</span> <span class="n">vp2</span> <span class="o">=</span> <span class="n">from2_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
+            <span class="n">full_qp2</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">qp2</span><span class="p">)</span>
+            <span class="n">full_vp2</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">vp2</span><span class="p">)</span>
+            <span class="n">full_qp1</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">qp1</span><span class="p">)</span>
+            <span class="n">full_vp1</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">vp1</span><span class="p">)</span>
+            <span class="n">pop_qp2_candidates</span> <span class="o">=</span> <span class="n">full_qp2</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+            <span class="n">pop_qp2</span> <span class="o">=</span> <span class="n">pop_qp2_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">pop_vp2_candidates</span> <span class="o">=</span> <span class="n">full_vp2</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+            <span class="n">pop_vp2</span> <span class="o">=</span> <span class="n">pop_vp2_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">pop_qp1_candidates</span> <span class="o">=</span> <span class="n">full_qp1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+            <span class="n">pop_qp1</span> <span class="o">=</span> <span class="n">pop_qp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">pop_vp1_candidates</span> <span class="o">=</span> <span class="n">full_vp1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+            <span class="n">pop_vp1</span> <span class="o">=</span> <span class="n">pop_vp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">pop_qp2_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_qp2</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
+            <span class="n">pop_vp2_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vp2</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
+            <span class="n">pop_qp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_qp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
+            <span class="n">pop_vp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
+            <span class="n">new_qp1_init</span> <span class="o">=</span> <span class="p">(</span><span class="n">pop_qp1_init</span> <span class="o">+</span> <span class="n">pop_qp2_init</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
+            <span class="n">new_vp1_init</span> <span class="o">=</span> <span class="n">pop_vp1_init</span> <span class="o">+</span> <span class="n">pop_vp2_init</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_qp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="n">new_qp1_init</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="n">new_vp1_init</span>
+
         <span class="n">symbols</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">last_peripheral</span><span class="p">)</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">symbols</span> <span class="o">|=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">last_peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">odes</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">last_peripheral</span><span class="p">)</span>
@@ -597,7 +715,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Feb 02, 2021.<br/>
+        Last updated on Feb 08, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

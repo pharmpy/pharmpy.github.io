@@ -8,6 +8,7 @@ Submodules
    :maxdepth: 2
 
    pharmpy.methods.modelfit.method
+   pharmpy.methods.modelfit.results
    pharmpy.methods.modelfit.run
 
 Module contents

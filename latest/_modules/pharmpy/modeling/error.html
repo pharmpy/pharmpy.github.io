@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.error &#8212; Pharmpy 0.15.6 documentation</title>
+    <title>pharmpy.modeling.error &#8212; Pharmpy 0.16.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
 
@@ -195,6 +195,8 @@
 <span class="sd">    model</span>
 <span class="sd">        Set error model for this model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">has_additive_error</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">model</span>
     <span class="n">stats</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_preparations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">ruv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="s1">&#39;RUV&#39;</span><span class="p">)</span>
     <span class="n">expr</span> <span class="o">=</span> <span class="n">f</span> <span class="o">+</span> <span class="n">ruv</span>
@@ -228,6 +230,8 @@
 <span class="sd">    model</span>
 <span class="sd">        Set error model for this model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">has_proportional_error</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">model</span>
     <span class="n">stats</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_preparations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">ruv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="s1">&#39;RUV&#39;</span><span class="p">)</span>
     <span class="n">expr</span> <span class="o">=</span> <span class="n">f</span> <span class="o">+</span> <span class="n">f</span> <span class="o">*</span> <span class="n">ruv</span>
@@ -254,6 +258,8 @@
 <span class="sd">    model</span>
 <span class="sd">        Set error model for this model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">has_combined_error</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">model</span>
     <span class="n">stats</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_preparations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">ruv_prop</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="s1">&#39;RUV_PROP&#39;</span><span class="p">)</span>
     <span class="n">ruv_add</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="s1">&#39;RUV_ADD&#39;</span><span class="p">)</span>
@@ -276,6 +282,74 @@
     <span class="n">eps_add</span><span class="o">.</span><span class="n">variability_level</span> <span class="o">=</span> <span class="n">VariabilityLevel</span><span class="o">.</span><span class="n">RUV</span>
     <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eps_add</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="has_additive_error"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.has_additive_error">[docs]</a><span class="k">def</span> <span class="nf">has_additive_error</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if a model has an additive error model</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model</span>
+<span class="sd">        The model to check</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variable_symbol</span>
+    <span class="n">expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">full_expression_after_odes</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">ruv_rvs</span>
+    <span class="n">rvs_in_y</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span> <span class="k">if</span> <span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs_in_y</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">rvs_in_y</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">eps</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">expr</span> <span class="o">-</span> <span class="n">eps</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span><span class="o">.</span><span class="n">free_symbols</span></div>
+
+
+<div class="viewcode-block" id="has_proportional_error"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.has_proportional_error">[docs]</a><span class="k">def</span> <span class="nf">has_proportional_error</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if a model has a proportional error model</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model</span>
+<span class="sd">        The model to check</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variable_symbol</span>
+    <span class="n">expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">full_expression_after_odes</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">ruv_rvs</span>
+    <span class="n">rvs_in_y</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span> <span class="k">if</span> <span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs_in_y</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">eps</span> <span class="o">=</span> <span class="n">rvs_in_y</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">eps</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">expr</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">eps</span><span class="p">))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span><span class="o">.</span><span class="n">free_symbols</span></div>
+
+
+<div class="viewcode-block" id="has_combined_error"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.has_combined_error">[docs]</a><span class="k">def</span> <span class="nf">has_combined_error</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if a model has a combined additive and proportinal error model</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model</span>
+<span class="sd">        The model to check</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variable_symbol</span>
+    <span class="n">expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">full_expression_after_odes</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+    <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">ruv_rvs</span>
+    <span class="n">rvs_in_y</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span> <span class="k">if</span> <span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="p">}</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs_in_y</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">eps1</span> <span class="o">=</span> <span class="n">rvs_in_y</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="n">eps2</span> <span class="o">=</span> <span class="n">rvs_in_y</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+    <span class="n">canc1</span> <span class="o">=</span> <span class="p">((</span><span class="n">expr</span> <span class="o">-</span> <span class="n">eps1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">eps2</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+    <span class="n">canc2</span> <span class="o">=</span> <span class="p">((</span><span class="n">expr</span> <span class="o">-</span> <span class="n">eps2</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">eps1</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">eps1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">canc1</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="ow">and</span> <span class="n">eps2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">canc1</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="ow">or</span> <span class="n">eps1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">canc2</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="ow">and</span> <span class="n">eps2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">canc2</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="p">)</span></div>
 </pre></div>
 
               </div>
@@ -300,7 +374,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Feb 02, 2021.<br/>
+        Last updated on Feb 08, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>
