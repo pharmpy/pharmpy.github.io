@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.16.0 documentation</title>
+    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.17.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
 
@@ -180,6 +180,9 @@
 <span class="sd">        List of etas to create a block structure from. If None, all etas that are IIVs and</span>
 <span class="sd">        non-fixed will be used (full block). None is default.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">list_of_rvs</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_rvs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;At least two random variables are needed&#39;</span><span class="p">)</span>
+
     <span class="n">rvs_full</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
     <span class="n">rvs_block</span> <span class="o">=</span> <span class="n">_get_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_rvs</span><span class="p">)</span>
 
@@ -187,7 +190,7 @@
         <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs_block</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">MultivariateNormalDistribution</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">rvs_full</span><span class="o">.</span><span class="n">get_rvs_from_same_dist</span><span class="p">(</span><span class="n">rv</span><span class="p">):</span>
-                    <span class="n">rv_extracted</span> <span class="o">=</span> <span class="n">rvs_full</span><span class="o">.</span><span class="n">extract_from_block</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
+                    <span class="n">rv_extracted</span> <span class="o">=</span> <span class="n">rvs_full</span><span class="o">.</span><span class="n">extract_from_block</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
                     <span class="n">rvs_block</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
                     <span class="n">rvs_block</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rv_extracted</span><span class="p">)</span>
 
@@ -211,14 +214,46 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
+<div class="viewcode-block" id="split_rv_block"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.split_rv_block">[docs]</a><span class="k">def</span> <span class="nf">split_rv_block</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_rvs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Splits an block structure given a list of etas to separate.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model to create block effect on.</span>
+<span class="sd">    list_of_rvs : list</span>
+<span class="sd">        List of etas to split from block structure. If None, all etas that are IIVs and</span>
+<span class="sd">        non-fixed will become single. None is default.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">rvs_full</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
+    <span class="n">rvs_block</span> <span class="o">=</span> <span class="n">_get_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_rvs</span><span class="p">)</span>
+    <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
+
+    <span class="n">cov_matrix_before</span> <span class="o">=</span> <span class="n">rvs_full</span><span class="o">.</span><span class="n">covariance_matrix</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs_block</span><span class="p">:</span>
+        <span class="n">rvs_full</span><span class="o">.</span><span class="n">extract_from_block</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
+
+    <span class="n">cov_matrix_after</span> <span class="o">=</span> <span class="n">rvs_full</span><span class="o">.</span><span class="n">covariance_matrix</span><span class="p">()</span>
+
+    <span class="n">diff</span> <span class="o">=</span> <span class="n">cov_matrix_before</span> <span class="o">-</span> <span class="n">cov_matrix_after</span>
+    <span class="n">param_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">elem</span> <span class="k">for</span> <span class="n">elem</span> <span class="ow">in</span> <span class="n">diff</span> <span class="k">if</span> <span class="n">elem</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">param_names</span><span class="p">):</span>
+        <span class="n">pset</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+
+    <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">rvs_full</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">pset</span>
+
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
 <span class="k">def</span> <span class="nf">_get_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_rvs</span><span class="p">):</span>
     <span class="n">full_block</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="k">if</span> <span class="n">list_of_rvs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">list_of_rvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">]</span>
         <span class="n">full_block</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_rvs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;At least two random variables are needed&#39;</span><span class="p">)</span>
 
     <span class="n">rvs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">rv_str</span> <span class="ow">in</span> <span class="n">list_of_rvs</span><span class="p">:</span>
@@ -251,9 +286,16 @@
 
 
 <span class="k">def</span> <span class="nf">_merge_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rvs</span><span class="p">):</span>
-    <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
+    <span class="n">sset</span><span class="p">,</span> <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
 
-    <span class="n">cov_to_params</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">merge_normal_distributions</span><span class="p">(</span><span class="n">create_cov_params</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">rv_to_param</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">:</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">is_symbol</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">last</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">parameter_names</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">s</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">statements</span><span class="p">])</span>
+        <span class="n">rv_to_param</span><span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">parameter_names</span>
+
+    <span class="n">cov_to_params</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">merge_normal_distributions</span><span class="p">(</span><span class="n">create_cov_params</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">rv_to_param</span><span class="o">=</span><span class="n">rv_to_param</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">:</span>
         <span class="n">rv</span><span class="o">.</span><span class="n">variability_level</span> <span class="o">=</span> <span class="n">VariabilityLevel</span><span class="o">.</span><span class="n">IIV</span>
@@ -312,7 +354,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Feb 08, 2021.<br/>
+        Last updated on Feb 15, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>
