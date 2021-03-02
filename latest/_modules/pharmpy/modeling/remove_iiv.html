@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.remove_iiv &#8212; Pharmpy 0.17.0 documentation</title>
+    <title>pharmpy.modeling.remove_iiv &#8212; Pharmpy 0.19.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
 
@@ -79,7 +79,7 @@
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../development.html">Contribute</a>
+            <a class="nav-link" href="../../../contribute.html">Contribute</a>
         </li>
         
         <li class="nav-item ">
@@ -124,7 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
@@ -157,8 +157,7 @@
 <span class="sd">:meta private:</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">from</span> <span class="nn">pharmpy.random_variables</span> <span class="kn">import</span> <span class="n">RandomVariables</span><span class="p">,</span> <span class="n">VariabilityLevel</span>
-<span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span>
+<span class="kn">from</span> <span class="nn">pharmpy.modeling.help_functions</span> <span class="kn">import</span> <span class="n">_format_input_list</span><span class="p">,</span> <span class="n">_get_etas</span>
 <span class="kn">from</span> <span class="nn">pharmpy.symbols</span> <span class="kn">import</span> <span class="n">symbol</span> <span class="k">as</span> <span class="n">S</span>
 
 
@@ -170,12 +169,13 @@
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model to create block effect on.</span>
-<span class="sd">    list_to_remove : list</span>
-<span class="sd">        List of etas and/or parameter name to remove. If None, all etas that are IIVs will</span>
+<span class="sd">    list_to_remove : str, list</span>
+<span class="sd">        Name/names of etas and/or parameter name to remove. If None, all etas that are IIVs will</span>
 <span class="sd">        be removed. None is default.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rvs</span><span class="p">,</span> <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
-    <span class="n">etas</span> <span class="o">=</span> <span class="n">_get_etas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_to_remove</span><span class="p">)</span>
+    <span class="n">list_to_remove</span> <span class="o">=</span> <span class="n">_format_input_list</span><span class="p">(</span><span class="n">list_to_remove</span><span class="p">)</span>
+    <span class="n">etas</span> <span class="o">=</span> <span class="n">_get_etas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_to_remove</span><span class="p">,</span> <span class="n">include_symbols</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="n">etas</span><span class="p">:</span>
         <span class="n">statement</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">eta</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">is_symbol</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
@@ -188,41 +188,6 @@
     <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
-
-
-<span class="k">def</span> <span class="nf">_get_etas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_to_remove</span><span class="p">):</span>
-    <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
-    <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
-    <span class="n">symbols_all</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">)]</span>
-
-    <span class="k">if</span> <span class="n">list_to_remove</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">list_to_remove</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span><span class="o">.</span><span class="n">etas</span><span class="p">]</span>
-
-    <span class="n">etas</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">symbols</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">list_to_remove</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">eta</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="n">variable</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">variable</span> <span class="ow">in</span> <span class="n">symbols_all</span><span class="p">:</span>
-                <span class="n">symbols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">variable</span><span class="p">)</span>
-                <span class="k">continue</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Random variable does not exist: </span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">eta</span><span class="o">.</span><span class="n">variability_level</span> <span class="o">==</span> <span class="n">VariabilityLevel</span><span class="o">.</span><span class="n">IOV</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">list_to_remove</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Random variable cannot be IOV: </span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="k">continue</span>
-
-        <span class="n">etas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">symbols</span><span class="p">:</span>
-        <span class="n">terms</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span><span class="o">.</span><span class="n">free_symbols</span>
-        <span class="n">eta_set</span> <span class="o">=</span> <span class="n">terms</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">rvs</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">)</span>
-        <span class="n">etas</span> <span class="o">+=</span> <span class="p">[</span><span class="n">rvs</span><span class="p">[</span><span class="n">eta</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="n">eta_set</span><span class="p">]</span>
-
-    <span class="k">return</span> <span class="n">RandomVariables</span><span class="p">(</span><span class="n">etas</span><span class="p">)</span>
 </pre></div>
 
               </div>
@@ -247,7 +212,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Feb 15, 2021.<br/>
+        Last updated on Mar 02, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.power_on_ruv &#8212; Pharmpy 0.17.0 documentation</title>
+    <title>pharmpy.modeling.power_on_ruv &#8212; Pharmpy 0.19.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
 
@@ -79,7 +79,7 @@
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../development.html">Contribute</a>
+            <a class="nav-link" href="../../../contribute.html">Contribute</a>
         </li>
         
         <li class="nav-item ">
@@ -124,7 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
@@ -157,9 +157,8 @@
 <span class="sd">:meta private:</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">warnings</span>
-
 <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">has_proportional_error</span>
+<span class="kn">from</span> <span class="nn">pharmpy.modeling.help_functions</span> <span class="kn">import</span> <span class="n">_format_input_list</span><span class="p">,</span> <span class="n">_get_epsilons</span>
 <span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
 <span class="kn">from</span> <span class="nn">pharmpy.symbols</span> <span class="kn">import</span> <span class="n">symbol</span> <span class="k">as</span> <span class="n">S</span>
 
@@ -173,10 +172,11 @@
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model to create block effect on.</span>
-<span class="sd">    list_of_eps : list</span>
-<span class="sd">        List of epsilons to apply power effect. If None, all epsilons will be used.</span>
+<span class="sd">    list_of_eps : str, list</span>
+<span class="sd">        Name/names of epsilons to apply power effect. If None, all epsilons will be used.</span>
 <span class="sd">        None is default.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">list_of_eps</span> <span class="o">=</span> <span class="n">_format_input_list</span><span class="p">(</span><span class="n">list_of_eps</span><span class="p">)</span>
     <span class="n">eps</span> <span class="o">=</span> <span class="n">_get_epsilons</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_eps</span><span class="p">)</span>
     <span class="n">pset</span><span class="p">,</span> <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
 
@@ -196,21 +196,6 @@
     <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">sset</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
-
-
-<span class="k">def</span> <span class="nf">_get_epsilons</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_eps</span><span class="p">):</span>
-    <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
-
-    <span class="k">if</span> <span class="n">list_of_eps</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">rvs</span><span class="o">.</span><span class="n">ruv_rvs</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">eps</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">list_of_eps</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="n">eps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rvs</span><span class="p">[</span><span class="n">e</span><span class="o">.</span><span class="n">upper</span><span class="p">()])</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Epsilon &quot;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&quot; does not exist&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">eps</span>
 </pre></div>
 
               </div>
@@ -235,7 +220,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Feb 15, 2021.<br/>
+        Last updated on Mar 02, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

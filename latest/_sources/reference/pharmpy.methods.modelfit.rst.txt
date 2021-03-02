@@ -7,9 +7,9 @@ Submodules
 .. toctree::
    :maxdepth: 2
 
+   pharmpy.methods.modelfit.job
    pharmpy.methods.modelfit.method
    pharmpy.methods.modelfit.results
-   pharmpy.methods.modelfit.run
 
 Module contents
 ---------------

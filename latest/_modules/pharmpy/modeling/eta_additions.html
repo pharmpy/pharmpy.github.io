@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.eta_additions &#8212; Pharmpy 0.17.0 documentation</title>
+    <title>pharmpy.modeling.eta_additions &#8212; Pharmpy 0.19.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
 
@@ -79,7 +79,7 @@
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../development.html">Contribute</a>
+            <a class="nav-link" href="../../../contribute.html">Contribute</a>
         </li>
         
         <li class="nav-item ">
@@ -124,7 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
@@ -163,6 +163,7 @@
 <span class="kn">import</span> <span class="nn">sympy.stats</span> <span class="k">as</span> <span class="nn">stats</span>
 <span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">Eq</span><span class="p">,</span> <span class="n">Piecewise</span>
 
+<span class="kn">from</span> <span class="nn">pharmpy.modeling.help_functions</span> <span class="kn">import</span> <span class="n">_format_input_list</span><span class="p">,</span> <span class="n">_format_options</span><span class="p">,</span> <span class="n">_get_etas</span>
 <span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
 <span class="kn">from</span> <span class="nn">pharmpy.random_variables</span> <span class="kn">import</span> <span class="n">VariabilityLevel</span>
 <span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">ModelStatements</span>
@@ -196,24 +197,23 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rvs</span><span class="p">,</span> <span class="n">pset</span><span class="p">,</span> <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
 
-    <span class="n">parameter</span><span class="p">,</span> <span class="n">additional_options</span> <span class="o">=</span> <span class="n">_change_to_list</span><span class="p">(</span>
-        <span class="n">list_of_parameters</span><span class="p">,</span> <span class="p">[</span><span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">eta_names</span><span class="p">]</span>
-    <span class="p">)</span>
-    <span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">eta_names</span> <span class="o">=</span> <span class="n">additional_options</span>
+    <span class="n">list_of_parameters</span> <span class="o">=</span> <span class="n">_format_input_list</span><span class="p">(</span><span class="n">list_of_parameters</span><span class="p">)</span>
+    <span class="n">list_of_options</span> <span class="o">=</span> <span class="n">_format_options</span><span class="p">([</span><span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">eta_names</span><span class="p">],</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_parameters</span><span class="p">))</span>
+    <span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">,</span> <span class="n">eta_names</span> <span class="o">=</span> <span class="n">list_of_options</span>
 
     <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">eta_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">eta_name</span> <span class="ow">in</span> <span class="n">eta_names</span><span class="p">):</span>
         <span class="n">eta_names</span> <span class="o">=</span> <span class="kc">None</span>
 
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">additional_options</span> <span class="k">if</span> <span class="n">opt</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">opt</span><span class="p">)</span> <span class="o">==</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_parameters</span><span class="p">)</span> <span class="k">for</span> <span class="n">opt</span> <span class="ow">in</span> <span class="n">list_of_options</span> <span class="k">if</span> <span class="n">opt</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="s1">&#39;The number of provided expressions and operations must either be equal &#39;</span>
             <span class="s1">&#39;to the number of parameters or equal to 1&#39;</span>
         <span class="p">)</span>
 
-    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">parameter</span><span class="p">)):</span>
-        <span class="n">omega</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IIV_</span><span class="si">{</span><span class="n">parameter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_of_parameters</span><span class="p">)):</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IIV_</span><span class="si">{</span><span class="n">list_of_parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">eta_names</span><span class="p">:</span>
-            <span class="n">eta_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;ETA_</span><span class="si">{</span><span class="n">parameter</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">eta_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;ETA_</span><span class="si">{</span><span class="n">list_of_parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">eta_name</span> <span class="o">=</span> <span class="n">eta_names</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
@@ -223,7 +223,7 @@
         <span class="n">rvs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span>
         <span class="n">pset</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">omega</span><span class="p">),</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.09</span><span class="p">))</span>
 
-        <span class="n">statement</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">parameter</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
+        <span class="n">statement</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">list_of_parameters</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
         <span class="n">eta_addition</span> <span class="o">=</span> <span class="n">_create_template</span><span class="p">(</span><span class="n">expression</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">operation</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
         <span class="n">eta_addition</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">statement</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">eta</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -251,19 +251,14 @@
 <span class="sd">    list_of_parameters : str, list</span>
 <span class="sd">        List of names of parameters and random variables. Accepts random variable names, parameter</span>
 <span class="sd">        names, or a mix of both.</span>
-<span class="sd">    eta_names: list</span>
+<span class="sd">    eta_names: str, list</span>
 <span class="sd">        Custom names of new etas. Must be equal to the number of input etas times the number of</span>
 <span class="sd">        categories for occasion.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rvs</span><span class="p">,</span> <span class="n">pset</span><span class="p">,</span> <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
-    <span class="n">params</span><span class="p">,</span> <span class="n">additional_options</span> <span class="o">=</span> <span class="n">_change_to_list</span><span class="p">(</span><span class="n">list_of_parameters</span><span class="p">,</span> <span class="p">[</span><span class="n">eta_names</span><span class="p">])</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">additional_options</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">eta_names</span> <span class="o">=</span> <span class="n">additional_options</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-
-    <span class="n">etas</span> <span class="o">=</span> <span class="n">_get_etas</span><span class="p">(</span><span class="n">rvs</span><span class="p">,</span> <span class="n">sset</span><span class="p">,</span> <span class="n">params</span><span class="p">)</span>
-    <span class="n">iovs</span><span class="p">,</span> <span class="n">etais</span> <span class="o">=</span> <span class="n">ModelStatements</span><span class="p">(),</span> <span class="n">ModelStatements</span><span class="p">()</span>
-
+    <span class="n">list_of_parameters</span> <span class="o">=</span> <span class="n">_format_input_list</span><span class="p">(</span><span class="n">list_of_parameters</span><span class="p">)</span>
+    <span class="n">etas</span> <span class="o">=</span> <span class="n">_get_etas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_parameters</span><span class="p">,</span> <span class="n">include_symbols</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">categories</span> <span class="o">=</span> <span class="n">_get_occ_levels</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">occ</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">eta_names</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">eta_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">etas</span><span class="p">)</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">categories</span><span class="p">):</span>
@@ -273,6 +268,7 @@
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Only one value in </span><span class="si">{</span><span class="n">occ</span><span class="si">}</span><span class="s1"> column.&#39;</span><span class="p">)</span>
 
+    <span class="n">iovs</span><span class="p">,</span> <span class="n">etais</span> <span class="o">=</span> <span class="n">ModelStatements</span><span class="p">(),</span> <span class="n">ModelStatements</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">eta</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">etas</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
         <span class="n">omega_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">eta</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">)))</span>
         <span class="n">omega</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;OMEGA_IOV_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>  <span class="c1"># TODO: better name</span>
@@ -312,24 +308,6 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<span class="k">def</span> <span class="nf">_change_to_list</span><span class="p">(</span><span class="n">list_of_params</span><span class="p">,</span> <span class="n">additional_options</span><span class="p">):</span>
-    <span class="n">additional_options_as_list</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="n">params</span> <span class="o">=</span> <span class="n">list_of_params</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">list_of_params</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">additional_options</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">option</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">option</span><span class="p">:</span>
-                <span class="n">option</span> <span class="o">=</span> <span class="p">[</span><span class="n">option</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_params</span><span class="p">)</span>
-            <span class="n">additional_options_as_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">option</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">list_of_params</span><span class="p">:</span>
-            <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">list_of_params</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">option</span> <span class="ow">in</span> <span class="n">additional_options</span><span class="p">:</span>
-            <span class="n">additional_options_as_list</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">option</span><span class="p">])</span>
-
-    <span class="k">return</span> <span class="n">params</span><span class="p">,</span> <span class="n">additional_options_as_list</span>
-
-
 <span class="k">def</span> <span class="nf">_create_template</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
     <span class="n">operation_func</span> <span class="o">=</span> <span class="n">_get_operation_func</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">expression</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
@@ -351,28 +329,6 @@
         <span class="k">return</span> <span class="n">mul</span>
     <span class="k">elif</span> <span class="n">operation</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">add</span>
-
-
-<span class="k">def</span> <span class="nf">_get_etas</span><span class="p">(</span><span class="n">rvs</span><span class="p">,</span> <span class="n">sset</span><span class="p">,</span> <span class="n">list_of_parameters</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">list_of_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">rvs</span><span class="o">.</span><span class="n">etas</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">etas</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">list_of_parameters</span><span class="p">:</span>
-            <span class="k">try</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">rvs</span><span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">upper</span><span class="p">()]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">etas</span><span class="p">:</span>
-                    <span class="n">etas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rvs</span><span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">upper</span><span class="p">()])</span>
-            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">exp_symbs</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">param</span><span class="p">)</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">free_symbols</span>
-                <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Symbol/random variable &quot;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">&quot; does not exist&#39;</span><span class="p">)</span>
-                <span class="n">etas</span> <span class="o">+=</span> <span class="p">[</span>
-                    <span class="n">rvs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)]</span>
-                    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">exp_symbs</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">rvs</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="n">rvs</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)]</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">etas</span>
-                <span class="p">]</span>
-        <span class="k">return</span> <span class="n">etas</span>
 
 
 <span class="k">def</span> <span class="nf">_get_occ_levels</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">occ</span><span class="p">):</span>
@@ -457,7 +413,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Feb 15, 2021.<br/>
+        Last updated on Mar 02, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

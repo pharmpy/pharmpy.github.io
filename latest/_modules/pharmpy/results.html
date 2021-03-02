@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.results &#8212; Pharmpy 0.17.0 documentation</title>
+    <title>pharmpy.results &#8212; Pharmpy 0.19.0 documentation</title>
     
   <link rel="stylesheet" href="../../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
 
@@ -79,7 +79,7 @@
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../development.html">Contribute</a>
+            <a class="nav-link" href="../../contribute.html">Contribute</a>
         </li>
         
         <li class="nav-item ">
@@ -124,7 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../reference/modules.html">API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../development.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 </ul>
@@ -626,6 +626,39 @@
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">plot</span></div>
 
+<div class="viewcode-block" id="ModelfitResults.plot_individual_predictions"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ModelfitResults.plot_individual_predictions">[docs]</a>    <span class="k">def</span> <span class="nf">plot_individual_predictions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">predictions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">individuals</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Plot DV and predictions grouped on individuals</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        predictions : list</span>
+<span class="sd">            A list of names of predictions to plot. None for all available</span>
+<span class="sd">        individuals: list</span>
+<span class="sd">            A list of individuals to include. None for all individuals</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">pred</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">observations</span>
+        <span class="n">indexcols</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">names</span>
+        <span class="n">idcol</span> <span class="o">=</span> <span class="n">indexcols</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">idvcol</span> <span class="o">=</span> <span class="n">indexcols</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+
+        <span class="n">data</span> <span class="o">=</span> <span class="n">pred</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">melt</span><span class="p">(</span><span class="n">id_vars</span><span class="o">=</span><span class="n">indexcols</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">individuals</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="n">idcol</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">individuals</span><span class="p">)]</span>
+        <span class="k">if</span> <span class="n">predictions</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dvcol</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="n">data</span><span class="p">[</span><span class="s1">&#39;variable&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">isin</span><span class="p">(</span><span class="n">predictions</span> <span class="o">+</span> <span class="p">[</span><span class="n">dvcol</span><span class="p">])]</span>
+
+        <span class="n">plot</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">alt</span><span class="o">.</span><span class="n">Chart</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">mark_line</span><span class="p">(</span><span class="n">point</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">encode</span><span class="p">(</span><span class="n">x</span><span class="o">=</span><span class="n">idvcol</span><span class="p">,</span> <span class="n">y</span><span class="o">=</span><span class="s1">&#39;value&#39;</span><span class="p">,</span> <span class="n">color</span><span class="o">=</span><span class="s1">&#39;variable&#39;</span><span class="p">)</span>
+            <span class="o">.</span><span class="n">facet</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">idcol</span><span class="si">}</span><span class="s1">:N&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">plot</span></div>
+
 <div class="viewcode-block" id="ModelfitResults.individual_parameter_statistics"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ModelfitResults.individual_parameter_statistics">[docs]</a>    <span class="k">def</span> <span class="nf">individual_parameter_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exprs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Calculate statistics for individual parameters</span>
 
@@ -798,6 +831,10 @@
     <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">residuals</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">predictions</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predictions</span>
+
 <div class="viewcode-block" id="ChainedModelfitResults.plot_iofv_vs_iofv"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ChainedModelfitResults.plot_iofv_vs_iofv">[docs]</a>    <span class="k">def</span> <span class="nf">plot_iofv_vs_iofv</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">plot_iofv_vs_iofv</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
 
@@ -849,7 +886,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Feb 15, 2021.<br/>
+        Last updated on Mar 02, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

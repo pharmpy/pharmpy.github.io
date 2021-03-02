@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.methods.common &#8212; Pharmpy 0.17.0 documentation</title>
+    <title>pharmpy.methods.common &#8212; Pharmpy 0.19.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
 
@@ -79,7 +79,7 @@
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../development.html">Contribute</a>
+            <a class="nav-link" href="../../../contribute.html">Contribute</a>
         </li>
         
         <li class="nav-item ">
@@ -124,7 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
@@ -155,6 +155,10 @@
   <h1>Source code for pharmpy.methods.common</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
+<span class="kn">import</span> <span class="nn">pharmpy.execute</span> <span class="k">as</span> <span class="nn">execute</span>
+
+<span class="kn">from</span> <span class="nn">.psn_helpers</span> <span class="kn">import</span> <span class="n">tool_name</span>
+
 
 <div class="viewcode-block" id="RunDirectory"><a class="viewcode-back" href="../../../reference/pharmpy.methods.common.html#pharmpy.methods.RunDirectory">[docs]</a><span class="k">class</span> <span class="nc">RunDirectory</span><span class="p">:</span>
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method_name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -175,8 +179,58 @@
 
 
 <div class="viewcode-block" id="Method"><a class="viewcode-back" href="../../../reference/pharmpy.methods.common.html#pharmpy.methods.Method">[docs]</a><span class="k">class</span> <span class="nc">Method</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">rundir</span> <span class="o">=</span> <span class="n">RunDirectory</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span></div>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dispatcher</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">job_creator</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">rundir</span> <span class="o">=</span> <span class="n">RunDirectory</span><span class="p">(</span><span class="nb">type</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="o">.</span><span class="n">lower</span><span class="p">(),</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dispatcher</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dispatcher</span> <span class="o">=</span> <span class="n">execute</span><span class="o">.</span><span class="n">default_dispatcher</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">dispatcher</span> <span class="o">=</span> <span class="n">dispatcher</span>
+        <span class="k">if</span> <span class="n">database</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">execute</span><span class="o">.</span><span class="n">default_database</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span>
+        <span class="k">if</span> <span class="n">job_creator</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">pharmpy.plugins.nonmem.run</span>
+
+            <span class="bp">self</span><span class="o">.</span><span class="n">job_creator</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">plugins</span><span class="o">.</span><span class="n">nonmem</span><span class="o">.</span><span class="n">run</span><span class="o">.</span><span class="n">create_job</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">job_creator</span> <span class="o">=</span> <span class="n">job_creator</span></div>
+
+
+<div class="viewcode-block" id="create_results"><a class="viewcode-back" href="../../../reference/pharmpy.methods.common.html#pharmpy.methods.create_results">[docs]</a><span class="k">def</span> <span class="nf">create_results</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">tool_name</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="c1"># FIXME: Do something automatic here</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;qa&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.methods.qa.results</span> <span class="kn">import</span> <span class="n">psn_qa_results</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">psn_qa_results</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;bootstrap&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.methods.bootstrap.results</span> <span class="kn">import</span> <span class="n">psn_bootstrap_results</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">psn_bootstrap_results</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;cdd&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.methods.cdd.results</span> <span class="kn">import</span> <span class="n">psn_cdd_results</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">psn_cdd_results</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;frem&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.methods.frem.results</span> <span class="kn">import</span> <span class="n">psn_frem_results</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">psn_frem_results</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;linearize&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.methods.linearize.results</span> <span class="kn">import</span> <span class="n">psn_linearize_results</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">psn_linearize_results</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;scm&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.methods.scm.results</span> <span class="kn">import</span> <span class="n">psn_scm_results</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">psn_scm_results</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;simeval&#39;</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.methods.simeval.results</span> <span class="kn">import</span> <span class="n">psn_simeval_results</span>
+
+        <span class="n">res</span> <span class="o">=</span> <span class="n">psn_simeval_results</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Not a valid run directory&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>
 
               </div>
@@ -201,7 +255,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Feb 15, 2021.<br/>
+        Last updated on Mar 02, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

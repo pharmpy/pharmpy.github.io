@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling package &#8212; Pharmpy 0.17.0 documentation</title>
+    <title>pharmpy.modeling package &#8212; Pharmpy 0.19.0 documentation</title>
     
   <link rel="stylesheet" href="../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
 
@@ -45,7 +45,7 @@
     <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="pharmpy.modeling.run module" href="pharmpy.modeling.run.html" />
+    <link rel="next" title="pharmpy.modeling.help_functions module" href="pharmpy.modeling.help_functions.html" />
     <link rel="prev" title="pharmpy.methods.psn_helpers module" href="pharmpy.methods.psn_helpers.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="en" />
@@ -81,7 +81,7 @@
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../development.html">Contribute</a>
+            <a class="nav-link" href="../contribute.html">Contribute</a>
         </li>
         
         <li class="nav-item ">
@@ -129,7 +129,7 @@
 <li class="toctree-l2 current"><a class="reference internal" href="pharmpy.html">pharmpy package</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="../development.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../license.html">License</a></li>
 </ul>
@@ -181,6 +181,7 @@
 <h2>Submodules<a class="headerlink" href="#submodules" title="Permalink to this headline">¶</a></h2>
 <div class="toctree-wrapper compound">
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="pharmpy.modeling.help_functions.html">pharmpy.modeling.help_functions module</a></li>
 <li class="toctree-l1"><a class="reference internal" href="pharmpy.modeling.run.html">pharmpy.modeling.run module</a></li>
 </ul>
 </div>
@@ -191,55 +192,147 @@
 <dt id="pharmpy.modeling.add_covariate_effect">
 <code class="sig-prename descclassname">pharmpy.modeling.</code><code class="sig-name descname">add_covariate_effect</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">parameter</span></em>, <em class="sig-param"><span class="n">covariate</span></em>, <em class="sig-param"><span class="n">effect</span></em>, <em class="sig-param"><span class="n">operation</span><span class="o">=</span><span class="default_value">'*'</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/modeling/covariate_effect.html#add_covariate_effect"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pharmpy.modeling.add_covariate_effect" title="Permalink to this definition">¶</a></dt>
 <dd><p>Adds covariate effect to <a class="reference internal" href="pharmpy.model.html#module-pharmpy.model" title="pharmpy.model"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model</span></code></a>. The following effects have templates:</p>
+<ul>
+<li><dl>
+<dt>Linear function for continuous covariates (<em>lin</em>)</dt><dd><ul class="simple">
+<li><p>Function:</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\text{coveff} = 1 + \text{theta} * (\text{cov} - \text{median})\]</div>
 <ul class="simple">
+<li><p>Init:  0.001</p></li>
 <li><dl class="simple">
-<dt>Linear function for continuous covariates (<em>lin</em>)</dt><dd><ul>
-<li><p>Initial estimate: 0.001</p></li>
-<li><p>Upper bound: 100,000 if the median of the covariate is equal to the minimum, otherwise
-<span class="math notranslate nohighlight">\(1/(median - min)\)</span></p></li>
-<li><p>Lower bound: -100,000 if the median of the covariate is equal to the maximum, otherwise
-<span class="math notranslate nohighlight">\(1/(median - max)\)</span></p></li>
+<dt>Upper:</dt><dd><ul>
+<li><p>If median of covariate equals minimum: <span class="math notranslate nohighlight">\(100,000\)</span></p></li>
+<li><p>Otherwise: <span class="math notranslate nohighlight">\(\frac{1}{\text{median} - \text{min}}\)</span></p></li>
 </ul>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
+<dt>Lower:</dt><dd><ul>
+<li><p>If median of covariate equals maximum: <span class="math notranslate nohighlight">\(-100,000\)</span></p></li>
+<li><p>Otherwise: <span class="math notranslate nohighlight">\(\frac{1}{\text{median} - \text{max}}\)</span></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
 <dt>Linear function for categorical covariates (<em>cat</em>)</dt><dd><ul>
-<li><p>Initial estimate: 0.001</p></li>
-<li><p>Upper bound: 100,000</p></li>
-<li><p>Lower bound: -100,000</p></li>
+<li><dl>
+<dt>Function:</dt><dd><ul class="simple">
+<li><p>If covariate is most common category:</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\text{coveff} = 1\]</div>
+<ul class="simple">
+<li><p>For each additional category:</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\text{coveff} = 1 + \text{theta}\]</div>
+</dd>
+</dl>
+</li>
+<li><p>Init: <span class="math notranslate nohighlight">\(0.001\)</span></p></li>
+<li><p>Upper: <span class="math notranslate nohighlight">\(100,000\)</span></p></li>
+<li><p>Lower: <span class="math notranslate nohighlight">\(-100,000\)</span></p></li>
 </ul>
 </dd>
 </dl>
 </li>
-<li><dl class="simple">
+<li><dl>
 <dt>Piecewise linear function/”hockey-stick”, continuous covariates only (<em>piece_lin</em>)</dt><dd><ul>
-<li><p>Initial estimate: 0.001</p></li>
-<li><p>Upper bound: for first state 1/(median - minimum), otherwise 100,000</p></li>
-<li><p>Lower bound: for first state -100,000, otherwise 1/(median - maximum)</p></li>
+<li><dl>
+<dt>Function:</dt><dd><ul class="simple">
+<li><p>If cov &lt;= median:</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\text{coveff} = 1 + \text{theta1} * (\text{cov} - \text{median})\]</div>
+<ul class="simple">
+<li><p>If cov &gt; median:</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\text{coveff} = 1 + \text{theta2} * (\text{cov} - \text{median})\]</div>
+</dd>
+</dl>
+</li>
+<li><p>Init: <span class="math notranslate nohighlight">\(0.001\)</span></p></li>
+<li><dl class="simple">
+<dt>Upper:</dt><dd><ul class="simple">
+<li><p>For first state: <span class="math notranslate nohighlight">\(\frac{1}{\text{median} - \text{min}}\)</span></p></li>
+<li><p>Otherwise: <span class="math notranslate nohighlight">\(100,000\)</span></p></li>
 </ul>
 </dd>
 </dl>
 </li>
 <li><dl class="simple">
-<dt>Exponential function, continuous covariates only (<em>exp</em>)</dt><dd><ul>
-<li><p>Initial estimate: 0.001 unless lower bound &gt; 0.001 or upper bound &lt; 0.001. In that case
-<span class="math notranslate nohighlight">\(init = (upper - lower)/2\)</span>, if init = 0: <span class="math notranslate nohighlight">\(init = upper/2\)</span></p></li>
-<li><p>Upper bound: if <span class="math notranslate nohighlight">\(min - median = 0\)</span> or <span class="math notranslate nohighlight">\(max - median = 0\)</span>, upper bound is 100.
-Otherwise the upper bound is
-<span class="math notranslate nohighlight">\(min(log(0.01)/(min - median), log(100)/(max - median))\)</span></p></li>
-<li><p>Lower bound: if <span class="math notranslate nohighlight">\(min - median = 0\)</span> or <span class="math notranslate nohighlight">\(max - median = 0\)</span>, lower bound is 0.01.
-Otherwise the lower bound is
-<span class="math notranslate nohighlight">\(max(log(0.01)/(max - median), log(100)/(min - median))\)</span></p></li>
+<dt>Lower:</dt><dd><ul class="simple">
+<li><p>For first state: <span class="math notranslate nohighlight">\(-100,000\)</span></p></li>
+<li><p>Otherwise: <span class="math notranslate nohighlight">\(\frac{1}{\text{median} - \text{max}}\)</span></p></li>
 </ul>
 </dd>
 </dl>
 </li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Exponential function, continuous covariates only (<em>exp</em>)</dt><dd><ul class="simple">
+<li><p>Function:</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\text{coveff} = \exp(\text{theta} * (\text{cov} - \text{median}))\]</div>
+<ul>
 <li><dl class="simple">
-<dt>Power function, continuous covariates only (<em>pow</em>)</dt><dd><ul>
-<li><p>Initial estimate: 0.001</p></li>
-<li><p>Upper bound: 100,000</p></li>
-<li><p>Lower bound: -100</p></li>
+<dt>Init:</dt><dd><ul class="simple">
+<li><p>If lower &gt; 0.001 or upper &lt; 0.001: <span class="math notranslate nohighlight">\(\frac{\text{upper} - \text{lower}}{2}\)</span></p></li>
+<li><p>If estimated init is 0: <span class="math notranslate nohighlight">\(\frac{\text{upper}}{2}\)</span></p></li>
+<li><p>Otherwise: <span class="math notranslate nohighlight">\(0.001\)</span></p></li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Upper:</dt><dd><ul class="simple">
+<li><p>If min - median = 0 or max - median = 0: <span class="math notranslate nohighlight">\(100\)</span></p></li>
+<li><p>Otherwise:</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\min(\frac{\log(0.01)}{\text{min} - \text{median}},
+\frac{\log(100)}{\text{max} - \text{median}})\]</div>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Lower:</dt><dd><ul class="simple">
+<li><p>If min - median = 0 or max - median = 0: <span class="math notranslate nohighlight">\(0.01\)</span></p></li>
+<li><p>Otherwise:</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\max(\frac{\log(0.01)}{\text{max} - \text{median}},
+\frac{\log(100)}{\text{min} - \text{median}})\]</div>
+</dd>
+</dl>
+</li>
+</ul>
+</dd>
+</dl>
+</li>
+<li><dl>
+<dt>Power function, continuous covariates only (<em>pow</em>)</dt><dd><ul class="simple">
+<li><p>Function:</p></li>
+</ul>
+<div class="math notranslate nohighlight">
+\[\text{coveff} = (\frac{\text{cov}}{\text{median}})^\text{theta}\]</div>
+<ul class="simple">
+<li><p>Init: <span class="math notranslate nohighlight">\(0.001\)</span></p></li>
+<li><p>Upper: <span class="math notranslate nohighlight">\(100,000\)</span></p></li>
+<li><p>Lower: <span class="math notranslate nohighlight">\(-100\)</span></p></li>
 </ul>
 </dd>
 </dl>
@@ -295,7 +388,7 @@ it is based on.</p>
 <li><p><strong>occ</strong> (<em>str</em>) – Name of occasion column.</p></li>
 <li><p><strong>list_of_parameters</strong> (<em>str, list</em>) – List of names of parameters and random variables. Accepts random variable names, parameter
 names, or a mix of both.</p></li>
-<li><p><strong>eta_names</strong> (<em>list</em>) – Custom names of new etas. Must be equal to the number of input etas times the number of
+<li><p><strong>eta_names</strong> (<em>str, list</em>) – Custom names of new etas. Must be equal to the number of input etas times the number of
 categories for occasion.</p></li>
 </ul>
 </dd>
@@ -380,7 +473,7 @@ estimate for lambda is 0.1 with bounds (-3, 3).</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<em>Model</em>) – Pharmpy model to apply boxcox transformation to.</p></li>
-<li><p><strong>list_of_etas</strong> (<em>list</em>) – List of etas to transform. If None, all etas will be transformed (default).</p></li>
+<li><p><strong>list_of_etas</strong> (<em>str, list</em>) – Name/names of etas to transform. If None, all etas will be transformed (default).</p></li>
 </ul>
 </dd>
 </dl>
@@ -401,6 +494,11 @@ proportional and 0.09 for additive.</p>
 <dl class="py function">
 <dt id="pharmpy.modeling.copy_model">
 <code class="sig-prename descclassname">pharmpy.modeling.</code><code class="sig-name descname">copy_model</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/modeling/common.html#copy_model"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pharmpy.modeling.copy_model" title="Permalink to this definition">¶</a></dt>
+<dd></dd></dl>
+
+<dl class="py function">
+<dt id="pharmpy.modeling.create_results">
+<code class="sig-prename descclassname">pharmpy.modeling.</code><code class="sig-name descname">create_results</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">path</span></em>, <em class="sig-param"><span class="o">**</span><span class="n">kwargs</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/modeling/run.html#create_results"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pharmpy.modeling.create_results" title="Permalink to this definition">¶</a></dt>
 <dd></dd></dl>
 
 <dl class="py function">
@@ -469,6 +567,25 @@ the previous rate if available, otherwise it is set to the time of first observa
 </dd></dl>
 
 <dl class="py function">
+<dt id="pharmpy.modeling.fix_parameters_to">
+<code class="sig-prename descclassname">pharmpy.modeling.</code><code class="sig-name descname">fix_parameters_to</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">parameter_names</span></em>, <em class="sig-param"><span class="n">values</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/modeling/common.html#fix_parameters_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pharmpy.modeling.fix_parameters_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Fix parameters to</p>
+<p>Fix all listed parameters to specified value/values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>Model</em>)</p></li>
+<li><p><strong>parameter_names</strong> (<em>list or str</em>) – one parameter name or a list of parameter names</p></li>
+<li><p><strong>values</strong> (<em>list or str</em>) – one value or a list of values (must be equal to number of parameter_names)</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>model</strong> (<em>Model</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
 <dt id="pharmpy.modeling.has_additive_error">
 <code class="sig-prename descclassname">pharmpy.modeling.</code><code class="sig-name descname">has_additive_error</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/modeling/error.html#has_additive_error"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pharmpy.modeling.has_additive_error" title="Permalink to this definition">¶</a></dt>
 <dd><p>Check if a model has an additive error model</p>
@@ -509,10 +626,11 @@ the previous rate if available, otherwise it is set to the time of first observa
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<em>Model</em>) – Pharmpy model to apply IIV on epsilons.</p></li>
-<li><p><strong>list_of_eps</strong> (<em>list</em>) – List of epsilons to multiply with exponential etas. If None, all epsilons will
+<li><p><strong>list_of_eps</strong> (<em>str, list</em>) – Name/names of epsilons to multiply with exponential etas. If None, all epsilons will
 be chosen. None is default.</p></li>
 <li><p><strong>same_eta</strong> (<em>bool</em>) – Boolean of whether all RUVs from input should use the same new ETA or if one ETA
 should be created for each RUV. True is default.</p></li>
+<li><p><strong>eta_names</strong> (<em>str, list</em>) – Custom names of new etas. Must be equal to the number epsilons or 1 if same eta.</p></li>
 </ul>
 </dd>
 </dl>
@@ -534,7 +652,7 @@ Journal of the Royal Statistical Society. Series C (Applied Statistics),
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<em>Model</em>) – Pharmpy model to apply John Draper transformation to.</p></li>
-<li><p><strong>list_of_etas</strong> (<em>list</em>) – List of etas to transform. If None, all etas will be transformed (default).</p></li>
+<li><p><strong>list_of_etas</strong> (<em>str, list</em>) – Name/names of etas to transform. If None, all etas will be transformed (default).</p></li>
 </ul>
 </dd>
 </dl>
@@ -563,7 +681,7 @@ model is proportional, otherwise they are 0.1.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<em>Model</em>) – Pharmpy model to create block effect on.</p></li>
-<li><p><strong>list_of_eps</strong> (<em>list</em>) – List of epsilons to apply power effect. If None, all epsilons will be used.
+<li><p><strong>list_of_eps</strong> (<em>str, list</em>) – Name/names of epsilons to apply power effect. If None, all epsilons will be used.
 None is default.</p></li>
 </ul>
 </dd>
@@ -612,7 +730,7 @@ None is default.</p></li>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<em>Model</em>) – Pharmpy model to create block effect on.</p></li>
-<li><p><strong>list_to_remove</strong> (<em>list</em>) – List of etas and/or parameter name to remove. If None, all etas that are IIVs will
+<li><p><strong>list_to_remove</strong> (<em>str, list</em>) – Name/names of etas and/or parameter name to remove. If None, all etas that are IIVs will
 be removed. None is default.</p></li>
 </ul>
 </dd>
@@ -720,7 +838,7 @@ is used.</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<em>Model</em>) – Pharmpy model to create block effect on.</p></li>
-<li><p><strong>list_of_rvs</strong> (<em>list</em>) – List of etas to split from block structure. If None, all etas that are IIVs and
+<li><p><strong>list_of_rvs</strong> (<em>str, list</em>) – Name/names of etas to split from block structure. If None, all etas that are IIVs and
 non-fixed will become single. None is default.</p></li>
 </ul>
 </dd>
@@ -736,7 +854,7 @@ estimate for degrees of freedom is 80 with bounds (3, 100).</p>
 <dt class="field-odd">Parameters</dt>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<em>Model</em>) – Pharmpy model to apply t distribution transformation to.</p></li>
-<li><p><strong>list_of_etas</strong> (<em>list</em>) – List of etas to transform. If None, all etas will be transformed (default).</p></li>
+<li><p><strong>list_of_etas</strong> (<em>str, list</em>) – Name/names of etas to transform. If None, all etas will be transformed (default).</p></li>
 </ul>
 </dd>
 </dl>
@@ -752,6 +870,25 @@ estimate for degrees of freedom is 80 with bounds (3, 100).</p>
 <dd class="field-odd"><ul class="simple">
 <li><p><strong>model</strong> (<em>Model</em>)</p></li>
 <li><p><strong>parameter_names</strong> (<em>list or str</em>) – one parameter name or a list of parameter names</p></li>
+</ul>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><strong>model</strong> (<em>Model</em>)</p>
+</dd>
+</dl>
+</dd></dl>
+
+<dl class="py function">
+<dt id="pharmpy.modeling.unfix_parameters_to">
+<code class="sig-prename descclassname">pharmpy.modeling.</code><code class="sig-name descname">unfix_parameters_to</code><span class="sig-paren">(</span><em class="sig-param"><span class="n">model</span></em>, <em class="sig-param"><span class="n">parameter_names</span></em>, <em class="sig-param"><span class="n">values</span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/modeling/common.html#unfix_parameters_to"><span class="viewcode-link">[source]</span></a><a class="headerlink" href="#pharmpy.modeling.unfix_parameters_to" title="Permalink to this definition">¶</a></dt>
+<dd><p>Unix parameters to</p>
+<p>Unfix all listed parameters to specified value/values</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><ul class="simple">
+<li><p><strong>model</strong> (<em>Model</em>)</p></li>
+<li><p><strong>parameter_names</strong> (<em>list or str</em>) – one parameter name or a list of parameter names</p></li>
+<li><p><strong>values</strong> (<em>list or str</em>) – one value or a list of values (must be equal to number of parameter_names)</p></li>
 </ul>
 </dd>
 <dt class="field-even">Returns</dt>
@@ -819,7 +956,7 @@ observation.</p>
               <div class='prev-next-bottom'>
                 
     <a class='left-prev' id="prev-link" href="pharmpy.methods.psn_helpers.html" title="previous page">pharmpy.methods.psn_helpers module</a>
-    <a class='right-next' id="next-link" href="pharmpy.modeling.run.html" title="next page">pharmpy.modeling.run module</a>
+    <a class='right-next' id="next-link" href="pharmpy.modeling.help_functions.html" title="next page">pharmpy.modeling.help_functions module</a>
 
               </div>
               
@@ -837,7 +974,7 @@ observation.</p>
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Feb 15, 2021.<br/>
+        Last updated on Mar 02, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

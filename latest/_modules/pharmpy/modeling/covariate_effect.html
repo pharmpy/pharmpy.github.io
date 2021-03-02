@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.covariate_effect &#8212; Pharmpy 0.17.0 documentation</title>
+    <title>pharmpy.modeling.covariate_effect &#8212; Pharmpy 0.19.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
 
@@ -79,7 +79,7 @@
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../development.html">Contribute</a>
+            <a class="nav-link" href="../../../contribute.html">Contribute</a>
         </li>
         
         <li class="nav-item ">
@@ -124,7 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
@@ -176,32 +176,94 @@
 <span class="sd">    Adds covariate effect to :class:`pharmpy.model`. The following effects have templates:</span>
 
 <span class="sd">    - Linear function for continuous covariates (*lin*)</span>
-<span class="sd">        - Initial estimate: 0.001</span>
-<span class="sd">        - Upper bound: 100,000 if the median of the covariate is equal to the minimum, otherwise</span>
-<span class="sd">          :math:`1/(median - min)`</span>
-<span class="sd">        - Lower bound: -100,000 if the median of the covariate is equal to the maximum, otherwise</span>
-<span class="sd">          :math:`1/(median - max)`</span>
+<span class="sd">        - Function:</span>
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \\text{coveff} = 1 + \\text{theta} * (\\text{cov} - \\text{median})</span>
+
+<span class="sd">        - Init:  0.001</span>
+<span class="sd">        - Upper:</span>
+<span class="sd">            - If median of covariate equals minimum: :math:`100,000`</span>
+<span class="sd">            - Otherwise: :math:`\\frac{1}{\\text{median} - \\text{min}}`</span>
+<span class="sd">        - Lower:</span>
+<span class="sd">            - If median of covariate equals maximum: :math:`-100,000`</span>
+<span class="sd">            - Otherwise: :math:`\\frac{1}{\\text{median} - \\text{max}}`</span>
 <span class="sd">    - Linear function for categorical covariates (*cat*)</span>
-<span class="sd">        - Initial estimate: 0.001</span>
-<span class="sd">        - Upper bound: 100,000</span>
-<span class="sd">        - Lower bound: -100,000</span>
+<span class="sd">        - Function:</span>
+<span class="sd">            - If covariate is most common category:</span>
+
+<span class="sd">            .. math::</span>
+
+<span class="sd">                \\text{coveff} = 1</span>
+
+<span class="sd">            - For each additional category:</span>
+
+<span class="sd">            .. math::</span>
+
+<span class="sd">                \\text{coveff} = 1 + \\text{theta}</span>
+
+<span class="sd">        - Init: :math:`0.001`</span>
+<span class="sd">        - Upper: :math:`100,000`</span>
+<span class="sd">        - Lower: :math:`-100,000`</span>
 <span class="sd">    - Piecewise linear function/&quot;hockey-stick&quot;, continuous covariates only (*piece_lin*)</span>
-<span class="sd">        - Initial estimate: 0.001</span>
-<span class="sd">        - Upper bound: for first state 1/(median - minimum), otherwise 100,000</span>
-<span class="sd">        - Lower bound: for first state -100,000, otherwise 1/(median - maximum)</span>
+<span class="sd">        - Function:</span>
+<span class="sd">            - If cov &lt;= median:</span>
+
+<span class="sd">            .. math::</span>
+
+<span class="sd">                \\text{coveff} = 1 + \\text{theta1} * (\\text{cov} - \\text{median})</span>
+
+<span class="sd">            - If cov &gt; median:</span>
+
+<span class="sd">            .. math::</span>
+
+<span class="sd">                \\text{coveff} = 1 + \\text{theta2} * (\\text{cov} - \\text{median})</span>
+
+
+<span class="sd">        - Init: :math:`0.001`</span>
+<span class="sd">        - Upper:</span>
+<span class="sd">            - For first state: :math:`\\frac{1}{\\text{median} - \\text{min}}`</span>
+<span class="sd">            - Otherwise: :math:`100,000`</span>
+<span class="sd">        - Lower:</span>
+<span class="sd">            - For first state: :math:`-100,000`</span>
+<span class="sd">            - Otherwise: :math:`\\frac{1}{\\text{median} - \\text{max}}`</span>
 <span class="sd">    - Exponential function, continuous covariates only (*exp*)</span>
-<span class="sd">        - Initial estimate: 0.001 unless lower bound &gt; 0.001 or upper bound &lt; 0.001. In that case</span>
-<span class="sd">          :math:`init = (upper - lower)/2`, if init = 0: :math:`init = upper/2`</span>
-<span class="sd">        - Upper bound: if :math:`min - median = 0` or :math:`max - median = 0`, upper bound is 100.</span>
-<span class="sd">          Otherwise the upper bound is</span>
-<span class="sd">          :math:`min(log(0.01)/(min - median), log(100)/(max - median))`</span>
-<span class="sd">        - Lower bound: if :math:`min - median = 0` or :math:`max - median = 0`, lower bound is 0.01.</span>
-<span class="sd">          Otherwise the lower bound is</span>
-<span class="sd">          :math:`max(log(0.01)/(max - median), log(100)/(min - median))`</span>
+<span class="sd">        - Function:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \\text{coveff} = \\exp(\\text{theta} * (\\text{cov} - \\text{median}))</span>
+
+<span class="sd">        - Init:</span>
+<span class="sd">            - If lower &gt; 0.001 or upper &lt; 0.001: :math:`\\frac{\\text{upper} - \\text{lower}}{2}`</span>
+<span class="sd">            - If estimated init is 0: :math:`\\frac{\\text{upper}}{2}`</span>
+<span class="sd">            - Otherwise: :math:`0.001`</span>
+<span class="sd">        - Upper:</span>
+<span class="sd">            - If min - median = 0 or max - median = 0: :math:`100`</span>
+<span class="sd">            - Otherwise:</span>
+<span class="sd">            .. math::</span>
+
+<span class="sd">                \\min(\\frac{\\log(0.01)}{\\text{min} - \\text{median}},</span>
+<span class="sd">                \\frac{\\log(100)}{\\text{max} - \\text{median}})</span>
+<span class="sd">        - Lower:</span>
+<span class="sd">            - If min - median = 0 or max - median = 0: :math:`0.01`</span>
+<span class="sd">            - Otherwise:</span>
+<span class="sd">            .. math::</span>
+
+<span class="sd">                \\max(\\frac{\\log(0.01)}{\\text{max} - \\text{median}},</span>
+<span class="sd">                \\frac{\\log(100)}{\\text{min} - \\text{median}})</span>
+
 <span class="sd">    - Power function, continuous covariates only (*pow*)</span>
-<span class="sd">        - Initial estimate: 0.001</span>
-<span class="sd">        - Upper bound: 100,000</span>
-<span class="sd">        - Lower bound: -100</span>
+<span class="sd">        - Function:</span>
+
+<span class="sd">        .. math::</span>
+
+<span class="sd">            \\text{coveff} = (\\frac{\\text{cov}}{\\text{median}})^\\text{theta}</span>
+
+<span class="sd">        - Init: :math:`0.001`</span>
+<span class="sd">        - Upper: :math:`100,000`</span>
+<span class="sd">        - Lower: :math:`-100`</span>
+
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -589,7 +651,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Feb 15, 2021.<br/>
+        Last updated on Mar 02, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>

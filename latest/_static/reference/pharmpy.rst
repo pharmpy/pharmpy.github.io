@@ -8,6 +8,7 @@ Subpackages
    :maxdepth: 2
 
    pharmpy.data
+   pharmpy.execute
    pharmpy.methods
    pharmpy.modeling
    pharmpy.parse_utils

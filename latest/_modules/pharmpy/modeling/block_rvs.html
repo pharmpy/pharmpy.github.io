@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.17.0 documentation</title>
+    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.19.0 documentation</title>
     
   <link rel="stylesheet" href="../../../_static/css/index.f658d18f9b420779cfdf24aa0a7e2d77.css">
 
@@ -79,7 +79,7 @@
         </li>
         
         <li class="nav-item ">
-            <a class="nav-link" href="../../../development.html">Contribute</a>
+            <a class="nav-link" href="../../../contribute.html">Contribute</a>
         </li>
         
         <li class="nav-item ">
@@ -124,7 +124,7 @@
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">API reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../development.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
@@ -161,6 +161,7 @@
 <span class="kn">from</span> <span class="nn">sympy.stats.joint_rv_types</span> <span class="kn">import</span> <span class="n">MultivariateNormalDistribution</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy</span> <span class="kn">import</span> <span class="n">math</span>
+<span class="kn">from</span> <span class="nn">pharmpy.modeling.help_functions</span> <span class="kn">import</span> <span class="n">_format_input_list</span><span class="p">,</span> <span class="n">_get_etas</span>
 <span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
 <span class="kn">from</span> <span class="nn">pharmpy.random_variables</span> <span class="kn">import</span> <span class="n">RandomVariables</span><span class="p">,</span> <span class="n">VariabilityLevel</span>
 
@@ -184,15 +185,19 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;At least two random variables are needed&#39;</span><span class="p">)</span>
 
     <span class="n">rvs_full</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
-    <span class="n">rvs_block</span> <span class="o">=</span> <span class="n">_get_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_rvs</span><span class="p">)</span>
+    <span class="n">rvs</span> <span class="o">=</span> <span class="n">_get_etas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_rvs</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">list_of_rvs</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs_block</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">MultivariateNormalDistribution</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">rvs_full</span><span class="o">.</span><span class="n">get_rvs_from_same_dist</span><span class="p">(</span><span class="n">rv</span><span class="p">):</span>
-                    <span class="n">rv_extracted</span> <span class="o">=</span> <span class="n">rvs_full</span><span class="o">.</span><span class="n">extract_from_block</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-                    <span class="n">rvs_block</span><span class="o">.</span><span class="n">discard</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
-                    <span class="n">rvs_block</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rv_extracted</span><span class="p">)</span>
+                <span class="n">rvs_same_dist</span> <span class="o">=</span> <span class="n">rvs_full</span><span class="o">.</span><span class="n">get_rvs_from_same_dist</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs_same_dist</span><span class="p">):</span>
+                    <span class="n">rvs_full</span><span class="o">.</span><span class="n">extract_from_block</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
+
+    <span class="n">rvs_block</span> <span class="o">=</span> <span class="n">RandomVariables</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs_full</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">rv</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="p">[</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">]:</span>
+            <span class="n">rvs_block</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
 
     <span class="n">pset</span> <span class="o">=</span> <span class="n">_merge_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rvs_block</span><span class="p">)</span>
 
@@ -222,12 +227,13 @@
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model to create block effect on.</span>
-<span class="sd">    list_of_rvs : list</span>
-<span class="sd">        List of etas to split from block structure. If None, all etas that are IIVs and</span>
+<span class="sd">    list_of_rvs : str, list</span>
+<span class="sd">        Name/names of etas to split from block structure. If None, all etas that are IIVs and</span>
 <span class="sd">        non-fixed will become single. None is default.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rvs_full</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
-    <span class="n">rvs_block</span> <span class="o">=</span> <span class="n">_get_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_rvs</span><span class="p">)</span>
+    <span class="n">list_of_rvs</span> <span class="o">=</span> <span class="n">_format_input_list</span><span class="p">(</span><span class="n">list_of_rvs</span><span class="p">)</span>
+    <span class="n">rvs_block</span> <span class="o">=</span> <span class="n">_get_etas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_rvs</span><span class="p">)</span>
     <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
 
     <span class="n">cov_matrix_before</span> <span class="o">=</span> <span class="n">rvs_full</span><span class="o">.</span><span class="n">covariance_matrix</span><span class="p">()</span>
@@ -246,43 +252,6 @@
     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">pset</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
-
-
-<span class="k">def</span> <span class="nf">_get_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_rvs</span><span class="p">):</span>
-    <span class="n">full_block</span> <span class="o">=</span> <span class="kc">False</span>
-
-    <span class="k">if</span> <span class="n">list_of_rvs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">list_of_rvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">rv</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">]</span>
-        <span class="n">full_block</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="n">rvs</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">rv_str</span> <span class="ow">in</span> <span class="n">list_of_rvs</span><span class="p">:</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">rv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">[</span><span class="n">rv_str</span><span class="p">]</span>
-        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Random variable does not exist: </span><span class="si">{</span><span class="n">rv_str</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="n">_has_fixed_params</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rv</span><span class="p">):</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">full_block</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Random variable cannot be set to fixed: </span><span class="si">{</span><span class="n">rv</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="k">continue</span>
-        <span class="k">if</span> <span class="n">rv</span><span class="o">.</span><span class="n">variability_level</span> <span class="o">==</span> <span class="n">VariabilityLevel</span><span class="o">.</span><span class="n">IOV</span><span class="p">:</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">full_block</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Random variable cannot be IOV: </span><span class="si">{</span><span class="n">rv</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="k">continue</span>
-
-        <span class="n">rvs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">RandomVariables</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">_has_fixed_params</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rv</span><span class="p">):</span>
-    <span class="n">param_names</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">get_eta_params</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
-
-    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">param_names</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">fix</span><span class="p">:</span>
-            <span class="k">return</span> <span class="kc">True</span>
-    <span class="k">return</span> <span class="kc">False</span>
 
 
 <span class="k">def</span> <span class="nf">_merge_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rvs</span><span class="p">):</span>
@@ -320,16 +289,22 @@
             <span class="n">etas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rvs_names</span><span class="p">[</span><span class="n">i</span><span class="p">])</span>
 
     <span class="n">sd</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">init</span><span class="p">),</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">params</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span><span class="p">)])</span>
+    <span class="n">init_default</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">sd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">7</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">ie</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_estimates</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">ie</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_estimates</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">eta</span> <span class="ow">in</span> <span class="n">ie</span><span class="o">.</span><span class="n">columns</span> <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="n">etas</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">init_default</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">init_default</span>
         <span class="n">eta_corr</span> <span class="o">=</span> <span class="n">ie</span><span class="p">[</span><span class="n">etas</span><span class="p">]</span><span class="o">.</span><span class="n">corr</span><span class="p">()</span>
         <span class="n">cov</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">corr2cov</span><span class="p">(</span><span class="n">eta_corr</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">(),</span> <span class="n">sd</span><span class="p">)</span>
         <span class="n">cov</span><span class="p">[</span><span class="n">cov</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0001</span>
         <span class="n">cov</span> <span class="o">=</span> <span class="n">math</span><span class="o">.</span><span class="n">nearest_posdef</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span>
         <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="n">cov</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">],</span> <span class="mi">7</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="nb">round</span><span class="p">(</span><span class="mf">0.1</span> <span class="o">*</span> <span class="n">sd</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="n">sd</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="mi">7</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">init_default</span>
 </pre></div>
 
               </div>
@@ -354,7 +329,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2020; the Pharmpy development team.<br/>
-        Last updated on Feb 15, 2021.<br/>
+        Last updated on Mar 02, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.2.1.<br/>
     </p>
   </div>
