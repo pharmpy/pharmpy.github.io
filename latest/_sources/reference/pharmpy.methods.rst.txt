@@ -12,6 +12,7 @@ Subpackages
    pharmpy.methods.frem
    pharmpy.methods.linearize
    pharmpy.methods.modelfit
+   pharmpy.methods.modelsearch
    pharmpy.methods.qa
    pharmpy.methods.scm
    pharmpy.methods.simfit

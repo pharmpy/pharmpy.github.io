@@ -22,6 +22,7 @@ Submodules
    pharmpy.cli
    pharmpy.config
    pharmpy.data_structures
+   pharmpy.estimation
    pharmpy.math
    pharmpy.model
    pharmpy.model_factory
