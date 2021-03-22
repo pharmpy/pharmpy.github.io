@@ -1,5 +1,3 @@
-from __future__ import unicode_literals
-
 import os
 
 
@@ -28,10 +26,10 @@ if os.getenv('SPELLCHECK'):
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'Pharmpy'
-year = '2018-2020'
+year = '2018-2021'
 authors = ['the Pharmpy development team']
 copyright = '{0}; {1}'.format(year, ', '.join(authors))
-version = release = '0.20.1'
+version = release = '0.21.0'
 
 pygments_style = 'trac'
 templates_path = ['.']

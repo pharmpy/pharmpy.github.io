@@ -18,10 +18,3 @@ Module contents
    :members:
    :undoc-members:
    :show-inheritance:
-
-Inheritance Diagram
--------------------
-
-.. inheritance-diagram:: pharmpy.methods.frem
-   :parts: 4
-

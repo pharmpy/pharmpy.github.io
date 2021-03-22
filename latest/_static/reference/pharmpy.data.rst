@@ -18,10 +18,3 @@ Module contents
    :members:
    :undoc-members:
    :show-inheritance:
-
-Inheritance Diagram
--------------------
-
-.. inheritance-diagram:: pharmpy.data
-   :parts: 4
-

@@ -16,10 +16,3 @@ Module contents
    :members:
    :undoc-members:
    :show-inheritance:
-
-Inheritance Diagram
--------------------
-
-.. inheritance-diagram:: pharmpy.execute.databases
-   :parts: 4
-

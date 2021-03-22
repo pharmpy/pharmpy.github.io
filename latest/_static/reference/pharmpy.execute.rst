@@ -26,10 +26,3 @@ Module contents
    :members:
    :undoc-members:
    :show-inheritance:
-
-Inheritance Diagram
--------------------
-
-.. inheritance-diagram:: pharmpy.execute
-   :parts: 4
-
