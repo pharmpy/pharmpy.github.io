@@ -7,6 +7,7 @@ Submodules
 .. toctree::
    :maxdepth: 2
 
+   pharmpy.modeling.evaluation
    pharmpy.modeling.help_functions
    pharmpy.modeling.run
 
