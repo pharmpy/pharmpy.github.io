@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Modeling &#8212; Pharmpy 0.23.4 documentation</title>
+    <title>Modeling &#8212; Pharmpy 0.24.2 documentation</title>
     
   <link href="_static/css/theme.css" rel="stylesheet" />
   <link href="_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -23,8 +23,8 @@
       
 
     
-    <link rel="stylesheet" href="_static/pygments.css" type="text/css" />
-    <link rel="stylesheet" href="_static/basic.css" type="text/css" />
+    <link rel="stylesheet" type="text/css" href="_static/pygments.css" />
+    <link rel="stylesheet" type="text/css" href="_static/basic.css" />
     <link rel="stylesheet" type="text/css" href="_static/graphviz.css" />
     <link rel="stylesheet" type="text/css" href="_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/thebelab.css" />
@@ -32,14 +32,14 @@
     
   <link rel="preload" as="script" href="_static/js/index.1e043a052b0af929e4d8.js">
 
-    <script id="documentation_options" data-url_root="./" src="_static/documentation_options.js"></script>
+    <script data-url_root="./" id="documentation_options" src="_static/documentation_options.js"></script>
     <script src="_static/jquery.js"></script>
     <script src="_static/underscore.js"></script>
     <script src="_static/doctools.js"></script>
     <script src="_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
-    <script async="async" src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.7/latest.js?config=TeX-AMS-MML_HTMLorMML"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Modelfit" href="modelfit.html" />
@@ -414,6 +414,21 @@
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#power-effects-on-ruvs">
      Power effects on RUVs
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#estimate-standard-deviation-of-epsilons-with-thetas">
+     Estimate standard deviation of epsilons with thetas
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#weighted-error-model">
+     Weighted error model
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#dtbs-error-model">
+     dTBS error model
     </a>
    </li>
   </ul>
@@ -1430,6 +1445,11 @@ input etas times the number of categories for occasion).</p>
 </section>
 <section id="setting-an-additive-error-model">
 <h3>Setting an additive error model<a class="headerlink" href="#setting-an-additive-error-model" title="Permalink to this headline">¶</a></h3>
+<p>The additive error model is <span class="math notranslate nohighlight">\(y = f + \epsilon_a\)</span>. In the case of log transformed data the
+same error model can be approximated to <span class="math notranslate nohighlight">\(y = \log f + \frac{\epsilon_a}{f}\)</span>. This because</p>
+<div class="math notranslate nohighlight">
+\[\log (f + \epsilon_a) = \log (f(1+\frac{\epsilon_a}{f})) = \log f + \log(1 + \frac{\epsilon_a}{f}) \approx \log f + \frac{\epsilon_a}{f}\]</div>
+<p>where the approximation is the first term of the Taylor expansion of <span class="math notranslate nohighlight">\(\log(1 + x)\)</span>.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
@@ -1445,7 +1465,18 @@ input etas times the number of categories for occasion).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">additive_error</span>
 
 <span class="n">additive_error</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_latex math notranslate nohighlight">
+\[\displaystyle Y := \displaystyle F + \epsilon_{a}\]</div>
+</div>
+</div>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
 <span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
@@ -1453,10 +1484,31 @@ input etas times the number of categories for occasion).</p>
 <div class="cell_output docutils container">
 <div class="output text_html"><p style=line-height:120%><text style=font-style:normal;font-size:80%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>Y = F + EPS(1)</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>$SIGMA  11.2225 ; sigma</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br></p></div></div>
 </div>
+<p>To set an additive error model with log transformed data:</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">additive_error</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
+<span class="n">additive_error</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="o">=</span><span class="s1">&#39;log(Y)&#39;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><p style=line-height:120%><text style=font-style:normal;font-size:80%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>Y = LOG(F) + EPS(1)/F</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>$SIGMA  11.2225 ; sigma</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br></p></div></div>
+</div>
+<p>or set the <cite>data_transformation</cite> attribute on the model.</p>
 <p>See <a class="reference internal" href="reference/pharmpy.modeling.html#pharmpy.modeling.additive_error" title="pharmpy.modeling.additive_error"><code class="xref py py-func docutils literal notranslate"><span class="pre">pharmpy.modeling.additive_error()</span></code></a>.</p>
 </section>
 <section id="setting-a-proportional-error-model">
 <h3>Setting a proportional error model<a class="headerlink" href="#setting-a-proportional-error-model" title="Permalink to this headline">¶</a></h3>
+<p>The proportinal error model is <span class="math notranslate nohighlight">\(y = f + f \epsilon_p\)</span>. In the case of log transformed data the
+same error model can be approximated to <span class="math notranslate nohighlight">\(y = \log f + \epsilon_p\)</span>. This because</p>
+<div class="math notranslate nohighlight">
+\[\log (f + f\epsilon_p) = \log (f(1+\epsilon_p)) = \log f + \log(1+ \epsilon_p) \approx \log f + \epsilon_p\]</div>
+<p>where again the approximation is the first term of the Taylor expansion of <span class="math notranslate nohighlight">\(\log(1 + x)\)</span>.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
@@ -1472,6 +1524,32 @@ input etas times the number of categories for occasion).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">proportional_error</span>
 
 <span class="n">proportional_error</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_latex math notranslate nohighlight">
+\[\displaystyle Y := \displaystyle EPS(1) F + F\]</div>
+</div>
+</div>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><p style=line-height:120%><text style=font-style:normal;font-size:80%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>Y=F+F*EPS(1)</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br></p></div></div>
+</div>
+<p>To set a proportional error model with log transformed data:</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">proportional_error</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
+<span class="n">proportional_error</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="o">=</span><span class="s1">&#39;log(Y)&#39;</span><span class="p">)</span>
 <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
 <span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
@@ -1484,6 +1562,11 @@ input etas times the number of categories for occasion).</p>
 </section>
 <section id="setting-a-combined-additive-and-proportional-error-model">
 <h3>Setting a combined additive and proportional error model<a class="headerlink" href="#setting-a-combined-additive-and-proportional-error-model" title="Permalink to this headline">¶</a></h3>
+<p>The combined error model is <span class="math notranslate nohighlight">\(y = f + f \epsilon_p + \epsilon_a\)</span>. In the case of log transformed data the
+same error model can be approximated to <span class="math notranslate nohighlight">\(y = \log f + \epsilon_p + \frac{\epsilon_a}{f}\)</span>. This because</p>
+<div class="math notranslate nohighlight">
+\[\log (f + f\epsilon_p + \epsilon_a) = \log (f(1+\epsilon_p+\frac{\epsilon_a}{f})) = \log f + \log(1 + \epsilon_p + \frac{\epsilon_a}{f}) \approx \log f + \epsilon_p + \frac{\epsilon_a}{f}\]</div>
+<p>where again the approximation is the first term of the Taylor expansion of <span class="math notranslate nohighlight">\(\log(1 + x)\)</span>.</p>
 <div class="jupyter_cell jupyter_container docutils container">
 <div class="cell_input code_cell docutils container">
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
@@ -1499,13 +1582,39 @@ input etas times the number of categories for occasion).</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">combined_error</span>
 
 <span class="n">combined_error</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-<span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
+<span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_latex math notranslate nohighlight">
+\[\displaystyle Y := \displaystyle F \epsilon_{p} + F + \epsilon_{a}\]</div>
+</div>
+</div>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
 <span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
 </div>
 <div class="cell_output docutils container">
 <div class="output text_html"><p style=line-height:120%><text style=font-style:normal;font-size:80%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>Y = F + EPS(1)*F + EPS(2)</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>$SIGMA  0.09 ; sigma_prop</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>$SIGMA  11.2225 ; sigma_add</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br></p></div></div>
+</div>
+<p>To set a combined error model with log transformed data:</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">combined_error</span>
+
+<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
+<span class="n">combined_error</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="o">=</span><span class="s1">&#39;log(Y)&#39;</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><p style=line-height:120%><text style=font-style:normal;font-size:80%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>Y = LOG(F) + EPS(2)/F + EPS(1)</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>$SIGMA  0.09 ; sigma_prop</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>$SIGMA  11.2225 ; sigma_add</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br></p></div></div>
 </div>
 <p>See <a class="reference internal" href="reference/pharmpy.modeling.html#pharmpy.modeling.combined_error" title="pharmpy.modeling.combined_error"><code class="xref py py-func docutils literal notranslate"><span class="pre">pharmpy.modeling.combined_error()</span></code></a>.</p>
 </section>
@@ -1583,6 +1692,56 @@ transformed.</p>
 <p>A power effect will be applied to all provided epsilons, leave argument empty if all
 epsilons should be transformed.</p>
 <p>See <a class="reference internal" href="reference/pharmpy.modeling.html#pharmpy.modeling.power_on_ruv" title="pharmpy.modeling.power_on_ruv"><code class="xref py py-func docutils literal notranslate"><span class="pre">pharmpy.modeling.power_on_ruv()</span></code></a>.</p>
+</section>
+<section id="estimate-standard-deviation-of-epsilons-with-thetas">
+<h3>Estimate standard deviation of epsilons with thetas<a class="headerlink" href="#estimate-standard-deviation-of-epsilons-with-thetas" title="Permalink to this headline">¶</a></h3>
+<p>Someimes it is useful to estimate a theta instead of a sigma. This can be done by fixing the sigma to 1 and multiplying the
+correspondng epsilon with a theta. This way the theta will represent the standard deviation of the epsilon.</p>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">theta_as_stdev</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
+<span class="n">theta_as_stdev</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><p style=line-height:120%><text style=font-style:normal;font-size:80%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>Y = F + EPS(1)*F*THETA(3)</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>$THETA  (0,0.11506954418958998) ; SD_EPS(1)</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>$SIGMA 1 FIX</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br></p></div></div>
+</div>
+</section>
+<section id="weighted-error-model">
+<h3>Weighted error model<a class="headerlink" href="#weighted-error-model" title="Permalink to this headline">¶</a></h3>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">set_weighted_error_model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
+<span class="n">set_weighted_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><p style=line-height:120%><text style=font-style:normal;font-size:80%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>W = F</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>Y = F + EPS(1)*W</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$SIGMA 0.013241</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br></p></div></div>
+</div>
+</section>
+<section id="dtbs-error-model">
+<h3>dTBS error model<a class="headerlink" href="#dtbs-error-model" title="Permalink to this headline">¶</a></h3>
+<div class="jupyter_cell jupyter_container docutils container">
+<div class="cell_input code_cell docutils container">
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">set_weighted_error_model</span>
+<span class="n">model</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;pheno.mod&quot;</span><span class="p">)</span>
+<span class="n">set_dtbs_error</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">(</span><span class="n">nofiles</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="n">print_model_diff</span><span class="p">(</span><span class="n">model_ref</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+<div class="cell_output docutils container">
+<div class="output text_html"><p style=line-height:120%><text style=font-style:normal;font-size:80%;font-family:monospace;>$PROBLEM PHENOBARB SIMPLE MODEL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$DATA pheno.dta IGNORE=@</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$INPUT ID TIME AMT WGT APGR DV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$SUBROUTINE ADVAN1 TRANS2</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$PK</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>CL=THETA(1)*EXP(ETA(1))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>V=THETA(2)*EXP(ETA(2))</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>S1=V</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ERROR</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>W = SQRT(F**2*THETA(3)**2)</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>W = F**THETA(5)*W</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>IF (F.NE.0.AND.THETA(4).NE.0) THEN</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>IPRED = (F**THETA(4) - 1)/THETA(4)</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>ELSE IF (THETA(4).EQ.0.AND.F.NE.0) THEN</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>IPRED = LOG(F)</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>ELSE IF (F.EQ.0.AND.THETA(4).EQ.0) THEN</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>IPRED = -1/THETA(4)</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>ELSE</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>IPRED = -1000000000</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>END IF</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>Y = IPRED + EPS(1)*W</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,0.00469307) ; TVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$THETA (0,1.00916) ; TVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>$THETA  (0,0.11506954418958998) ; SD_EPS(1)</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>$THETA  1 ; tbs_lambda</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>$THETA  0.001 ; tbs_zeta</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.0309626  ; IVCL</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$OMEGA 0.031128  ; IVV</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;background-color:#DEF4FD>$SIGMA 1 FIX</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br><text style=font-style:normal;font-size:80%;font-family:monospace;>$ESTIMATION METHOD=1 INTERACTION</text><br><text style=font-style:normal;font-size:80%;font-family:monospace;></text><br></p></div></div>
+</div>
 </section>
 </section>
 <section id="creating-full-or-partial-block-structures">
@@ -1763,8 +1922,8 @@ results from the tool and can be saved as either json or csv.</p>
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on May 03, 2021.<br/>
-        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 3.4.3.<br/>
+        Last updated on May 25, 2021.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.2.<br/>
     </p>
   </div>
 </footer>

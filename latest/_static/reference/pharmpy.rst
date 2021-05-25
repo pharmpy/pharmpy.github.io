@@ -9,9 +9,9 @@ Subpackages
 
    pharmpy.data
    pharmpy.execute
-   pharmpy.methods
    pharmpy.modeling
    pharmpy.parse_utils
+   pharmpy.tools
 
 Submodules
 ----------
