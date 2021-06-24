@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.cli &#8212; Pharmpy 0.24.2 documentation</title>
+    <title>pharmpy.cli &#8212; Pharmpy 0.25.0 documentation</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -315,7 +315,7 @@
 <div class="viewcode-block" id="run_bootstrap"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.run_bootstrap">[docs]</a><span class="k">def</span> <span class="nf">run_bootstrap</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">pharmpy.tools.bootstrap</span> <span class="k">as</span> <span class="nn">bootstrap</span>
 
-    <span class="n">method</span> <span class="o">=</span> <span class="n">bootstrap</span><span class="o">.</span><span class="n">Bootstrap</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">method</span> <span class="o">=</span> <span class="n">bootstrap</span><span class="o">.</span><span class="n">Bootstrap</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">model</span><span class="p">,</span> <span class="n">resamples</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">samples</span><span class="p">)</span>
     <span class="n">method</span><span class="o">.</span><span class="n">run</span><span class="p">()</span></div>
 
 
@@ -807,6 +807,16 @@
     <span class="n">res</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.csv&#39;</span><span class="p">)</span></div>
 
 
+<div class="viewcode-block" id="results_resmod"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_resmod">[docs]</a><span class="k">def</span> <span class="nf">results_resmod</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
+    <span class="kn">from</span> <span class="nn">pharmpy.tools.resmod.results</span> <span class="kn">import</span> <span class="n">psn_resmod_results</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+        <span class="n">error</span><span class="p">(</span><span class="ne">FileNotFoundError</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="p">)))</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">psn_resmod_results</span><span class="p">(</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.json&#39;</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">args</span><span class="o">.</span><span class="n">psn_dir</span> <span class="o">/</span> <span class="s1">&#39;results.csv&#39;</span><span class="p">)</span></div>
+
+
 <div class="viewcode-block" id="results_scm"><a class="viewcode-back" href="../../reference/pharmpy.cli.html#pharmpy.cli.results_scm">[docs]</a><span class="k">def</span> <span class="nf">results_scm</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
     <span class="kn">from</span> <span class="nn">pharmpy.tools.scm.results</span> <span class="kn">import</span> <span class="n">psn_scm_results</span>
 
@@ -878,12 +888,6 @@
     <span class="sd">&quot;&quot;&quot;Subcommand to output summary of modelfit&quot;&quot;&quot;</span>
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">args</span><span class="o">.</span><span class="n">models</span><span class="p">:</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">reparameterize</span><span class="p">(</span>
-            <span class="p">[</span>
-                <span class="n">pharmpy</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">NormalParametrizationSd</span><span class="p">,</span>
-                <span class="n">pharmpy</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">MultivariateNormalParametrizationSdCorr</span><span class="p">,</span>
-            <span class="p">]</span>
-        <span class="p">)</span>
         <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_summary</span><span class="p">())</span>
         <span class="nb">print</span><span class="p">()</span></div>
 
@@ -1011,6 +1015,13 @@
                         <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Bootstrap&#39;</span><span class="p">,</span>
                         <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">run_bootstrap</span><span class="p">,</span>
                         <span class="s1">&#39;parents&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">args_model_input</span><span class="p">],</span>
+                        <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="p">{</span>
+                                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;--samples&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
+                                <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Number of bootstrap datasets&#39;</span><span class="p">,</span>
+                            <span class="p">},</span>
+                        <span class="p">],</span>
                     <span class="p">}</span>
                 <span class="p">},</span>
                 <span class="p">{</span>
@@ -1679,6 +1690,21 @@
                     <span class="p">}</span>
                 <span class="p">},</span>
                 <span class="p">{</span>
+                    <span class="s1">&#39;resmod&#39;</span><span class="p">:</span> <span class="p">{</span>
+                        <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate resmod results&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate results from a PsN resmod run&#39;</span><span class="p">,</span>
+                        <span class="s1">&#39;func&#39;</span><span class="p">:</span> <span class="n">results_resmod</span><span class="p">,</span>
+                        <span class="s1">&#39;args&#39;</span><span class="p">:</span> <span class="p">[</span>
+                            <span class="p">{</span>
+                                <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="s1">&#39;psn_dir&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;metavar&#39;</span><span class="p">:</span> <span class="s1">&#39;PsN directory&#39;</span><span class="p">,</span>
+                                <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">,</span>
+                                <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Path to PsN resmod run directory&#39;</span><span class="p">,</span>
+                            <span class="p">}</span>
+                        <span class="p">],</span>
+                    <span class="p">}</span>
+                <span class="p">},</span>
+                <span class="p">{</span>
                     <span class="s1">&#39;scm&#39;</span><span class="p">:</span> <span class="p">{</span>
                         <span class="s1">&#39;help&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate scm results&#39;</span><span class="p">,</span>
                         <span class="s1">&#39;description&#39;</span><span class="p">:</span> <span class="s1">&#39;Generate results from a PsN scm run&#39;</span><span class="p">,</span>
@@ -1774,7 +1800,7 @@
     <span class="n">formatter_class</span><span class="o">=</span><span class="n">formatter</span><span class="p">,</span>
     <span class="n">allow_abbrev</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;0.24.2&#39;</span><span class="p">)</span>
+<span class="n">parser</span><span class="o">.</span><span class="n">add_argument</span><span class="p">(</span><span class="s1">&#39;--version&#39;</span><span class="p">,</span> <span class="n">action</span><span class="o">=</span><span class="s1">&#39;version&#39;</span><span class="p">,</span> <span class="n">version</span><span class="o">=</span><span class="s1">&#39;0.25.0&#39;</span><span class="p">)</span>
 
 <span class="c1"># subcommand parsers</span>
 <span class="n">subparsers</span> <span class="o">=</span> <span class="n">parser</span><span class="o">.</span><span class="n">add_subparsers</span><span class="p">(</span><span class="n">title</span><span class="o">=</span><span class="s1">&#39;Pharmpy commands&#39;</span><span class="p">,</span> <span class="n">metavar</span><span class="o">=</span><span class="s1">&#39;COMMAND&#39;</span><span class="p">)</span>
@@ -1817,7 +1843,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on May 25, 2021.<br/>
+        Last updated on Jun 24, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.2.<br/>
     </p>
   </div>

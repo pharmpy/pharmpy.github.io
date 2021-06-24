@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.data.iterators &#8212; Pharmpy 0.24.2 documentation</title>
+    <title>pharmpy.data.iterators &#8212; Pharmpy 0.25.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -174,6 +174,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 <span class="kn">import</span> <span class="nn">collections</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
@@ -191,7 +192,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">iterations</span><span class="p">,</span> <span class="n">name_pattern</span><span class="o">=</span><span class="s1">&#39;dataset_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Initialization of the base class</span>
 <span class="sd">        :param iterations: is the number of iterations</span>
-<span class="sd">        :param name_pattern: Name too use for generated datasets.</span>
+<span class="sd">        :param name_pattern: Name pattern to use for generated datasets.</span>
 <span class="sd">             A number starting from 1 will be put in the placeholder.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_next</span> <span class="o">=</span> <span class="mi">1</span>
@@ -301,6 +302,7 @@
         <span class="n">sample_size</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">replace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">name_pattern</span><span class="o">=</span><span class="s1">&#39;resample_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_dataset</span><span class="p">(</span><span class="n">dataset_or_model</span><span class="p">)</span>
         <span class="n">unique_groups</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">group</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
@@ -351,6 +353,14 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_replace</span> <span class="o">=</span> <span class="n">replace</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_stratas</span> <span class="o">=</span> <span class="n">stratas</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sample_size_dict</span> <span class="o">=</span> <span class="n">sample_size_dict</span>
+        <span class="k">if</span> <span class="n">resamples</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">name</span><span class="p">:</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;One name was provided despite having multiple resamples, falling back to &#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;name pattern: </span><span class="si">{</span><span class="n">name_pattern</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">resamples</span><span class="p">,</span> <span class="n">name_pattern</span><span class="o">=</span><span class="n">name_pattern</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__next__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -369,7 +379,10 @@
             <span class="n">sub</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_group</span><span class="p">]</span> <span class="o">=</span> <span class="n">new_grp</span>
             <span class="n">new_df</span> <span class="o">=</span> <span class="n">new_df</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sub</span><span class="p">)</span>
         <span class="n">new_df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_next</span><span class="p">(</span><span class="n">new_df</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span>
+            <span class="n">new_df</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_prepare_next</span><span class="p">(</span><span class="n">new_df</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_combine_dataset</span><span class="p">(</span><span class="n">new_df</span><span class="p">),</span> <span class="n">random_groups</span></div>
 </pre></div>
@@ -396,7 +409,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on May 25, 2021.<br/>
+        Last updated on Jun 24, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.2.<br/>
     </p>
   </div>

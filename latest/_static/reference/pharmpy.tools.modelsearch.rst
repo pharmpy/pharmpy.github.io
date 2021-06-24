@@ -7,6 +7,9 @@ Submodules
 .. toctree::
    :maxdepth: 2
 
+   pharmpy.tools.modelsearch.algorithms
+   pharmpy.tools.modelsearch.mfl
+   pharmpy.tools.modelsearch.rankfuncs
    pharmpy.tools.modelsearch.tool
 
 Module contents

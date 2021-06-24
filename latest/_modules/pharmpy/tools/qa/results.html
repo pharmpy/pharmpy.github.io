@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.qa.results &#8212; Pharmpy 0.24.2 documentation</title>
+    <title>pharmpy.tools.qa.results &#8212; Pharmpy 0.25.0 documentation</title>
     
   <link href="../../../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -163,6 +163,7 @@
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+<span class="kn">import</span> <span class="nn">yaml</span>
 
 <span class="kn">import</span> <span class="nn">pharmpy.random_variables</span>
 <span class="kn">import</span> <span class="nn">pharmpy.symbols</span>
@@ -183,6 +184,8 @@
         <span class="n">influential_individuals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">covariate_effects</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">univariate_sum</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">residual_error</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">structural_bias</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">dofv</span> <span class="o">=</span> <span class="n">dofv</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">fullblock_parameters</span> <span class="o">=</span> <span class="n">fullblock_parameters</span>
@@ -192,7 +195,9 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">iov_parameters</span> <span class="o">=</span> <span class="n">iov_parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">influential_individuals</span> <span class="o">=</span> <span class="n">influential_individuals</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">covariate_effects</span> <span class="o">=</span> <span class="n">covariate_effects</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">univariate_sum</span> <span class="o">=</span> <span class="n">univariate_sum</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">univariate_sum</span> <span class="o">=</span> <span class="n">univariate_sum</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">residual_error</span> <span class="o">=</span> <span class="n">residual_error</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">structural_bias</span> <span class="o">=</span> <span class="n">structural_bias</span></div>
 
 
 <div class="viewcode-block" id="calculate_results"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.qa.results.html#pharmpy.tools.qa.calculate_results">[docs]</a><span class="k">def</span> <span class="nf">calculate_results</span><span class="p">(</span>
@@ -207,6 +212,8 @@
     <span class="n">frem_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">cdd_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">scm_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">simeval_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">resmod_idv_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="n">fullblock_table</span><span class="p">,</span> <span class="n">fullblock_dofv</span> <span class="o">=</span> <span class="n">calc_fullblock</span><span class="p">(</span><span class="n">original_model</span><span class="p">,</span> <span class="n">fullblock_model</span><span class="p">)</span>
     <span class="n">boxcox_table</span><span class="p">,</span> <span class="n">boxcox_dofv</span> <span class="o">=</span> <span class="n">calc_transformed_etas</span><span class="p">(</span>
@@ -218,6 +225,9 @@
     <span class="n">frem_dofv</span> <span class="o">=</span> <span class="n">calc_frem_dofv</span><span class="p">(</span><span class="n">base_model</span><span class="p">,</span> <span class="n">fullblock_model</span><span class="p">,</span> <span class="n">frem_results</span><span class="p">)</span>
     <span class="n">univariate_sum</span><span class="p">,</span> <span class="n">scm_table</span><span class="p">,</span> <span class="n">scm_dofv</span> <span class="o">=</span> <span class="n">calc_scm_dofv</span><span class="p">(</span><span class="n">scm_results</span><span class="p">)</span>
     <span class="n">infinds</span><span class="p">,</span> <span class="n">cdd_dofv</span> <span class="o">=</span> <span class="n">influential_individuals</span><span class="p">(</span><span class="n">cdd_results</span><span class="p">)</span>
+    <span class="n">outs</span><span class="p">,</span> <span class="n">simeval_dofv</span> <span class="o">=</span> <span class="n">outliers</span><span class="p">(</span><span class="n">simeval_results</span><span class="p">,</span> <span class="n">cdd_results</span><span class="p">)</span>
+    <span class="n">resmodtab</span><span class="p">,</span> <span class="n">resmod_dofv</span> <span class="o">=</span> <span class="n">resmod</span><span class="p">(</span><span class="n">resmod_idv_results</span><span class="p">)</span>
+
     <span class="n">dofv_table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
         <span class="p">[</span>
             <span class="n">fullblock_dofv</span><span class="p">,</span>
@@ -228,9 +238,11 @@
             <span class="n">frem_dofv</span><span class="p">,</span>
             <span class="n">scm_dofv</span><span class="p">,</span>
             <span class="n">cdd_dofv</span><span class="p">,</span>
+            <span class="n">simeval_dofv</span><span class="p">,</span>
+            <span class="n">resmod_dofv</span><span class="p">,</span>
         <span class="p">]</span>
     <span class="p">)</span>
-    <span class="n">dofv_table</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;section&#39;</span><span class="p">,</span> <span class="s1">&#39;run&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">dofv_table</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;section&#39;</span><span class="p">,</span> <span class="s1">&#39;run&#39;</span><span class="p">,</span> <span class="s1">&#39;dvid&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">QAResults</span><span class="p">(</span>
         <span class="n">dofv</span><span class="o">=</span><span class="n">dofv_table</span><span class="p">,</span>
         <span class="n">fullblock_parameters</span><span class="o">=</span><span class="n">fullblock_table</span><span class="p">,</span>
@@ -241,8 +253,40 @@
         <span class="n">influential_individuals</span><span class="o">=</span><span class="n">infinds</span><span class="p">,</span>
         <span class="n">covariate_effects</span><span class="o">=</span><span class="n">scm_table</span><span class="p">,</span>
         <span class="n">univariate_sum</span><span class="o">=</span><span class="n">univariate_sum</span><span class="p">,</span>
+        <span class="n">residual_error</span><span class="o">=</span><span class="n">resmodtab</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="outliers"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.qa.results.html#pharmpy.tools.qa.outliers">[docs]</a><span class="k">def</span> <span class="nf">outliers</span><span class="p">(</span><span class="n">simeval_res</span><span class="p">,</span> <span class="n">cdd_res</span><span class="p">):</span>
+    <span class="n">dofv_tab</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;outliers&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;1&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+            <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">simeval_res</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cdd_res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dofv_tab</span>
+    <span class="n">iofv</span> <span class="o">=</span> <span class="n">simeval_res</span><span class="o">.</span><span class="n">iofv_summary</span>
+    <span class="n">outliers</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">iofv</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">iofv</span><span class="p">[</span><span class="s1">&#39;residual_outlier&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="n">cases</span> <span class="o">=</span> <span class="n">cdd_res</span><span class="o">.</span><span class="n">case_results</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">cases</span><span class="p">[</span><span class="s1">&#39;skipped_individuals&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">cases</span><span class="p">[</span><span class="s1">&#39;skipped_individuals&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">int</span><span class="p">(</span><span class="n">x</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">cases</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">cases</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="s1">&#39;skipped_individuals&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">dofv</span> <span class="o">=</span> <span class="n">cases</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">outliers</span><span class="p">]</span><span class="o">.</span><span class="n">delta_ofv</span>
+    <span class="n">top_three</span> <span class="o">=</span> <span class="n">dofv</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)[:</span><span class="mi">3</span><span class="p">]</span>
+    <span class="n">dofv_tab</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;outliers&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">top_three</span><span class="p">),</span>
+            <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">top_three</span><span class="o">.</span><span class="n">index</span><span class="p">),</span>
+            <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="n">top_three</span><span class="p">,</span>
+            <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">top_three</span><span class="p">),</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dofv_tab</span></div>
 
 
 <div class="viewcode-block" id="influential_individuals"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.qa.results.html#pharmpy.tools.qa.influential_individuals">[docs]</a><span class="k">def</span> <span class="nf">influential_individuals</span><span class="p">(</span><span class="n">cdd_res</span><span class="p">):</span>
@@ -273,11 +317,74 @@
     <span class="k">return</span> <span class="n">influentials</span><span class="p">,</span> <span class="n">dofv_tab</span></div>
 
 
+<div class="viewcode-block" id="resmod"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.qa.results.html#pharmpy.tools.qa.resmod">[docs]</a><span class="k">def</span> <span class="nf">resmod</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+    <span class="n">dofv_tab</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;residual_error_model&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+            <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+            <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dofv_tab</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">models</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="s1">&#39;sum&#39;</span><span class="p">,</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;DVID&#39;</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="s1">&#39;ignore&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;dOFV&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="o">-</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;dOFV&#39;</span><span class="p">]</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span>
+        <span class="p">[</span><span class="s1">&#39;idv_varying_RUV&#39;</span><span class="p">,</span> <span class="s1">&#39;idv_varying_combined&#39;</span><span class="p">,</span> <span class="s1">&#39;idv_varying_theta&#39;</span><span class="p">],</span>
+        <span class="n">level</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span>
+        <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="c1"># Select the best idv_varying cut for each DVID</span>
+    <span class="n">remaining_timevar</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">dvid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;DVID&#39;</span><span class="p">):</span>
+        <span class="n">subdf</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">dvid</span><span class="p">]</span>
+        <span class="n">idvvar</span> <span class="o">=</span> <span class="n">subdf</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">str</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s2">&quot;idv_varying&quot;</span><span class="p">)</span>
+        <span class="n">best_timevar_idx</span> <span class="o">=</span> <span class="n">subdf</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idvvar</span><span class="p">][</span><span class="s1">&#39;dOFV&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">idxmax</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">subdf</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">idvvar</span><span class="p">]</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="n">best_timevar_idx</span><span class="p">:</span>
+                <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">((</span><span class="n">dvid</span><span class="p">,</span> <span class="n">name</span><span class="p">),</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">remaining_timevar</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">best_timevar_idx</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">ind</span> <span class="ow">in</span> <span class="n">remaining_timevar</span><span class="p">:</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="p">{</span><span class="n">ind</span><span class="p">:</span> <span class="s1">&#39;time_varying&#39;</span><span class="p">},</span> <span class="n">level</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;DVID&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">sort_values</span><span class="p">([</span><span class="s1">&#39;dOFV&#39;</span><span class="p">],</span> <span class="n">ascending</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">droplevel</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>  <span class="c1"># FIXME: Why was an extra DVID level added?</span>
+    <span class="n">n</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">x</span><span class="p">))</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;additional_parameters&#39;</span><span class="p">,</span> <span class="n">n</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">dvid</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;DVID&#39;</span><span class="p">):</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[(</span><span class="n">dvid</span><span class="p">,</span> <span class="s1">&#39;time_varying&#39;</span><span class="p">),</span> <span class="s1">&#39;additional_parameters&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>
+
+    <span class="n">inds</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">[:</span><span class="mi">2</span><span class="p">])</span>
+    <span class="n">dvid2</span> <span class="o">=</span> <span class="p">[</span><span class="n">dvid</span> <span class="k">for</span> <span class="n">dvid</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">]</span>
+    <span class="n">run2</span> <span class="o">=</span> <span class="p">[</span><span class="n">run</span> <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">run</span> <span class="ow">in</span> <span class="n">inds</span><span class="p">]</span>
+
+    <span class="n">dofv_tab</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;residual_error_model&#39;</span><span class="p">]</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span>
+            <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="n">run2</span><span class="p">,</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="n">dvid2</span><span class="p">,</span>
+            <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;dOFV&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">2</span><span class="p">]),</span>
+            <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;additional_parameters&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[:</span><span class="mi">2</span><span class="p">]),</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span><span class="p">,</span> <span class="n">dofv_tab</span></div>
+
+
 <div class="viewcode-block" id="calc_iov"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.qa.results.html#pharmpy.tools.qa.calc_iov">[docs]</a><span class="k">def</span> <span class="nf">calc_iov</span><span class="p">(</span><span class="n">original_model</span><span class="p">,</span> <span class="n">iov_model</span><span class="p">):</span>
     <span class="n">dofv_tab</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;parameter_variability&#39;</span><span class="p">],</span>
             <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;iov&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
             <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
             <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
         <span class="p">}</span>
@@ -310,6 +417,7 @@
         <span class="p">{</span>
             <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;parameter_variability&#39;</span><span class="p">],</span>
             <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;iov&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
             <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">dofv</span><span class="p">],</span>
             <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">iov_params</span><span class="p">)],</span>
         <span class="p">}</span>
@@ -322,6 +430,7 @@
         <span class="p">{</span>
             <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;parameter_variability&#39;</span><span class="p">],</span>
             <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;add_etas&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
             <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
             <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
         <span class="p">}</span>
@@ -350,6 +459,7 @@
         <span class="p">{</span>
             <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;parameter_variability&#39;</span><span class="p">],</span>
             <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;add_etas&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
             <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">dofv</span><span class="p">],</span>
             <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="nb">len</span><span class="p">(</span><span class="n">etas_added_to</span><span class="p">)],</span>
         <span class="p">}</span>
@@ -359,7 +469,13 @@
 
 <div class="viewcode-block" id="calc_scm_dofv"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.qa.results.html#pharmpy.tools.qa.calc_scm_dofv">[docs]</a><span class="k">def</span> <span class="nf">calc_scm_dofv</span><span class="p">(</span><span class="n">scm_results</span><span class="p">):</span>
     <span class="n">dofv_tab</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-        <span class="p">{</span><span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;covariates&#39;</span><span class="p">],</span> <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;scm&#39;</span><span class="p">],</span> <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span> <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]}</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;covariates&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;scm&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+            <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+            <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+        <span class="p">}</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">scm_results</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="kc">None</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">dofv_tab</span>
@@ -376,6 +492,7 @@
         <span class="p">{</span>
             <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;covariates&#39;</span><span class="p">],</span>
             <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="n">top</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
             <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="n">top</span><span class="p">[</span><span class="s1">&#39;ofv_drop&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
             <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="n">top</span><span class="p">[</span><span class="s1">&#39;delta_df&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">,</span>
         <span class="p">}</span>
@@ -386,7 +503,13 @@
 <div class="viewcode-block" id="calc_frem_dofv"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.qa.results.html#pharmpy.tools.qa.calc_frem_dofv">[docs]</a><span class="k">def</span> <span class="nf">calc_frem_dofv</span><span class="p">(</span><span class="n">base_model</span><span class="p">,</span> <span class="n">fullblock_model</span><span class="p">,</span> <span class="n">frem_results</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate the dOFV for the frem model&quot;&quot;&quot;</span>
     <span class="n">dofv_tab</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-        <span class="p">{</span><span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;covariates&#39;</span><span class="p">],</span> <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;frem&#39;</span><span class="p">],</span> <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span> <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">]}</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;covariates&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;frem&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+            <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+            <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+        <span class="p">}</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">base_model</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">frem_results</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">dofv_tab</span>
@@ -411,7 +534,13 @@
     <span class="n">npar</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frem_results</span><span class="o">.</span><span class="n">covariate_effects</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;parameter&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
     <span class="n">ncov</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">frem_results</span><span class="o">.</span><span class="n">covariate_effects</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="s1">&#39;covariate&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
     <span class="n">dofv_tab</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-        <span class="p">{</span><span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;covariates&#39;</span><span class="p">],</span> <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;frem&#39;</span><span class="p">],</span> <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">dofv</span><span class="p">],</span> <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">npar</span> <span class="o">*</span> <span class="n">ncov</span><span class="p">]}</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;covariates&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;frem&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
+            <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">dofv</span><span class="p">],</span>
+            <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">npar</span> <span class="o">*</span> <span class="n">ncov</span><span class="p">],</span>
+        <span class="p">}</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">dofv_tab</span></div>
 
@@ -422,6 +551,7 @@
         <span class="p">{</span>
             <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;parameter_variability&#39;</span><span class="p">],</span>
             <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">transform_name</span><span class="p">],</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
             <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
             <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
         <span class="p">}</span>
@@ -461,6 +591,7 @@
         <span class="p">{</span>
             <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;parameter_variability&#39;</span><span class="p">],</span>
             <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;fullblock&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
             <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
             <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
         <span class="p">}</span>
@@ -487,11 +618,45 @@
         <span class="p">{</span>
             <span class="s1">&#39;section&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;parameter_variability&#39;</span><span class="p">],</span>
             <span class="s1">&#39;run&#39;</span><span class="p">:</span> <span class="p">[</span><span class="s1">&#39;fullblock&#39;</span><span class="p">],</span>
+            <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">],</span>
             <span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">dofv</span><span class="p">],</span>
             <span class="s1">&#39;df&#39;</span><span class="p">:</span> <span class="p">[</span><span class="n">degrees</span><span class="p">],</span>
         <span class="p">}</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">table</span><span class="p">,</span> <span class="n">dofv_tab</span></div>
+
+
+<div class="viewcode-block" id="read_results_summary"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.qa.results.html#pharmpy.tools.qa.read_results_summary">[docs]</a><span class="k">def</span> <span class="nf">read_results_summary</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="n">summary_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;results_summary.yaml&#39;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">summary_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="k">return</span>
+    <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">summary_path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fh</span><span class="p">:</span>
+        <span class="n">summary</span> <span class="o">=</span> <span class="n">yaml</span><span class="o">.</span><span class="n">safe_load</span><span class="p">(</span><span class="n">fh</span><span class="p">)</span>
+    <span class="n">dfs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">idvtab</span> <span class="ow">in</span> <span class="n">summary</span><span class="p">[</span><span class="s1">&#39;structural&#39;</span><span class="p">]:</span>
+        <span class="n">idv</span> <span class="o">=</span> <span class="n">idvtab</span><span class="p">[</span><span class="s1">&#39;idv&#39;</span><span class="p">]</span>
+        <span class="n">dvid</span> <span class="o">=</span> <span class="n">idvtab</span><span class="p">[</span><span class="s1">&#39;dvid&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">dvid</span> <span class="o">==</span> <span class="s1">&#39;NA&#39;</span><span class="p">:</span>
+            <span class="n">dvid</span> <span class="o">=</span> <span class="mi">1</span>
+        <span class="n">cwres</span> <span class="o">=</span> <span class="p">[</span><span class="nb">float</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">idvtab</span><span class="p">[</span><span class="s1">&#39;second_table&#39;</span><span class="p">][</span><span class="s1">&#39;CWRES&#39;</span><span class="p">]]</span>
+        <span class="n">cpred</span> <span class="o">=</span> <span class="p">[</span><span class="nb">int</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="k">for</span> <span class="n">num</span> <span class="ow">in</span> <span class="n">idvtab</span><span class="p">[</span><span class="s1">&#39;second_table&#39;</span><span class="p">][</span><span class="s1">&#39;%CPRED&#39;</span><span class="p">]]</span>
+        <span class="n">binmin</span> <span class="o">=</span> <span class="n">idvtab</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">][</span><span class="s1">&#39;bin_min&#39;</span><span class="p">]</span>
+        <span class="n">binmax</span> <span class="o">=</span> <span class="n">idvtab</span><span class="p">[</span><span class="s1">&#39;table&#39;</span><span class="p">][</span><span class="s1">&#39;bin_max&#39;</span><span class="p">]</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+            <span class="p">{</span>
+                <span class="s1">&#39;idv&#39;</span><span class="p">:</span> <span class="n">idv</span><span class="p">,</span>
+                <span class="s1">&#39;dvid&#39;</span><span class="p">:</span> <span class="n">dvid</span><span class="p">,</span>
+                <span class="s1">&#39;binid&#39;</span><span class="p">:</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">cpred</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)),</span>
+                <span class="s1">&#39;binmin&#39;</span><span class="p">:</span> <span class="n">binmin</span><span class="p">,</span>
+                <span class="s1">&#39;binmax&#39;</span><span class="p">:</span> <span class="n">binmax</span><span class="p">,</span>
+                <span class="s1">&#39;cwres&#39;</span><span class="p">:</span> <span class="n">cwres</span><span class="p">,</span>
+                <span class="s1">&#39;cpred&#39;</span><span class="p">:</span> <span class="n">cpred</span><span class="p">,</span>
+            <span class="p">}</span>
+        <span class="p">)</span>
+        <span class="n">dfs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
+    <span class="n">bias</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">dfs</span><span class="p">)</span>
+    <span class="n">bias</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;idv&#39;</span><span class="p">,</span> <span class="s1">&#39;dvid&#39;</span><span class="p">,</span> <span class="s1">&#39;binid&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">bias</span></div>
 
 
 <div class="viewcode-block" id="psn_qa_results"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.qa.results.html#pharmpy.tools.qa.psn_qa_results">[docs]</a><span class="k">def</span> <span class="nf">psn_qa_results</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
@@ -549,11 +714,24 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">scm_res</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="n">simeval_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;simeval_run&#39;</span> <span class="o">/</span> <span class="s1">&#39;results.json&#39;</span>
+    <span class="k">if</span> <span class="n">simeval_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">simeval_res</span> <span class="o">=</span> <span class="n">read_results</span><span class="p">(</span><span class="n">simeval_path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">simeval_res</span> <span class="o">=</span> <span class="kc">None</span>
+
     <span class="n">args</span> <span class="o">=</span> <span class="n">psn_helpers</span><span class="o">.</span><span class="n">options_from_command</span><span class="p">(</span><span class="n">psn_helpers</span><span class="o">.</span><span class="n">psn_command</span><span class="p">(</span><span class="n">path</span><span class="p">))</span>
     <span class="k">if</span> <span class="s1">&#39;add_etas&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
         <span class="n">etas_added_to</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">etas_added_to</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="s1">&#39;add_etas&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
+
+    <span class="n">idv</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;resmod_idv&#39;</span><span class="p">,</span> <span class="s1">&#39;TIME&#39;</span><span class="p">)</span>
+    <span class="n">resmod_idv_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="sa">f</span><span class="s1">&#39;resmod_</span><span class="si">{</span><span class="n">idv</span><span class="si">}</span><span class="s1">&#39;</span> <span class="o">/</span> <span class="s1">&#39;results.json&#39;</span>
+    <span class="k">if</span> <span class="n">resmod_idv_path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+        <span class="n">resmod_idv_res</span> <span class="o">=</span> <span class="n">read_results</span><span class="p">(</span><span class="n">resmod_idv_path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">resmod_idv_res</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">calculate_results</span><span class="p">(</span>
         <span class="n">original_model</span><span class="p">,</span>
@@ -567,7 +745,13 @@
         <span class="n">frem_results</span><span class="o">=</span><span class="n">frem_res</span><span class="p">,</span>
         <span class="n">cdd_results</span><span class="o">=</span><span class="n">cdd_res</span><span class="p">,</span>
         <span class="n">scm_results</span><span class="o">=</span><span class="n">scm_res</span><span class="p">,</span>
+        <span class="n">simeval_results</span><span class="o">=</span><span class="n">simeval_res</span><span class="p">,</span>
+        <span class="n">resmod_idv_results</span><span class="o">=</span><span class="n">resmod_idv_res</span><span class="p">,</span>
     <span class="p">)</span>
+
+    <span class="n">bias</span> <span class="o">=</span> <span class="n">read_results_summary</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">res</span><span class="o">.</span><span class="n">structural_bias</span> <span class="o">=</span> <span class="n">bias</span>
+
     <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>
 
@@ -593,7 +777,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on May 25, 2021.<br/>
+        Last updated on Jun 24, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.2.<br/>
     </p>
   </div>

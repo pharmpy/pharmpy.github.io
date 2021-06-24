@@ -9,12 +9,15 @@ Subpackages
 
    pharmpy.tools.bootstrap
    pharmpy.tools.cdd
+   pharmpy.tools.crossval
    pharmpy.tools.frem
    pharmpy.tools.linearize
    pharmpy.tools.modelfit
    pharmpy.tools.modelsearch
    pharmpy.tools.qa
+   pharmpy.tools.resmod
    pharmpy.tools.scm
+   pharmpy.tools.simeval
    pharmpy.tools.simfit
 
 Submodules

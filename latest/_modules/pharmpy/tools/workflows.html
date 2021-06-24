@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.workflows &#8212; Pharmpy 0.24.2 documentation</title>
+    <title>pharmpy.tools.workflows &#8212; Pharmpy 0.25.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -159,58 +159,157 @@
               <div>
                 
   <h1>Source code for pharmpy.tools.workflows</h1><div class="highlight"><pre>
-<div class="viewcode-block" id="Workflow"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow">[docs]</a><span></span><span class="k">class</span> <span class="nc">Workflow</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tasks</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">models</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">if</span> <span class="n">tasks</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">add_tasks</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">models</span> <span class="o">=</span> <span class="n">models</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">infiles</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">outfiles</span> <span class="o">=</span> <span class="p">[]</span>
+<span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">import</span> <span class="nn">uuid</span>
 
-<div class="viewcode-block" id="Workflow.add_tasks"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.add_tasks">[docs]</a>    <span class="k">def</span> <span class="nf">add_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tasks</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span>
+<span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
+<span class="kn">from</span> <span class="nn">dask</span> <span class="kn">import</span> <span class="n">visualize</span>
+
+
+<div class="viewcode-block" id="Workflow"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow">[docs]</a><span class="k">class</span> <span class="nc">Workflow</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">tasks</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">tasks</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">add_tasks</span><span class="p">(</span><span class="n">tasks</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Workflow.add_tasks"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.add_tasks">[docs]</a>    <span class="k">def</span> <span class="nf">add_tasks</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">output_nodes</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">as_single_element</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">arg_index</span><span class="o">=</span><span class="mi">0</span>
+    <span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Keep all nodes and edges, connects output from first workflow to input in second if connect=True</span>
+<span class="sd">        (assumes 1:M, M:1 or 1:1 connections)&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">output_nodes</span><span class="p">:</span>
+            <span class="n">wf1_out_tasks</span> <span class="o">=</span> <span class="n">output_nodes</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tasks</span><span class="p">)</span></div>
+            <span class="n">wf1_out_tasks</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_output</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">):</span>
+            <span class="n">wf2_in_tasks</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">add_nodes_from</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+                <span class="n">wf2_in_tasks</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+                <span class="n">wf2_in_tasks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wf2_in_tasks</span> <span class="o">=</span> <span class="n">other</span><span class="o">.</span><span class="n">get_input</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">compose</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">,</span> <span class="n">other</span><span class="o">.</span><span class="n">tasks</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">connect</span><span class="p">:</span>
+            <span class="k">return</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># TODO: assert this is consistent with task input</span>
+            <span class="n">workflow_connection</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_workflow_connections</span><span class="p">(</span><span class="n">wf1_out_tasks</span><span class="p">,</span> <span class="n">wf2_in_tasks</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">wf2_in_task</span> <span class="ow">in</span> <span class="n">wf2_in_tasks</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">as_single_element</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">wf1_out_tasks</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+                    <span class="n">wf1_out_task</span> <span class="o">=</span> <span class="n">wf1_out_tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">wf1_out_task</span> <span class="o">=</span> <span class="n">wf1_out_tasks</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">wf2_in_task</span><span class="o">.</span><span class="n">has_input</span><span class="p">():</span>
+                    <span class="n">wf2_in_task</span><span class="o">.</span><span class="n">task_input</span> <span class="o">=</span> <span class="p">(</span><span class="n">wf1_out_task</span><span class="p">,)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">wf2_in_task_input</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">wf2_in_task</span><span class="o">.</span><span class="n">task_input</span><span class="p">)</span>
+                    <span class="n">wf2_in_task_input</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">arg_index</span><span class="p">,</span> <span class="n">wf1_out_task</span><span class="p">)</span>
+                    <span class="n">wf2_in_task</span><span class="o">.</span><span class="n">task_input</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">wf2_in_task_input</span><span class="p">)</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">connect_tasks</span><span class="p">(</span><span class="n">workflow_connection</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Workflow.find_workflow_connections"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.find_workflow_connections">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">find_workflow_connections</span><span class="p">(</span><span class="n">wf1_out_tasks</span><span class="p">,</span> <span class="n">wf2_in_tasks</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">wf1_out_tasks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">wf2_in_tasks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Having N:M connections currently not supported&#39;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">wf1_out_tasks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">wf2_in_task</span> <span class="o">=</span> <span class="n">wf2_in_tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">workflow_connection</span> <span class="o">=</span> <span class="p">{</span><span class="n">wf1_out_task</span><span class="p">:</span> <span class="n">wf2_in_task</span> <span class="k">for</span> <span class="n">wf1_out_task</span> <span class="ow">in</span> <span class="n">wf1_out_tasks</span><span class="p">}</span>
+        <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">wf2_in_tasks</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">wf1_out_task</span> <span class="o">=</span> <span class="n">wf1_out_tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">workflow_connection</span> <span class="o">=</span> <span class="p">{</span><span class="n">wf1_out_task</span><span class="p">:</span> <span class="n">wf2_in_task</span> <span class="k">for</span> <span class="n">wf2_in_task</span> <span class="ow">in</span> <span class="n">wf2_in_tasks</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">wf1_out_task</span><span class="p">,</span> <span class="n">wf2_in_task</span> <span class="o">=</span> <span class="n">wf1_out_tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">wf2_in_tasks</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">workflow_connection</span> <span class="o">=</span> <span class="p">{</span><span class="n">wf1_out_task</span><span class="p">:</span> <span class="n">wf2_in_task</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">workflow_connection</span></div>
+
+<div class="viewcode-block" id="Workflow.connect_tasks"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.connect_tasks">[docs]</a>    <span class="k">def</span> <span class="nf">connect_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">connect_dict</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Connects task with dict: {from: to}&quot;&quot;&quot;</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">connect_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot connect </span><span class="si">{</span><span class="n">key</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> to itself&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+                <span class="n">key_edges</span> <span class="o">=</span> <span class="p">[(</span><span class="n">key</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">value</span><span class="p">]</span>
+                <span class="n">edges</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">key_edges</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">edges</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">add_edges_from</span><span class="p">(</span><span class="n">edges</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="Workflow.as_dict"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.as_dict">[docs]</a>    <span class="k">def</span> <span class="nf">as_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">as_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">task_input</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">task</span><span class="o">.</span><span class="n">task_input</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="n">task</span><span class="o">.</span><span class="n">task_input</span><span class="p">)</span>
-            <span class="n">as_dict</span><span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">nx</span><span class="o">.</span><span class="n">dfs_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">):</span>
+            <span class="n">key</span> <span class="o">=</span> <span class="n">task</span><span class="o">.</span><span class="n">task_id</span>
+            <span class="n">input_list</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">id_convert</span><span class="p">(</span><span class="n">t</span><span class="p">)</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">task_input</span><span class="p">]</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">input_list</span><span class="p">)</span>
+            <span class="n">as_dict</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
         <span class="k">return</span> <span class="n">as_dict</span></div>
 
-<div class="viewcode-block" id="Workflow.get_task"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.get_task">[docs]</a>    <span class="k">def</span> <span class="nf">get_task</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">task</span>
-        <span class="k">return</span> <span class="kc">None</span></div>
+<div class="viewcode-block" id="Workflow.id_convert"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.id_convert">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">id_convert</span><span class="p">(</span><span class="n">task</span><span class="p">):</span>
+        <span class="c1"># TODO: Convert recursively</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="n">Task</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">task</span><span class="o">.</span><span class="n">task_id</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">task</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">[</span><span class="n">t</span><span class="o">.</span><span class="n">task_id</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">t</span><span class="p">,</span> <span class="n">Task</span><span class="p">)</span> <span class="k">else</span> <span class="n">t</span> <span class="k">for</span> <span class="n">t</span> <span class="ow">in</span> <span class="n">task</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">task</span></div>
 
-<div class="viewcode-block" id="Workflow.add_infiles"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.add_infiles">[docs]</a>    <span class="k">def</span> <span class="nf">add_infiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="o">=</span><span class="s1">&#39;.&#39;</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">infiles</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">))</span></div>
+<div class="viewcode-block" id="Workflow.get_output"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.get_output">[docs]</a>    <span class="k">def</span> <span class="nf">get_output</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">nodes</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">out_degree</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span></div>
 
-<div class="viewcode-block" id="Workflow.add_outfiles"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.add_outfiles">[docs]</a>    <span class="k">def</span> <span class="nf">add_outfiles</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">outfiles</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">outfiles</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">outfiles</span><span class="p">)</span></div></div>
+<div class="viewcode-block" id="Workflow.get_input"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.get_input">[docs]</a>    <span class="k">def</span> <span class="nf">get_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">nodes</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">in_degree</span><span class="p">(</span><span class="n">node</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Workflow.get_upstream_tasks"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.get_upstream_tasks">[docs]</a>    <span class="k">def</span> <span class="nf">get_upstream_tasks</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">task</span><span class="p">):</span>
+        <span class="n">edges</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">edge_dfs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">,</span> <span class="n">task</span><span class="p">,</span> <span class="n">orientation</span><span class="o">=</span><span class="s1">&#39;reverse&#39;</span><span class="p">))</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">]</span></div>
+
+<div class="viewcode-block" id="Workflow.force_new_task_ids"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.force_new_task_ids">[docs]</a>    <span class="k">def</span> <span class="nf">force_new_task_ids</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+            <span class="n">task</span><span class="o">.</span><span class="n">force_new_id</span><span class="p">()</span></div>
+
+<div class="viewcode-block" id="Workflow.copy"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_ids</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">wf_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">new_ids</span><span class="p">:</span>
+            <span class="n">wf_copy</span><span class="o">.</span><span class="n">force_new_task_ids</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">wf_copy</span></div>
+
+<div class="viewcode-block" id="Workflow.plot_dask"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Workflow.plot_dask">[docs]</a>    <span class="k">def</span> <span class="nf">plot_dask</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
+        <span class="n">visualize</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">as_dict</span><span class="p">(),</span> <span class="n">filename</span><span class="o">=</span><span class="n">filename</span><span class="p">,</span> <span class="n">collapse_outputs</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span></div>
+
+    <span class="c1"># def plot_graph(self, filename):</span>
+    <span class="c1">#     nx.draw(self.tasks, with_labels=True, font_weight=&#39;bold&#39;)</span>
+    <span class="c1">#     plt.savefig(filename)</span>
+
+    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">str</span><span class="p">(</span><span class="n">task</span><span class="p">)</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">tasks</span><span class="p">])</span></div>
 
 
 <div class="viewcode-block" id="Task"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Task">[docs]</a><span class="k">class</span> <span class="nc">Task</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="n">task_input</span><span class="p">,</span> <span class="n">condition</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">function</span><span class="p">,</span> <span class="o">*</span><span class="n">task_input</span><span class="p">,</span> <span class="n">final_task</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">function</span> <span class="o">=</span> <span class="n">function</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">task_input</span> <span class="o">=</span> <span class="n">task_input</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">condition</span> <span class="o">=</span> <span class="n">condition</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">final_task</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">task_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">task_id</span> <span class="o">=</span> <span class="s1">&#39;results&#39;</span>
 
-<div class="viewcode-block" id="Task.add_condition"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Task.add_condition">[docs]</a>    <span class="k">def</span> <span class="nf">add_condition</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">condition</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">condition</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">condition</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">condition</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">condition</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">other</span><span class="p">)</span></div>
+<div class="viewcode-block" id="Task.has_input"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Task.has_input">[docs]</a>    <span class="k">def</span> <span class="nf">has_input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">task_input</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span></div>
+
+<div class="viewcode-block" id="Task.force_new_id"><a class="viewcode-back" href="../../../reference/pharmpy.tools.workflows.html#pharmpy.tools.workflows.Task.force_new_id">[docs]</a>    <span class="k">def</span> <span class="nf">force_new_id</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">task_id</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">-</span><span class="si">{</span><span class="n">uuid</span><span class="o">.</span><span class="n">uuid4</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span></div>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
 
     <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">: </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">function</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">task_input</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span></div>
 </pre></div>
 
               </div>
@@ -235,7 +334,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on May 25, 2021.<br/>
+        Last updated on Jun 24, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.2.<br/>
     </p>
   </div>
