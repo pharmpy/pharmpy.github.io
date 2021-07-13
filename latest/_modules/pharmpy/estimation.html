@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.estimation &#8212; Pharmpy 0.25.1 documentation</title>
+    <title>pharmpy.estimation &#8212; Pharmpy 0.26.0 documentation</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -161,16 +161,20 @@
   <h1>Source code for pharmpy.estimation</h1><div class="highlight"><pre>
 <span></span><span class="c1"># The estimation steps in a model</span>
 
+<span class="kn">from</span> <span class="nn">collections</span> <span class="kn">import</span> <span class="n">namedtuple</span>
+
 
 <div class="viewcode-block" id="EstimationMethod"><a class="viewcode-back" href="../../reference/pharmpy.estimation.html#pharmpy.estimation.EstimationMethod">[docs]</a><span class="k">class</span> <span class="nc">EstimationMethod</span><span class="p">:</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">interaction</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">cov</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="p">[]):</span>
         <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicalize_and_check_method</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">=</span> <span class="n">method</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">interaction</span> <span class="o">=</span> <span class="n">interaction</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">=</span> <span class="n">cov</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
 
     <span class="k">def</span> <span class="nf">_canonicalize_and_check_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="n">method</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-        <span class="n">supported</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FO&#39;</span><span class="p">,</span> <span class="s1">&#39;FOI&#39;</span><span class="p">,</span> <span class="s1">&#39;FOCE&#39;</span><span class="p">,</span> <span class="s1">&#39;FOCEI&#39;</span><span class="p">]</span>
+        <span class="n">supported</span> <span class="o">=</span> <span class="n">list_supported_est</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Estimation method: </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1"> not recognized. Use any of </span><span class="si">{</span><span class="n">supported</span><span class="si">}</span><span class="s1">.&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">method</span>
@@ -184,11 +188,38 @@
         <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicalize_and_check_method</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">=</span> <span class="n">method</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_options</span>
+
+    <span class="nd">@options</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">options</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">options</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">options</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="n">Option</span> <span class="o">=</span> <span class="n">namedtuple</span><span class="p">(</span><span class="s1">&#39;Option&#39;</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;key&#39;</span><span class="p">,</span> <span class="s1">&#39;value&#39;</span><span class="p">])</span>
+            <span class="n">options_new</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">options</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">options_new</span> <span class="o">+=</span> <span class="p">[</span><span class="n">Option</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)]</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_options</span> <span class="o">=</span> <span class="n">options_new</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_options</span> <span class="o">=</span> <span class="n">options</span>
+
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_method</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">cov</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_method</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_method</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">interaction</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">interaction</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">cov</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">options</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">options</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;EstimationMethod(&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_method</span><span class="si">}</span><span class="s1">&quot;, cov=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cov</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;EstimationMethod(&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_method</span><span class="si">}</span><span class="s1">&quot;, interaction=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">interaction</span><span class="si">}</span><span class="s1">, cov=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cov</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;options=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">options</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="list_supported_est"><a class="viewcode-back" href="../../reference/pharmpy.estimation.html#pharmpy.estimation.list_supported_est">[docs]</a><span class="k">def</span> <span class="nf">list_supported_est</span><span class="p">():</span>
+    <span class="k">return</span> <span class="p">[</span><span class="s1">&#39;FO&#39;</span><span class="p">,</span> <span class="s1">&#39;FOCE&#39;</span><span class="p">,</span> <span class="s1">&#39;ITS&#39;</span><span class="p">,</span> <span class="s1">&#39;LAPLACE&#39;</span><span class="p">,</span> <span class="s1">&#39;IMPMAP&#39;</span><span class="p">,</span> <span class="s1">&#39;IMP&#39;</span><span class="p">,</span> <span class="s1">&#39;SAEM&#39;</span><span class="p">]</span></div>
 </pre></div>
 
               </div>
@@ -213,7 +244,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on Jul 08, 2021.<br/>
+        Last updated on Jul 13, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.0.2.<br/>
     </p>
   </div>
