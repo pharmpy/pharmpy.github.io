@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.results &#8212; Pharmpy 0.26.1 documentation</title>
+    <title>pharmpy.results &#8212; Pharmpy 0.29.1 documentation</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -180,21 +180,17 @@
 <span class="kn">import</span> <span class="nn">json</span>
 <span class="kn">import</span> <span class="nn">lzma</span>
 <span class="kn">import</span> <span class="nn">math</span>
-<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">import</span> <span class="nn">altair</span> <span class="k">as</span> <span class="nn">alt</span>
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-<span class="kn">import</span> <span class="nn">sympy</span>
 
 <span class="kn">import</span> <span class="nn">pharmpy.config</span> <span class="k">as</span> <span class="nn">config</span>
 <span class="kn">import</span> <span class="nn">pharmpy.visualization</span>
 <span class="kn">from</span> <span class="nn">pharmpy.data</span> <span class="kn">import</span> <span class="n">PharmDataFrame</span>
-<span class="kn">from</span> <span class="nn">pharmpy.data_structures</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
 <span class="kn">from</span> <span class="nn">pharmpy.math</span> <span class="kn">import</span> <span class="n">cov2corr</span>
-<span class="kn">from</span> <span class="nn">pharmpy.parameter_sampling</span> <span class="kn">import</span> <span class="n">sample_from_covariance_matrix</span>
 
 
 <div class="viewcode-block" id="ResultsConfiguration"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ResultsConfiguration">[docs]</a><span class="k">class</span> <span class="nc">ResultsConfiguration</span><span class="p">(</span><span class="n">config</span><span class="o">.</span><span class="n">Configuration</span><span class="p">):</span>
@@ -418,6 +414,7 @@
         <span class="n">minimization_successful</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">individual_ofv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">individual_estimates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">runtime_total</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ofv</span> <span class="o">=</span> <span class="n">ofv</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parameter_estimates</span> <span class="o">=</span> <span class="n">parameter_estimates</span>
@@ -426,6 +423,10 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_minimization_successful</span> <span class="o">=</span> <span class="n">minimization_successful</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_individual_estimates</span> <span class="o">=</span> <span class="n">individual_estimates</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_individual_ofv</span> <span class="o">=</span> <span class="n">individual_ofv</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_total</span> <span class="o">=</span> <span class="n">runtime_total</span>
+
+    <span class="k">def</span> <span class="fm">__bool__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_ofv</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">bool</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_parameter_estimates</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ModelfitResults.to_dict"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ModelfitResults.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Convert results object to a dictionary&quot;&quot;&quot;</span>
@@ -590,30 +591,8 @@
         <span class="k">return</span> <span class="n">shrinkage</span></div>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">individual_shrinkage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;The individual eta-shrinkage</span>
-
-<span class="sd">        Definition: ieta_shr = (var(eta) / omega)</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">cov</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individual_estimates_covariance</span>
-        <span class="n">pe</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_estimates</span>
-        <span class="c1"># Want parameter estimates combined with fixed parameter values</span>
-        <span class="n">param_inits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
-        <span class="n">pe</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">combine_first</span><span class="p">(</span><span class="n">param_inits</span><span class="p">)</span>
-
-        <span class="c1"># Get all iiv variance parameters</span>
-        <span class="n">param_names</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">variance_parameters</span>
-        <span class="n">param_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">(</span><span class="n">param_names</span><span class="p">))</span>  <span class="c1"># Only unique in order</span>
-
-        <span class="n">diag_ests</span> <span class="o">=</span> <span class="n">pe</span><span class="p">[</span><span class="n">param_names</span><span class="p">]</span>
-
-        <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">row</span><span class="p">,</span> <span class="n">ests</span><span class="p">):</span>
-            <span class="n">names</span> <span class="o">=</span> <span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">index</span>
-            <span class="n">ser</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">)</span> <span class="o">/</span> <span class="n">ests</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">names</span><span class="p">)</span>
-            <span class="k">return</span> <span class="n">ser</span>
-
-        <span class="n">ish</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">cov</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fn</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">ests</span><span class="o">=</span><span class="n">diag_ests</span><span class="o">.</span><span class="n">values</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">ish</span>
+    <span class="k">def</span> <span class="nf">runtime_total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_runtime_total</span>
 
 <div class="viewcode-block" id="ModelfitResults.near_bounds"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ModelfitResults.near_bounds">[docs]</a>    <span class="k">def</span> <span class="nf">near_bounds</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">zero_limit</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">significant_digits</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">is_close_to_bound</span><span class="p">(</span>
@@ -671,122 +650,6 @@
             <span class="o">.</span><span class="n">facet</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">idcol</span><span class="si">}</span><span class="s1">:N&#39;</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="mi">5</span><span class="p">)</span>
         <span class="p">)</span>
         <span class="k">return</span> <span class="n">plot</span></div>
-
-<div class="viewcode-block" id="ModelfitResults.individual_parameter_statistics"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ModelfitResults.individual_parameter_statistics">[docs]</a>    <span class="k">def</span> <span class="nf">individual_parameter_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">exprs</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Calculate statistics for individual parameters</span>
-
-<span class="sd">        exprs - is one string or an iterable of strings</span>
-
-<span class="sd">        The parameter does not have to be in the model, but can be an</span>
-<span class="sd">        expression of other parameters from the model.</span>
-<span class="sd">        Does not support parameters that relies on the solution of the ODE-system</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exprs</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exprs</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Basic</span><span class="p">):</span>
-            <span class="n">exprs</span> <span class="o">=</span> <span class="p">[</span><span class="n">_split_equation</span><span class="p">(</span><span class="n">exprs</span><span class="p">)]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">exprs</span> <span class="o">=</span> <span class="p">[</span><span class="n">_split_equation</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">exprs</span><span class="p">]</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span>
-        <span class="n">dataset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
-        <span class="n">cols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;parameter&#39;</span><span class="p">,</span> <span class="s1">&#39;covariates&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;variance&#39;</span><span class="p">,</span> <span class="s1">&#39;stderr&#39;</span><span class="p">])</span>
-        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">exprs</span><span class="p">:</span>
-            <span class="n">full_expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
-            <span class="n">covariates</span> <span class="o">=</span> <span class="p">{</span><span class="n">symb</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">full_expr</span><span class="o">.</span><span class="n">free_symbols</span> <span class="k">if</span> <span class="n">symb</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">}</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">covariates</span><span class="p">:</span>
-                <span class="n">cases</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;median&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()}</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">q5</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[{</span><span class="s1">&#39;ID&#39;</span><span class="p">}</span> <span class="o">|</span> <span class="n">covariates</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.05</span><span class="p">)</span>
-                <span class="n">q95</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[{</span><span class="s1">&#39;ID&#39;</span><span class="p">}</span> <span class="o">|</span> <span class="n">covariates</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="o">.</span><span class="n">quantile</span><span class="p">(</span><span class="mf">0.95</span><span class="p">)</span>
-                <span class="n">median</span> <span class="o">=</span> <span class="n">dataset</span><span class="p">[{</span><span class="s1">&#39;ID&#39;</span><span class="p">}</span> <span class="o">|</span> <span class="n">covariates</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">median</span><span class="p">()</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
-                <span class="n">cases</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;p5&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">q5</span><span class="p">),</span> <span class="s1">&#39;median&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">median</span><span class="p">),</span> <span class="s1">&#39;p95&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">(</span><span class="n">q95</span><span class="p">)}</span>
-
-            <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="nb">list</span><span class="p">(</span><span class="n">cases</span><span class="o">.</span><span class="n">keys</span><span class="p">()),</span> <span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;variance&#39;</span><span class="p">,</span> <span class="s1">&#39;stderr&#39;</span><span class="p">])</span>
-            <span class="k">for</span> <span class="n">case</span><span class="p">,</span> <span class="n">cov_values</span> <span class="ow">in</span> <span class="n">cases</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-                <span class="n">pe</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="p">)</span>
-                <span class="n">cov_expr</span> <span class="o">=</span> <span class="n">full_expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">cov_values</span><span class="p">)</span>
-                <span class="n">expr</span> <span class="o">=</span> <span class="n">cov_expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">pe</span><span class="p">)</span>
-                <span class="n">samples</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
-                    <span class="n">expr</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">pe</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span>
-                <span class="p">)</span>
-
-                <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
-                <span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
-
-                <span class="n">parameters</span> <span class="o">=</span> <span class="n">sample_from_covariance_matrix</span><span class="p">(</span>
-                    <span class="n">model</span><span class="p">,</span>
-                    <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-                    <span class="n">force_posdef_covmatrix</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                    <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
-                <span class="p">)</span>
-                <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
-                <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
-                    <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
-                    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-                        <span class="n">batch</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
-                            <span class="n">cov_expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)),</span>
-                            <span class="n">parameters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">),</span>
-                            <span class="n">samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                            <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
-                        <span class="p">)</span>
-                        <span class="n">samples</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">batch</span><span class="p">))</span>
-                <span class="n">stderr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
-                <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">case</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">stderr</span><span class="p">]</span>
-                <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;covariates&#39;</span>
-
-            <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="k">if</span> <span class="ow">not</span> <span class="n">name</span><span class="p">:</span>
-                <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;unknown</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span>
-                <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
-            <span class="n">df</span><span class="p">[</span><span class="s1">&#39;parameter&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">name</span>
-            <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">table</span><span class="p">,</span> <span class="n">df</span><span class="p">])</span>
-        <span class="n">table</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="s1">&#39;parameter&#39;</span><span class="p">,</span> <span class="s1">&#39;covariates&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">table</span></div>
-
-<div class="viewcode-block" id="ModelfitResults.pk_parameters"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ModelfitResults.pk_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">pk_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="n">statements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span>
-        <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-        <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">()</span>
-        <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
-        <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
-        <span class="n">peripherals</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_peripherals</span><span class="p">()</span>
-        <span class="n">elimination_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
-
-        <span class="n">expressions</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Eq(name, expr)</span>
-        <span class="c1"># FO abs + 1comp + FO elimination</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">depot</span> <span class="ow">and</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
-            <span class="n">ode_list</span><span class="p">,</span> <span class="n">ics</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">to_explicit_odes</span><span class="p">(</span><span class="n">skip_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">sols</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">dsolve</span><span class="p">(</span><span class="n">ode_list</span><span class="p">,</span> <span class="n">ics</span><span class="o">=</span><span class="n">ics</span><span class="p">)</span>
-            <span class="n">expr</span> <span class="o">=</span> <span class="n">sols</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rhs</span>
-            <span class="n">d</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
-            <span class="n">tmax_closed_form</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">expressions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;t_max&#39;</span><span class="p">),</span> <span class="n">tmax_closed_form</span><span class="p">))</span>
-            <span class="n">e2</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">expr</span> <span class="o">/</span> <span class="n">depot</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span> <span class="o">/</span> <span class="n">sympy</span><span class="o">.</span><span class="n">denom</span><span class="p">(</span><span class="n">elimination_rate</span><span class="p">))</span>
-            <span class="n">cmax_dose_closed_form</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">e2</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">odes</span><span class="o">.</span><span class="n">t</span><span class="p">:</span> <span class="n">tmax_closed_form</span><span class="p">}))</span>
-            <span class="n">expressions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;C_max_dose&#39;</span><span class="p">),</span> <span class="n">cmax_dose_closed_form</span><span class="p">))</span>
-
-        <span class="c1"># Any abs + 1comp + FO elimination</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">peripherals</span> <span class="ow">and</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
-            <span class="n">elimination_system</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span><span class="o">.</span><span class="n">ode_system</span>
-            <span class="c1"># keep central and output</span>
-            <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">elimination_system</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">central</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">name</span><span class="p">]:</span>
-                    <span class="n">elimination_system</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">elimination_system</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-                    <span class="n">ode_list</span><span class="p">,</span> <span class="n">ics</span> <span class="o">=</span> <span class="n">elimination_system</span><span class="o">.</span><span class="n">to_explicit_odes</span><span class="p">(</span><span class="n">skip_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-                    <span class="n">A0</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;A0&#39;</span><span class="p">)</span>
-                    <span class="n">ic</span> <span class="o">=</span> <span class="n">ics</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
-                    <span class="n">ics</span> <span class="o">=</span> <span class="p">{</span><span class="n">ic</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">A0</span><span class="p">}</span>
-                    <span class="n">sols</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">dsolve</span><span class="p">(</span><span class="n">ode_list</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">ics</span><span class="o">=</span><span class="n">ics</span><span class="p">)</span>
-                    <span class="n">eq</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Rational</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">A0</span><span class="p">,</span> <span class="n">sols</span><span class="o">.</span><span class="n">rhs</span><span class="p">)</span>
-                    <span class="n">thalf_elim</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">solve</span><span class="p">(</span><span class="n">eq</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-                    <span class="n">expressions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;t_half_elim&#39;</span><span class="p">),</span> <span class="n">thalf_elim</span><span class="p">))</span>
-
-        <span class="c1"># Any abs + any comp + FO elimination</span>
-        <span class="k">if</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
-            <span class="n">expressions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;k_e&#39;</span><span class="p">),</span> <span class="n">elimination_rate</span><span class="p">))</span>
-
-        <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">individual_parameter_statistics</span><span class="p">(</span><span class="n">expressions</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">df</span></div>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">df</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameter_summary</span><span class="p">()</span>
@@ -879,10 +742,6 @@
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">individual_estimates_covariance</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">individual_shrinkage</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">individual_shrinkage</span>
-
-    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">residuals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">residuals</span>
 
@@ -897,36 +756,14 @@
     <span class="k">def</span> <span class="nf">model_name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">model_name</span>
 
-<div class="viewcode-block" id="ChainedModelfitResults.individual_parameter_statistics"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ChainedModelfitResults.individual_parameter_statistics">[docs]</a>    <span class="k">def</span> <span class="nf">individual_parameter_statistics</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">individual_parameter_statistics</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="ChainedModelfitResults.pk_parameters"><a class="viewcode-back" href="../../reference/pharmpy.results.html#pharmpy.results.ChainedModelfitResults.pk_parameters">[docs]</a>    <span class="k">def</span> <span class="nf">pk_parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">pk_parameters</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span></div>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">runtime_total</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">runtime_total</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">repr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_results</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span></div>
 
     <span class="c1"># FIXME: To not have to manually intercept everything here. Could do it in a general way.</span>
-
-
-<span class="k">def</span> <span class="nf">_split_equation</span><span class="p">(</span><span class="n">s</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">a</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">name</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">lhs</span><span class="o">.</span><span class="n">name</span>
-        <span class="n">expr</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">rhs</span>
-    <span class="k">else</span><span class="p">:</span>  <span class="c1"># sympy expr</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="n">expr</span> <span class="o">=</span> <span class="n">s</span>
-    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">name</span>
-    <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="n">expr</span>
 </pre></div>
 
               </div>
@@ -951,7 +788,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on Aug 04, 2021.<br/>
+        Last updated on Aug 25, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
     </p>
   </div>

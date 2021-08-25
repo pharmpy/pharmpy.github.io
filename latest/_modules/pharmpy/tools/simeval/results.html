@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.simeval.results &#8212; Pharmpy 0.26.1 documentation</title>
+    <title>pharmpy.tools.simeval.results &#8212; Pharmpy 0.29.1 documentation</title>
     
   <link href="../../../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -166,7 +166,7 @@
 <span class="kn">from</span> <span class="nn">pharmpy.tools.simfit.results</span> <span class="kn">import</span> <span class="n">psn_simfit_results</span>
 
 
-<div class="viewcode-block" id="SimevalResults"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.simeval.results.html#pharmpy.tools.simeval.results.SimevalResults">[docs]</a><span class="k">class</span> <span class="nc">SimevalResults</span><span class="p">(</span><span class="n">Results</span><span class="p">):</span>
+<div class="viewcode-block" id="SimevalResults"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.simeval.results.html#pharmpy.tools.simeval.SimevalResults">[docs]</a><span class="k">class</span> <span class="nc">SimevalResults</span><span class="p">(</span><span class="n">Results</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Simeval results class&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">sampled_iofv</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">iofv_summary</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">individual_predictions_plot</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -175,11 +175,13 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">individual_predictions_plot</span> <span class="o">=</span> <span class="n">individual_predictions_plot</span></div>
 
 
-<div class="viewcode-block" id="calculate_results"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.simeval.results.html#pharmpy.tools.simeval.results.calculate_results">[docs]</a><span class="k">def</span> <span class="nf">calculate_results</span><span class="p">(</span><span class="n">original_model</span><span class="p">,</span> <span class="n">simfit_results</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_results"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.simeval.results.html#pharmpy.tools.simeval.calculate_results">[docs]</a><span class="k">def</span> <span class="nf">calculate_results</span><span class="p">(</span><span class="n">original_model</span><span class="p">,</span> <span class="n">simfit_results</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate simeval results&quot;&quot;&quot;</span>
-    <span class="n">sampled_iofv</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">res</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">simfit_results</span><span class="o">.</span><span class="n">modelfit_results</span><span class="p">):</span>
-        <span class="n">sampled_iofv</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_ofv</span>
+    <span class="n">sampled_iofv</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">individual_ofv</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">simfit_results</span><span class="o">.</span><span class="n">modelfit_results</span><span class="p">],</span>
+        <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+        <span class="n">keys</span><span class="o">=</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">simfit_results</span><span class="o">.</span><span class="n">modelfit_results</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">),</span>
+    <span class="p">)</span>
     <span class="n">origiofv</span> <span class="o">=</span> <span class="n">original_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">individual_ofv</span>
     <span class="n">iofv_summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
         <span class="p">{</span>
@@ -211,7 +213,7 @@
     <span class="k">return</span> <span class="n">res</span></div>
 
 
-<div class="viewcode-block" id="psn_simeval_results"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.simeval.results.html#pharmpy.tools.simeval.results.psn_simeval_results">[docs]</a><span class="k">def</span> <span class="nf">psn_simeval_results</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="psn_simeval_results"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.simeval.results.html#pharmpy.tools.simeval.psn_simeval_results">[docs]</a><span class="k">def</span> <span class="nf">psn_simeval_results</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
     <span class="n">simfit_paths</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;m1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;sim-*.mod&#39;</span><span class="p">)</span>
     <span class="n">simfit_results</span> <span class="o">=</span> <span class="n">psn_simfit_results</span><span class="p">(</span><span class="n">simfit_paths</span><span class="p">)</span>
     <span class="n">original</span> <span class="o">=</span> <span class="n">Model</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;m1&#39;</span> <span class="o">/</span> <span class="s1">&#39;original.mod&#39;</span><span class="p">)</span>
@@ -250,7 +252,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on Aug 04, 2021.<br/>
+        Last updated on Aug 25, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
     </p>
   </div>

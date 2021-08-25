@@ -112,7 +112,7 @@ A new parameter can be added by using the name of the new parameter.
 .. jupyter-execute::
 
    model = Model(path / 'pheno.mod')
-   add_parameter(model, 'MAT')
+   add_individual_parameter(model, 'MAT')
    update_source(model)
    print_model_diff(model_ref, model)
 
@@ -163,14 +163,14 @@ Let us use a model with bolus absorption as a starting point.
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import bolus_absorption
+   from pharmpy.modeling import set_bolus_absorption
    model = Model(path / "pheno.mod")
 
 This type of absorption can be created with:
 
 .. jupyter-execute::
 
-    bolus_absorption(model)
+    set_bolus_absorption(model)
     model.update_source()
     print_model_diff(model_ref, model)
 
@@ -191,12 +191,12 @@ Let us now change to zero order absorption.
      S -> "Central" [label=Infusion];
    }
 
-See :py:func:`pharmpy.modeling.zero_order_absorption`.
+See :py:func:`pharmpy.modeling.set_zero_order_absorption`.
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import zero_order_absorption
-   zero_order_absorption(model)
+   from pharmpy.modeling import set_zero_order_absorption
+   set_zero_order_absorption(model)
    model.update_source(nofiles=True)
    print_model_diff(model_ref, model)
 
@@ -217,12 +217,12 @@ First order absorption would mean adding an absorption (depot) compartment like 
      S -> "Depot" [label=Bolus];
    }
 
-See :py:func:`pharmpy.modeling.first_order_absorption`.
+See :py:func:`pharmpy.modeling.set_first_order_absorption`.
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import first_order_absorption
-   first_order_absorption(model)
+   from pharmpy.modeling import set_first_order_absorption
+   set_first_order_absorption(model)
    model.update_source(nofiles=True)
    print_model_diff(model_ref, model)
 
@@ -243,12 +243,12 @@ Sequential zero-order absorption followed by first-order absorption will have an
      S -> "Depot" [label=Infusion];
    }
 
-See :py:func:`pharmpy.modeling.seq_zo_fo_absorption`.
+See :py:func:`pharmpy.modeling.set_seq_zo_fo_absorption`.
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import seq_zo_fo_absorption
-   seq_zo_fo_absorption(model)
+   from pharmpy.modeling import set_seq_zo_fo_absorption
+   set_seq_zo_fo_absorption(model)
    model.update_source(nofiles=True)
    print_model_diff(model_ref, model)
 
@@ -281,8 +281,8 @@ Lag time may be added to a dose compartment of a model.
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import add_lag_time
-   add_lag_time(model)
+   from pharmpy.modeling import set_lag_time
+   set_lag_time(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
@@ -306,52 +306,52 @@ First-order elimination
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import first_order_elimination
+   from pharmpy.modeling import set_first_order_elimination
    model = Model(path / "pheno.mod")
-   first_order_elimination(model)
+   set_first_order_elimination(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
-See :py:func:`pharmpy.modeling.first_order_elimination`.
+See :py:func:`pharmpy.modeling.set_first_order_elimination`.
 
 Zero-order elimination
 ======================
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import zero_order_elimination
+   from pharmpy.modeling import set_zero_order_elimination
    model = Model(path / "pheno.mod")
-   zero_order_elimination(model)
+   set_zero_order_elimination(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
-See :py:func:`pharmpy.modeling.zero_order_elimination`.
+See :py:func:`pharmpy.modeling.set_zero_order_elimination`.
 
 Michaelis-Menten elimination
 ============================
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import michaelis_menten_elimination
+   from pharmpy.modeling import set_michaelis_menten_elimination
    model = Model(path / "pheno.mod")
-   michaelis_menten_elimination(model)
+   set_michaelis_menten_elimination(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
-See :py:func:`pharmpy.modeling.michaelis_menten_elimination`.
+See :py:func:`pharmpy.modeling.set_michaelis_menten_elimination`.
 
 Mixed Michaelis-Menten + First-Order elimination
 ===================================================
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import mixed_mm_fo_elimination
+   from pharmpy.modeling import set_mixed_mm_fo_elimination
    model = Model(path / "pheno.mod")
-   mixed_mm_fo_elimination(model)
+   set_mixed_mm_fo_elimination(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
-See :py:func:`pharmpy.modeling.mixed_mm_fo_elimination`.
+See :py:func:`pharmpy.modeling.set_mixed_mm_fo_elimination`.
 
 Distribution
 ~~~~~~~~~~~~
@@ -464,12 +464,12 @@ Boxcox
    model = Model(path / "pheno.mod")
 
 To apply a boxcox transformation, input a list of the etas of interest. See
-:py:func:`pharmpy.modeling.boxcox`.
+:py:func:`pharmpy.modeling.transform_etas_boxcox`.
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import boxcox
-   boxcox(model, ['ETA(1)'])
+   from pharmpy.modeling import transform_etas_boxcox
+   transform_etas_boxcox(model, ['ETA(1)'])
    model.update_source()
    print_model_diff(model_ref, model)
 
@@ -481,7 +481,7 @@ If no list is provided, all etas will be updated.
 .. jupyter-execute::
 
    model = Model(path / "pheno.mod")
-   boxcox(model)
+   transform_etas_boxcox(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
@@ -490,13 +490,13 @@ Approximate t-distribution
 
 Applying an approximate t-distribution transformation of etas is analogous to a boxcox transformation. The input
 is a list of etas, and if no list is provided all etas will be transformed. See
-:py:func:`pharmpy.modeling.tdist`.
+:py:func:`pharmpy.modeling.transform_etas_tdist`.
 
 .. jupyter-execute::
 
    model = Model(path / "pheno.mod")
-   from pharmpy.modeling import tdist
-   tdist(model, ['ETA(1)'])
+   from pharmpy.modeling import transform_etas_tdist
+   transform_etas_tdist(model, ['ETA(1)'])
    model.update_source()
    print_model_diff(model_ref, model)
 
@@ -504,13 +504,13 @@ John Draper
 ~~~~~~~~~~~
 
 John Draper transformation is also supported. The function takes a list of etas as input, if no list is
-provided all etas will be transformed. See :py:func:`pharmpy.modeling.john_draper`.
+provided all etas will be transformed. See :py:func:`pharmpy.modeling.transform_etas_john_draper`.
 
 .. jupyter-execute::
 
    model = Model(path / "pheno.mod")
-   from pharmpy.modeling import john_draper
-   john_draper(model, ['ETA(1)'])
+   from pharmpy.modeling import transform_etas_john_draper
+   transform_etas_john_draper(model, ['ETA(1)'])
    model.update_source()
    print_model_diff(model_ref, model)
 
@@ -737,9 +737,9 @@ The error model can be removed.
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import remove_error
+   from pharmpy.modeling import remove_error_model
 
-   remove_error(model)
+   remove_error_model(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
@@ -765,9 +765,9 @@ To set an additive error model:
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import additive_error
+   from pharmpy.modeling import set_additive_error_model
 
-   additive_error(model)
+   set_additive_error_model(model)
    model.statements.find_assignment('Y')
 
 .. jupyter-execute::
@@ -780,16 +780,16 @@ To set an additive error model with log transformed data:
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import additive_error
+   from pharmpy.modeling import set_additive_error_model
 
    model = Model(path / "pheno.mod")
-   additive_error(model, data_trans='log(Y)')
+   set_additive_error_model(model, data_trans='log(Y)')
    model.update_source()
    print_model_diff(model_ref, model)
 
 or set the `data_transformation` attribute on the model.
 
-See :py:func:`pharmpy.modeling.additive_error`.
+See :py:func:`pharmpy.modeling.set_additive_error_model`.
 
 Setting a proportional error model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -812,9 +812,9 @@ To set a proportional error model:
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import proportional_error
+   from pharmpy.modeling import set_proportional_error_model
 
-   proportional_error(model)
+   set_proportional_error_model(model)
    model.statements.find_assignment('Y')
 
 .. jupyter-execute::
@@ -826,15 +826,15 @@ To set a proportional error model with log transformed data:
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import proportional_error
+   from pharmpy.modeling import set_proportional_error_model
 
    model = Model(path / "pheno.mod")
-   proportional_error(model, data_trans='log(Y)')
+   set_proportional_error_model(model, data_trans='log(Y)')
    model.update_source()
    print_model_diff(model_ref, model)
 
 
-See :py:func:`pharmpy.modeling.proportional_error`.
+See :py:func:`pharmpy.modeling.set_proportional_error_model`.
 
 Setting a combined additive and proportional error model
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -857,9 +857,9 @@ To set a combined error model:
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import combined_error
+   from pharmpy.modeling import set_combined_error_model
 
-   combined_error(model)
+   set_combined_error_model(model)
    model.statements.find_assignment('Y')
 
 .. jupyter-execute::
@@ -871,15 +871,15 @@ To set a combined error model with log transformed data:
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import combined_error
+   from pharmpy.modeling import set_combined_error_model
 
    model = Model(path / "pheno.mod")
-   combined_error(model, data_trans='log(Y)')
+   set_combined_error_model(model, data_trans='log(Y)')
    model.update_source()
    print_model_diff(model_ref, model)
 
 
-See :py:func:`pharmpy.modeling.combined_error`.
+See :py:func:`pharmpy.modeling.set_combined_error_model`.
 
 Applying IIV on RUVs
 ~~~~~~~~~~~~~~~~~~~~
@@ -893,9 +893,9 @@ IIVs can be added to RUVs by multiplying epsilons with an exponential new eta.
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import iiv_on_ruv
+   from pharmpy.modeling import set_iiv_on_ruv
 
-   iiv_on_ruv(model, ['EPS(1)'])
+   set_iiv_on_ruv(model, ['EPS(1)'])
    model.update_source()
    print_model_diff(model_ref, model)
 
@@ -905,18 +905,18 @@ transformed.
 .. jupyter-execute::
 
    model = Model(path / "pheno.mod")
-   iiv_on_ruv(model)
+   set_iiv_on_ruv(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
-See :py:func:`pharmpy.modeling.iiv_on_ruv`.
+See :py:func:`pharmpy.modeling.set_iiv_on_ruv`.
 
 Custom eta names are supported the same way as when :ref:`adding IOVs<add_iov_custom_names>`.
 
 .. jupyter-execute::
 
    model = Model(path / "pheno.mod")
-   iiv_on_ruv(model, ['EPS(1)'], eta_names=['ETA(3)'])
+   set_iiv_on_ruv(model, ['EPS(1)'], eta_names=['ETA(3)'])
    model.random_variables
 
 
@@ -925,16 +925,16 @@ Power effects on RUVs
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import power_on_ruv
+   from pharmpy.modeling import set_power_on_ruv
    model = Model(path / "pheno.mod")
-   power_on_ruv(model, ['EPS(1)'])
+   set_power_on_ruv(model, ['EPS(1)'])
    model.update_source()
    print_model_diff(model_ref, model)
 
 A power effect will be applied to all provided epsilons, leave argument empty if all
 epsilons should be transformed.
 
-See :py:func:`pharmpy.modeling.power_on_ruv`.
+See :py:func:`pharmpy.modeling.set_power_on_ruv`.
 
 Estimate standard deviation of epsilons with thetas
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -944,9 +944,9 @@ correspondng epsilon with a theta. This way the theta will represent the standar
 
 .. jupyter-execute::
 
-    from pharmpy.modeling import theta_as_stdev
+    from pharmpy.modeling import use_thetas_for_error_stdev
     model = Model(path / "pheno.mod")
-    theta_as_stdev(model)
+    use_thetas_for_error_stdev(model)
     model.update_source()
     print_model_diff(model_ref, model)
 
@@ -968,44 +968,44 @@ dTBS error model
 
     from pharmpy.modeling import set_weighted_error_model
     model = Model(path / "pheno.mod")
-    set_dtbs_error(model)
+    set_dtbs_error_model(model)
     model.update_source(nofiles=True)
     print_model_diff(model_ref, model)
 
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Creating full or partial block structures
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Creating joint distributions of multiple etas
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. jupyter-execute::
    :hide-output:
 
    model = Model(path / "pheno.mod")
 
-Pharmpy supports the creation of full and partial block structures of etas. See
-:py:func:`pharmpy.modeling.create_rv_block`.
+Pharmpy supports the joining of multiple etas into a joint distribution. See
+:py:func:`pharmpy.modeling.create_joint_distribution`.
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import create_rv_block
+   from pharmpy.modeling import create_joint_distribution
 
-   create_rv_block(model, ['ETA(1)', 'ETA(2)'])
+   create_joint_distribution(model, ['ETA(1)', 'ETA(2)'])
    model.update_source()
    print_model_diff(model_ref, model)
 
-To create a partial block structure, provide the etas as a list. Valid etas must be IIVs and cannot be
-fixed. If no list is provided as input, a full block structure is implemented.
+The listed etas will be combined into a new distribution. Valid etas must be IIVs and cannot be
+fixed. If no list is provided as input, all etas would be included in the same distribution.
 
 .. jupyter-execute::
 
    model = Model(path / "pheno.mod")
-   create_rv_block(model)
+   create_joint_distribution(model)
    model.update_source()
    print_model_diff(model_ref, model)
 
 .. warning::
 
-   If you have an eta block and wish to include another eta, note that you need to have all etas from that
-   block as input argument, any that are not included will be separated from that block.
+   If you already have a joint distribution and wish to include another eta, note that you need to have all etas from that
+   distribution as input argument, any that are not included will be separated from that distribution.
 
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -1017,14 +1017,14 @@ Remove covariance between etas
 
    model = Model(path / "pheno.mod")
 
-Covariance can be removed between etas using the function :py:func:`pharmpy.modeling.split_rv_block`. If we have
+Covariance can be removed between etas using the function :py:func:`pharmpy.modeling.split_joint_distribution`. If we have
 the model:
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import copy_model, create_rv_block
+   from pharmpy.modeling import copy_model, create_joint_distribution
 
-   create_rv_block(model)
+   create_joint_distribution(model)
    model.update_source()
    model_block = copy_model(model)
    print(model)
@@ -1033,9 +1033,9 @@ Provide etas as a list.
 
 .. jupyter-execute::
 
-   from pharmpy.modeling import split_rv_block
+   from pharmpy.modeling import split_joint_distribution
 
-   split_rv_block(model, ['ETA(1)'])
+   split_joint_distribution(model, ['ETA(1)'])
    model.update_source()
    print_model_diff(model_block, model)
 
@@ -1081,3 +1081,17 @@ results from the tool and can be saved as either json or csv.
     res = create_results("bootstrap_dir1")
     res.to_json("bootstrap_dir1/results.json")
     res.to_csv("bootstrap_dir1/results.csv")
+
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Individual parameter calculations
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Pharmpy has functions to calculate statistics for individual parameters that are either defined
+in the model code or that can be defined expressions containing dataset columns and/or variables
+from the model code.
+
+.. code-block:: python
+
+    from pharmpy.modeling import calculate_individual_parameter_statistics
+    model = read_model(path / 'secondary_parameters'/ 'run2.mod')

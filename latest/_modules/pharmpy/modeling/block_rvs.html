@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.26.1 documentation</title>
+    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.29.1 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -171,9 +171,11 @@
 <span class="kn">from</span> <span class="nn">pharmpy.random_variables</span> <span class="kn">import</span> <span class="n">RandomVariables</span>
 
 
-<div class="viewcode-block" id="create_rv_block"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.create_rv_block">[docs]</a><span class="k">def</span> <span class="nf">create_rv_block</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_rvs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="create_joint_distribution"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.create_joint_distribution">[docs]</a><span class="k">def</span> <span class="nf">create_joint_distribution</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rvs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Creates a full or partial block structure of etas. The etas must be IIVs and cannot</span>
+<span class="sd">    Combines some or all etas into a joint distribution.</span>
+
+<span class="sd">    The etas must be IIVs and cannot</span>
 <span class="sd">    be fixed. Initial estimates for covariance between the etas is dependent on whether</span>
 <span class="sd">    the model has results from a previous results. In that case, the correlation will</span>
 <span class="sd">    be calculated from individual estimates, otherwise correlation will be set to 10%.</span>
@@ -181,13 +183,13 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
-<span class="sd">        Pharmpy model to create block effect on.</span>
-<span class="sd">    list_of_rvs : list</span>
-<span class="sd">        List of etas to create a block structure from. If None, all etas that are IIVs and</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    rvs : list</span>
+<span class="sd">        Sequence of etas or names of etas to combine. If None, all etas that are IIVs and</span>
 <span class="sd">        non-fixed will be used (full block). None is default.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
-    <span class="k">if</span> <span class="n">list_of_rvs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">all_rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
+    <span class="k">if</span> <span class="n">rvs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">iiv_rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv</span>
         <span class="n">nonfix</span> <span class="o">=</span> <span class="n">RandomVariables</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">iiv_rvs</span><span class="p">:</span>
@@ -196,53 +198,53 @@
                     <span class="k">break</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">nonfix</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
-        <span class="n">list_of_rvs</span> <span class="o">=</span> <span class="n">nonfix</span><span class="o">.</span><span class="n">names</span>
+        <span class="n">rvs</span> <span class="o">=</span> <span class="n">nonfix</span><span class="o">.</span><span class="n">names</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">list_of_rvs</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">rvs</span> <span class="ow">and</span> <span class="n">rvs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;IOV&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">all_rvs</span> <span class="ow">and</span> <span class="n">all_rvs</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;IOV&#39;</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1"> describes IOV: Joining IOV random variables is currently not supported&#39;</span>
                 <span class="p">)</span>
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_rvs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;At least two random variables are needed&#39;</span><span class="p">)</span>
 
     <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
     <span class="n">paramnames</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">list_of_rvs</span><span class="p">:</span>
+    <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">:</span>
         <span class="n">statements</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">rv</span><span class="p">,</span> <span class="n">is_symbol</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">last</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="n">parameter_names</span> <span class="o">=</span> <span class="s1">&#39;_&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="n">s</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">statements</span><span class="p">])</span>
         <span class="n">paramnames</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">parameter_names</span><span class="p">)</span>
 
-    <span class="n">cov_to_params</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">list_of_rvs</span><span class="p">,</span> <span class="n">name_template</span><span class="o">=</span><span class="s1">&#39;IIV_</span><span class="si">{}</span><span class="s1">_IIV_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">paramnames</span><span class="p">)</span>
+    <span class="n">cov_to_params</span> <span class="o">=</span> <span class="n">all_rvs</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rvs</span><span class="p">,</span> <span class="n">name_template</span><span class="o">=</span><span class="s1">&#39;IIV_</span><span class="si">{}</span><span class="s1">_IIV_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">paramnames</span><span class="p">)</span>
 
     <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
     <span class="k">for</span> <span class="n">cov_name</span><span class="p">,</span> <span class="n">param_names</span> <span class="ow">in</span> <span class="n">cov_to_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">parent_params</span> <span class="o">=</span> <span class="p">(</span><span class="n">pset</span><span class="p">[</span><span class="n">param_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">pset</span><span class="p">[</span><span class="n">param_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
-        <span class="n">covariance_init</span> <span class="o">=</span> <span class="n">_choose_param_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">parent_params</span><span class="p">)</span>
+        <span class="n">covariance_init</span> <span class="o">=</span> <span class="n">_choose_param_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">all_rvs</span><span class="p">,</span> <span class="n">parent_params</span><span class="p">)</span>
         <span class="n">param_new</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">cov_name</span><span class="p">,</span> <span class="n">covariance_init</span><span class="p">)</span>
         <span class="n">pset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_new</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="split_rv_block"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.split_rv_block">[docs]</a><span class="k">def</span> <span class="nf">split_rv_block</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_rvs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="split_joint_distribution"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.split_joint_distribution">[docs]</a><span class="k">def</span> <span class="nf">split_joint_distribution</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rvs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">    Splits a block structure given a list of etas to separate.</span>
+<span class="sd">    Splits etas following a joint distribution into separate distributions.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
-<span class="sd">        Pharmpy model to create block effect on.</span>
-<span class="sd">    list_of_rvs : str, list</span>
-<span class="sd">        Name/names of etas to split from block structure. If None, all etas that are IIVs and</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    rvs : str, list</span>
+<span class="sd">        Name/names of etas to separate. If None, all etas that are IIVs and</span>
 <span class="sd">        non-fixed will become single. None is default.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
-    <span class="n">list_of_rvs</span> <span class="o">=</span> <span class="n">_get_etas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_rvs</span><span class="p">)</span>
+    <span class="n">all_rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
+    <span class="n">rvs</span> <span class="o">=</span> <span class="n">_get_etas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rvs</span><span class="p">)</span>
 
-    <span class="n">parameters_before</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">parameter_names</span>
-    <span class="n">rvs</span><span class="o">.</span><span class="n">unjoin</span><span class="p">(</span><span class="n">list_of_rvs</span><span class="p">)</span>
-    <span class="n">parameters_after</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">parameter_names</span>
+    <span class="n">parameters_before</span> <span class="o">=</span> <span class="n">all_rvs</span><span class="o">.</span><span class="n">parameter_names</span>
+    <span class="n">all_rvs</span><span class="o">.</span><span class="n">unjoin</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span>
+    <span class="n">parameters_after</span> <span class="o">=</span> <span class="n">all_rvs</span><span class="o">.</span><span class="n">parameter_names</span>
 
     <span class="n">removed_parameters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">parameters_before</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">parameters_after</span><span class="p">)</span>
     <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
@@ -303,7 +305,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on Aug 04, 2021.<br/>
+        Last updated on Aug 25, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
     </p>
   </div>

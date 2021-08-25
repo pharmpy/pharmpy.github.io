@@ -10,6 +10,7 @@ Submodules
    pharmpy.modeling.data
    pharmpy.modeling.evaluation
    pharmpy.modeling.help_functions
+   pharmpy.modeling.results
    pharmpy.modeling.run
 
 Module contents

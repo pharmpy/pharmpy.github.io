@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pathlib &#8212; Pharmpy 0.26.1 documentation</title>
+    <title>pathlib &#8212; Pharmpy 0.29.1 documentation</title>
     
   <link href="../_static/css/theme.css" rel="stylesheet" />
   <link href="../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -200,6 +200,7 @@
 
 <span class="n">_IGNORED_WINERRORS</span> <span class="o">=</span> <span class="p">(</span>
     <span class="mi">21</span><span class="p">,</span>  <span class="c1"># ERROR_NOT_READY - drive exists but is not accessible</span>
+    <span class="mi">123</span><span class="p">,</span> <span class="c1"># ERROR_INVALID_NAME - fix for bpo-35306</span>
     <span class="mi">1921</span><span class="p">,</span>  <span class="c1"># ERROR_CANT_RESOLVE_FILENAME - fix for broken symlink pointing to itself</span>
 <span class="p">)</span>
 
@@ -611,6 +612,20 @@
     <span class="k">def</span> <span class="nf">readlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">readlink</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">owner</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">pwd</span>
+            <span class="k">return</span> <span class="n">pwd</span><span class="o">.</span><span class="n">getpwuid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">st_uid</span><span class="p">)</span><span class="o">.</span><span class="n">pw_name</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Path.owner() is unsupported on this system&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">group</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="kn">import</span> <span class="nn">grp</span>
+            <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">getgrgid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">st_gid</span><span class="p">)</span><span class="o">.</span><span class="n">gr_name</span>
+        <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Path.group() is unsupported on this system&quot;</span><span class="p">)</span>
+
 
 <span class="n">_normal_accessor</span> <span class="o">=</span> <span class="n">_NormalAccessor</span><span class="p">()</span>
 
@@ -949,6 +964,9 @@
             <span class="k">return</span> <span class="bp">NotImplemented</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cparts</span> <span class="o">&gt;=</span> <span class="n">other</span><span class="o">.</span><span class="n">_cparts</span>
 
+    <span class="k">def</span> <span class="nf">__class_getitem__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="nb">type</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span>
+
     <span class="n">drive</span> <span class="o">=</span> <span class="nb">property</span><span class="p">(</span><span class="n">attrgetter</span><span class="p">(</span><span class="s1">&#39;_drv&#39;</span><span class="p">),</span>
                      <span class="n">doc</span><span class="o">=</span><span class="s2">&quot;&quot;&quot;The drive prefix (letter or UNC path), if any.&quot;&quot;&quot;</span><span class="p">)</span>
 
@@ -1017,6 +1035,10 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_parsed_parts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_drv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">,</span>
                                        <span class="bp">self</span><span class="o">.</span><span class="n">_parts</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">name</span><span class="p">])</span>
 
+    <span class="k">def</span> <span class="nf">with_stem</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">stem</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return a new path with the stem changed.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">with_name</span><span class="p">(</span><span class="n">stem</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">suffix</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">with_suffix</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">suffix</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Return a new path with the file suffix changed.  If the path</span>
 <span class="sd">        has no suffix, add given suffix.  If the given suffix is an empty</span>
@@ -1065,10 +1087,20 @@
         <span class="n">cf</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flavour</span><span class="o">.</span><span class="n">casefold_parts</span>
         <span class="k">if</span> <span class="p">(</span><span class="n">root</span> <span class="ow">or</span> <span class="n">drv</span><span class="p">)</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="n">cf</span><span class="p">(</span><span class="n">abs_parts</span><span class="p">[:</span><span class="n">n</span><span class="p">])</span> <span class="o">!=</span> <span class="n">cf</span><span class="p">(</span><span class="n">to_abs_parts</span><span class="p">):</span>
             <span class="n">formatted</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_format_parsed_parts</span><span class="p">(</span><span class="n">to_drv</span><span class="p">,</span> <span class="n">to_root</span><span class="p">,</span> <span class="n">to_parts</span><span class="p">)</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{!r}</span><span class="s2"> does not start with </span><span class="si">{!r}</span><span class="s2">&quot;</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">{!r}</span><span class="s2"> is not in the subpath of </span><span class="si">{!r}</span><span class="s2">&quot;</span>
+                    <span class="s2">&quot; OR one path is relative and the other is absolute.&quot;</span>
                              <span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="nb">str</span><span class="p">(</span><span class="n">formatted</span><span class="p">)))</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_parsed_parts</span><span class="p">(</span><span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="n">root</span> <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
                                        <span class="n">abs_parts</span><span class="p">[</span><span class="n">n</span><span class="p">:])</span>
+
+    <span class="k">def</span> <span class="nf">is_relative_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Return True if the path is relative to another path or False.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">relative_to</span><span class="p">(</span><span class="o">*</span><span class="n">other</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1193,7 +1225,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span>
         <span class="s1">&#39;_accessor&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;_closed&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__new__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -1210,7 +1241,6 @@
               <span class="c1"># Private non-constructor arguments</span>
               <span class="n">template</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
               <span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="o">=</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="n">template</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span> <span class="o">=</span> <span class="n">template</span><span class="o">.</span><span class="n">_accessor</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1223,15 +1253,18 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_parsed_parts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_drv</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_root</span><span class="p">,</span> <span class="n">parts</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__enter__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span>
 
     <span class="k">def</span> <span class="fm">__exit__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">t</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">tb</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span> <span class="o">=</span> <span class="kc">True</span>
-
-    <span class="k">def</span> <span class="nf">_raise_closed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;I/O operation on closed path&quot;</span><span class="p">)</span>
+        <span class="c1"># https://bugs.python.org/issue39682</span>
+        <span class="c1"># In previous versions of pathlib, this method marked this path as</span>
+        <span class="c1"># closed; subsequent attempts to perform I/O would raise an IOError.</span>
+        <span class="c1"># This functionality was never documented, and had the effect of</span>
+        <span class="c1"># making Path objects mutable, contrary to PEP 428. In Python 3.9 the</span>
+        <span class="c1"># _closed attribute was removed, and this method made a no-op.</span>
+        <span class="c1"># This method and __enter__()/__exit__() should be deprecated and</span>
+        <span class="c1"># removed in the future.</span>
+        <span class="k">pass</span>
 
     <span class="k">def</span> <span class="nf">_opener</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o666</span><span class="p">):</span>
         <span class="c1"># A stub for the opener argument to built-in open()</span>
@@ -1242,8 +1275,6 @@
 <span class="sd">        Open the file pointed by this path and return a file descriptor,</span>
 <span class="sd">        as os.open() does.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">flags</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
 
     <span class="c1"># Public API</span>
@@ -1270,27 +1301,24 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">other_st</span> <span class="o">=</span> <span class="n">other_path</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="n">other_st</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">other_path</span><span class="p">)</span>
+            <span class="n">other_st</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">stat</span><span class="p">(</span><span class="n">other_path</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">samestat</span><span class="p">(</span><span class="n">st</span><span class="p">,</span> <span class="n">other_st</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">iterdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Iterate over the files in this directory.  Does not yield any</span>
 <span class="sd">        result for the special paths &#39;.&#39; and &#39;..&#39;.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">listdir</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="p">{</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;..&#39;</span><span class="p">}:</span>
                 <span class="c1"># Yielding a path object for these makes little sense</span>
                 <span class="k">continue</span>
             <span class="k">yield</span> <span class="bp">self</span><span class="o">.</span><span class="n">_make_child_relpath</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
 
     <span class="k">def</span> <span class="nf">glob</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Iterate over this subtree and yield all existing files (of any</span>
 <span class="sd">        kind, including directories) matching the given relative pattern.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">audit</span><span class="p">(</span><span class="s2">&quot;pathlib.Path.glob&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">pattern</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unacceptable pattern: </span><span class="si">{!r}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">pattern</span><span class="p">))</span>
         <span class="n">drv</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">pattern_parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flavour</span><span class="o">.</span><span class="n">parse_parts</span><span class="p">((</span><span class="n">pattern</span><span class="p">,))</span>
@@ -1305,6 +1333,7 @@
 <span class="sd">        directories) matching the given relative pattern, anywhere in</span>
 <span class="sd">        this subtree.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sys</span><span class="o">.</span><span class="n">audit</span><span class="p">(</span><span class="s2">&quot;pathlib.Path.rglob&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">pattern</span><span class="p">)</span>
         <span class="n">drv</span><span class="p">,</span> <span class="n">root</span><span class="p">,</span> <span class="n">pattern_parts</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flavour</span><span class="o">.</span><span class="n">parse_parts</span><span class="p">((</span><span class="n">pattern</span><span class="p">,))</span>
         <span class="k">if</span> <span class="n">drv</span> <span class="ow">or</span> <span class="n">root</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Non-relative patterns are unsupported&quot;</span><span class="p">)</span>
@@ -1320,8 +1349,6 @@
 <span class="sd">        Use resolve() to get the canonical path to a file.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="c1"># XXX untested yet!</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_absolute</span><span class="p">():</span>
             <span class="k">return</span> <span class="bp">self</span>
         <span class="c1"># FIXME this must defer to the specific flavour (and, under Windows,</span>
@@ -1336,8 +1363,6 @@
 <span class="sd">        normalizing it (for example turning slashes into backslashes under</span>
 <span class="sd">        Windows).</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="n">s</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_flavour</span><span class="o">.</span><span class="n">resolve</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">strict</span><span class="o">=</span><span class="n">strict</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">s</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="c1"># No symlink resolution =&gt; for consistency, raise an error if</span>
@@ -1361,15 +1386,13 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the login name of the file owner.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">pwd</span>
-        <span class="k">return</span> <span class="n">pwd</span><span class="o">.</span><span class="n">getpwuid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_uid</span><span class="p">)</span><span class="o">.</span><span class="n">pw_name</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">owner</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Return the group name of the file gid.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="kn">import</span> <span class="nn">grp</span>
-        <span class="k">return</span> <span class="n">grp</span><span class="o">.</span><span class="n">getgrgid</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_gid</span><span class="p">)</span><span class="o">.</span><span class="n">gr_name</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">buffering</span><span class="o">=-</span><span class="mi">1</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
              <span class="n">errors</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">newline</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1377,8 +1400,6 @@
 <span class="sd">        Open the file pointed by this path and return a file object, as</span>
 <span class="sd">        the built-in open() function does.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">io</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">,</span> <span class="n">buffering</span><span class="p">,</span> <span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="p">,</span> <span class="n">newline</span><span class="p">,</span>
                        <span class="n">opener</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_opener</span><span class="p">)</span>
 
@@ -1415,12 +1436,19 @@
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">mode</span><span class="o">=</span><span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="n">encoding</span><span class="p">,</span> <span class="n">errors</span><span class="o">=</span><span class="n">errors</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
 
+    <span class="k">def</span> <span class="nf">readlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Return the path to which the symbolic link points.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">readlink</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">obj</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_from_parts</span><span class="p">((</span><span class="n">path</span><span class="p">,),</span> <span class="n">init</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="n">obj</span><span class="o">.</span><span class="n">_init</span><span class="p">(</span><span class="n">template</span><span class="o">=</span><span class="bp">self</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">obj</span>
+
     <span class="k">def</span> <span class="nf">touch</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="o">=</span><span class="mo">0o666</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create this file with the given access mode, if it doesn&#39;t exist.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">exist_ok</span><span class="p">:</span>
             <span class="c1"># First try to bump modification time</span>
             <span class="c1"># Implementation note: GNU touch uses the UTIME_NOW option of</span>
@@ -1442,8 +1470,6 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Create a new directory at this given path.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
@@ -1461,8 +1487,6 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Change the permissions of the path, like os.chmod().</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">chmod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">lchmod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">):</span>
@@ -1470,8 +1494,6 @@
 <span class="sd">        Like chmod(), except if the path points to a symlink, the symlink&#39;s</span>
 <span class="sd">        permissions are changed, rather than its target&#39;s.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">lchmod</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">mode</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">missing_ok</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -1479,8 +1501,6 @@
 <span class="sd">        Remove this file or link.</span>
 <span class="sd">        If the path is a directory, use rmdir() instead.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">unlink</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">except</span> <span class="ne">FileNotFoundError</span><span class="p">:</span>
@@ -1491,8 +1511,6 @@
         <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">        Remove this directory.  The directory must be empty.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">rmdir</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">lstat</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1500,17 +1518,7 @@
 <span class="sd">        Like stat(), except if the path points to a symlink, the symlink&#39;s</span>
 <span class="sd">        status information is returned, rather than its target&#39;s.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">lstat</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">link_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Create a hard link pointing to a path named target.</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">link_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
@@ -1522,8 +1530,6 @@
 
 <span class="sd">        Returns the new Path instance pointing to the target path.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
@@ -1537,19 +1543,27 @@
 
 <span class="sd">        Returns the new Path instance pointing to the target path.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span><span class="n">target</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">symlink_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;</span>
-<span class="sd">        Make this path a symlink pointing to the given path.</span>
-<span class="sd">        Note the order of arguments (self, target) is the reverse of os.symlink&#39;s.</span>
+<span class="sd">        Make this path a symlink pointing to the target path.</span>
+<span class="sd">        Note the order of arguments (link, target) is the reverse of os.symlink.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_closed</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_raise_closed</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">symlink</span><span class="p">(</span><span class="n">target</span><span class="p">,</span> <span class="bp">self</span><span class="p">,</span> <span class="n">target_is_directory</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">link_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">        Make the target path a hard link pointing to this path.</span>
+
+<span class="sd">        Note this function does not make this path a hard link to *target*,</span>
+<span class="sd">        despite the implication of the function and argument names. The order</span>
+<span class="sd">        of arguments (target, link) is the reverse of Path.symlink_to, but</span>
+<span class="sd">        matches that of os.link.</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_accessor</span><span class="o">.</span><span class="n">link_to</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">target</span><span class="p">)</span>
 
     <span class="c1"># Convenience functions for querying the stat results</span>
 
@@ -1578,7 +1592,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist or is a broken symlink</span>
-            <span class="c1"># (see https://bitbucket.org/pitrou/pathlib/issue/12/)</span>
+            <span class="c1"># (see http://web.archive.org/web/20200623061726/https://bitbucket.org/pitrou/pathlib/issues/12/ )</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="c1"># Non-encodable path</span>
@@ -1595,7 +1609,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist or is a broken symlink</span>
-            <span class="c1"># (see https://bitbucket.org/pitrou/pathlib/issue/12/)</span>
+            <span class="c1"># (see http://web.archive.org/web/20200623061726/https://bitbucket.org/pitrou/pathlib/issues/12/ )</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="c1"># Non-encodable path</span>
@@ -1609,9 +1623,8 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">exists</span><span class="p">()</span> <span class="ow">or</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
             <span class="k">return</span> <span class="kc">False</span>
 
-        <span class="n">parent</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">parent_dev</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_dev</span>
+            <span class="n">parent_dev</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_dev</span>
         <span class="k">except</span> <span class="ne">OSError</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
 
@@ -1619,7 +1632,7 @@
         <span class="k">if</span> <span class="n">dev</span> <span class="o">!=</span> <span class="n">parent_dev</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">True</span>
         <span class="n">ino</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_ino</span>
-        <span class="n">parent_ino</span> <span class="o">=</span> <span class="n">parent</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_ino</span>
+        <span class="n">parent_ino</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">stat</span><span class="p">()</span><span class="o">.</span><span class="n">st_ino</span>
         <span class="k">return</span> <span class="n">ino</span> <span class="o">==</span> <span class="n">parent_ino</span>
 
     <span class="k">def</span> <span class="nf">is_symlink</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1647,7 +1660,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist or is a broken symlink</span>
-            <span class="c1"># (see https://bitbucket.org/pitrou/pathlib/issue/12/)</span>
+            <span class="c1"># (see http://web.archive.org/web/20200623061726/https://bitbucket.org/pitrou/pathlib/issues/12/ )</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="c1"># Non-encodable path</span>
@@ -1663,7 +1676,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist or is a broken symlink</span>
-            <span class="c1"># (see https://bitbucket.org/pitrou/pathlib/issue/12/)</span>
+            <span class="c1"># (see http://web.archive.org/web/20200623061726/https://bitbucket.org/pitrou/pathlib/issues/12/ )</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="c1"># Non-encodable path</span>
@@ -1679,7 +1692,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist or is a broken symlink</span>
-            <span class="c1"># (see https://bitbucket.org/pitrou/pathlib/issue/12/)</span>
+            <span class="c1"># (see http://web.archive.org/web/20200623061726/https://bitbucket.org/pitrou/pathlib/issues/12/ )</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="c1"># Non-encodable path</span>
@@ -1695,7 +1708,7 @@
             <span class="k">if</span> <span class="ow">not</span> <span class="n">_ignore_error</span><span class="p">(</span><span class="n">e</span><span class="p">):</span>
                 <span class="k">raise</span>
             <span class="c1"># Path doesn&#39;t exist or is a broken symlink</span>
-            <span class="c1"># (see https://bitbucket.org/pitrou/pathlib/issue/12/)</span>
+            <span class="c1"># (see http://web.archive.org/web/20200623061726/https://bitbucket.org/pitrou/pathlib/issues/12/ )</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="c1"># Non-encodable path</span>
@@ -1727,12 +1740,6 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">()</span>
 
-    <span class="k">def</span> <span class="nf">owner</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Path.owner() is unsupported on this system&quot;</span><span class="p">)</span>
-
-    <span class="k">def</span> <span class="nf">group</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Path.group() is unsupported on this system&quot;</span><span class="p">)</span>
-
     <span class="k">def</span> <span class="nf">is_mount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Path.is_mount() is unsupported on this system&quot;</span><span class="p">)</span>
 </pre></div>
@@ -1759,7 +1766,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on Aug 04, 2021.<br/>
+        Last updated on Aug 25, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
     </p>
   </div>

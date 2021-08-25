@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.modelsearch.algorithms &#8212; Pharmpy 0.26.1 documentation</title>
+    <title>pharmpy.tools.modelsearch.algorithms &#8212; Pharmpy 0.29.1 documentation</title>
     
   <link href="../../../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -235,30 +235,40 @@
 
 
 <div class="viewcode-block" id="exhaustive_stepwise"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.modelsearch.algorithms.html#pharmpy.tools.modelsearch.algorithms.exhaustive_stepwise">[docs]</a><span class="k">def</span> <span class="nf">exhaustive_stepwise</span><span class="p">(</span><span class="n">base_model</span><span class="p">,</span> <span class="n">mfl</span><span class="p">,</span> <span class="n">wf_run</span><span class="p">):</span>
+    <span class="n">features</span> <span class="o">=</span> <span class="n">ModelFeatures</span><span class="p">(</span><span class="n">mfl</span><span class="p">)</span>
     <span class="c1"># TODO: Base condition/warning for input model?</span>
     <span class="n">wf_search</span> <span class="o">=</span> <span class="n">Workflow</span><span class="p">(</span><span class="n">Task</span><span class="p">(</span><span class="s1">&#39;start_model&#39;</span><span class="p">,</span> <span class="n">return_model</span><span class="p">,</span> <span class="n">base_model</span><span class="p">))</span>
-    <span class="c1"># TODO: Consider using a __bool__ in modelfit_results</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">base_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span> <span class="ow">and</span> <span class="n">base_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">base_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="p">:</span>
         <span class="n">wf_search</span><span class="o">.</span><span class="n">add_tasks</span><span class="p">(</span><span class="n">wf_run</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">new_ids</span><span class="o">=</span><span class="kc">True</span><span class="p">),</span> <span class="n">connect</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
+    <span class="n">models</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
         <span class="n">no_of_trans</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">wf_search</span><span class="o">.</span><span class="n">get_output</span><span class="p">():</span>
             <span class="n">previous_funcs</span> <span class="o">=</span> <span class="p">[</span><span class="n">task</span><span class="o">.</span><span class="n">function</span> <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">wf_search</span><span class="o">.</span><span class="n">get_upstream_tasks</span><span class="p">(</span><span class="n">task</span><span class="p">)]</span>
             <span class="n">possible_funcs</span> <span class="o">=</span> <span class="p">{</span>
-                <span class="n">feat</span><span class="p">:</span> <span class="n">func</span> <span class="k">for</span> <span class="n">feat</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">mfl</span><span class="o">.</span><span class="n">all_funcs</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span> <span class="k">if</span> <span class="n">func</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">previous_funcs</span>
+                <span class="n">feat</span><span class="p">:</span> <span class="n">func</span>
+                <span class="k">for</span> <span class="n">feat</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">features</span><span class="o">.</span><span class="n">all_funcs</span><span class="p">()</span><span class="o">.</span><span class="n">items</span><span class="p">()</span>
+                <span class="k">if</span> <span class="n">func</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">previous_funcs</span>
             <span class="p">}</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">possible_funcs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
                 <span class="n">no_of_trans</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="n">task_update_inits</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;update_inits&#39;</span><span class="p">,</span> <span class="n">update_inits</span><span class="p">,</span> <span class="n">task</span><span class="p">)</span>
-                <span class="n">wf_search</span><span class="o">.</span><span class="n">add_tasks</span><span class="p">(</span><span class="n">task_update_inits</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_nodes</span><span class="o">=</span><span class="p">[</span><span class="n">task</span><span class="p">])</span>
                 <span class="k">for</span> <span class="n">feat</span><span class="p">,</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">possible_funcs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
                     <span class="n">task_copy</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;copy&#39;</span><span class="p">,</span> <span class="n">copy_model</span><span class="p">,</span> <span class="n">feat</span><span class="p">)</span>
-                    <span class="n">wf_search</span><span class="o">.</span><span class="n">add_tasks</span><span class="p">(</span><span class="n">task_copy</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_nodes</span><span class="o">=</span><span class="p">[</span><span class="n">task_update_inits</span><span class="p">])</span>
+                    <span class="n">wf_search</span><span class="o">.</span><span class="n">add_tasks</span><span class="p">(</span><span class="n">task_copy</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_nodes</span><span class="o">=</span><span class="p">[</span><span class="n">task</span><span class="p">])</span>
+                    <span class="n">task_update_inits</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;update_inits&#39;</span><span class="p">,</span> <span class="n">update_inits</span><span class="p">)</span>
+                    <span class="n">wf_search</span><span class="o">.</span><span class="n">add_tasks</span><span class="p">(</span><span class="n">task_update_inits</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_nodes</span><span class="o">=</span><span class="p">[</span><span class="n">task_copy</span><span class="p">])</span>
+                    <span class="c1"># TODO: move wf_run here to be more explicit</span>
                     <span class="n">wf_trans</span> <span class="o">=</span> <span class="n">create_workflow_transform</span><span class="p">(</span><span class="n">feat</span><span class="p">,</span> <span class="n">func</span><span class="p">,</span> <span class="n">wf_run</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="n">new_ids</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-                    <span class="n">wf_search</span><span class="o">.</span><span class="n">add_tasks</span><span class="p">(</span><span class="n">wf_trans</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_nodes</span><span class="o">=</span><span class="p">[</span><span class="n">task_copy</span><span class="p">])</span>
+                    <span class="n">wf_search</span><span class="o">.</span><span class="n">add_tasks</span><span class="p">(</span><span class="n">wf_trans</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_nodes</span><span class="o">=</span><span class="p">[</span><span class="n">task_update_inits</span><span class="p">])</span>
+                    <span class="n">models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">wf_search</span><span class="o">.</span><span class="n">get_output</span><span class="p">())</span>
         <span class="k">if</span> <span class="n">no_of_trans</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">break</span>
+
+    <span class="c1"># TODO: consider merging with task_result</span>
+    <span class="n">task_collect</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;collect&#39;</span><span class="p">,</span> <span class="n">post_process_results</span><span class="p">)</span>
+    <span class="n">models_transformed</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">([</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">models</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]))</span>
+    <span class="n">wf_search</span><span class="o">.</span><span class="n">add_tasks</span><span class="p">(</span><span class="n">task_collect</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">output_nodes</span><span class="o">=</span><span class="n">models_transformed</span><span class="p">)</span>
 
     <span class="n">task_result</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;results&#39;</span><span class="p">,</span> <span class="n">post_process_results</span><span class="p">,</span> <span class="n">final_task</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">wf_search</span><span class="o">.</span><span class="n">add_tasks</span><span class="p">(</span><span class="n">task_result</span><span class="p">,</span> <span class="n">connect</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -284,8 +294,10 @@
 
 
 <div class="viewcode-block" id="copy_model"><a class="viewcode-back" href="../../../../reference/pharmpy.tools.modelsearch.algorithms.html#pharmpy.tools.modelsearch.algorithms.copy_model">[docs]</a><span class="k">def</span> <span class="nf">copy_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">feat</span><span class="p">):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">model_copy</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">model_copy</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;model_</span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="n">model_copy</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">feat</span><span class="si">}</span><span class="s1">&#39;</span>
     <span class="k">return</span> <span class="n">model_copy</span></div>
 </pre></div>
 
@@ -311,7 +323,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on Aug 04, 2021.<br/>
+        Last updated on Aug 25, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
     </p>
   </div>
