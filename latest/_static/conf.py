@@ -15,6 +15,7 @@ extensions = [
     'sphinx.ext.napoleon',
     'sphinx.ext.todo',
     'sphinx.ext.viewcode',
+    'sphinx_automodapi.automodapi',
     'jupyter_sphinx',
     'sphinxcontrib.autoprogram',
 ]
@@ -29,7 +30,7 @@ project = 'Pharmpy'
 year = '2018-2021'
 authors = ['the Pharmpy development team']
 copyright = '{0}; {1}'.format(year, ', '.join(authors))
-version = release = '0.29.1'
+version = release = '0.30.0'
 
 pygments_style = 'trac'
 templates_path = ['.']

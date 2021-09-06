@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.error &#8212; Pharmpy 0.29.1 documentation</title>
+    <title>pharmpy.modeling.error &#8212; Pharmpy 0.30.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -74,8 +74,8 @@
 </li>
 
 <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../reference/modules.html">
-  API reference
+ <a class="reference internal nav-link" href="../../../api.html">
+  API Reference
  </a>
 </li>
 
@@ -127,7 +127,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
@@ -181,13 +181,33 @@
     <span class="k">return</span> <span class="n">stats</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">f</span>
 
 
-<div class="viewcode-block" id="remove_error_model"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.remove_error_model">[docs]</a><span class="k">def</span> <span class="nf">remove_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="remove_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.remove_error_model.html#pharmpy.modeling.remove_error_model">[docs]</a><span class="k">def</span> <span class="nf">remove_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Remove error model.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Remove error model for this model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    Model : Reference to the same model</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import remove_error_model, load_example_model</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;Y&quot;)</span>
+<span class="sd">    Y := EPS(1)*W + F</span>
+<span class="sd">    &gt;&gt;&gt; remove_error_model(model)    # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;Y&quot;)</span>
+<span class="sd">    Y := F</span>
+
+<span class="sd">    Warnings</span>
+<span class="sd">    --------</span>
+<span class="sd">    Removing the error model will make the model unrunable for some tools.</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">stats</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_preparations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">stats</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
@@ -195,10 +215,11 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="set_additive_error_model"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.set_additive_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_additive_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="set_additive_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_additive_error_model.html#pharmpy.modeling.set_additive_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_additive_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">series_terms</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set an additive error model. Initial estimate for new sigma is :math:`(min(DV)/2)²`.</span>
 
-<span class="sd">    The error function being applied depends on the data transformation.</span>
+<span class="sd">    The error function being applied depends on the data transformation. The table displays</span>
+<span class="sd">    some examples.</span>
 
 <span class="sd">    +------------------------+----------------------------------------+</span>
 <span class="sd">    | Data transformation    | Additive error                         |</span>
@@ -214,7 +235,40 @@
 <span class="sd">        Set error model for this model</span>
 <span class="sd">    data_trans : str or expression</span>
 <span class="sd">        A data transformation expression or None (default) to use the transformation</span>
-<span class="sd">        specified by the model.</span>
+<span class="sd">        specified by the model. Series expansion will be used for approximation.</span>
+<span class="sd">    series_terms : int</span>
+<span class="sd">        Number of terms to use for the series expansion approximation for data</span>
+<span class="sd">        transformation.</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    Model : Reference to the same model</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import set_additive_error_model, load_example_model</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;Y&quot;)</span>
+<span class="sd">    Y := EPS(1)*W + F</span>
+<span class="sd">    &gt;&gt;&gt; set_additive_error_model(model)    # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;Y&quot;)</span>
+<span class="sd">    Y := F + epsilon_a</span>
+
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import set_additive_error_model, load_example_model</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;Y&quot;)</span>
+<span class="sd">    Y := EPS(1)*W + F</span>
+<span class="sd">    &gt;&gt;&gt; set_additive_error_model(model, data_trans=&quot;log(Y)&quot;)    # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;Y&quot;)</span>
+<span class="sd">    Y := log(F) + epsilon_a/F</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    set_proportional_error_model : Proportional error model</span>
+<span class="sd">    set_combined_error_model : Combined error model</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">has_additive_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">model</span>
@@ -222,12 +276,9 @@
     <span class="n">ruv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="s1">&#39;epsilon_a&#39;</span><span class="p">)</span>
 
     <span class="n">data_trans</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">canonicalize_data_transformation</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">data_trans</span> <span class="o">==</span> <span class="n">sympy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">):</span>
-        <span class="n">expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">+</span> <span class="n">ruv</span> <span class="o">/</span> <span class="n">f</span>
-    <span class="k">elif</span> <span class="n">data_trans</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">:</span>
-        <span class="n">expr</span> <span class="o">=</span> <span class="n">f</span> <span class="o">+</span> <span class="n">ruv</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not supported data transformation </span><span class="si">{</span><span class="n">data_trans</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">expr</span> <span class="o">=</span> <span class="n">f</span> <span class="o">+</span> <span class="n">ruv</span>
+    <span class="k">if</span> <span class="n">data_trans</span> <span class="o">!=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">:</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">data_trans</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span><span class="o">.</span><span class="n">series</span><span class="p">(</span><span class="n">ruv</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">series_terms</span><span class="p">)</span><span class="o">.</span><span class="n">removeO</span><span class="p">()</span>
 
     <span class="n">stats</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">remove_unused_parameters_and_rvs</span><span class="p">()</span>
@@ -250,7 +301,7 @@
         <span class="k">return</span> <span class="p">(</span><span class="n">dv_min</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
 
 
-<div class="viewcode-block" id="set_proportional_error_model"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.set_proportional_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_proportional_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="set_proportional_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_proportional_error_model.html#pharmpy.modeling.set_proportional_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_proportional_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set a proportional error model. Initial estimate for new sigma is 0.09.</span>
 
 <span class="sd">    The error function being applied depends on the data transformation.</span>
@@ -270,6 +321,32 @@
 <span class="sd">    data_trans : str or expression</span>
 <span class="sd">        A data transformation expression or None (default) to use the transformation</span>
 <span class="sd">        specified by the model.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Model : Reference to the same model</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = remove_error_model(load_example_model(&quot;pheno&quot;))</span>
+<span class="sd">    &gt;&gt;&gt; set_proportional_error_model(model)    # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;Y&quot;)</span>
+<span class="sd">    Y := F*epsilon_p + F</span>
+
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = remove_error_model(load_example_model(&quot;pheno&quot;))</span>
+<span class="sd">    &gt;&gt;&gt; set_proportional_error_model(model, data_trans=&quot;log(Y)&quot;)    # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;Y&quot;)</span>
+<span class="sd">    Y := epsilon_p + log(F)</span>
+
+<span class="sd">    See Also</span>
+<span class="sd">    --------</span>
+<span class="sd">    set_additive_error_model : Additive error model</span>
+<span class="sd">    set_combined_error_model : Combined error model</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">has_proportional_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">model</span>
@@ -297,7 +374,7 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="set_combined_error_model"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.set_combined_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_combined_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="set_combined_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_combined_error_model.html#pharmpy.modeling.set_combined_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_combined_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set a combined error model. Initial estimates for new sigmas are :math:`(min(DV)/2)²` for</span>
 <span class="sd">    proportional and 0.09 for additive.</span>
 
@@ -351,7 +428,7 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="has_additive_error_model"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.has_additive_error_model">[docs]</a><span class="k">def</span> <span class="nf">has_additive_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="has_additive_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_additive_error_model.html#pharmpy.modeling.has_additive_error_model">[docs]</a><span class="k">def</span> <span class="nf">has_additive_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Check if a model has an additive error model</span>
 
 <span class="sd">    Parameters</span>
@@ -371,7 +448,7 @@
     <span class="k">return</span> <span class="n">eps</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">expr</span> <span class="o">-</span> <span class="n">eps</span><span class="p">)</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span><span class="o">.</span><span class="n">free_symbols</span></div>
 
 
-<div class="viewcode-block" id="has_proportional_error_model"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.has_proportional_error_model">[docs]</a><span class="k">def</span> <span class="nf">has_proportional_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="has_proportional_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_proportional_error_model.html#pharmpy.modeling.has_proportional_error_model">[docs]</a><span class="k">def</span> <span class="nf">has_proportional_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Check if a model has a proportional error model</span>
 
 <span class="sd">    Parameters</span>
@@ -391,7 +468,7 @@
     <span class="k">return</span> <span class="n">eps</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="n">expr</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">eps</span><span class="p">))</span><span class="o">.</span><span class="n">simplify</span><span class="p">()</span><span class="o">.</span><span class="n">free_symbols</span></div>
 
 
-<div class="viewcode-block" id="has_combined_error_model"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.has_combined_error_model">[docs]</a><span class="k">def</span> <span class="nf">has_combined_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="has_combined_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_combined_error_model.html#pharmpy.modeling.has_combined_error_model">[docs]</a><span class="k">def</span> <span class="nf">has_combined_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Check if a model has a combined additive and proportinal error model</span>
 
 <span class="sd">    Parameters</span>
@@ -419,8 +496,14 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="use_thetas_for_error_stdev"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.use_thetas_for_error_stdev">[docs]</a><span class="k">def</span> <span class="nf">use_thetas_for_error_stdev</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Use thetas to estimate standard deviation of error&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="use_thetas_for_error_stdev"><a class="viewcode-back" href="../../../api/pharmpy.modeling.use_thetas_for_error_stdev.html#pharmpy.modeling.use_thetas_for_error_stdev">[docs]</a><span class="k">def</span> <span class="nf">use_thetas_for_error_stdev</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Use thetas to estimate standard deviation of error</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">epsilons</span>
     <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">:</span>
         <span class="n">sigmas</span> <span class="o">=</span> <span class="n">eps</span><span class="o">.</span><span class="n">parameter_names</span>
@@ -438,8 +521,14 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="set_weighted_error_model"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.set_weighted_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_weighted_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Encode error model with one epsilon and W as weight&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="set_weighted_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_weighted_error_model.html#pharmpy.modeling.set_weighted_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_weighted_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Encode error model with one epsilon and W as weight</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">stats</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_preparations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">epsilons</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">epsilons</span>
     <span class="n">expr</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">expression</span>
@@ -466,8 +555,14 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="set_dtbs_error_model"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.set_dtbs_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_dtbs_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Dynamic transform both sides&quot;&quot;&quot;</span>
+<div class="viewcode-block" id="set_dtbs_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_dtbs_error_model.html#pharmpy.modeling.set_dtbs_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_dtbs_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Dynamic transform both sides</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">use_thetas_for_error_stdev</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">set_weighted_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">stats</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_preparations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -523,7 +618,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on Aug 25, 2021.<br/>
+        Last updated on Sep 06, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
     </p>
   </div>

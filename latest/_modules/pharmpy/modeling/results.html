@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.29.1 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.30.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -74,8 +74,8 @@
 </li>
 
 <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../reference/modules.html">
-  API reference
+ <a class="reference internal nav-link" href="../../../api.html">
+  API Reference
  </a>
 </li>
 
@@ -127,7 +127,7 @@
 <ul>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../reference/modules.html">API reference</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
@@ -169,10 +169,37 @@
 <span class="kn">from</span> <span class="nn">pharmpy.parameter_sampling</span> <span class="kn">import</span> <span class="n">sample_from_covariance_matrix</span>
 
 
-<div class="viewcode-block" id="calculate_individual_shrinkage"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.calculate_individual_shrinkage">[docs]</a><span class="k">def</span> <span class="nf">calculate_individual_shrinkage</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_eta_shrinkage"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_eta_shrinkage.html#pharmpy.modeling.calculate_eta_shrinkage">[docs]</a><span class="k">def</span> <span class="nf">calculate_eta_shrinkage</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate eta shrinkage for each eta</span>
+
+<span class="sd">    Variance = False to get sd scale</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates</span>
+    <span class="c1"># Want parameter estimates combined with fixed parameter values</span>
+    <span class="n">param_inits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">combine_first</span><span class="p">(</span><span class="n">param_inits</span><span class="p">)</span>
+
+    <span class="n">ie</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_estimates</span>
+    <span class="n">param_names</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv</span><span class="o">.</span><span class="n">variance_parameters</span>
+    <span class="n">diag_ests</span> <span class="o">=</span> <span class="n">pe</span><span class="p">[</span><span class="n">param_names</span><span class="p">]</span>
+    <span class="n">diag_ests</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">ie</span><span class="o">.</span><span class="n">columns</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">sd</span><span class="p">:</span>
+        <span class="n">shrinkage</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">ie</span><span class="o">.</span><span class="n">var</span><span class="p">()</span> <span class="o">/</span> <span class="n">diag_ests</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">shrinkage</span> <span class="o">=</span> <span class="mi">1</span> <span class="o">-</span> <span class="p">(</span><span class="n">ie</span><span class="o">.</span><span class="n">std</span><span class="p">()</span> <span class="o">/</span> <span class="p">(</span><span class="n">diag_ests</span> <span class="o">**</span> <span class="mf">0.5</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">shrinkage</span></div>
+
+
+<div class="viewcode-block" id="calculate_individual_shrinkage"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_individual_shrinkage.html#pharmpy.modeling.calculate_individual_shrinkage">[docs]</a><span class="k">def</span> <span class="nf">calculate_individual_shrinkage</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate the individual eta-shrinkage</span>
 
 <span class="sd">    Definition: ieta_shr = (var(eta) / omega)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
     <span class="n">cov</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_estimates_covariance</span>
@@ -196,7 +223,7 @@
     <span class="k">return</span> <span class="n">ish</span></div>
 
 
-<div class="viewcode-block" id="calculate_individual_parameter_statistics"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.calculate_individual_parameter_statistics">[docs]</a><span class="k">def</span> <span class="nf">calculate_individual_parameter_statistics</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">exprs</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_individual_parameter_statistics"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_individual_parameter_statistics.html#pharmpy.modeling.calculate_individual_parameter_statistics">[docs]</a><span class="k">def</span> <span class="nf">calculate_individual_parameter_statistics</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">exprs</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate statistics for individual parameters</span>
 
 <span class="sd">    Calculate the mean (expected value of the distribution), variance</span>
@@ -287,7 +314,7 @@
     <span class="k">return</span> <span class="n">table</span></div>
 
 
-<div class="viewcode-block" id="calculate_pk_parameters_statistics"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.calculate_pk_parameters_statistics">[docs]</a><span class="k">def</span> <span class="nf">calculate_pk_parameters_statistics</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_pk_parameters_statistics"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_pk_parameters_statistics.html#pharmpy.modeling.calculate_pk_parameters_statistics">[docs]</a><span class="k">def</span> <span class="nf">calculate_pk_parameters_statistics</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate statistics for common pharmacokinetic parameters</span>
 
 <span class="sd">    Calculate the mean (expected value of the distribution), variance</span>
@@ -402,7 +429,15 @@
 
 
 <span class="c1"># TODO: consider moving part of function to results-object</span>
-<div class="viewcode-block" id="summarize_models"><a class="viewcode-back" href="../../../reference/pharmpy.modeling.html#pharmpy.modeling.summarize_models">[docs]</a><span class="k">def</span> <span class="nf">summarize_models</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
+<div class="viewcode-block" id="summarize_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.modeling.summarize_modelfit_results.html#pharmpy.modeling.summarize_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">summarize_modelfit_results</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Summarize results of multiple model runs, includes runtime, ofv and parameter estimates</span>
+<span class="sd">    (with errors).</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    models : list</span>
+<span class="sd">        List of models</span>
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">run_summaries</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">parameter_summaries</span> <span class="o">=</span> <span class="p">[]</span>
 
@@ -450,7 +485,7 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on Aug 25, 2021.<br/>
+        Last updated on Sep 06, 2021.<br/>
         Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
     </p>
   </div>
