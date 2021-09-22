@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.run &#8212; Pharmpy 0.30.1 documentation</title>
+    <title>pharmpy.modeling.run &#8212; Pharmpy 0.31.1 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -62,6 +62,12 @@
     <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
       <ul id="navbar-main-elements" class="navbar-nav mr-auto">
         <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../contributors.html">
+  About us
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../../../getting_started.html">
   Getting started
  </a>
@@ -80,14 +86,20 @@
 </li>
 
 <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../changelog.html">
+  Changelog
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../../../contribute.html">
   Contribute
  </a>
 </li>
 
 <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../changelog.html">
-  Changelog
+ <a class="reference internal nav-link" href="../../../citation.html">
+  References and citation
  </a>
 </li>
 
@@ -125,11 +137,13 @@
 <script>$('#searchbox').show(0);</script>
 <h3><a href="../../../index.html">Table of Contents</a></h3>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributors.html">About us</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribute.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citation.html">References and citation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
 
@@ -159,20 +173,37 @@
               <div>
                 
   <h1>Source code for pharmpy.modeling.run</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">pharmpy.model</span>
+<span></span><span class="kn">import</span> <span class="nn">importlib</span>
+
+<span class="kn">import</span> <span class="nn">pharmpy.model</span>
 <span class="kn">import</span> <span class="nn">pharmpy.results</span>
 <span class="kn">import</span> <span class="nn">pharmpy.tools.common</span>
 <span class="kn">import</span> <span class="nn">pharmpy.tools.modelfit</span>
+<span class="kn">from</span> <span class="nn">pharmpy.execute</span> <span class="kn">import</span> <span class="n">execute_workflow</span>
 
 
-<span class="c1"># TODO: elaborate documentation</span>
 <div class="viewcode-block" id="fit"><a class="viewcode-back" href="../../../api/pharmpy.modeling.fit.html#pharmpy.modeling.fit">[docs]</a><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Fit models.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    models : list</span>
-<span class="sd">        List of models</span>
+<span class="sd">        List of models or one single model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Reference to same model</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; fit(model)      # doctest: +SKIP</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    run_tool</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
         <span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">models</span><span class="p">]</span>
@@ -187,29 +218,89 @@
         <span class="k">return</span> <span class="n">models</span></div>
 
 
-<span class="c1"># TODO: elaborate documentation</span>
 <div class="viewcode-block" id="create_results"><a class="viewcode-back" href="../../../api/pharmpy.modeling.create_results.html#pharmpy.modeling.create_results">[docs]</a><span class="k">def</span> <span class="nf">create_results</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Create results object</span>
+    <span class="sd">&quot;&quot;&quot;Create/recalculate results object given path to run directory</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    path : str, Path</span>
 <span class="sd">        Path to run directory</span>
+<span class="sd">    kwargs</span>
+<span class="sd">        Arguments to pass to tool specific create results function</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Results</span>
+<span class="sd">        Results object for tool</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; res = create_results(&quot;frem_dir1&quot;)   # doctest: +SKIP</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    read_results</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">tools</span><span class="o">.</span><span class="n">common</span><span class="o">.</span><span class="n">create_results</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">res</span></div>
 
 
-<span class="c1"># TODO: elaborate documentation</span>
 <div class="viewcode-block" id="read_results"><a class="viewcode-back" href="../../../api/pharmpy.modeling.read_results.html#pharmpy.modeling.read_results">[docs]</a><span class="k">def</span> <span class="nf">read_results</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Read results object</span>
+    <span class="sd">&quot;&quot;&quot;Read results object from file</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    path : str, Path</span>
 <span class="sd">        Path to results file</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    Results</span>
+<span class="sd">        Results object for tool</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; res = read_resuts(&quot;results.json&quot;)     # doctest: +SKIP</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    create_results</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">read_results</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="run_tool"><a class="viewcode-back" href="../../../api/pharmpy.modeling.run_tool.html#pharmpy.modeling.run_tool">[docs]</a><span class="k">def</span> <span class="nf">run_tool</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Run tool workflow</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of tool to run</span>
+<span class="sd">    args</span>
+<span class="sd">        Arguments to pass to tool</span>
+<span class="sd">    kwargs</span>
+<span class="sd">        Arguments to pass to tool</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    Results</span>
+<span class="sd">        Results object for tool</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; res = run_tool(&quot;resmod&quot;, model)   # doctest: +SKIP</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">tool</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;pharmpy.tools.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">tool</span><span class="o">.</span><span class="n">create_workflow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">execute_workflow</span><span class="p">(</span><span class="n">wf</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>
 
@@ -235,8 +326,8 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on Sep 06, 2021.<br/>
-        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
+        Last updated on Sep 22, 2021.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>
 </footer>

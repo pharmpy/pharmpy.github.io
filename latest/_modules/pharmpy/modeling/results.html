@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.30.1 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.31.1 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -62,6 +62,12 @@
     <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
       <ul id="navbar-main-elements" class="navbar-nav mr-auto">
         <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../contributors.html">
+  About us
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../../../getting_started.html">
   Getting started
  </a>
@@ -80,14 +86,20 @@
 </li>
 
 <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../../changelog.html">
+  Changelog
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../../../contribute.html">
   Contribute
  </a>
 </li>
 
 <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../../changelog.html">
-  Changelog
+ <a class="reference internal nav-link" href="../../../citation.html">
+  References and citation
  </a>
 </li>
 
@@ -125,11 +137,13 @@
 <script>$('#searchbox').show(0);</script>
 <h3><a href="../../../index.html">Table of Contents</a></h3>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../../contributors.html">About us</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../user_guide.html">User guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../contribute.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../../citation.html">References and citation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../../license.html">License</a></li>
 </ul>
 
@@ -166,13 +180,42 @@
 <span class="kn">import</span> <span class="nn">sympy</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.data_structures</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
-<span class="kn">from</span> <span class="nn">pharmpy.parameter_sampling</span> <span class="kn">import</span> <span class="n">sample_from_covariance_matrix</span>
+<span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">create_rng</span><span class="p">,</span> <span class="n">sample_parameters_from_covariance_matrix</span>
 
 
 <div class="viewcode-block" id="calculate_eta_shrinkage"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_eta_shrinkage.html#pharmpy.modeling.calculate_eta_shrinkage">[docs]</a><span class="k">def</span> <span class="nf">calculate_eta_shrinkage</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate eta shrinkage for each eta</span>
 
-<span class="sd">    Variance = False to get sd scale</span>
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    sd : bool</span>
+<span class="sd">        Calculate shrinkage on the standard deviation scale (default is to calculate on the</span>
+<span class="sd">        variance scale)</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    Series</span>
+<span class="sd">        Shrinkage for each eta</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; calculate_eta_shrinkage(model)</span>
+<span class="sd">    ETA(1)    0.720481</span>
+<span class="sd">    ETA(2)    0.240295</span>
+<span class="sd">    dtype: float64</span>
+<span class="sd">    &gt;&gt;&gt; calculate_eta_shrinkage(model, sd=True)</span>
+<span class="sd">    ETA(1)    0.471305</span>
+<span class="sd">    ETA(2)    0.128389</span>
+<span class="sd">    dtype: float64</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    calculate_individual_shrinkage</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
     <span class="n">pe</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates</span>
@@ -200,6 +243,83 @@
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    DataFrame</span>
+<span class="sd">        Shrinkage for each eta and individual</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; calculate_individual_shrinkage(model)</span>
+<span class="sd">          ETA(1)    ETA(2)</span>
+<span class="sd">    ID</span>
+<span class="sd">    1   0.847789  0.256473</span>
+<span class="sd">    2   0.796643  0.210669</span>
+<span class="sd">    3   0.755025  0.226957</span>
+<span class="sd">    4   0.764541  0.216405</span>
+<span class="sd">    5   0.816192  0.203974</span>
+<span class="sd">    6   0.778108  0.210992</span>
+<span class="sd">    7   0.659420  0.236875</span>
+<span class="sd">    8   0.668551  0.240097</span>
+<span class="sd">    9   0.260056  0.200374</span>
+<span class="sd">    10  0.725190  0.226563</span>
+<span class="sd">    11  0.972110  0.421852</span>
+<span class="sd">    12  0.249640  0.254119</span>
+<span class="sd">    13  0.730294  0.364932</span>
+<span class="sd">    14  0.165785  0.194464</span>
+<span class="sd">    15  0.813399  0.313554</span>
+<span class="sd">    16  0.797328  0.213211</span>
+<span class="sd">    17  0.769059  0.278079</span>
+<span class="sd">    18  0.098506  0.176778</span>
+<span class="sd">    19  0.749022  0.235386</span>
+<span class="sd">    20  0.742181  0.222932</span>
+<span class="sd">    21  0.317956  0.264473</span>
+<span class="sd">    22  0.943950  0.232732</span>
+<span class="sd">    23  0.707183  0.259077</span>
+<span class="sd">    24  0.553787  0.247717</span>
+<span class="sd">    25  0.826349  0.114302</span>
+<span class="sd">    26  0.854777  0.341384</span>
+<span class="sd">    27  0.820829  0.263235</span>
+<span class="sd">    28  0.999942  0.319986</span>
+<span class="sd">    29  0.967084  0.432760</span>
+<span class="sd">    30  0.404773  0.325215</span>
+<span class="sd">    31  0.999980  0.318421</span>
+<span class="sd">    32  0.925283  0.167667</span>
+<span class="sd">    33  0.913706  0.242106</span>
+<span class="sd">    34  0.875554  0.249197</span>
+<span class="sd">    35  0.849135  0.294294</span>
+<span class="sd">    36  0.172206  0.246422</span>
+<span class="sd">    37  0.747380  0.278340</span>
+<span class="sd">    38  0.187440  0.231249</span>
+<span class="sd">    39  0.237805  0.254485</span>
+<span class="sd">    40  0.999925  0.189793</span>
+<span class="sd">    41  0.941906  0.170998</span>
+<span class="sd">    42  0.923801  0.244046</span>
+<span class="sd">    43  0.999928  0.320403</span>
+<span class="sd">    44  0.237637  0.260453</span>
+<span class="sd">    45  0.869540  0.194503</span>
+<span class="sd">    46  0.999949  0.319750</span>
+<span class="sd">    47  0.983782  0.393234</span>
+<span class="sd">    48  0.698267  0.169337</span>
+<span class="sd">    49  0.776674  0.214962</span>
+<span class="sd">    50  0.688847  0.192608</span>
+<span class="sd">    51  0.822213  0.202534</span>
+<span class="sd">    52  0.511489  0.273601</span>
+<span class="sd">    53  0.964757  0.223448</span>
+<span class="sd">    54  0.762153  0.181648</span>
+<span class="sd">    55  0.965657  0.435741</span>
+<span class="sd">    56  0.995278  0.354798</span>
+<span class="sd">    57  0.813382  0.263372</span>
+<span class="sd">    58  0.727295  0.232867</span>
+<span class="sd">    59  0.738777  0.224742</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    calculate_eta_shrinkage</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
     <span class="n">cov</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_estimates_covariance</span>
@@ -223,7 +343,7 @@
     <span class="k">return</span> <span class="n">ish</span></div>
 
 
-<div class="viewcode-block" id="calculate_individual_parameter_statistics"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_individual_parameter_statistics.html#pharmpy.modeling.calculate_individual_parameter_statistics">[docs]</a><span class="k">def</span> <span class="nf">calculate_individual_parameter_statistics</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">exprs</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_individual_parameter_statistics"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_individual_parameter_statistics.html#pharmpy.modeling.calculate_individual_parameter_statistics">[docs]</a><span class="k">def</span> <span class="nf">calculate_individual_parameter_statistics</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">exprs</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate statistics for individual parameters</span>
 
 <span class="sd">    Calculate the mean (expected value of the distribution), variance</span>
@@ -233,7 +353,8 @@
 <span class="sd">    being that variables that depends on the solution of the ODE system</span>
 <span class="sd">    cannot be used. If covariates are used in the expression the statistics</span>
 <span class="sd">    of the parameter is calculated at the median value of each covariate as well</span>
-<span class="sd">    as at the 5:th and 95:th percentiles.</span>
+<span class="sd">    as at the 5:th and 95:th percentiles. If no parameter uncertainty is available</span>
+<span class="sd">    for the model the standard error will not be calculated.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -242,16 +363,28 @@
 <span class="sd">    exprs : str, sympy expression or iterable of str or sympy expressions</span>
 <span class="sd">        Expressions or equations for parameters of interest. If equations are used</span>
 <span class="sd">        the names of the left hand sides will be used as the names of the parameters.</span>
-<span class="sd">    seed : int or numpy rng</span>
+<span class="sd">    rng : Generator or int</span>
+<span class="sd">        Random number generator or int seed</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    pd.DataFrame</span>
 <span class="sd">        A DataFrame of statistics indexed on parameter and covariate value.</span>
 
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, create_rng</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import calculate_individual_parameter_statistics</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; rng = create_rng(23)</span>
+<span class="sd">    &gt;&gt;&gt; calculate_individual_parameter_statistics(model, &quot;K=CL/V&quot;, rng=rng)</span>
+<span class="sd">                              mean  variance    stderr</span>
+<span class="sd">    parameter covariates</span>
+<span class="sd">    K         p5          0.004234  0.000001  0.001138</span>
+<span class="sd">              median      0.004909  0.000001  0.001212</span>
+<span class="sd">              p95         0.004910  0.000001  0.001263</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">seed</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">seed</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-        <span class="n">seed</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">default_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">rng</span> <span class="o">=</span> <span class="n">create_rng</span><span class="p">(</span><span class="n">rng</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exprs</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">exprs</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Basic</span><span class="p">):</span>
         <span class="n">exprs</span> <span class="o">=</span> <span class="p">[</span><span class="n">_split_equation</span><span class="p">(</span><span class="n">exprs</span><span class="p">)]</span>
@@ -277,29 +410,32 @@
             <span class="n">pe</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="p">)</span>
             <span class="n">cov_expr</span> <span class="o">=</span> <span class="n">full_expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">cov_values</span><span class="p">)</span>
             <span class="n">expr</span> <span class="o">=</span> <span class="n">cov_expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">pe</span><span class="p">)</span>
-            <span class="n">samples</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">pe</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+            <span class="n">samples</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">pe</span><span class="p">,</span> <span class="n">samples</span><span class="o">=</span><span class="mi">1000000</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
 
             <span class="n">mean</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
             <span class="n">variance</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">var</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span>
 
-            <span class="n">parameters</span> <span class="o">=</span> <span class="n">sample_from_covariance_matrix</span><span class="p">(</span>
-                <span class="n">model</span><span class="p">,</span>
-                <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-                <span class="n">force_posdef_covmatrix</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-                <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
-            <span class="p">)</span>
-            <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-                    <span class="n">batch</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
-                        <span class="n">cov_expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)),</span>
-                        <span class="n">parameters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">),</span>
-                        <span class="n">samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
-                        <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">,</span>
-                    <span class="p">)</span>
-                    <span class="n">samples</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">batch</span><span class="p">))</span>
-            <span class="n">stderr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">covariance_matrix</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">parameters</span> <span class="o">=</span> <span class="n">sample_parameters_from_covariance_matrix</span><span class="p">(</span>
+                    <span class="n">model</span><span class="p">,</span>
+                    <span class="n">n</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
+                    <span class="n">force_posdef_covmatrix</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
+                    <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
+                <span class="p">)</span>
+                <span class="n">samples</span> <span class="o">=</span> <span class="p">[]</span>
+                <span class="k">with</span> <span class="n">warnings</span><span class="o">.</span><span class="n">catch_warnings</span><span class="p">():</span>
+                    <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
+                    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">parameters</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
+                        <span class="n">batch</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+                            <span class="n">cov_expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">)),</span>
+                            <span class="n">parameters</span><span class="o">=</span><span class="nb">dict</span><span class="p">(</span><span class="n">row</span><span class="p">),</span>
+                            <span class="n">samples</span><span class="o">=</span><span class="mi">10</span><span class="p">,</span>
+                            <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">,</span>
+                        <span class="p">)</span>
+                        <span class="n">samples</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">batch</span><span class="p">))</span>
+                <span class="n">stderr</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">samples</span><span class="p">)</span><span class="o">.</span><span class="n">std</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">stderr</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
             <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">case</span><span class="p">]</span> <span class="o">=</span> <span class="p">[</span><span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">,</span> <span class="n">stderr</span><span class="p">]</span>
             <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;covariates&#39;</span>
 
@@ -314,7 +450,7 @@
     <span class="k">return</span> <span class="n">table</span></div>
 
 
-<div class="viewcode-block" id="calculate_pk_parameters_statistics"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_pk_parameters_statistics.html#pharmpy.modeling.calculate_pk_parameters_statistics">[docs]</a><span class="k">def</span> <span class="nf">calculate_pk_parameters_statistics</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_pk_parameters_statistics"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_pk_parameters_statistics.html#pharmpy.modeling.calculate_pk_parameters_statistics">[docs]</a><span class="k">def</span> <span class="nf">calculate_pk_parameters_statistics</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate statistics for common pharmacokinetic parameters</span>
 
 <span class="sd">    Calculate the mean (expected value of the distribution), variance</span>
@@ -325,12 +461,26 @@
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        A previously estimated model</span>
-<span class="sd">    seed : int or numpy rng</span>
+<span class="sd">    rng : Generator or int</span>
+<span class="sd">        Random number generator or seed</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    pd.DataFrame</span>
 <span class="sd">        A DataFrame of statistics indexed on parameter and covariate value.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, create_rng</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import calculate_pk_parameters_statistics</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; rng = create_rng(23)</span>
+<span class="sd">    &gt;&gt;&gt; calculate_pk_parameters_statistics(model, rng=rng)  # doctest: +NORMALIZE_WHITESPACE</span>
+<span class="sd">                              mean  variance    stderr</span>
+<span class="sd">    parameter covariates</span>
+<span class="sd">    k_e       p5          0.004234  0.000001  0.001138</span>
+<span class="sd">              median      0.004909  0.000001  0.001212</span>
+<span class="sd">              p95         0.004910  0.000001  0.001263</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
@@ -404,7 +554,7 @@
     <span class="k">if</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
         <span class="n">expressions</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;k_e&#39;</span><span class="p">),</span> <span class="n">elimination_rate</span><span class="p">))</span>
 
-    <span class="n">df</span> <span class="o">=</span> <span class="n">calculate_individual_parameter_statistics</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expressions</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">seed</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">calculate_individual_parameter_statistics</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expressions</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span></div>
 
 
@@ -430,13 +580,28 @@
 
 <span class="c1"># TODO: consider moving part of function to results-object</span>
 <div class="viewcode-block" id="summarize_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.modeling.summarize_modelfit_results.html#pharmpy.modeling.summarize_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">summarize_modelfit_results</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Summarize results of multiple model runs, includes runtime, ofv and parameter estimates</span>
-<span class="sd">    (with errors).</span>
+    <span class="sd">&quot;&quot;&quot;Summarize results of multiple model runs</span>
+
+<span class="sd">    Summarize different results after fitting a model, includes runtime, ofv,</span>
+<span class="sd">    and parameter estimates (with errors).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    models : list</span>
 <span class="sd">        List of models</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        A DataFrame of modelfit results, one row per model.</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, summarize_modelfit_results</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; summarize_modelfit_results([model]) # doctest: +ELLIPSIS</span>
+<span class="sd">          minimization_successful         ofv runtime_total  THETA(1)_estimate  ... SIGMA(1,1)_RSE</span>
+<span class="sd">    pheno                    True  586.276056           4.0           0.004696  ...       0.172147</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">run_summaries</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">parameter_summaries</span> <span class="o">=</span> <span class="p">[]</span>
@@ -485,8 +650,8 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on Sep 06, 2021.<br/>
-        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
+        Last updated on Sep 22, 2021.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>
 </footer>

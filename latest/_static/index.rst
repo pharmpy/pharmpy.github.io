@@ -27,11 +27,13 @@ Contents
 .. toctree::
    :maxdepth: 2
 
+   About us <contributors>
    getting_started
    user_guide
    api
-   contribute
    changelog
+   contribute
+   References and citation <citation>
    license
 
 Indices and tables

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.statements &#8212; Pharmpy 0.30.1 documentation</title>
+    <title>pharmpy.statements &#8212; Pharmpy 0.31.1 documentation</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet" />
   <link href="../../_static/css/index.f6b7ca918bee2f46fd9abac01cfb07d5.css" rel="stylesheet" />
@@ -62,6 +62,12 @@
     <div id="navbar-menu" class="col-lg-9 collapse navbar-collapse">
       <ul id="navbar-main-elements" class="navbar-nav mr-auto">
         <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../contributors.html">
+  About us
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../../getting_started.html">
   Getting started
  </a>
@@ -80,14 +86,20 @@
 </li>
 
 <li class="toctree-l1 nav-item">
+ <a class="reference internal nav-link" href="../../changelog.html">
+  Changelog
+ </a>
+</li>
+
+<li class="toctree-l1 nav-item">
  <a class="reference internal nav-link" href="../../contribute.html">
   Contribute
  </a>
 </li>
 
 <li class="toctree-l1 nav-item">
- <a class="reference internal nav-link" href="../../changelog.html">
-  Changelog
+ <a class="reference internal nav-link" href="../../citation.html">
+  References and citation
  </a>
 </li>
 
@@ -125,11 +137,13 @@
 <script>$('#searchbox').show(0);</script>
 <h3><a href="../../index.html">Table of Contents</a></h3>
 <ul>
+<li class="toctree-l1"><a class="reference internal" href="../../contributors.html">About us</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../getting_started.html">Getting started</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../user_guide.html">User guide</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../api.html">API Reference</a></li>
-<li class="toctree-l1"><a class="reference internal" href="../../contribute.html">Contribute</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../changelog.html">Changelog</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../contribute.html">Contribute</a></li>
+<li class="toctree-l1"><a class="reference internal" href="../../citation.html">References and citation</a></li>
 <li class="toctree-l1"><a class="reference internal" href="../../license.html">License</a></li>
 </ul>
 
@@ -309,15 +323,33 @@
 <span class="sd">    ----------</span>
 <span class="sd">    solver : str</span>
 <span class="sd">        Solver to use when numerically solving the ode system</span>
-<span class="sd">        Currently supports NONMEM ADVANs</span>
+<span class="sd">        Supported solvers and their NONMEM ADVAN</span>
+
+<span class="sd">        +------------------------+------------------+</span>
+<span class="sd">        | Solver                 | NONMEM ADVAN     |</span>
+<span class="sd">        +========================+==================+</span>
+<span class="sd">        | LSODA                  | ADVAN13          |</span>
+<span class="sd">        +------------------------+------------------+</span>
+
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">free_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">solver</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span>
+
+    <span class="nd">@solver</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">solver</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">supported</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;LSODA&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">in</span> <span class="n">supported</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown solver </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">. Recognized solvers are </span><span class="si">{</span><span class="n">supported</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">rhs_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -329,7 +361,7 @@
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="s1">&#39;ODESystem()&#39;</span>
 
     <span class="k">def</span> <span class="nf">_repr_html</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -739,7 +771,7 @@
         <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;pre&gt;</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s1">&lt;/pre&gt;&#39;</span>
 
-    <span class="k">def</span> <span class="fm">__str__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
         <span class="n">output_box</span> <span class="o">=</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">central</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_central</span><span class="p">()</span>
@@ -801,7 +833,8 @@
             <span class="p">)</span>
 
         <span class="n">dose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span><span class="o">.</span><span class="n">dose</span>
-        <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">dose</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dose</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="k">return</span> <span class="n">s</span>
 
 
 <span class="k">class</span> <span class="nc">Compartment</span><span class="p">:</span>
@@ -976,7 +1009,10 @@
             <span class="k">return</span> <span class="n">assignments</span></div>
 
 <div class="viewcode-block" id="ModelStatements.extract_params_from_symb"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.extract_params_from_symb">[docs]</a>    <span class="k">def</span> <span class="nf">extract_params_from_symb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol_name</span><span class="p">,</span> <span class="n">pset</span><span class="p">):</span>
-        <span class="n">terms</span> <span class="o">=</span> <span class="p">{</span><span class="n">symb</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">symb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">symbol_name</span><span class="p">)</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">}</span>
+        <span class="n">terms</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">symb</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">for</span> <span class="n">symb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">symbol_name</span><span class="p">))</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="p">}</span>
         <span class="n">theta_name</span> <span class="o">=</span> <span class="n">terms</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">pset</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">pset</span><span class="p">[</span><span class="n">theta_name</span><span class="p">]</span></div>
 
@@ -1021,6 +1057,9 @@
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find symbol </span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_dependency_graph</span><span class="p">()</span>
         <span class="n">symbs</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rhs_symbols</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="c1"># Special case for models with only one statement</span>
+            <span class="k">return</span> <span class="n">symbs</span>
         <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">nx</span><span class="o">.</span><span class="n">bfs_predecessors</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">sort_neighbors</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">x</span><span class="p">))):</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">j</span><span class="p">],</span> <span class="n">Assignment</span><span class="p">):</span>
                 <span class="n">symbs</span> <span class="o">-=</span> <span class="p">{</span><span class="bp">self</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">}</span>
@@ -1089,6 +1128,8 @@
 
 <span class="sd">        Before ODE system</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
         <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ode_index</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
@@ -1101,6 +1142,8 @@
 
 <span class="sd">        After ODE system</span>
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
         <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ode_index</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
@@ -1179,8 +1222,8 @@
   <div class="container">
     <p>
           &copy; Copyright 2018-2021; the Pharmpy development team.<br/>
-        Last updated on Sep 06, 2021.<br/>
-        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.1.2.<br/>
+        Last updated on Sep 22, 2021.<br/>
+        Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br/>
     </p>
   </div>
 </footer>
