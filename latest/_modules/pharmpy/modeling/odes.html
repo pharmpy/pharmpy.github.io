@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.33.1 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.34.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -195,6 +195,7 @@
 <span class="kn">import</span> <span class="nn">sympy</span>
 
 <span class="kn">import</span> <span class="nn">pharmpy.symbols</span>
+<span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">ModelException</span>
 <span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
 <span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">Infusion</span>
 
@@ -670,6 +671,7 @@
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">odes</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Setting absorption is not supported for ExplicitODESystem&quot;</span><span class="p">)</span>
+    <span class="n">_disallow_infusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
 
     <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
@@ -838,6 +840,7 @@
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">odes</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Setting absorption is not supported for ExplicitODESystem&quot;</span><span class="p">)</span>
+    <span class="n">_disallow_infusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
 
     <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
@@ -853,6 +856,19 @@
         <span class="n">depot</span> <span class="o">=</span> <span class="n">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">dose_comp</span><span class="p">)</span>
         <span class="n">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">depot</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
+
+
+<span class="k">def</span> <span class="nf">_disallow_infusion</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="p">,</span> <span class="n">Infusion</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ex</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">rate</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ex</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">duration</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">ex</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="n">ModelException</span><span class="p">(</span><span class="s2">&quot;Model already has an infusion given in the dataset&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="has_zero_order_absorption"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_zero_order_absorption.html#pharmpy.modeling.has_zero_order_absorption">[docs]</a><span class="k">def</span> <span class="nf">has_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
