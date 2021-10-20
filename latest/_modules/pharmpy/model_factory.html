@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model_factory &#8212; Pharmpy 0.34.0 documentation</title>
+    <title>pharmpy.model_factory &#8212; Pharmpy 0.34.1 documentation</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
   <link href="../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -193,7 +193,11 @@
 <span class="sd">Definitions</span>
 <span class="sd">===========</span>
 <span class="sd">&quot;&quot;&quot;</span>
-<span class="kn">import</span> <span class="nn">pharmpy.source</span> <span class="k">as</span> <span class="nn">source</span>
+
+<span class="kn">import</span> <span class="nn">io</span>
+<span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
 <span class="kn">from</span> <span class="nn">pharmpy.plugins.utils</span> <span class="kn">import</span> <span class="n">detect_model</span>
 
 
@@ -213,9 +217,24 @@
 <span class="sd">    - Generic :class:`~pharmpy.generic.Model` if path is None, otherwise appropriate implementation</span>
 <span class="sd">      is invoked (e.g. NONMEM7 :class:`~pharmpy.api_nonmem.model.Model`).</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">src</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">Source</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-    <span class="n">model_class</span> <span class="o">=</span> <span class="n">detect_model</span><span class="p">(</span><span class="n">src</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">model_class</span><span class="p">(</span><span class="n">src</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">pathlib</span><span class="o">.</span><span class="n">Path</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">obj</span>
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">io</span><span class="o">.</span><span class="n">IOBase</span><span class="p">):</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown input type to Model constructor&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;latin-1&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">code</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
+    <span class="n">model_class</span> <span class="o">=</span> <span class="n">detect_model</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model_class</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="c1"># Setup model database here</span>
+    <span class="c1"># Read in model results here?</span>
+    <span class="c1"># Set filename extension?</span>
     <span class="k">return</span> <span class="n">model</span></div>
 </pre></div>
 
