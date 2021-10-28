@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Pharmpy in R &#8212; Pharmpy 0.34.2 documentation</title>
+    <title>Pharmpy in R &#8212; Pharmpy 0.34.3 documentation</title>
     
   <link href="_static/css/theme.css" rel="stylesheet">
   <link href="_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -208,19 +208,38 @@
 <nav id="bd-toc-nav">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#relevant-imports">
-   Relevant imports
+  <a class="reference internal nav-link" href="#installation">
+   Installation
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#trouble-shooting">
+     Trouble shooting
+    </a>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#using-pharmr">
+   Using Pharmr
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#basic-operations">
-   Basic operations
+  <a class="reference internal nav-link" href="#gotchas">
+   Gotchas
   </a>
- </li>
- <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#transformations">
-   Transformations
-  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#the-model-object">
+     The model object
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#list-indices">
+     List indices
+    </a>
+   </li>
+  </ul>
  </li>
 </ul>
 
@@ -245,62 +264,99 @@
                 
   <section id="pharmpy-in-r">
 <span id="using-r"></span><h1>Pharmpy in R<a class="headerlink" href="#pharmpy-in-r" title="Permalink to this headline">¶</a></h1>
-<p>Using Pharmpy in R is similar to how it is used in Python, and all the examples for Python are analogous to how
-they work in R. Replace “.” with “$” for the R equivalent. When a list (denoted […] in Python) is used as input
-in e.g. transformations, the R equivalent is <cite>c()</cite>. For more information about type conversions from R to Python,
-see <a class="reference external" href="https://rstudio.github.io/reticulate/index.html#type-conversions">Reticulate’s documentation</a>.</p>
-<p>An R wrapper to Pharmpy is in development.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>When providing a one-element list as an input argument to e.g. transformations or configurations that do not
-support single strings, use <cite>list()</cite> instead of <cite>c()</cite>. This is because Reticulate translates the string array
-from the list element to separate strings (e.g. <cite>c(‘ETA(1)’)</cite> will be interpreted as
-<cite>c(‘E’, ‘T’, ‘A’, ‘(’, ‘1’, ‘)’)</cite>.</p>
-</div>
-<p>If you want the documentation for a function, use the function <cite>py_help()</cite> from Reticulate.</p>
-<section id="relevant-imports">
-<h2>Relevant imports<a class="headerlink" href="#relevant-imports" title="Permalink to this headline">¶</a></h2>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="nf">library</span><span class="p">(</span><span class="n">reticulate</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="c1"># use_python(&quot;python3&quot;)  # Uncomment if needed</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">pharmpy</span> <span class="o">&lt;-</span> <span class="nf">import</span><span class="p">(</span><span class="s">&quot;pharmpy&quot;</span><span class="p">)</span>
+<p>Pharmr is an R wrapper to Pharmpy. It provides an R interface to all functions found in
+the modeling-module (documented <a class="reference external" href="https://pharmpy.github.io/latest/reference/pharmpy.modeling.html">here</a>).
+Each function is also available via the help-function (or <cite>?</cite>). The version number of Pharmr
+mirrors Pharmpy, so it is import to make sure they have the same version number (a warning
+will appear if they are different). Pharmr version 0.33.1 is on CRAN. However, since Pharmpy
+still is under development and different features constantly are being released, we still
+recommend using the development version on Github until Pharmpy/Pharmr version 1.0.0 is released.</p>
+<section id="installation">
+<h2>Installation<a class="headerlink" href="#installation" title="Permalink to this headline">¶</a></h2>
+<p>Pharmr uses the package <a class="reference external" href="https://rstudio.github.io/reticulate">reticulate</a> for calling Python from R. When installing Pharmr,
+reticulate will give a prompt to set up the reticulate environment. To use Python 3.9
+in your environment run the following code in R before installing Pharmr:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">Sys.setenv</span><span class="p">(</span><span class="n">RETICULATE_MINICONDA_PYTHON_VERSION</span><span class="o">=</span><span class="s">&quot;3.9&quot;</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>A way to write functions from e.g. the modeling module in a more clean way:</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">add_covariate_effect</span> <span class="o">&lt;-</span> <span class="n">modeling</span><span class="o">$</span><span class="n">add_covariate_effect</span>
+<p>Then install Pharmr and Pharmpy:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">remotes</span><span class="o">::</span><span class="nf">install_github</span><span class="p">(</span><span class="s">&quot;pharmpy/pharmr&quot;</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="s">&quot;main&quot;</span><span class="p">)</span>
+<span class="n">pharmr</span><span class="o">::</span><span class="nf">install_pharmpy</span><span class="p">()</span>
 </pre></div>
 </div>
-</section>
-<section id="basic-operations">
-<h2>Basic operations<a class="headerlink" href="#basic-operations" title="Permalink to this headline">¶</a></h2>
-<p>To load a model and access e.g. parameters</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">model</span> <span class="o">&lt;-</span> <span class="n">pharmpy</span><span class="o">$</span><span class="nf">Model</span><span class="p">(</span><span class="s">&quot;run1.mod&quot;</span><span class="p">)</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">model</span><span class="o">$</span><span class="n">modelfit_results</span><span class="o">$</span><span class="n">parameter_estimates</span>
-  <span class="nf">THETA</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>   <span class="nf">THETA</span><span class="p">(</span><span class="m">2</span><span class="p">)</span>   <span class="nf">THETA</span><span class="p">(</span><span class="m">3</span><span class="p">)</span> <span class="nf">OMEGA</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">1</span><span class="p">)</span> <span class="nf">OMEGA</span><span class="p">(</span><span class="m">2</span><span class="p">,</span><span class="m">2</span><span class="p">)</span> <span class="nf">SIGMA</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">1</span><span class="p">)</span>
-<span class="m">0.00469555</span> <span class="m">0.98425800</span> <span class="m">0.15892000</span> <span class="m">0.02935080</span> <span class="m">0.02790600</span> <span class="m">0.01324100</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">model</span><span class="o">$</span><span class="n">parameters</span>
-       <span class="n">name</span>     <span class="n">value</span>  <span class="n">lower</span>    <span class="n">upper</span>    <span class="n">fix</span>
-   <span class="nf">THETA</span><span class="p">(</span><span class="m">1</span><span class="p">)</span>  <span class="m">0.004693</span>   <span class="m">0.00</span>  <span class="m">1000000</span>  <span class="n">False</span>
-   <span class="nf">THETA</span><span class="p">(</span><span class="m">2</span><span class="p">)</span>  <span class="m">1.009160</span>   <span class="m">0.00</span>  <span class="m">1000000</span>  <span class="n">False</span>
-   <span class="nf">THETA</span><span class="p">(</span><span class="m">3</span><span class="p">)</span>  <span class="m">0.100000</span>  <span class="m">-0.99</span>  <span class="m">1000000</span>  <span class="n">False</span>
- <span class="nf">OMEGA</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">1</span><span class="p">)</span>  <span class="m">0.030963</span>   <span class="m">0.00</span>       <span class="n">oo</span>  <span class="n">False</span>
- <span class="nf">OMEGA</span><span class="p">(</span><span class="m">2</span><span class="p">,</span><span class="m">2</span><span class="p">)</span>  <span class="m">0.031128</span>   <span class="m">0.00</span>       <span class="n">oo</span>  <span class="n">False</span>
- <span class="nf">SIGMA</span><span class="p">(</span><span class="m">1</span><span class="p">,</span><span class="m">1</span><span class="p">)</span>  <span class="m">0.013086</span>   <span class="m">0.00</span>       <span class="n">oo</span>  <span class="n">False</span>
-<span class="o">&gt;&gt;&gt;</span> <span class="n">model</span><span class="o">$</span><span class="nf">write</span><span class="p">(</span><span class="s">&quot;run2.mod&quot;</span><span class="p">)</span>
+<section id="trouble-shooting">
+<h3>Trouble shooting<a class="headerlink" href="#trouble-shooting" title="Permalink to this headline">¶</a></h3>
+<p>When reticulate sets up Miniconda it will default to use Python 3.6 (which Pharmpy does not
+support). If you have any trouble installing Pharmpy or any of its dependencies, you can do
+the following to check the Python version in your reticulate environment:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">reticulate</span><span class="p">)</span>
+<span class="n">reticulate</span><span class="o">::</span><span class="nf">py_discover_config</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Make sure the Pyrhon version is &gt;= 3.7. If it is not, you can run the following in R:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">conda_create</span><span class="p">(</span><span class="s">&#39;r-reticulate&#39;</span><span class="p">,</span> <span class="n">python_version</span> <span class="o">=</span> <span class="s">&#39;3.9&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Restart the session and try installing Pharmpy again:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">pharmr</span><span class="p">)</span>
+<span class="n">pharmr</span><span class="o">::</span><span class="nf">install_pharmpy</span><span class="p">()</span>
 </pre></div>
 </div>
 </section>
-<section id="transformations">
-<h2>Transformations<a class="headerlink" href="#transformations" title="Permalink to this headline">¶</a></h2>
-<p>It is also possible to perform different types of transformations, such as addition of covariate effects (see the
-user guide <a class="reference internal" href="modeling.html#modeling"><span class="std std-ref">Modeling</span></a> for available transformations).</p>
-<p>Together with the <cite>dplyr</cite> package, you can create transformation pipelines (note that model is changed in place).</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="o">&gt;&gt;&gt;</span> <span class="n">model</span> <span class="o">&lt;-</span> <span class="n">pharmpy</span><span class="o">$</span><span class="nf">Model</span><span class="p">(</span><span class="s">&quot;run1.mod&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="nf">set_first_order_absorption</span><span class="p">()</span> <span class="o">%&gt;%</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="nf">add_iiv</span><span class="p">(</span><span class="s">&quot;MAT&quot;</span><span class="p">,</span> <span class="s">&quot;exp&quot;</span><span class="p">)</span> <span class="o">%&gt;%</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="nf">update_source</span><span class="p">()</span> <span class="o">%&gt;%</span>
-<span class="o">&gt;&gt;&gt;</span>     <span class="nf">write_model</span><span class="p">(</span><span class="s">&quot;run2.mod&quot;</span><span class="p">)</span>
+</section>
+<section id="using-pharmr">
+<h2>Using Pharmr<a class="headerlink" href="#using-pharmr" title="Permalink to this headline">¶</a></h2>
+<p>In Pharmr, you can pipe different Pharmpy functions together with the magrittr-package:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">pharmr</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">&lt;-</span> <span class="nf">load_example_model</span><span class="p">(</span><span class="s">&#39;pheno&#39;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  <span class="nf">add_parameter</span><span class="p">(</span><span class="s">&#39;MAT&#39;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  <span class="nf">fit</span><span class="p">()</span>
 </pre></div>
 </div>
+<p><a class="reference external" href="https://pharmpy.github.io/latest/modelfit.html">fit()</a> will call the appropriate software/package to run the model (e.g. a NONMEM model will
+be run using NONMEM, currently only this is supported). Most methods return model object
+references, allowing you to pipe more easily.</p>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>If you try to access data frames belonging to a Pharmpy object you need to reset the index.
+All functions available in Pharmr do this internally, it is only when you have data frames
+nested in objects (such as a model object) that you need to do this. An example:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">model</span> <span class="o">&lt;-</span> <span class="nf">load_example_model</span><span class="p">(</span><span class="s">&#39;pheno&#39;</span><span class="p">)</span>
+<span class="n">residuals</span> <span class="o">&lt;-</span> <span class="nf">reset_index</span><span class="p">(</span><span class="n">model</span><span class="o">$</span><span class="n">modelfit_results</span><span class="o">$</span><span class="n">residuals</span><span class="p">)</span>
+</pre></div>
+</div>
+</div>
+</section>
+<section id="gotchas">
+<h2>Gotchas<a class="headerlink" href="#gotchas" title="Permalink to this headline">¶</a></h2>
+<section id="the-model-object">
+<h3>The model object<a class="headerlink" href="#the-model-object" title="Permalink to this headline">¶</a></h3>
+<p>In Pharmpy, all changes to a model object occur in place.</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">model_a</span> <span class="o">&lt;-</span> <span class="n">model_b</span> <span class="o">&lt;-</span> <span class="nf">load_example_model</span><span class="p">(</span>’<span class="n">pheno</span>’<span class="p">)</span>
+</pre></div>
+</div>
+<p>All changes to model_a will be also applied to model_b since they refer to the same object.
+In order to have to different models we recommend the following to have two different models:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">model_a</span> <span class="o">&lt;-</span> <span class="nf">load_example_model</span><span class="p">(</span>’<span class="n">pheno</span>’<span class="p">)</span>
+<span class="n">model_b</span> <span class="o">&lt;-</span> <span class="nf">copy_model</span><span class="p">(</span><span class="n">model_a</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span>’<span class="n">pheno2</span>’<span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="list-indices">
+<h3>List indices<a class="headerlink" href="#list-indices" title="Permalink to this headline">¶</a></h3>
+<p>One difference between Python and R is that in Python, list indices start at 0 while in R
+it starts at 1. Since Pharmpy is developed in R, in functions where you have arguments
+referring to indices, you need to use the Python way. For example:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">set_estimation_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">interaction</span> <span class="o">=</span> <span class="kc">TRUE</span><span class="p">,</span> <span class="n">options</span> <span class="o">=</span> <span class="kc">NULL</span><span class="p">,</span> <span class="n">idx</span> <span class="o">=</span> <span class="m">0</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that normal R data structures such as vectors, lists and data frames are still indexed
+the same way as usual:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">etas</span> <span class="o">&lt;-</span> <span class="n">model</span><span class="o">$</span><span class="n">random_variables</span>
+<span class="n">etas</span><span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="c1"># access first element</span>
+</pre></div>
+</div>
+</section>
 </section>
 </section>
 
