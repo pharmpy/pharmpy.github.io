@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.common &#8212; Pharmpy 0.34.3 documentation</title>
+    <title>pharmpy.modeling.common &#8212; Pharmpy 0.35.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -676,7 +676,7 @@
     <span class="k">return</span> <span class="n">d</span>
 
 
-<div class="viewcode-block" id="set_estimation_step"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_estimation_step.html#pharmpy.modeling.set_estimation_step">[docs]</a><span class="k">def</span> <span class="nf">set_estimation_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">interaction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
+<div class="viewcode-block" id="set_estimation_step"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_estimation_step.html#pharmpy.modeling.set_estimation_step">[docs]</a><span class="k">def</span> <span class="nf">set_estimation_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Set estimation step</span>
 
 <span class="sd">    Sets estimation step for a model. Methods currently supported are:</span>
@@ -688,13 +688,10 @@
 <span class="sd">        Pharmpy model</span>
 <span class="sd">    method : str</span>
 <span class="sd">        estimation method to change to</span>
-<span class="sd">    interaction : bool</span>
-<span class="sd">        whether to use interaction or not, default is true</span>
-<span class="sd">    options : dict</span>
-<span class="sd">        any additional options. Note that this replaces old options (see</span>
-<span class="sd">            append_estimation_step_options to keep old options)</span>
 <span class="sd">    idx : int</span>
 <span class="sd">        index of estimation step, default is 0 (first estimation step)</span>
+<span class="sd">    kwargs</span>
+<span class="sd">        Arguments to pass to EstimationMethod (such as interaction, evaluation)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -705,11 +702,11 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; opts = {&#39;NITER&#39;: 1000, &#39;ISAMPLE&#39;: 100, &#39;EONLY&#39;: 1}</span>
-<span class="sd">    &gt;&gt;&gt; set_estimation_step(model, &quot;IMP&quot;, options=opts)   # doctest: +ELLIPSIS</span>
+<span class="sd">    &gt;&gt;&gt; opts = {&#39;NITER&#39;: 1000, &#39;ISAMPLE&#39;: 100}</span>
+<span class="sd">    &gt;&gt;&gt; set_estimation_step(model, &quot;IMP&quot;, evaluation=True, tool_options=opts)   # doctest: +ELLIPSIS</span>
 <span class="sd">    &lt;...&gt;</span>
 <span class="sd">    &gt;&gt;&gt; model.estimation_steps[0]   # doctest: +ELLIPSIS</span>
-<span class="sd">    EstimationMethod(&quot;IMP&quot;, interaction=True, cov=True, options=[Option(key=&#39;NITER&#39;, value=1000),...</span>
+<span class="sd">    EstimationMethod(&quot;IMP&quot;, interaction=True, cov=True, evaluation=True, ..., tool_options=...</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -719,13 +716,12 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">method</span> <span class="o">=</span> <span class="n">method</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">interaction</span> <span class="o">=</span> <span class="n">interaction</span>
-    <span class="k">if</span> <span class="n">options</span><span class="p">:</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">options</span> <span class="o">=</span> <span class="n">options</span>
+    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+        <span class="nb">setattr</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">[</span><span class="n">idx</span><span class="p">],</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="add_estimation_step"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_estimation_step.html#pharmpy.modeling.add_estimation_step">[docs]</a><span class="k">def</span> <span class="nf">add_estimation_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">interaction</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="add_estimation_step"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_estimation_step.html#pharmpy.modeling.add_estimation_step">[docs]</a><span class="k">def</span> <span class="nf">add_estimation_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">method</span><span class="p">,</span> <span class="n">idx</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add estimation step</span>
 
 <span class="sd">    Adds estimation step for a model in a given index. Methods currently supported are:</span>
@@ -737,12 +733,10 @@
 <span class="sd">        Pharmpy model</span>
 <span class="sd">    method : str</span>
 <span class="sd">        estimation method to change to</span>
-<span class="sd">    interaction : bool</span>
-<span class="sd">        whether to use interaction or not, default is true</span>
-<span class="sd">    options : dict</span>
-<span class="sd">        any additional tool specific options</span>
 <span class="sd">    idx : int</span>
 <span class="sd">        index of estimation step, default is None (adds step at the end)</span>
+<span class="sd">    kwargs</span>
+<span class="sd">        Arguments to pass to EstimationMethod (such as interaction, evaluation)</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -753,14 +747,14 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; opts = {&#39;NITER&#39;: 1000, &#39;ISAMPLE&#39;: 100, &#39;EONLY&#39;: 1}</span>
-<span class="sd">    &gt;&gt;&gt; add_estimation_step(model, &quot;IMP&quot;, options=opts)   # doctest: +ELLIPSIS</span>
+<span class="sd">    &gt;&gt;&gt; opts = {&#39;NITER&#39;: 1000, &#39;ISAMPLE&#39;: 100}</span>
+<span class="sd">    &gt;&gt;&gt; add_estimation_step(model, &quot;IMP&quot;, tool_options=opts)   # doctest: +ELLIPSIS</span>
 <span class="sd">    &lt;...&gt;</span>
 <span class="sd">    &gt;&gt;&gt; ests = model.estimation_steps</span>
 <span class="sd">    &gt;&gt;&gt; len(ests)</span>
 <span class="sd">    2</span>
 <span class="sd">    &gt;&gt;&gt; ests[1]   # doctest: +ELLIPSIS</span>
-<span class="sd">    EstimationMethod(&quot;IMP&quot;, interaction=True, cov=False, options=[Option(key=&#39;NITER&#39;, value=1000...</span>
+<span class="sd">    EstimationMethod(&quot;IMP&quot;, interaction=False, cov=False, ..., tool_options={&#39;NITER&#39;: 1000,...</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -769,7 +763,8 @@
 <span class="sd">    append_estimation_step_options</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">meth</span> <span class="o">=</span> <span class="n">EstimationMethod</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="n">interaction</span><span class="o">=</span><span class="n">interaction</span><span class="p">,</span> <span class="n">options</span><span class="o">=</span><span class="n">options</span><span class="p">)</span>
+    <span class="n">meth</span> <span class="o">=</span> <span class="n">EstimationMethod</span><span class="p">(</span><span class="n">method</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
         <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">idx</span><span class="p">,</span> <span class="n">meth</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
@@ -797,14 +792,11 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; opts = {&#39;NITER&#39;: 1000, &#39;ISAMPLE&#39;: 100, &#39;EONLY&#39;: 1}</span>
-<span class="sd">    &gt;&gt;&gt; add_estimation_step(model, &quot;IMP&quot;, options=opts)   # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
-<span class="sd">    &gt;&gt;&gt; remove_estimation_step(model, 1)      # doctest: +ELLIPSIS</span>
+<span class="sd">    &gt;&gt;&gt; remove_estimation_step(model, 0)      # doctest: +ELLIPSIS</span>
 <span class="sd">    &lt;...&gt;</span>
 <span class="sd">    &gt;&gt;&gt; ests = model.estimation_steps</span>
 <span class="sd">    &gt;&gt;&gt; len(ests)</span>
-<span class="sd">    1</span>
+<span class="sd">    0</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -817,7 +809,7 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="append_estimation_step_options"><a class="viewcode-back" href="../../../api/pharmpy.modeling.append_estimation_step_options.html#pharmpy.modeling.append_estimation_step_options">[docs]</a><span class="k">def</span> <span class="nf">append_estimation_step_options</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
+<div class="viewcode-block" id="append_estimation_step_options"><a class="viewcode-back" href="../../../api/pharmpy.modeling.append_estimation_step_options.html#pharmpy.modeling.append_estimation_step_options">[docs]</a><span class="k">def</span> <span class="nf">append_estimation_step_options</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tool_options</span><span class="p">,</span> <span class="n">idx</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Append estimation step options</span>
 
 <span class="sd">    Appends options to an existing estimation step.</span>
@@ -826,7 +818,7 @@
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model</span>
-<span class="sd">    options : dict</span>
+<span class="sd">    tool_options : dict</span>
 <span class="sd">        any additional tool specific options</span>
 <span class="sd">    idx : int</span>
 <span class="sd">        index of estimation step</span>
@@ -840,12 +832,12 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; opts = {&#39;NITER&#39;: 1000, &#39;ISAMPLE&#39;: 100, &#39;EONLY&#39;: 1}</span>
-<span class="sd">    &gt;&gt;&gt; append_estimation_step_options(model, options=opts, idx=0)   # doctest: +ELLIPSIS</span>
+<span class="sd">    &gt;&gt;&gt; opts = {&#39;NITER&#39;: 1000, &#39;ISAMPLE&#39;: 100}</span>
+<span class="sd">    &gt;&gt;&gt; append_estimation_step_options(model, tool_options=opts, idx=0)   # doctest: +ELLIPSIS</span>
 <span class="sd">    &lt;...&gt;</span>
 <span class="sd">    &gt;&gt;&gt; est = model.estimation_steps[0]</span>
-<span class="sd">    &gt;&gt;&gt; len(est.options)</span>
-<span class="sd">    3</span>
+<span class="sd">    &gt;&gt;&gt; len(est.tool_options)</span>
+<span class="sd">    2</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -854,7 +846,7 @@
 <span class="sd">    remove_estimation_step</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">append_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">append_tool_options</span><span class="p">(</span><span class="n">tool_options</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.34.3 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.35.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -594,22 +594,27 @@
     <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="n">expr</span>
 
 
-<span class="c1"># TODO: consider moving part of function to results-object</span>
-<div class="viewcode-block" id="summarize_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.modeling.summarize_modelfit_results.html#pharmpy.modeling.summarize_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">summarize_modelfit_results</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
+<div class="viewcode-block" id="summarize_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.modeling.summarize_modelfit_results.html#pharmpy.modeling.summarize_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">summarize_modelfit_results</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Summarize results of model runs</span>
 
 <span class="sd">    Summarize different results after fitting a model, includes runtime, ofv,</span>
-<span class="sd">    and parameter estimates (with errors).</span>
+<span class="sd">    and parameter estimates (with errors). If include_all_estimation_steps is False,</span>
+<span class="sd">    only the last estimation step will be included (note that in that case, the</span>
+<span class="sd">    minimization_successful value will be referring to the last estimation step, if</span>
+<span class="sd">    last step is evaluation it will go backwards until it finds an estimation step</span>
+<span class="sd">    that wasn&#39;t an evaluation).</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    models : list, Model</span>
 <span class="sd">        List of models or single model</span>
+<span class="sd">    include_all_estimation_steps : bool</span>
+<span class="sd">        Whether to include all estimation steps, default is False</span>
 
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    pd.DataFrame</span>
-<span class="sd">        A DataFrame of modelfit results, one row per model.</span>
+<span class="sd">        A DataFrame of modelfit results with model name and estmation step as index.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -622,11 +627,14 @@
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
         <span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">models</span><span class="p">]</span>
 
-    <span class="n">modelfit_results_dict</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
-        <span class="n">modelfit_results_dict</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">get_result_summary</span><span class="p">()</span>
+    <span class="n">summaries</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">modelfit_results_dict</span><span class="p">,</span> <span class="n">orient</span><span class="o">=</span><span class="s1">&#39;index&#39;</span><span class="p">)</span></div>
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">result_summary</span><span class="p">(</span><span class="n">include_all_estimation_steps</span><span class="p">))</span>
+
+    <span class="n">summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">summaries</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
+
+    <span class="k">return</span> <span class="n">summary</span></div>
 </pre></div>
 
               </div>
