@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.statements &#8212; Pharmpy 0.35.1 documentation</title>
+    <title>pharmpy.statements &#8212; Pharmpy 0.36.0 documentation</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
   <link href="../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -627,7 +627,7 @@
             <span class="k">return</span> <span class="n">transits</span>
         <span class="n">transits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
         <span class="n">comp</span><span class="p">,</span> <span class="n">rate</span> <span class="o">=</span> <span class="n">outflows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">rate</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_compartment_inflows</span><span class="p">(</span><span class="n">comp</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">break</span>
@@ -635,7 +635,7 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">outflows</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="k">break</span>
             <span class="n">next_comp</span><span class="p">,</span> <span class="n">next_rate</span> <span class="o">=</span> <span class="n">outflows</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">next_rate</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">next_rate</span><span class="p">)</span>
+            <span class="n">next_rate</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">next_rate</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">rate</span> <span class="o">!=</span> <span class="n">next_rate</span><span class="p">:</span>
                 <span class="k">break</span>
             <span class="n">transits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
@@ -980,6 +980,87 @@
             <span class="n">symbols</span> <span class="o">|=</span> <span class="n">assignment</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="k">return</span> <span class="n">symbols</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">ode_system</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Returns the ODE system of the model or None if the model doesn&#39;t have an ODE system</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
+<span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; model.statements.ode_system</span>
+<span class="sd">        Bolus(AMT)</span>
+<span class="sd">        ┌───────┐       ┌──────┐</span>
+<span class="sd">        │CENTRAL│──CL/V→│OUTPUT│</span>
+<span class="sd">        └───────┘       └──────┘</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
+                <span class="k">return</span> <span class="n">s</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">before_odes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;All statements before the ODE system</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
+<span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; model.statements.before_odes</span>
+<span class="sd">                 ⎧TIME  for AMT &gt; 0</span>
+<span class="sd">                 ⎨</span>
+<span class="sd">        BTIME := ⎩ 0     otherwise</span>
+<span class="sd">        TAD := -BTIME + TIME</span>
+<span class="sd">        TVCL := THETA(1)⋅WGT</span>
+<span class="sd">        TVV := THETA(2)⋅WGT</span>
+<span class="sd">               ⎧TVV⋅(THETA(3) + 1)  for APGR &lt; 5</span>
+<span class="sd">               ⎨</span>
+<span class="sd">        TVV := ⎩       TVV           otherwise</span>
+<span class="sd">                    ETA(1)</span>
+<span class="sd">        CL := TVCL⋅ℯ</span>
+<span class="sd">                  ETA(2)</span>
+<span class="sd">        V := TVV⋅ℯ</span>
+<span class="sd">        S₁ := V</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sset</span> <span class="o">=</span> <span class="n">ModelStatements</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
+                <span class="k">break</span>
+            <span class="n">sset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sset</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">after_odes</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;All statements after the ODE system</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
+<span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; model.statements.after_odes</span>
+<span class="sd">             A_CENTRAL</span>
+<span class="sd">             ─────────</span>
+<span class="sd">        F :=     S₁</span>
+<span class="sd">        W := F</span>
+<span class="sd">        Y := EPS(1)⋅W + F</span>
+<span class="sd">        IPRED := F</span>
+<span class="sd">        IRES := DV - IPRED</span>
+<span class="sd">                  IRES</span>
+<span class="sd">                  ────</span>
+<span class="sd">        IWRES :=   W</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sset</span> <span class="o">=</span> <span class="n">ModelStatements</span><span class="p">()</span>
+        <span class="n">found</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">ode_system</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
+                <span class="n">found</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="k">elif</span> <span class="n">found</span><span class="p">:</span>
+                <span class="n">sset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">sset</span>
+
 <div class="viewcode-block" id="ModelStatements.subs"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.subs">[docs]</a>    <span class="k">def</span> <span class="nf">subs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Substitute symbols in all statements.</span>
 
@@ -1017,16 +1098,29 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">assignments</span></div>
 
-<div class="viewcode-block" id="ModelStatements.extract_params_from_symb"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.extract_params_from_symb">[docs]</a>    <span class="k">def</span> <span class="nf">extract_params_from_symb</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol_name</span><span class="p">,</span> <span class="n">pset</span><span class="p">):</span>
-        <span class="n">terms</span> <span class="o">=</span> <span class="p">{</span>
-            <span class="n">symb</span><span class="o">.</span><span class="n">name</span>
-            <span class="k">for</span> <span class="n">symb</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">symbol_name</span><span class="p">))</span><span class="o">.</span><span class="n">free_symbols</span>
-        <span class="p">}</span>
-        <span class="n">theta_name</span> <span class="o">=</span> <span class="n">terms</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">pset</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">pset</span><span class="p">[</span><span class="n">theta_name</span><span class="p">]</span></div>
-
 <div class="viewcode-block" id="ModelStatements.reassign"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.reassign">[docs]</a>    <span class="k">def</span> <span class="nf">reassign</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Reassign symbol to expression&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Reassign symbol to expression</span>
+
+<span class="sd">        Set symbol to be expression and remove all previous assignments of symbol</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        symbol : Symbol or str</span>
+<span class="sd">            Symbol to reassign</span>
+<span class="sd">        expression : Expression or str</span>
+<span class="sd">            The new expression to assign to symbol</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
+<span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; model.statements.reassign(&quot;CL&quot;, &quot;TVCL + eta&quot;)</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
+
         <span class="n">last</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">stat</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">),</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">stat</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">)</span> <span class="ow">and</span> <span class="n">stat</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">symbol</span><span class="p">:</span>
@@ -1053,7 +1147,26 @@
         <span class="k">return</span> <span class="n">graph</span>
 
 <div class="viewcode-block" id="ModelStatements.dependencies"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.dependencies">[docs]</a>    <span class="k">def</span> <span class="nf">dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Find all dependencies of a symbol&quot;&quot;&quot;</span>
+        <span class="sd">&quot;&quot;&quot;Find all dependencies of a symbol</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        symbol : Symbol or str</span>
+<span class="sd">            Input symbol</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        set</span>
+<span class="sd">            Set of symbols</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
+<span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; model.statements.dependencies(&quot;CL&quot;)   # doctest: +SKIP</span>
+<span class="sd">        {ETA(1), THETA(1), WGT}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">symbol</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
             <span class="k">if</span> <span class="p">(</span>
                 <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Assignment</span><span class="p">)</span>
@@ -1078,8 +1191,19 @@
         <span class="k">return</span> <span class="n">symbs</span></div>
 
 <div class="viewcode-block" id="ModelStatements.remove_symbol_definitions"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.remove_symbol_definitions">[docs]</a>    <span class="k">def</span> <span class="nf">remove_symbol_definitions</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbols</span><span class="p">,</span> <span class="n">statement</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Remove symbols and dependencies not used elsewhere. statement</span>
-<span class="sd">        is the statement from which the symbol was removed</span>
+        <span class="sd">&quot;&quot;&quot;Remove symbols and dependencies not used elsewhere</span>
+
+<span class="sd">        If the statement no longer depends on the specified</span>
+<span class="sd">        symbols, this method will make sure that the definitions</span>
+<span class="sd">        of these symbols will be removed unless they are dependencies</span>
+<span class="sd">        of other statements.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        symbols : iterable</span>
+<span class="sd">            Iterable of symbols no longer used in the statement</span>
+<span class="sd">        statement : Statement</span>
+<span class="sd">            Statement from which the symbols were removed</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">graph</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_dependency_graph</span><span class="p">()</span>
         <span class="n">removed_ind</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span>
@@ -1109,59 +1233,53 @@
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="n">remove</span><span class="p">)):</span>
             <span class="k">del</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span></div>
 
-    <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">ode_system</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Returns the ODE system of the model or None if the model doesn&#39;t have an ODE system&quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">s</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-<div class="viewcode-block" id="ModelStatements.before_ode"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.before_ode">[docs]</a>    <span class="k">def</span> <span class="nf">before_ode</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">sset</span> <span class="o">=</span> <span class="n">ModelStatements</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
-                <span class="k">break</span>
-            <span class="n">sset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="n">sset</span></div>
-
-    <span class="k">def</span> <span class="nf">_ode_index</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
-                <span class="k">return</span> <span class="n">i</span>
-        <span class="k">return</span> <span class="kc">None</span>
-
-<div class="viewcode-block" id="ModelStatements.full_expression_from_odes"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.full_expression_from_odes">[docs]</a>    <span class="k">def</span> <span class="nf">full_expression_from_odes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelStatements.full_expression"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.full_expression">[docs]</a>    <span class="k">def</span> <span class="nf">full_expression</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Expand an expression into its full definition</span>
 
-<span class="sd">        Before ODE system</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        expression : expression or str</span>
+<span class="sd">            Expression to expand. A string will be converted to an expression.</span>
+
+<span class="sd">        Return</span>
+<span class="sd">        ------</span>
+<span class="sd">        expression</span>
+<span class="sd">            Expanded expression</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
+<span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; model.statements.before_odes.full_expression(&quot;CL&quot;)</span>
+<span class="sd">        THETA(1)*WGT*exp(ETA(1))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">expression</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ode_index</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">i</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="bp">self</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">:</span> <span class="bp">self</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">expression</span><span class="p">})</span>
+        <span class="k">for</span> <span class="n">statement</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="s2">&quot;ODESystem not supported by full_expression. Use the properties before_odes &quot;</span>
+                    <span class="s2">&quot;or after_odes.&quot;</span>
+                <span class="p">)</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">statement</span><span class="o">.</span><span class="n">symbol</span><span class="p">:</span> <span class="n">statement</span><span class="o">.</span><span class="n">expression</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">expression</span></div>
 
-<div class="viewcode-block" id="ModelStatements.full_expression_after_odes"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.full_expression_after_odes">[docs]</a>    <span class="k">def</span> <span class="nf">full_expression_after_odes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expression</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Expand an expression into its full definition</span>
+<div class="viewcode-block" id="ModelStatements.insert_before_odes"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.insert_before_odes">[docs]</a>    <span class="k">def</span> <span class="nf">insert_before_odes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statement</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Insert a statement just before the ODE system or at the end of the model</span>
 
-<span class="sd">        After ODE system</span>
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        statement : Statement</span>
+<span class="sd">            Statement to insert</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy import Assignment</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
+<span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; a = Assignment(&quot;WGT_G&quot;, &quot;WGT*1000&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; model.statements.insert_before_odes(a)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">expression</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
-        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ode_index</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">i</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">i</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span>
-        <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="bp">self</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">:</span> <span class="bp">self</span><span class="p">[</span><span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">expression</span><span class="p">})</span>
-        <span class="k">return</span> <span class="n">expression</span></div>
-
-<div class="viewcode-block" id="ModelStatements.add_before_odes"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.add_before_odes">[docs]</a>    <span class="k">def</span> <span class="nf">add_before_odes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statement</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Add a statement just before the ODE system or at the end of the model&quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
                 <span class="k">break</span>
@@ -1177,16 +1295,13 @@
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)):</span>
-                <span class="k">if</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">!=</span> <span class="n">other</span><span class="p">[</span><span class="n">i</span><span class="p">]:</span>
+            <span class="k">for</span> <span class="n">first</span><span class="p">,</span> <span class="n">second</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">first</span> <span class="o">!=</span> <span class="n">second</span><span class="p">:</span>
                     <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
-        <span class="k">for</span> <span class="n">statement</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
-            <span class="n">s</span> <span class="o">+=</span> <span class="nb">repr</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span>
-        <span class="k">return</span> <span class="n">s</span>
+        <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">([</span><span class="nb">repr</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span> <span class="k">for</span> <span class="n">statement</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">])</span>
 
     <span class="k">def</span> <span class="nf">_repr_html_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">html</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;\begin{align*}&#39;</span>
@@ -1229,7 +1344,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.0.<br>
 </p>
     </div>
     

@@ -10,6 +10,8 @@ ModelStatements
 
    .. autosummary::
 
+      ~ModelStatements.after_odes
+      ~ModelStatements.before_odes
       ~ModelStatements.free_symbols
       ~ModelStatements.ode_system
 
@@ -17,35 +19,31 @@ ModelStatements
 
    .. autosummary::
 
-      ~ModelStatements.add_before_odes
-      ~ModelStatements.before_ode
       ~ModelStatements.copy
       ~ModelStatements.dependencies
-      ~ModelStatements.extract_params_from_symb
       ~ModelStatements.find_assignment
-      ~ModelStatements.full_expression_after_odes
-      ~ModelStatements.full_expression_from_odes
+      ~ModelStatements.full_expression
       ~ModelStatements.insert
+      ~ModelStatements.insert_before_odes
       ~ModelStatements.reassign
       ~ModelStatements.remove_symbol_definitions
       ~ModelStatements.subs
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: after_odes
+   .. autoattribute:: before_odes
    .. autoattribute:: free_symbols
    .. autoattribute:: ode_system
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: add_before_odes
-   .. automethod:: before_ode
    .. automethod:: copy
    .. automethod:: dependencies
-   .. automethod:: extract_params_from_symb
    .. automethod:: find_assignment
-   .. automethod:: full_expression_after_odes
-   .. automethod:: full_expression_from_odes
+   .. automethod:: full_expression
    .. automethod:: insert
+   .. automethod:: insert_before_odes
    .. automethod:: reassign
    .. automethod:: remove_symbol_definitions
    .. automethod:: subs

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.35.1 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.36.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -411,7 +411,7 @@
     <span class="n">i</span> <span class="o">=</span> <span class="mi">0</span>
     <span class="n">table</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;parameter&#39;</span><span class="p">,</span> <span class="s1">&#39;covariates&#39;</span><span class="p">,</span> <span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="s1">&#39;variance&#39;</span><span class="p">,</span> <span class="s1">&#39;stderr&#39;</span><span class="p">])</span>
     <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">exprs</span><span class="p">:</span>
-        <span class="n">full_expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">full_expression_from_odes</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="n">full_expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
         <span class="n">covariates</span> <span class="o">=</span> <span class="p">{</span><span class="n">symb</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">full_expr</span><span class="o">.</span><span class="n">free_symbols</span> <span class="k">if</span> <span class="n">symb</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">cols</span><span class="p">}</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">covariates</span><span class="p">:</span>
             <span class="n">cases</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;median&#39;</span><span class="p">:</span> <span class="nb">dict</span><span class="p">()}</span>
@@ -630,7 +630,14 @@
     <span class="n">summaries</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
-        <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">result_summary</span><span class="p">(</span><span class="n">include_all_estimation_steps</span><span class="p">))</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
+        <span class="k">if</span> <span class="n">res</span><span class="p">:</span>
+            <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">result_summary</span><span class="p">(</span><span class="n">include_all_estimation_steps</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># FIXME: in read_modelfit_results, maybe some parts can be extracted (i.e.</span>
+            <span class="c1">#   create modelfit_results object</span>
+            <span class="n">empty_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;minimization_successful&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+            <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">empty_df</span><span class="p">)</span>
 
     <span class="n">summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">summaries</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
 
@@ -662,7 +669,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.2.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.0.<br>
 </p>
     </div>
     
