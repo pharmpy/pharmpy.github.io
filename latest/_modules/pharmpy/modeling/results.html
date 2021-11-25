@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.36.0 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.37.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -506,16 +506,17 @@
 
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">()</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
+    <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
-    <span class="n">peripherals</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_peripherals</span><span class="p">()</span>
+    <span class="n">peripherals</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">peripheral_compartments</span>
     <span class="n">elimination_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
 
     <span class="n">expressions</span> <span class="o">=</span> <span class="p">[]</span>  <span class="c1"># Eq(name, expr)</span>
     <span class="c1"># FO abs + 1comp + FO elimination</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">depot</span> <span class="ow">and</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
-        <span class="n">ode_list</span><span class="p">,</span> <span class="n">ics</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">to_explicit_odes</span><span class="p">(</span><span class="n">skip_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">exodes</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">to_explicit_system</span><span class="p">(</span><span class="n">skip_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">ode_list</span><span class="p">,</span> <span class="n">ics</span> <span class="o">=</span> <span class="n">exodes</span><span class="o">.</span><span class="n">odes</span><span class="p">,</span> <span class="n">exodes</span><span class="o">.</span><span class="n">ics</span>
         <span class="n">sols</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">dsolve</span><span class="p">(</span><span class="n">ode_list</span><span class="p">,</span> <span class="n">ics</span><span class="o">=</span><span class="n">ics</span><span class="p">)</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="n">sols</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">rhs</span>
         <span class="n">d</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">diff</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span><span class="p">)</span>
@@ -532,7 +533,8 @@
         <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">elimination_system</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="n">central</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">output</span><span class="o">.</span><span class="n">name</span><span class="p">]:</span>
                 <span class="n">elimination_system</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">elimination_system</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="n">name</span><span class="p">))</span>
-                <span class="n">ode_list</span><span class="p">,</span> <span class="n">ics</span> <span class="o">=</span> <span class="n">elimination_system</span><span class="o">.</span><span class="n">to_explicit_odes</span><span class="p">(</span><span class="n">skip_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">exodes</span> <span class="o">=</span> <span class="n">elimination_system</span><span class="o">.</span><span class="n">to_explicit_system</span><span class="p">(</span><span class="n">skip_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+                <span class="n">ode_list</span><span class="p">,</span> <span class="n">ics</span> <span class="o">=</span> <span class="n">exodes</span><span class="o">.</span><span class="n">odes</span><span class="p">,</span> <span class="n">exodes</span><span class="o">.</span><span class="n">ics</span>
                 <span class="n">A0</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;A0&#39;</span><span class="p">)</span>
                 <span class="n">ic</span> <span class="o">=</span> <span class="n">ics</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
                 <span class="n">ics</span> <span class="o">=</span> <span class="p">{</span><span class="n">ic</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span> <span class="n">A0</span><span class="p">}</span>
@@ -543,7 +545,8 @@
 
     <span class="c1"># Bolus dose + 2comp + FO elimination</span>
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peripherals</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span> <span class="ow">and</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
-        <span class="n">ode_list</span><span class="p">,</span> <span class="n">ics</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">to_explicit_odes</span><span class="p">(</span><span class="n">skip_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">exodes</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">to_explicit_system</span><span class="p">(</span><span class="n">skip_output</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">ode_list</span><span class="p">,</span> <span class="n">ics</span> <span class="o">=</span> <span class="n">exodes</span><span class="o">.</span><span class="n">odes</span><span class="p">,</span> <span class="n">exodes</span><span class="o">.</span><span class="n">ics</span>
         <span class="n">sols</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">dsolve</span><span class="p">(</span><span class="n">ode_list</span><span class="p">,</span> <span class="n">ics</span><span class="o">=</span><span class="n">ics</span><span class="p">)</span>
         <span class="n">A</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Wild</span><span class="p">(</span><span class="s1">&#39;A&#39;</span><span class="p">)</span>
         <span class="n">B</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Wild</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">)</span>
@@ -635,9 +638,19 @@
             <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">result_summary</span><span class="p">(</span><span class="n">include_all_estimation_steps</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># FIXME: in read_modelfit_results, maybe some parts can be extracted (i.e.</span>
-            <span class="c1">#   create modelfit_results object</span>
-            <span class="n">empty_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;minimization_successful&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
-            <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">empty_df</span><span class="p">)</span>
+            <span class="c1">#   create modelfit_results object)</span>
+            <span class="k">if</span> <span class="n">include_all_estimation_steps</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">)):</span>
+                    <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span>
+                        <span class="p">[(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">,</span> <span class="s1">&#39;step&#39;</span><span class="p">]</span>
+                    <span class="p">)</span>
+                    <span class="n">empty_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+                        <span class="p">{</span><span class="s1">&#39;run_type&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;minimization_successful&#39;</span><span class="p">:</span> <span class="kc">None</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span>
+                    <span class="p">)</span>
+                    <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">empty_df</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">empty_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;minimization_successful&#39;</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">empty_df</span><span class="p">)</span>
 
     <span class="n">summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">summaries</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
 

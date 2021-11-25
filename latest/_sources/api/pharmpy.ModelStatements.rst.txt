@@ -28,6 +28,8 @@ ModelStatements
       ~ModelStatements.reassign
       ~ModelStatements.remove_symbol_definitions
       ~ModelStatements.subs
+      ~ModelStatements.to_compartmental_system
+      ~ModelStatements.to_explicit_system
 
    .. rubric:: Attributes Documentation
 
@@ -47,3 +49,5 @@ ModelStatements
    .. automethod:: reassign
    .. automethod:: remove_symbol_definitions
    .. automethod:: subs
+   .. automethod:: to_compartmental_system
+   .. automethod:: to_explicit_system

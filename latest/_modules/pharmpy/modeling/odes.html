@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.36.0 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.37.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -401,8 +401,8 @@
 
 <span class="k">def</span> <span class="nf">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">()</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
+    <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
     <span class="n">old_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
     <span class="n">numer</span><span class="p">,</span> <span class="n">denom</span> <span class="o">=</span> <span class="n">old_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
 
@@ -475,7 +475,7 @@
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
-<span class="sd">    set_lag_time</span>
+<span class="sd">    add_lag_time</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
@@ -490,7 +490,7 @@
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">transits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">))</span>
         <span class="n">rate</span> <span class="o">=</span> <span class="n">n</span> <span class="o">/</span> <span class="n">mdt_symb</span>
-        <span class="n">comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+        <span class="n">comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
         <span class="n">dose</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">dose</span>
         <span class="n">comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -504,7 +504,7 @@
         <span class="n">removed_symbols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="n">trans</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">flow</span> <span class="o">=</span> <span class="n">_find_last_transit</span><span class="p">(</span><span class="n">odes</span><span class="p">,</span> <span class="n">transits</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># The dosing compartment will be removed</span>
-            <span class="n">dosing</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+            <span class="n">dosing</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
             <span class="n">dose</span> <span class="o">=</span> <span class="n">dosing</span><span class="o">.</span><span class="n">dose</span>
         <span class="n">remaining</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">transits</span><span class="p">)</span>
         <span class="k">while</span> <span class="n">nremove</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -568,7 +568,7 @@
                     <span class="n">statements</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">numer</span><span class="p">,</span> <span class="n">new_rate</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="set_lag_time"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_lag_time.html#pharmpy.modeling.set_lag_time">[docs]</a><span class="k">def</span> <span class="nf">set_lag_time</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="add_lag_time"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_lag_time.html#pharmpy.modeling.add_lag_time">[docs]</a><span class="k">def</span> <span class="nf">add_lag_time</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add lag time to the dose compartment of model.</span>
 
 <span class="sd">    Initial estimate for lag time is set the</span>
@@ -588,7 +588,7 @@
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_lag_time(model)     # doctest: +ELLIPSIS</span>
+<span class="sd">    &gt;&gt;&gt; add_lag_time(model)     # doctest: +ELLIPSIS</span>
 <span class="sd">    &lt;...&gt;</span>
 
 <span class="sd">    See also</span>
@@ -598,7 +598,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+    <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="n">old_lag_time</span> <span class="o">=</span> <span class="n">dosing_comp</span><span class="o">.</span><span class="n">lag_time</span>
     <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">))</span>
     <span class="n">dosing_comp</span><span class="o">.</span><span class="n">lag_time</span> <span class="o">=</span> <span class="n">mdt_symb</span>
@@ -631,12 +631,12 @@
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
 <span class="sd">    set_transit_compartments</span>
-<span class="sd">    set_lag_time</span>
+<span class="sd">    add_lag_time</span>
 
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+    <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="n">lag_time</span> <span class="o">=</span> <span class="n">dosing_comp</span><span class="o">.</span><span class="n">lag_time</span>
     <span class="k">if</span> <span class="n">lag_time</span><span class="p">:</span>
         <span class="n">symbols</span> <span class="o">=</span> <span class="n">lag_time</span><span class="o">.</span><span class="n">free_symbols</span>
@@ -687,12 +687,12 @@
     <span class="n">_disallow_infusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
 
-    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="n">symbols</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">free_symbols</span>
     <span class="n">dose</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span>
     <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
         <span class="n">to_comp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">depot</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="n">ka</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">())</span>
+        <span class="n">ka</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span><span class="p">)</span>
         <span class="n">odes</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">depot</span><span class="p">)</span>
         <span class="n">symbols</span> <span class="o">|=</span> <span class="n">ka</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">to_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">dose</span>
@@ -740,12 +740,11 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">odes</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Setting absorption is not supported for ExplicitODESystem&quot;</span><span class="p">)</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
 
-    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="n">amount</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span>
     <span class="n">symbols</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">free_symbols</span>
     <span class="k">if</span> <span class="n">depot</span> <span class="ow">and</span> <span class="n">depot</span> <span class="o">==</span> <span class="n">dose_comp</span><span class="p">:</span>
@@ -798,13 +797,13 @@
     <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
         <span class="n">to_comp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">depot</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">to_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">depot</span><span class="o">.</span><span class="n">dose</span>
-        <span class="n">ka</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">())</span>
+        <span class="n">ka</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span><span class="p">)</span>
         <span class="n">odes</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">depot</span><span class="p">)</span>
         <span class="n">symbols</span> <span class="o">=</span> <span class="n">ka</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">remove_unused_parameters_and_rvs</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">has_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-        <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+        <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
         <span class="n">old_symbols</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span>
         <span class="n">unneeded_symbols</span> <span class="o">=</span> <span class="n">old_symbols</span> <span class="o">-</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">free_symbols</span>
@@ -856,7 +855,7 @@
     <span class="n">_disallow_infusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
 
-    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="n">have_ZO</span> <span class="o">=</span> <span class="n">has_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">depot</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">have_ZO</span><span class="p">:</span>
         <span class="n">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="n">depot</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
@@ -873,7 +872,7 @@
 
 <span class="k">def</span> <span class="nf">_disallow_infusion</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="p">,</span> <span class="n">Infusion</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ex</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">rate</span>
@@ -908,7 +907,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="n">dosing</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_dosing</span><span class="p">()</span>
+    <span class="n">dosing</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="n">dose</span> <span class="o">=</span> <span class="n">dosing</span><span class="o">.</span><span class="n">dose</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dose</span><span class="p">,</span> <span class="n">Infusion</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">dose</span><span class="o">.</span><span class="n">rate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1012,7 +1011,12 @@
 <span class="sd">    remove_peripheral_compartment</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">per</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">find_peripherals</span><span class="p">())</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="n">_as_integer</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of compartments must be integer: </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">per</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">peripheral_compartments</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">per</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">per</span><span class="p">):</span>
             <span class="n">add_peripheral_compartment</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -1078,11 +1082,11 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="n">per</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_peripherals</span><span class="p">()</span>
+    <span class="n">per</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">peripheral_compartments</span>
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">per</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
 
-    <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">()</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
+    <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
     <span class="n">elimination_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
     <span class="n">cl</span><span class="p">,</span> <span class="n">vc</span> <span class="o">=</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">cl</span><span class="o">.</span><span class="n">is_Symbol</span> <span class="ow">and</span> <span class="n">vc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1189,12 +1193,12 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="n">peripherals</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_peripherals</span><span class="p">()</span>
+    <span class="n">peripherals</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">peripheral_compartments</span>
     <span class="k">if</span> <span class="n">peripherals</span><span class="p">:</span>
         <span class="n">last_peripheral</span> <span class="o">=</span> <span class="n">peripherals</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-        <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_central</span><span class="p">()</span>
+        <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peripherals</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_output</span><span class="p">()</span>
+            <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
             <span class="n">elimination_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
             <span class="n">cl</span><span class="p">,</span> <span class="n">vc</span> <span class="o">=</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
             <span class="n">from_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">last_peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>

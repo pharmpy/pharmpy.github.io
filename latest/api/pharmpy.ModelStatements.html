@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>ModelStatements &#8212; Pharmpy 0.36.0 documentation</title>
+    <title>ModelStatements &#8212; Pharmpy 0.37.0 documentation</title>
     
   <link href="../_static/css/theme.css" rel="stylesheet">
   <link href="../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -41,8 +41,8 @@
     <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../genindex.html" />
     <link rel="search" title="Search" href="../search.html" />
-    <link rel="next" title="Parameter" href="pharmpy.Parameter.html" />
-    <link rel="prev" title="Assignment" href="pharmpy.Assignment.html" />
+    <link rel="next" title="ODESystem" href="pharmpy.ODESystem.html" />
+    <link rel="prev" title="Infusion" href="pharmpy.Infusion.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="docsearch:language" content="None">
     
@@ -222,6 +222,10 @@
 <em class="property"><span class="pre">class</span><span class="w"> </span></em><span class="sig-prename descclassname"><span class="pre">pharmpy.</span></span><span class="sig-name descname"><span class="pre">ModelStatements</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">statements</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">None</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/statements.html#ModelStatements"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pharmpy.ModelStatements" title="Permalink to this definition">¶</a></dt>
 <dd><p>Bases: <code class="xref py py-class docutils literal notranslate"><span class="pre">collections.abc.MutableSequence</span></code></p>
 <p>A sequence of symbolic statements describing the model</p>
+<p>Two types of statements are supported: Assignment and ODESystem.
+A ModelStatements object can have 0 or 1 ODESystem. The order of
+the statements is significant and the same symbol can be assigned
+to multiple times.</p>
 <p class="rubric">Attributes Summary</p>
 <table class="longtable table autosummary">
 <colgroup>
@@ -256,8 +260,8 @@
 <tr class="row-even"><td><p><a class="reference internal" href="#pharmpy.ModelStatements.dependencies" title="pharmpy.ModelStatements.dependencies"><code class="xref py py-obj docutils literal notranslate"><span class="pre">dependencies</span></code></a>(symbol)</p></td>
 <td><p>Find all dependencies of a symbol</p></td>
 </tr>
-<tr class="row-odd"><td><p><a class="reference internal" href="#pharmpy.ModelStatements.find_assignment" title="pharmpy.ModelStatements.find_assignment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_assignment</span></code></a>(variable[, is_symbol, last])</p></td>
-<td><p>Returns full last statement or all assignments that contains the symbol or variable of interest of an assignment</p></td>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pharmpy.ModelStatements.find_assignment" title="pharmpy.ModelStatements.find_assignment"><code class="xref py py-obj docutils literal notranslate"><span class="pre">find_assignment</span></code></a>(symbol)</p></td>
+<td><p>Returns last assignment of symbol</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pharmpy.ModelStatements.full_expression" title="pharmpy.ModelStatements.full_expression"><code class="xref py py-obj docutils literal notranslate"><span class="pre">full_expression</span></code></a>(expression)</p></td>
 <td><p>Expand an expression into its full definition</p></td>
@@ -276,6 +280,12 @@
 </tr>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pharmpy.ModelStatements.subs" title="pharmpy.ModelStatements.subs"><code class="xref py py-obj docutils literal notranslate"><span class="pre">subs</span></code></a>(substitutions)</p></td>
 <td><p>Substitute symbols in all statements.</p></td>
+</tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pharmpy.ModelStatements.to_compartmental_system" title="pharmpy.ModelStatements.to_compartmental_system"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_compartmental_system</span></code></a>()</p></td>
+<td><p>Convert ODE system to a compartmental system</p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pharmpy.ModelStatements.to_explicit_system" title="pharmpy.ModelStatements.to_explicit_system"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_explicit_system</span></code></a>()</p></td>
+<td><p>Convert ODE system to an explicit ODE system</p></td>
 </tr>
 </tbody>
 </table>
@@ -388,9 +398,24 @@
 
 <dl class="py method">
 <dt class="sig sig-object py" id="pharmpy.ModelStatements.find_assignment">
-<span class="sig-name descname"><span class="pre">find_assignment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">variable</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">is_symbol</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">last</span></span><span class="o"><span class="pre">=</span></span><span class="default_value"><span class="pre">True</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/statements.html#ModelStatements.find_assignment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pharmpy.ModelStatements.find_assignment" title="Permalink to this definition">¶</a></dt>
-<dd><p>Returns full last statement or all assignments that contains the symbol or
-variable of interest of an assignment</p>
+<span class="sig-name descname"><span class="pre">find_assignment</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">symbol</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/statements.html#ModelStatements.find_assignment"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pharmpy.ModelStatements.find_assignment" title="Permalink to this definition">¶</a></dt>
+<dd><p>Returns last assignment of symbol</p>
+<dl class="field-list simple">
+<dt class="field-odd">Parameters</dt>
+<dd class="field-odd"><p><strong>symbol</strong> (<em>Symbol or str</em>) – Symbol to look for</p>
+</dd>
+<dt class="field-even">Returns</dt>
+<dd class="field-even"><p><em>Assignment</em> – An Assignment or None if no assignment to symbol exists</p>
+</dd>
+</dl>
+<p class="rubric">Examples</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">load_example_model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">load_example_model</span><span class="p">(</span><span class="s2">&quot;pheno&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s2">&quot;CL&quot;</span><span class="p">)</span>
+<span class="go">            ETA(1)</span>
+<span class="go">CL := TVCL⋅ℯ</span>
+</pre></div>
+</div>
 </dd></dl>
 
 <dl class="py method">
@@ -495,6 +520,48 @@ of other statements.</p>
 </div>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pharmpy.ModelStatements.to_compartmental_system">
+<span class="sig-name descname"><span class="pre">to_compartmental_system</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/statements.html#ModelStatements.to_compartmental_system"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pharmpy.ModelStatements.to_compartmental_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert ODE system to a compartmental system</p>
+<p>raise if not possible
+&gt;&gt;&gt; from pharmpy.modeling import load_example_model
+&gt;&gt;&gt; model = load_example_model(“pheno”)
+&gt;&gt;&gt; model.statements.to_explicit_system()
+&gt;&gt;&gt; model.statements.to_compartmental_system()
+&gt;&gt;&gt; model.statements.ode_system
+Bolus(AMT)
+┌───────┐       ┌──────┐
+│CENTRAL│──CL/V→│OUTPUT│
+└───────┘       └──────┘</p>
+</dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pharmpy.ModelStatements.to_explicit_system">
+<span class="sig-name descname"><span class="pre">to_explicit_system</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/statements.html#ModelStatements.to_explicit_system"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pharmpy.ModelStatements.to_explicit_system" title="Permalink to this definition">¶</a></dt>
+<dd><p>Convert ODE system to an explicit ODE system</p>
+<p class="rubric">Example</p>
+<div class="doctest highlight-default notranslate"><div class="highlight"><pre><span></span><span class="gp">&gt;&gt;&gt; </span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">load_example_model</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">load_example_model</span><span class="p">(</span><span class="s2">&quot;pheno&quot;</span><span class="p">)</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+<span class="go">Bolus(AMT)</span>
+<span class="go">┌───────┐       ┌──────┐</span>
+<span class="go">│CENTRAL│──CL/V→│OUTPUT│</span>
+<span class="go">└───────┘       └──────┘</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">to_explicit_system</span><span class="p">()</span>
+<span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+<span class="go">⎧d                  -CL⋅A_CENTRAL(t)</span>
+<span class="go">⎪──(A_CENTRAL(t)) = ─────────────────</span>
+<span class="go">⎪dt                         V</span>
+<span class="go">⎨d                 CL⋅A_CENTRAL(t)</span>
+<span class="go">⎪──(A_OUTPUT(t)) = ───────────────</span>
+<span class="go">⎪dt                       V</span>
+<span class="go">⎪A_CENTRAL(0) = AMT</span>
+<span class="go">⎩A_OUTPUT(0) = 0</span>
+</pre></div>
+</div>
+</dd></dl>
+
 </dd></dl>
 
 </section>
@@ -505,17 +572,17 @@ of other statements.</p>
               
               <!-- Previous / next buttons -->
 <div class='prev-next-area'> 
-    <a class='left-prev' id="prev-link" href="pharmpy.Assignment.html" title="previous page">
+    <a class='left-prev' id="prev-link" href="pharmpy.Infusion.html" title="previous page">
         <i class="fas fa-angle-left"></i>
         <div class="prev-next-info">
             <p class="prev-next-subtitle">previous</p>
-            <p class="prev-next-title">Assignment</p>
+            <p class="prev-next-title">Infusion</p>
         </div>
     </a>
-    <a class='right-next' id="next-link" href="pharmpy.Parameter.html" title="next page">
+    <a class='right-next' id="next-link" href="pharmpy.ODESystem.html" title="next page">
     <div class="prev-next-info">
         <p class="prev-next-subtitle">next</p>
-        <p class="prev-next-title">Parameter</p>
+        <p class="prev-next-title">ODESystem</p>
     </div>
     <i class="fas fa-angle-right"></i>
     </a>
