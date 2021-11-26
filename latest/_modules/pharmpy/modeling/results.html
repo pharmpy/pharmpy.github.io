@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.37.0 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.37.1 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -194,7 +194,6 @@
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">sympy</span>
 
-<span class="kn">from</span> <span class="nn">pharmpy.data_structures</span> <span class="kn">import</span> <span class="n">OrderedSet</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">create_rng</span><span class="p">,</span> <span class="n">sample_parameters_from_covariance_matrix</span>
 
@@ -344,9 +343,11 @@
     <span class="n">param_inits</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()[</span><span class="s1">&#39;value&#39;</span><span class="p">]</span>
     <span class="n">pe</span> <span class="o">=</span> <span class="n">pe</span><span class="o">.</span><span class="n">combine_first</span><span class="p">(</span><span class="n">param_inits</span><span class="p">)</span>
 
-    <span class="c1"># Get all iiv variance parameters</span>
-    <span class="n">param_names</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">variance_parameters</span>
-    <span class="n">param_names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">OrderedSet</span><span class="p">(</span><span class="n">param_names</span><span class="p">))</span>  <span class="c1"># Only unique in order</span>
+    <span class="c1"># Get all iiv and iov variance parameters</span>
+    <span class="n">diag</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">covariance_matrix</span><span class="o">.</span><span class="n">diagonal</span><span class="p">()</span>
+    <span class="n">param_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">diag</span><span class="p">]</span>
+    <span class="c1"># param_names = model.random_variables.etas.variance_parameters</span>
+    <span class="c1"># param_names = list(OrderedSet(param_names))  # Only unique in order</span>
 
     <span class="n">diag_ests</span> <span class="o">=</span> <span class="n">pe</span><span class="p">[</span><span class="n">param_names</span><span class="p">]</span>
 
