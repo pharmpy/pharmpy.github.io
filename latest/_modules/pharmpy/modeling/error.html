@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.error &#8212; Pharmpy 0.37.1 documentation</title>
+    <title>pharmpy.modeling.error &#8212; Pharmpy 0.38.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -372,8 +372,20 @@
 <span class="sd">    &gt;&gt;&gt; model = remove_error_model(load_example_model(&quot;pheno&quot;))</span>
 <span class="sd">    &gt;&gt;&gt; set_proportional_error_model(model, data_trans=&quot;log(Y)&quot;)    # doctest: +ELLIPSIS</span>
 <span class="sd">    &lt;...&gt;</span>
-<span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;Y&quot;)</span>
-<span class="sd">    Y := εₚ + log(F)</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.after_odes</span>
+<span class="sd">         A_CENTRAL</span>
+<span class="sd">         ─────────</span>
+<span class="sd">    F :=     S₁</span>
+<span class="sd">    W := F</span>
+<span class="sd">                ⎧2.225e-307  for F = 0</span>
+<span class="sd">                ⎨</span>
+<span class="sd">    IPREDADJ := ⎩    F       otherwise</span>
+<span class="sd">    Y := εₚ + log(IPREDADJ)</span>
+<span class="sd">    IPRED := F</span>
+<span class="sd">    IRES := DV - IPRED</span>
+<span class="sd">             IRES</span>
+<span class="sd">             ────</span>
+<span class="sd">    IWRES :=  W</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
@@ -388,7 +400,12 @@
 
     <span class="n">data_trans</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">canonicalize_data_transformation</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">data_trans</span> <span class="o">==</span> <span class="n">sympy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">):</span>
-        <span class="n">expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="o">+</span> <span class="n">ruv</span>
+        <span class="c1"># Add protection for log(0)</span>
+        <span class="n">new_ipred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="s1">&#39;IPREDADJ&#39;</span><span class="p">)</span>
+        <span class="n">guard_expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Piecewise</span><span class="p">((</span><span class="mf">2.225e-307</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="n">guard_assignment</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">new_ipred</span><span class="p">,</span> <span class="n">guard_expr</span><span class="p">)</span>
+        <span class="n">stats</span><span class="o">.</span><span class="n">insert_before</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">guard_assignment</span><span class="p">)</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">new_ipred</span><span class="p">)</span> <span class="o">+</span> <span class="n">ruv</span>
     <span class="k">elif</span> <span class="n">data_trans</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">:</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="n">f</span> <span class="o">+</span> <span class="n">f</span> <span class="o">*</span> <span class="n">ruv</span>
     <span class="k">else</span><span class="p">:</span>
@@ -786,7 +803,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.1.<br>
 </p>
     </div>
     

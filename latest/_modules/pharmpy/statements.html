@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.statements &#8212; Pharmpy 0.37.1 documentation</title>
+    <title>pharmpy.statements &#8212; Pharmpy 0.38.0 documentation</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
   <link href="../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -189,6 +189,7 @@
                 
   <h1>Source code for pharmpy.statements</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">copy</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
 
 <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
@@ -198,7 +199,25 @@
 <span class="kn">import</span> <span class="nn">pharmpy.unicode</span> <span class="k">as</span> <span class="nn">unicode</span>
 
 
-<div class="viewcode-block" id="Assignment"><a class="viewcode-back" href="../../api/pharmpy.Assignment.html#pharmpy.Assignment">[docs]</a><span class="k">class</span> <span class="nc">Assignment</span><span class="p">:</span>
+<span class="k">class</span> <span class="nc">Statement</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Abstract base class for all types of statements&quot;&quot;&quot;</span>
+
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">subs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">free_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+    <span class="nd">@property</span>
+    <span class="nd">@abstractmethod</span>
+    <span class="k">def</span> <span class="nf">rhs_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">pass</span>
+
+
+<div class="viewcode-block" id="Assignment"><a class="viewcode-back" href="../../api/pharmpy.Assignment.html#pharmpy.Assignment">[docs]</a><span class="k">class</span> <span class="nc">Assignment</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Representation of variable assignment</span>
 
 <span class="sd">    This class is similar to :class:`sympy.codegen.Assignment` and are</span>
@@ -306,7 +325,7 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">sym</span><span class="si">}</span><span class="s1"> := </span><span class="si">{</span><span class="n">expr</span><span class="si">}</span><span class="s1">$&#39;</span></div>
 
 
-<div class="viewcode-block" id="ODESystem"><a class="viewcode-back" href="../../api/pharmpy.ODESystem.html#pharmpy.ODESystem">[docs]</a><span class="k">class</span> <span class="nc">ODESystem</span><span class="p">:</span>
+<div class="viewcode-block" id="ODESystem"><a class="viewcode-back" href="../../api/pharmpy.ODESystem.html#pharmpy.ODESystem">[docs]</a><span class="k">class</span> <span class="nc">ODESystem</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Base class and placeholder for ODE systems of different forms</span>
 
 <span class="sd">    Attributes</span>
@@ -1966,6 +1985,29 @@
             <span class="n">expression</span> <span class="o">=</span> <span class="n">expression</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">statement</span><span class="o">.</span><span class="n">symbol</span><span class="p">:</span> <span class="n">statement</span><span class="o">.</span><span class="n">expression</span><span class="p">})</span>
         <span class="k">return</span> <span class="n">expression</span></div>
 
+<div class="viewcode-block" id="ModelStatements.insert_before"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.insert_before">[docs]</a>    <span class="k">def</span> <span class="nf">insert_before</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statement</span><span class="p">,</span> <span class="n">new_statement</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Insert a statement just before another statement</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        statement : Statement</span>
+<span class="sd">            Insert before this statement</span>
+<span class="sd">        new_statement : Statement</span>
+<span class="sd">            Statement to insert</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy import Assignment</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
+<span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; a = Assignment(&quot;WGT_G&quot;, &quot;WGT*1000&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; b = model.statements.find_assignment(&quot;CL&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; model.statements.insert_before(b, a)</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">new_statement</span><span class="p">)</span></div>
+
 <div class="viewcode-block" id="ModelStatements.insert_before_odes"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.insert_before_odes">[docs]</a>    <span class="k">def</span> <span class="nf">insert_before_odes</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statement</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Insert a statement just before the ODE system or at the end of the model</span>
 
@@ -2095,7 +2137,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.1.<br>
 </p>
     </div>
     

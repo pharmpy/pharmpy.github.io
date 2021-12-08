@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.parameter &#8212; Pharmpy 0.37.1 documentation</title>
+    <title>pharmpy.parameter &#8212; Pharmpy 0.38.0 documentation</title>
     
   <link href="../../_static/css/theme.css" rel="stylesheet">
   <link href="../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -191,6 +191,7 @@
 <span></span><span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">MutableSequence</span>
 
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">sympy</span>
 
@@ -304,7 +305,7 @@
         <span class="n">i</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_param</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">insert</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s2">&quot;Cannot insert parameter with alread existing name </span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;Cannot insert parameter with already existing name </span><span class="si">{</span><span class="n">value</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> &quot;</span>
                 <span class="s2">&quot;into Parameters.&quot;</span>
             <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span></div>
@@ -419,6 +420,7 @@
         <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="n">init_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="k">if</span> <span class="n">key</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Parameter </span><span class="si">{</span><span class="n">key</span><span class="si">}</span><span class="s1"> not in Parameters&#39;</span><span class="p">)</span>
+        <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">verify_init</span><span class="p">(</span><span class="n">value</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">init_dict</span><span class="o">.</span><span class="n">items</span><span class="p">()]</span>
         <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">init_dict</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
             <span class="bp">self</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="n">value</span>
 
@@ -527,6 +529,7 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">lower</span> <span class="o">=</span> <span class="n">lower</span>
         <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">upper</span> <span class="o">=</span> <span class="n">upper</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verify_init</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_init</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="n">parse_units</span><span class="p">(</span><span class="n">unit</span><span class="p">)</span>
 
     <span class="nd">@property</span>
@@ -563,13 +566,44 @@
 
     <span class="nd">@init</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_init</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">verify_init</span><span class="p">(</span><span class="n">new_init</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_init</span> <span class="o">=</span> <span class="n">new_init</span>
+
+<div class="viewcode-block" id="Parameter.verify_init"><a class="viewcode-back" href="../../api/pharmpy.Parameter.html#pharmpy.Parameter.verify_init">[docs]</a>    <span class="k">def</span> <span class="nf">verify_init</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">new_init</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Verify initial estimate</span>
+
+<span class="sd">        Verifies that an initial estimate is valid (i.e. is within bounds and is not NaN).</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        new_init : number</span>
+<span class="sd">            value to to set as new initial estimate</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import numpy as np</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy import Parameter</span>
+<span class="sd">        &gt;&gt;&gt; par = Parameter(&quot;x&quot;, 1, lower=0, upper=10)</span>
+<span class="sd">        &gt;&gt;&gt; par.verify_init(5)</span>
+<span class="sd">        &gt;&gt;&gt; par.verify_init(11)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        ...</span>
+<span class="sd">        ValueError: Initial estimate must be within the constraints of the parameter: 11 ∉ [0, 10]</span>
+<span class="sd">        Unconstrain the parameter before setting an initial estimate.</span>
+
+<span class="sd">        &gt;&gt;&gt; par.verify_init(np.nan)</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">        ...</span>
+<span class="sd">        ValueError: Initial estimate cannot be set to NaN</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">new_init</span> <span class="ow">is</span> <span class="n">sympy</span><span class="o">.</span><span class="n">nan</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">new_init</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Initial estimate cannot be set to NaN&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">new_init</span> <span class="o">&lt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower</span> <span class="ow">or</span> <span class="n">new_init</span> <span class="o">&gt;</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;Initial estimate must be within the constraints of the parameter: &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">new_init</span><span class="si">}</span><span class="s1"> ∉ </span><span class="si">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Interval</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lower</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper</span><span class="p">))</span><span class="si">}</span><span class="s1">&#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">Unconstrain the parameter before setting an initial estimate.&#39;</span>
-            <span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_init</span> <span class="o">=</span> <span class="n">new_init</span>
+            <span class="p">)</span></div>
 
 <div class="viewcode-block" id="Parameter.is_close_to_bound"><a class="viewcode-back" href="../../api/pharmpy.Parameter.html#pharmpy.Parameter.is_close_to_bound">[docs]</a>    <span class="k">def</span> <span class="nf">is_close_to_bound</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zero_limit</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">significant_digits</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Check if parameter value is close to any bound</span>
@@ -585,7 +619,6 @@
 
 <span class="sd">        Examples</span>
 <span class="sd">        --------</span>
-
 <span class="sd">        &gt;&gt;&gt; from pharmpy import Parameter</span>
 <span class="sd">        &gt;&gt;&gt; par = Parameter(&quot;x&quot;, 1, lower=0, upper=10)</span>
 <span class="sd">        &gt;&gt;&gt; par.is_close_to_bound()</span>
@@ -703,7 +736,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.1.<br>
 </p>
     </div>
     
