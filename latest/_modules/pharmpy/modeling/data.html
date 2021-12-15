@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.data &#8212; Pharmpy 0.38.0 documentation</title>
+    <title>pharmpy.modeling.data &#8212; Pharmpy 0.39.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -189,7 +189,10 @@
                 
   <h1>Source code for pharmpy.modeling.data</h1><div class="highlight"><pre>
 <span></span><span class="c1"># Functional interface to extract dataset information</span>
-<span class="kn">from</span> <span class="nn">pharmpy.data</span> <span class="kn">import</span> <span class="n">ColumnType</span><span class="p">,</span> <span class="n">DatasetError</span>
+<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
+
+<span class="kn">from</span> <span class="nn">pharmpy.data</span> <span class="kn">import</span> <span class="n">ColumnType</span>
 
 
 <div class="viewcode-block" id="get_number_of_individuals"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_number_of_individuals.html#pharmpy.modeling.get_number_of_individuals">[docs]</a><span class="k">def</span> <span class="nf">get_number_of_individuals</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
@@ -417,10 +420,13 @@
         <span class="k">try</span><span class="p">:</span>
             <span class="n">label</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">labels_by_type</span><span class="p">[</span><span class="n">ColumnType</span><span class="o">.</span><span class="n">DOSE</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="n">DatasetError</span><span class="p">(</span><span class="s1">&#39;Could not find EVID or AMT column in dataset&#39;</span><span class="p">)</span>
+            <span class="n">label</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">labels_by_type</span><span class="p">[</span><span class="n">ColumnType</span><span class="o">.</span><span class="n">DV</span><span class="p">]</span>
+            <span class="n">data</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+            <span class="n">mdv</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">data</span><span class="p">)))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;MDV&#39;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">mdv</span>
 
-    <span class="n">dose</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
-    <span class="n">mdv</span> <span class="o">=</span> <span class="n">dose</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">dose</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;MDV&#39;</span><span class="p">)</span>
+    <span class="n">data</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">label</span><span class="p">]</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span>
+    <span class="n">mdv</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">data</span> <span class="o">==</span> <span class="mi">0</span><span class="p">,</span> <span class="n">other</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int64&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="s1">&#39;MDV&#39;</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mdv</span></div>
 </pre></div>
 

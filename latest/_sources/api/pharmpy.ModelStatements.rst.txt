@@ -24,6 +24,7 @@ ModelStatements
       ~ModelStatements.find_assignment
       ~ModelStatements.full_expression
       ~ModelStatements.insert
+      ~ModelStatements.insert_after
       ~ModelStatements.insert_before
       ~ModelStatements.insert_before_odes
       ~ModelStatements.reassign
@@ -46,6 +47,7 @@ ModelStatements
    .. automethod:: find_assignment
    .. automethod:: full_expression
    .. automethod:: insert
+   .. automethod:: insert_after
    .. automethod:: insert_before
    .. automethod:: insert_before_odes
    .. automethod:: reassign

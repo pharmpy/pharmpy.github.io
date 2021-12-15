@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.power_on_ruv &#8212; Pharmpy 0.38.0 documentation</title>
+    <title>pharmpy.modeling.power_on_ruv &#8212; Pharmpy 0.39.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -201,7 +201,7 @@
 <span class="kn">from</span> <span class="nn">pharmpy.symbols</span> <span class="kn">import</span> <span class="n">symbol</span> <span class="k">as</span> <span class="n">S</span>
 
 
-<div class="viewcode-block" id="set_power_on_ruv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_power_on_ruv.html#pharmpy.modeling.set_power_on_ruv">[docs]</a><span class="k">def</span> <span class="nf">set_power_on_ruv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_eps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">ipred</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="set_power_on_ruv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_power_on_ruv.html#pharmpy.modeling.set_power_on_ruv">[docs]</a><span class="k">def</span> <span class="nf">set_power_on_ruv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_eps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lower_limit</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">ipred</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Applies a power effect to provided epsilons.</span>
 
 <span class="sd">    Initial estimates for new thetas are 1 if the error</span>
@@ -214,6 +214,8 @@
 <span class="sd">    list_of_eps : str, list</span>
 <span class="sd">        Name/names of epsilons to apply power effect. If None, all epsilons will be used.</span>
 <span class="sd">        None is default.</span>
+<span class="sd">    lower_limit : int or None</span>
+<span class="sd">        Lower limit of power (theta). None for no limit.</span>
 <span class="sd">    ipred : Symbol</span>
 <span class="sd">        Symbol to use as IPRED. Default is to autodetect expression for IPRED.</span>
 
@@ -263,7 +265,10 @@
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">e</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">eps</span><span class="p">):</span>
         <span class="n">theta_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="n">stem</span><span class="o">=</span><span class="s1">&#39;power&#39;</span><span class="p">,</span> <span class="n">force_numbering</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-        <span class="n">theta</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">theta_name</span><span class="p">,</span> <span class="n">theta_init</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mf">0.01</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lower_limit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">theta_name</span><span class="p">,</span> <span class="n">theta_init</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">theta_name</span><span class="p">,</span> <span class="n">theta_init</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="n">lower_limit</span><span class="p">)</span>
         <span class="n">pset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">theta</span><span class="p">)</span>
         <span class="n">sset</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">e</span><span class="o">.</span><span class="n">symbol</span> <span class="o">*</span> <span class="n">ipred</span><span class="p">:</span> <span class="n">e</span><span class="o">.</span><span class="n">symbol</span><span class="p">})</span>  <span class="c1"># To avoid getting F*EPS*F**THETA</span>
         <span class="k">if</span> <span class="n">alternative</span><span class="p">:</span>  <span class="c1"># To avoid getting W*EPS*F**THETA</span>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.38.0 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.39.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -690,18 +690,19 @@
     <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="n">symbols</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">free_symbols</span>
     <span class="n">dose</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span>
+    <span class="n">lag_time</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">lag_time</span>
     <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
         <span class="n">to_comp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">depot</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">ka</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span><span class="p">)</span>
         <span class="n">odes</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">depot</span><span class="p">)</span>
-        <span class="n">symbols</span> <span class="o">|=</span> <span class="n">ka</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">ka</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">to_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">dose</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">to_comp</span> <span class="o">=</span> <span class="n">dose_comp</span>
     <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">remove_unused_parameters_and_rvs</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-        <span class="n">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">)</span>
+        <span class="n">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -747,6 +748,7 @@
     <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="n">amount</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span>
     <span class="n">symbols</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="n">lag_time</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">lag_time</span>
     <span class="k">if</span> <span class="n">depot</span> <span class="ow">and</span> <span class="n">depot</span> <span class="o">==</span> <span class="n">dose_comp</span><span class="p">:</span>
         <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">depot</span><span class="p">:</span>
@@ -754,12 +756,14 @@
     <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">remove_unused_parameters_and_rvs</span><span class="p">()</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">depot</span><span class="p">:</span>
-        <span class="n">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">amount</span><span class="p">),</span> <span class="n">dose_comp</span><span class="p">)</span>
+        <span class="n">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">amount</span><span class="p">),</span> <span class="n">dose_comp</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
 <div class="viewcode-block" id="set_bolus_absorption"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_bolus_absorption.html#pharmpy.modeling.set_bolus_absorption">[docs]</a><span class="k">def</span> <span class="nf">set_bolus_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Set or change to bolus absorption rate.</span>
+
+<span class="sd">    Currently lagtime together with bolus absorption is not supported.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -818,6 +822,9 @@
 <span class="sd">    Initial estimate for</span>
 <span class="sd">    absorption rate is set the previous rate if available, otherwise it is set to the time of</span>
 <span class="sd">    first observation/2.</span>
+
+<span class="sd">    Currently lagtime together with sequential zero order first order absorption is not</span>
+<span class="sd">    supported.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -921,19 +928,24 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<span class="k">def</span> <span class="nf">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">lag_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add zero order absorption to a compartment. Initial estimate for absorption rate is set</span>
 <span class="sd">    the previous rate if available, otherwise it is set to the time of first observation/2 is used.</span>
 <span class="sd">    Disregards what is currently in the model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># if parameter_name == model.statements.find_assignment(lag_time.name).expression.name:</span>
+    <span class="c1">#     mat_symb = model.parameters[f&#39;POP_{parameter_name}&#39;].symbol</span>
+    <span class="c1"># else:</span>
     <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span>
         <span class="n">model</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span>
     <span class="p">)</span>
     <span class="n">new_dose</span> <span class="o">=</span> <span class="n">Infusion</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">mat_symb</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">to_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">new_dose</span>
+    <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">and</span> <span class="n">lag_time</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">to_comp</span><span class="o">.</span><span class="n">lag_time</span> <span class="o">=</span> <span class="n">lag_time</span>
 
 
-<span class="k">def</span> <span class="nf">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="n">lag_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add first order absorption</span>
 <span class="sd">    Disregards what is currently in the model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -942,6 +954,8 @@
     <span class="n">depot</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">dose</span>
     <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">))</span>
     <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">mat_symb</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">and</span> <span class="n">lag_time</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">depot</span><span class="o">.</span><span class="n">lag_time</span> <span class="o">=</span> <span class="n">lag_time</span>
     <span class="k">return</span> <span class="n">depot</span>
 
 
