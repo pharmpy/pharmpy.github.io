@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.40.0 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.41.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -200,6 +200,8 @@
 <span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
 <span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">Infusion</span>
 
+<span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">get_observations</span>
+
 
 <span class="k">def</span> <span class="nf">_extract_params_from_symb</span><span class="p">(</span><span class="n">statements</span><span class="p">,</span> <span class="n">symbol_name</span><span class="p">,</span> <span class="n">pset</span><span class="p">):</span>
     <span class="n">terms</span> <span class="o">=</span> <span class="p">{</span>
@@ -317,7 +319,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="n">obs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">observations</span>
+    <span class="n">obs</span> <span class="o">=</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">init</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">/</span> <span class="mi">100</span>  <span class="c1"># 1% of smallest observation</span>
     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="n">init</span>
     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fix</span> <span class="o">=</span> <span class="kc">True</span>
@@ -437,7 +439,7 @@
     <span class="k">if</span> <span class="n">combined</span><span class="p">:</span>
         <span class="n">clmm_init</span> <span class="o">/=</span> <span class="mi">2</span>
 
-    <span class="n">dv_max</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+    <span class="n">dv_max</span> <span class="o">=</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
     <span class="n">km_init</span> <span class="o">=</span> <span class="n">dv_max</span> <span class="o">*</span> <span class="mi">2</span>
 
     <span class="k">return</span> <span class="n">km_init</span><span class="p">,</span> <span class="n">clmm_init</span>
@@ -969,9 +971,8 @@
     <span class="k">except</span> <span class="p">(</span><span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">KeyError</span><span class="p">):</span>
         <span class="k">pass</span>
 
-    <span class="n">dt</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
-    <span class="n">time_label</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">idv_label</span>
-    <span class="n">obs</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">observations</span>
+    <span class="n">time_label</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">idv_label</span>
+    <span class="n">obs</span> <span class="o">=</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">time_min</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="n">time_label</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">param_name</span> <span class="o">==</span> <span class="s1">&#39;MDT&#39;</span><span class="p">:</span>
@@ -1341,7 +1342,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.2.<br>
 </p>
     </div>
     

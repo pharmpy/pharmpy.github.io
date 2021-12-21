@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.error &#8212; Pharmpy 0.40.0 documentation</title>
+    <title>pharmpy.modeling.error &#8212; Pharmpy 0.41.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -200,6 +200,8 @@
 <span class="kn">from</span> <span class="nn">pharmpy.random_variables</span> <span class="kn">import</span> <span class="n">RandomVariable</span>
 <span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span>
 
+<span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">get_observations</span>
+
 
 <span class="k">def</span> <span class="nf">_preparations</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
@@ -317,7 +319,7 @@
     <span class="n">model</span><span class="o">.</span><span class="n">remove_unused_parameters_and_rvs</span><span class="p">()</span>
 
     <span class="n">sigma</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="s1">&#39;sigma&#39;</span><span class="p">)</span>
-    <span class="n">sigma_par</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">sigma</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_prop_init</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">))</span>
+    <span class="n">sigma_par</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">sigma</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_prop_init</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sigma_par</span><span class="p">)</span>
 
     <span class="n">eps</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">ruv</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;RUV&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
@@ -325,15 +327,15 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<span class="k">def</span> <span class="nf">_get_prop_init</span><span class="p">(</span><span class="n">dt</span><span class="p">):</span>
-    <span class="n">dv_min</span> <span class="o">=</span> <span class="n">dt</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">observations</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+<span class="k">def</span> <span class="nf">_get_prop_init</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">dv_min</span> <span class="o">=</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">dv_min</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">return</span> <span class="mf">0.01</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span><span class="n">dv_min</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span> <span class="o">**</span> <span class="mi">2</span>
 
 
-<div class="viewcode-block" id="set_proportional_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_proportional_error_model.html#pharmpy.modeling.set_proportional_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_proportional_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="set_proportional_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_proportional_error_model.html#pharmpy.modeling.set_proportional_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_proportional_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zero_protection</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Set a proportional error model. Initial estimate for new sigma is 0.09.</span>
 
 <span class="sd">    The error function being applied depends on the data transformation.</span>
@@ -353,6 +355,8 @@
 <span class="sd">    data_trans : str or expression</span>
 <span class="sd">        A data transformation expression or None (default) to use the transformation</span>
 <span class="sd">        specified by the model.</span>
+<span class="sd">    zero_protection : bool</span>
+<span class="sd">        Set to True to add code protecting from IPRED=0</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -370,7 +374,7 @@
 
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = remove_error_model(load_example_model(&quot;pheno&quot;))</span>
-<span class="sd">    &gt;&gt;&gt; set_proportional_error_model(model, data_trans=&quot;log(Y)&quot;)    # doctest: +ELLIPSIS</span>
+<span class="sd">    &gt;&gt;&gt; set_proportional_error_model(model, data_trans=&quot;log(Y)&quot;, zero_protection=True)    # doctest: +ELLIPSIS  # noqa: E501</span>
 <span class="sd">    &lt;...&gt;</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.after_odes</span>
 <span class="sd">         A_CENTRAL</span>
@@ -399,15 +403,21 @@
     <span class="n">ruv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="s1">&#39;epsilon_p&#39;</span><span class="p">)</span>
 
     <span class="n">data_trans</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">canonicalize_data_transformation</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">data_trans</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">data_trans</span> <span class="o">==</span> <span class="n">sympy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">):</span>
-        <span class="c1"># Add protection for log(0)</span>
-        <span class="n">new_ipred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="s1">&#39;IPREDADJ&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">zero_protection</span><span class="p">:</span>
+        <span class="n">ipred</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="s1">&#39;IPREDADJ&#39;</span><span class="p">)</span>
         <span class="n">guard_expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Piecewise</span><span class="p">((</span><span class="mf">2.225e-307</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
-        <span class="n">guard_assignment</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">new_ipred</span><span class="p">,</span> <span class="n">guard_expr</span><span class="p">)</span>
-        <span class="n">stats</span><span class="o">.</span><span class="n">insert_before</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">guard_assignment</span><span class="p">)</span>
-        <span class="n">expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">new_ipred</span><span class="p">)</span> <span class="o">+</span> <span class="n">ruv</span>
+        <span class="n">guard_assignment</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">ipred</span><span class="p">,</span> <span class="n">guard_expr</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">ipred</span> <span class="o">=</span> <span class="n">f</span>
+
+    <span class="k">if</span> <span class="n">data_trans</span> <span class="o">==</span> <span class="n">sympy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">zero_protection</span><span class="p">:</span>
+            <span class="n">stats</span><span class="o">.</span><span class="n">insert_before</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">guard_assignment</span><span class="p">)</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">ipred</span><span class="p">)</span> <span class="o">+</span> <span class="n">ruv</span>
     <span class="k">elif</span> <span class="n">data_trans</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">:</span>
-        <span class="n">expr</span> <span class="o">=</span> <span class="n">f</span> <span class="o">+</span> <span class="n">f</span> <span class="o">*</span> <span class="n">ruv</span>
+        <span class="k">if</span> <span class="n">zero_protection</span><span class="p">:</span>
+            <span class="n">stats</span><span class="o">.</span><span class="n">insert_before</span><span class="p">(</span><span class="n">stats</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">y</span><span class="p">),</span> <span class="n">guard_assignment</span><span class="p">)</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">f</span> <span class="o">+</span> <span class="n">ipred</span> <span class="o">*</span> <span class="n">ruv</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not supported data transformation </span><span class="si">{</span><span class="n">data_trans</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -495,7 +505,7 @@
     <span class="n">sigma_par1</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">sigma_prop</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.09</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sigma_par1</span><span class="p">)</span>
     <span class="n">sigma_add</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">create_symbol</span><span class="p">(</span><span class="s1">&#39;sigma_add&#39;</span><span class="p">)</span>
-    <span class="n">sigma_par2</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">sigma_add</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_prop_init</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">))</span>
+    <span class="n">sigma_par2</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">sigma_add</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_prop_init</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sigma_par2</span><span class="p">)</span>
 
     <span class="n">eps_prop</span> <span class="o">=</span> <span class="n">RandomVariable</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">ruv_prop</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;RUV&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">sigma_prop</span><span class="p">)</span>
@@ -803,7 +813,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.2.<br>
 </p>
     </div>
     

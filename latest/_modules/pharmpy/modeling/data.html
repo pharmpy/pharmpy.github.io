@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.data &#8212; Pharmpy 0.40.0 documentation</title>
+    <title>pharmpy.modeling.data &#8212; Pharmpy 0.41.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -192,7 +192,32 @@
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
-<span class="kn">from</span> <span class="nn">pharmpy.data</span> <span class="kn">import</span> <span class="n">ColumnType</span>
+<span class="kn">from</span> <span class="nn">pharmpy.data</span> <span class="kn">import</span> <span class="n">ColumnType</span><span class="p">,</span> <span class="n">DatasetError</span>
+
+
+<div class="viewcode-block" id="get_ids"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_ids.html#pharmpy.modeling.get_ids">[docs]</a><span class="k">def</span> <span class="nf">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Retrieve a list of all subject ids of the dataset</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list</span>
+<span class="sd">        All subject ids</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, get_ids</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; get_ids(model)      # doctest: +ELLIPSIS</span>
+<span class="sd">    [1, 2, 3, ..., 57, 58, 59]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">idcol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_label</span>
+    <span class="n">ids</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">idcol</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">ids</span></div>
 
 
 <div class="viewcode-block" id="get_number_of_individuals"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_number_of_individuals.html#pharmpy.modeling.get_number_of_individuals">[docs]</a><span class="k">def</span> <span class="nf">get_number_of_individuals</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
@@ -227,7 +252,7 @@
 <span class="sd">        dataset</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">ninds</span></div>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="get_number_of_observations"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_number_of_observations.html#pharmpy.modeling.get_number_of_observations">[docs]</a><span class="k">def</span> <span class="nf">get_number_of_observations</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
@@ -262,7 +287,7 @@
 <span class="sd">        dataset</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">nobs</span></div>
+    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">))</span></div>
 
 
 <div class="viewcode-block" id="get_number_of_observations_per_individual"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_number_of_observations_per_individual.html#pharmpy.modeling.get_number_of_observations_per_individual">[docs]</a><span class="k">def</span> <span class="nf">get_number_of_observations_per_individual</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
@@ -357,7 +382,9 @@
 <span class="sd">        dataset</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">nobsi</span></div>
+    <span class="n">ser</span> <span class="o">=</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_label</span><span class="p">)</span><span class="o">.</span><span class="n">count</span><span class="p">()</span>
+    <span class="n">ser</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;observation_count&quot;</span>
+    <span class="k">return</span> <span class="n">ser</span></div>
 
 
 <div class="viewcode-block" id="get_observations"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_observations.html#pharmpy.modeling.get_observations">[docs]</a><span class="k">def</span> <span class="nf">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
@@ -394,11 +421,302 @@
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
-<span class="sd">    get_number_of_observations</span>
-<span class="sd">    get_number_of_observations_per_individual</span>
+<span class="sd">    get_number_of_observations : get the number of observations</span>
+<span class="sd">    get_number_of_observations_per_individual : get the number of observations per individual</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">label</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">get_column_label</span><span class="p">(</span><span class="s1">&#39;event&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">get_column_label</span><span class="p">(</span><span class="s1">&#39;dose&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">label</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DatasetError</span><span class="p">(</span><span class="s1">&#39;Could not identify observation rows in dataset&#39;</span><span class="p">)</span>
+
+    <span class="n">idcol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_label</span>
+    <span class="n">idvcol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">idv_label</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> == 0&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">label</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">})</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> == 0&#39;</span><span class="p">)</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">idcol</span><span class="p">,</span> <span class="n">idvcol</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">dv_label</span><span class="p">]]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># FIXME: This shouldn&#39;t be needed</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">idvcol</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># TIME could not be converted to float (e.g. 10:15)</span>
+        <span class="k">pass</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="n">idcol</span><span class="p">,</span> <span class="n">idvcol</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_baselines"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_baselines.html#pharmpy.modeling.get_baselines">[docs]</a><span class="k">def</span> <span class="nf">get_baselines</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Baselines for each subject.</span>
+
+<span class="sd">    Baseline is taken to be the first row even if that has a missing value.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        Dataset with the baselines</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, get_baselines</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; get_baselines(model)</span>
+<span class="sd">           ID TIME   AMT  WGT  APGR   DV  FA1  FA2</span>
+<span class="sd">    pheno</span>
+<span class="sd">    1       1   0.  25.0  1.4   7.0  0.0  1.0  1.0</span>
+<span class="sd">    2       2   0.  15.0  1.5   9.0  0.0  1.0  1.0</span>
+<span class="sd">    3       3   0.  30.0  1.5   6.0  0.0  1.0  1.0</span>
+<span class="sd">    4       4   0.  18.6  0.9   6.0  0.0  1.0  1.0</span>
+<span class="sd">    5       5   0.  27.0  1.4   7.0  0.0  1.0  1.0</span>
+<span class="sd">    6       6   0.  24.0  1.2   5.0  0.0  1.0  1.0</span>
+<span class="sd">    7       7   0.  19.0  1.0   5.0  0.0  1.0  1.0</span>
+<span class="sd">    8       8   0.  24.0  1.2   7.0  0.0  1.0  1.0</span>
+<span class="sd">    9       9   0.  27.0  1.4   8.0  0.0  1.0  1.0</span>
+<span class="sd">    10     10   0.  27.0  1.4   7.0  0.0  1.0  1.0</span>
+<span class="sd">    11     11   0.  24.0  1.2   7.0  0.0  1.0  1.0</span>
+<span class="sd">    12     12   0.  26.0  1.3   6.0  0.0  1.0  1.0</span>
+<span class="sd">    13     13   0.  11.0  1.1   6.0  0.0  1.0  1.0</span>
+<span class="sd">    14     14   0.  22.0  1.1   7.0  0.0  1.0  1.0</span>
+<span class="sd">    15     15   0.  26.0  1.3   7.0  0.0  1.0  1.0</span>
+<span class="sd">    16     16   0.  12.0  1.2   9.0  0.0  1.0  1.0</span>
+<span class="sd">    17     17   0.  22.0  1.1   5.0  0.0  1.0  1.0</span>
+<span class="sd">    18     18   0.  20.0  1.0   5.0  0.0  1.0  1.0</span>
+<span class="sd">    19     19   0.  10.0  1.0   1.0  0.0  1.0  1.0</span>
+<span class="sd">    20     20   0.  24.0  1.2   6.0  0.0  1.0  1.0</span>
+<span class="sd">    21     21   0.  17.5  1.8   7.0  0.0  1.0  1.0</span>
+<span class="sd">    22     22   0.  15.0  1.5   8.0  0.0  1.0  1.0</span>
+<span class="sd">    23     23   0.  60.0  3.1   3.0  0.0  1.0  1.0</span>
+<span class="sd">    24     24   0.  63.0  3.2   2.0  0.0  1.0  1.0</span>
+<span class="sd">    25     25   0.  15.0  0.7   1.0  0.0  1.0  1.0</span>
+<span class="sd">    26     26   0.  70.0  3.5   9.0  0.0  1.0  1.0</span>
+<span class="sd">    27     27   0.  35.0  1.9   5.0  0.0  1.0  1.0</span>
+<span class="sd">    28     28   0.  60.0  3.2   9.0  0.0  1.0  1.0</span>
+<span class="sd">    29     29   0.  20.0  1.0   7.0  0.0  1.0  1.0</span>
+<span class="sd">    30     30   0.  18.0  1.8   8.0  0.0  1.0  1.0</span>
+<span class="sd">    31     31   0.  30.0  1.4   8.0  0.0  1.0  1.0</span>
+<span class="sd">    32     32   0.  70.0  3.6   9.0  0.0  1.0  1.0</span>
+<span class="sd">    33     33   0.  17.0  1.7   8.0  0.0  1.0  1.0</span>
+<span class="sd">    34     34   0.  34.0  1.7   4.0  0.0  1.0  1.0</span>
+<span class="sd">    35     35   0.  25.0  2.5   5.0  0.0  1.0  1.0</span>
+<span class="sd">    36     36   0.  30.0  1.5   5.0  0.0  1.0  1.0</span>
+<span class="sd">    37     37   0.  24.0  1.2   9.0  0.0  1.0  1.0</span>
+<span class="sd">    38     38   0.  26.0  1.3   8.0  0.0  1.0  1.0</span>
+<span class="sd">    39     39   0.  56.0  1.9  10.0  0.0  1.0  1.0</span>
+<span class="sd">    40     40   0.  19.0  1.1   3.0  0.0  1.0  1.0</span>
+<span class="sd">    41     41   0.  34.0  1.7   7.0  0.0  1.0  1.0</span>
+<span class="sd">    42     42   0.  28.0  2.8   9.0  0.0  1.0  1.0</span>
+<span class="sd">    43     43   0.  18.0  0.9   1.0  0.0  1.0  1.0</span>
+<span class="sd">    44     44   0.  14.0  1.4   7.0  0.0  1.0  1.0</span>
+<span class="sd">    45     45   0.  16.0  0.8   2.0  0.0  1.0  1.0</span>
+<span class="sd">    46     46   0.  11.0  1.1   8.0  0.0  1.0  1.0</span>
+<span class="sd">    47     47   0.  40.0  2.6   9.0  0.0  1.0  1.0</span>
+<span class="sd">    48     48   0.  14.0  0.7   8.0  0.0  1.0  1.0</span>
+<span class="sd">    49     49   0.  26.0  1.3   8.0  0.0  1.0  1.0</span>
+<span class="sd">    50     50   0.  20.0  1.1   6.0  0.0  1.0  1.0</span>
+<span class="sd">    51     51   0.  18.0  0.9   9.0  0.0  1.0  1.0</span>
+<span class="sd">    52     52   0.   9.5  0.9   7.0  0.0  1.0  1.0</span>
+<span class="sd">    53     53   0.  17.0  1.7   8.0  0.0  1.0  1.0</span>
+<span class="sd">    54     54   0.  18.0  1.8   8.0  0.0  1.0  1.0</span>
+<span class="sd">    55     55   0.  25.0  1.1   4.0  0.0  1.0  1.0</span>
+<span class="sd">    56     56   0.  12.0  0.6   4.0  0.0  1.0  1.0</span>
+<span class="sd">    57     57   0.  20.0  2.1   6.0  0.0  1.0  1.0</span>
+<span class="sd">    58     58   0.  14.0  1.4   8.0  0.0  1.0  1.0</span>
+<span class="sd">    59     59   0.  22.8  1.1   6.0  0.0  1.0  1.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">idlab</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_label</span>
+    <span class="n">baselines</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idlab</span><span class="p">)</span><span class="o">.</span><span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">baselines</span></div>
+
+
+<div class="viewcode-block" id="get_covariate_baselines"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_covariate_baselines.html#pharmpy.modeling.get_covariate_baselines">[docs]</a><span class="k">def</span> <span class="nf">get_covariate_baselines</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a dataframe with baselines of all covariates for each id.</span>
+
+<span class="sd">    Baseline is taken to be the first row even if that has a missing value.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        covariate baselines</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    get_baselines : baselines for all data columns</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, get_covariate_baselines</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model.datainfo.set_column_type([&quot;WGT&quot;, &quot;APGR&quot;], &quot;covariate&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; get_covariate_baselines(model)</span>
+<span class="sd">        WGT  APGR</span>
+<span class="sd">    ID</span>
+<span class="sd">    1   1.4   7.0</span>
+<span class="sd">    2   1.5   9.0</span>
+<span class="sd">    3   1.5   6.0</span>
+<span class="sd">    4   0.9   6.0</span>
+<span class="sd">    5   1.4   7.0</span>
+<span class="sd">    6   1.2   5.0</span>
+<span class="sd">    7   1.0   5.0</span>
+<span class="sd">    8   1.2   7.0</span>
+<span class="sd">    9   1.4   8.0</span>
+<span class="sd">    10  1.4   7.0</span>
+<span class="sd">    11  1.2   7.0</span>
+<span class="sd">    12  1.3   6.0</span>
+<span class="sd">    13  1.1   6.0</span>
+<span class="sd">    14  1.1   7.0</span>
+<span class="sd">    15  1.3   7.0</span>
+<span class="sd">    16  1.2   9.0</span>
+<span class="sd">    17  1.1   5.0</span>
+<span class="sd">    18  1.0   5.0</span>
+<span class="sd">    19  1.0   1.0</span>
+<span class="sd">    20  1.2   6.0</span>
+<span class="sd">    21  1.8   7.0</span>
+<span class="sd">    22  1.5   8.0</span>
+<span class="sd">    23  3.1   3.0</span>
+<span class="sd">    24  3.2   2.0</span>
+<span class="sd">    25  0.7   1.0</span>
+<span class="sd">    26  3.5   9.0</span>
+<span class="sd">    27  1.9   5.0</span>
+<span class="sd">    28  3.2   9.0</span>
+<span class="sd">    29  1.0   7.0</span>
+<span class="sd">    30  1.8   8.0</span>
+<span class="sd">    31  1.4   8.0</span>
+<span class="sd">    32  3.6   9.0</span>
+<span class="sd">    33  1.7   8.0</span>
+<span class="sd">    34  1.7   4.0</span>
+<span class="sd">    35  2.5   5.0</span>
+<span class="sd">    36  1.5   5.0</span>
+<span class="sd">    37  1.2   9.0</span>
+<span class="sd">    38  1.3   8.0</span>
+<span class="sd">    39  1.9  10.0</span>
+<span class="sd">    40  1.1   3.0</span>
+<span class="sd">    41  1.7   7.0</span>
+<span class="sd">    42  2.8   9.0</span>
+<span class="sd">    43  0.9   1.0</span>
+<span class="sd">    44  1.4   7.0</span>
+<span class="sd">    45  0.8   2.0</span>
+<span class="sd">    46  1.1   8.0</span>
+<span class="sd">    47  2.6   9.0</span>
+<span class="sd">    48  0.7   8.0</span>
+<span class="sd">    49  1.3   8.0</span>
+<span class="sd">    50  1.1   6.0</span>
+<span class="sd">    51  0.9   9.0</span>
+<span class="sd">    52  0.9   7.0</span>
+<span class="sd">    53  1.7   8.0</span>
+<span class="sd">    54  1.8   8.0</span>
+<span class="sd">    55  1.1   4.0</span>
+<span class="sd">    56  0.6   4.0</span>
+<span class="sd">    57  2.1   6.0</span>
+<span class="sd">    58  1.4   8.0</span>
+<span class="sd">    59  1.1   6.0</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">covariates</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">get_column_labels</span><span class="p">(</span><span class="s1">&#39;covariate&#39;</span><span class="p">)</span>
+    <span class="n">idlab</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_label</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">covariates</span> <span class="o">+</span> <span class="p">[</span><span class="n">idlab</span><span class="p">]]</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">idlab</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idlab</span><span class="p">)</span><span class="o">.</span><span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="list_time_varying_covariates"><a class="viewcode-back" href="../../../api/pharmpy.modeling.list_time_varying_covariates.html#pharmpy.modeling.list_time_varying_covariates">[docs]</a><span class="k">def</span> <span class="nf">list_time_varying_covariates</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Return a list of names of all time varying covariates</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    list</span>
+<span class="sd">        Names of all time varying covariates</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    get_covariate_baselines : get baselines for all covariates</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, list_time_varying_covariates</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; list_time_varying_covariates(model)</span>
+<span class="sd">    []</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">observations</span></div>
+    <span class="n">cov_labels</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">get_column_labels</span><span class="p">(</span><span class="s1">&#39;covariate&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cov_labels</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="p">[]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">time_var</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_label</span><span class="p">)[</span><span class="n">cov_labels</span><span class="p">]</span><span class="o">.</span><span class="n">nunique</span><span class="p">()</span><span class="o">.</span><span class="n">gt</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">()</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">time_var</span><span class="o">.</span><span class="n">index</span><span class="p">[</span><span class="n">time_var</span><span class="p">])</span></div>
+
+
+<div class="viewcode-block" id="get_doses"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_doses.html#pharmpy.modeling.get_doses">[docs]</a><span class="k">def</span> <span class="nf">get_doses</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get a series of all doses</span>
+
+<span class="sd">    Indexed with ID and TIME</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.Series</span>
+<span class="sd">        doses</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, get_doses</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; get_doses(model)</span>
+<span class="sd">    ID  TIME</span>
+<span class="sd">    1   0.0      25.0</span>
+<span class="sd">        12.5      3.5</span>
+<span class="sd">        24.5      3.5</span>
+<span class="sd">        37.0      3.5</span>
+<span class="sd">        48.0      3.5</span>
+<span class="sd">                 ...</span>
+<span class="sd">    59  96.0      3.0</span>
+<span class="sd">        108.3     3.0</span>
+<span class="sd">        120.5     3.0</span>
+<span class="sd">        132.3     3.0</span>
+<span class="sd">        144.8     3.0</span>
+<span class="sd">    Name: AMT, Length: 589, dtype: float64</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">label</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">get_column_label</span><span class="p">(</span><span class="s1">&#39;dose&#39;</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">DatasetError</span><span class="p">(</span><span class="s1">&#39;Could not identify dosing rows in dataset&#39;</span><span class="p">)</span>
+
+    <span class="n">idcol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_label</span>
+    <span class="n">idvcol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">idv_label</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> != 0&#39;</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">idcol</span><span class="p">,</span> <span class="n">idvcol</span><span class="p">,</span> <span class="n">label</span><span class="p">]]</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="c1"># FIXME: This shouldn&#39;t be needed</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">idvcol</span><span class="p">:</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">})</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="c1"># TIME could not be converted to float (e.g. 10:15)</span>
+        <span class="k">pass</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">set_index</span><span class="p">([</span><span class="n">idcol</span><span class="p">,</span> <span class="n">idvcol</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">squeeze</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="get_mdv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_mdv.html#pharmpy.modeling.get_mdv">[docs]</a><span class="k">def</span> <span class="nf">get_mdv</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
@@ -455,7 +773,7 @@
     
     <div class="footer-item">
       <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.1.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 4.3.2.<br>
 </p>
     </div>
     
