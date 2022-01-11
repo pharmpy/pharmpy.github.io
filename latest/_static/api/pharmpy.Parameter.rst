@@ -10,8 +10,10 @@ Parameter
 
    .. autosummary::
 
+      ~Parameter.fix
       ~Parameter.init
       ~Parameter.lower
+      ~Parameter.name
       ~Parameter.parameter_space
       ~Parameter.symbol
       ~Parameter.upper
@@ -27,8 +29,10 @@ Parameter
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: fix
    .. autoattribute:: init
    .. autoattribute:: lower
+   .. autoattribute:: name
    .. autoattribute:: parameter_space
    .. autoattribute:: symbol
    .. autoattribute:: upper

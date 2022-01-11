@@ -11,8 +11,10 @@ Compartment
    .. autosummary::
 
       ~Compartment.amount
+      ~Compartment.dose
       ~Compartment.free_symbols
       ~Compartment.lag_time
+      ~Compartment.name
 
    .. rubric:: Methods Summary
 
@@ -23,8 +25,10 @@ Compartment
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: amount
+   .. autoattribute:: dose
    .. autoattribute:: free_symbols
    .. autoattribute:: lag_time
+   .. autoattribute:: name
 
    .. rubric:: Methods Documentation
 

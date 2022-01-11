@@ -11,6 +11,8 @@ ExplicitODESystem
    .. autosummary::
 
       ~ExplicitODESystem.free_symbols
+      ~ExplicitODESystem.ics
+      ~ExplicitODESystem.odes
       ~ExplicitODESystem.rhs_symbols
 
    .. rubric:: Methods Summary
@@ -23,6 +25,8 @@ ExplicitODESystem
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: free_symbols
+   .. autoattribute:: ics
+   .. autoattribute:: odes
    .. autoattribute:: rhs_symbols
 
    .. rubric:: Methods Documentation

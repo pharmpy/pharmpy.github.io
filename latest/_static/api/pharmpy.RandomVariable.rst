@@ -12,6 +12,7 @@ RandomVariable
 
       ~RandomVariable.free_symbols
       ~RandomVariable.joint_names
+      ~RandomVariable.level
       ~RandomVariable.name
       ~RandomVariable.parameter_names
       ~RandomVariable.sympy_rv
@@ -29,6 +30,7 @@ RandomVariable
 
    .. autoattribute:: free_symbols
    .. autoattribute:: joint_names
+   .. autoattribute:: level
    .. autoattribute:: name
    .. autoattribute:: parameter_names
    .. autoattribute:: sympy_rv
