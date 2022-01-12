@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.common &#8212; Pharmpy 0.42.0 documentation</title>
+    <title>pharmpy.modeling.common &#8212; Pharmpy 0.43.0 documentation</title>
     
   <link href="../../../_static/css/theme.css" rel="stylesheet">
   <link href="../../../_static/css/index.ff1ffe594081f20da1ef19478df9384b.css" rel="stylesheet">
@@ -192,6 +192,7 @@
 <span class="sd">:meta private:</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
+<span class="kn">import</span> <span class="nn">re</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
@@ -455,6 +456,54 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="bump_model_number"><a class="viewcode-back" href="../../../api/pharmpy.modeling.bump_model_number.html#pharmpy.modeling.bump_model_number">[docs]</a><span class="k">def</span> <span class="nf">bump_model_number</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;If the model name ends in a number increase it</span>
+
+<span class="sd">    If path is set increase the number until no file exists</span>
+<span class="sd">    with the same name in path.</span>
+<span class="sd">    If model name does not end in a number do nothing.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+<span class="sd">    path : Path in which to find next unique number</span>
+<span class="sd">        Default is to not look for files.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Reference to the same model object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import bump_model_number, load_example_model</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model.name = &quot;run2&quot;</span>
+<span class="sd">    &gt;&gt;&gt; bump_model_number(model)    # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model.name</span>
+<span class="sd">    &#39;run3&#39;</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">m</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">search</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;(.*?)(\d+)$&#39;</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">m</span><span class="p">:</span>
+        <span class="n">stem</span> <span class="o">=</span> <span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">m</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">new_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stem</span><span class="si">}{</span><span class="n">n</span> <span class="o">+</span> <span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+            <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
+                <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">new_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stem</span><span class="si">}{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span>
+                <span class="n">new_path</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="n">new_name</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">filename_extension</span><span class="p">)</span>
+                <span class="k">if</span> <span class="ow">not</span> <span class="n">new_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
+                    <span class="k">break</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
