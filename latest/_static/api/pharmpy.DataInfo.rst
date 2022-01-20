@@ -22,6 +22,7 @@ DataInfo
 
    .. autosummary::
 
+      ~DataInfo.copy
       ~DataInfo.from_json
       ~DataInfo.insert
       ~DataInfo.read_json
@@ -39,6 +40,7 @@ DataInfo
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: copy
    .. automethod:: from_json
    .. automethod:: insert
    .. automethod:: read_json

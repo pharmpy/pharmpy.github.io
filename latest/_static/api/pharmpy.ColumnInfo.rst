@@ -22,6 +22,7 @@ ColumnInfo
 
    .. autosummary::
 
+      ~ColumnInfo.copy
       ~ColumnInfo.is_categorical
       ~ColumnInfo.is_numerical
 
@@ -37,5 +38,6 @@ ColumnInfo
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: copy
    .. automethod:: is_categorical
    .. automethod:: is_numerical

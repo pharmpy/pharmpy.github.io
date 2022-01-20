@@ -26,7 +26,6 @@ Parameters
       ~Parameters.insert
       ~Parameters.is_close_to_bound
       ~Parameters.remove_fixed
-      ~Parameters.simplify
       ~Parameters.to_dataframe
 
    .. rubric:: Attributes Documentation
@@ -45,5 +44,4 @@ Parameters
    .. automethod:: insert
    .. automethod:: is_close_to_bound
    .. automethod:: remove_fixed
-   .. automethod:: simplify
    .. automethod:: to_dataframe

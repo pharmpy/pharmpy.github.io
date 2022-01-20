@@ -10,7 +10,7 @@ At the heart of Pharmpy lies its non-linear mixed effects model abstraction. A m
 Reading in a model
 ~~~~~~~~~~~~~~~~~~
 
-Reading a model from a model specification file into a Pharmy model object is done by using the factory constructor.
+Reading a model from a model specification file into a Pharmy model object can be done by using the factory constructor.
 
 .. jupyter-execute::
    :hide-output:
@@ -23,7 +23,7 @@ Reading a model from a model specification file into a Pharmy model object is do
 
    from pharmpy import Model
 
-   model = Model(path / "pheno_real.mod")
+   model = Model.create_model(path / "pheno_real.mod")
 
 
 Internally this will trigger a model type detection to select which model implementation to use, i.e. if it is an NM-TRAN control stream the Pharmpy NONMEM model class will be selected transparent to the user.
@@ -48,13 +48,14 @@ A model object can be written to a file using its source format. By default the 
 
 .. code-block::
 
-   model.write()
+    from pharmpy.modeling import write_model
+    write_model(model)
 
 Optionally a path can be specified:
 
 .. code-block::
 
-   model.write(path='/home/user/mymodel.mod')
+   write_model(model, path='/home/user/mymodel.mod')
 
 
 ~~~~~~~~~~~~~~~~~~~~~~
@@ -163,11 +164,12 @@ Updating all initial estimates of a model from its own results can be done eithe
 
    model.parameters = model.modelfit_results.parameter_estimates
 
-or using the convenience method:
+or using the convenient function:
 
 .. jupyter-execute::
 
-   model.update_inits()
+    from pharmpy.modeling import update_inits
+    update_inits(model)
 
 ~~~~~~~~~~~~~~~~
 Random variables
@@ -200,7 +202,7 @@ Joint distributions are also supported
 
 .. jupyter-execute::
 
-   frem_model = Model(path / "frem" / "pheno" / "model_4.mod")
+   frem_model = Model.create_model(path / "frem" / "pheno" / "model_4.mod")
 
    rvs = frem_model.random_variables
    rvs
@@ -279,13 +281,3 @@ Get the compartmental matrix:
 .. jupyter-execute::
 
    statements.ode_system.compartmental_matrix
-
-~~~~~~~~~~~~~~~~~~~
-Data transformation
-~~~~~~~~~~~~~~~~~~~
-
-If a dataset has transformed data this can be described in the `data_transformation` attribute of the model. This attribute can be set to the transformation expression describing how the `dependent_variable` is transformed in the data. Default this is set to the `dependent_variable`, i.e. no transformation. Note that setting this attribute only changes the interpretation of the model, not the model itself. Pharmpy can use this information for example when applying an error model to be able to set the correct model given the data transformation.
-
-.. jupyter-execute::
-
-    model.data_transformation = 'log(Y)'
