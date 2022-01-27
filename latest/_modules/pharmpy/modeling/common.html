@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.common &#8212; Pharmpy 0.45.0 documentation</title>
+    <title>pharmpy.modeling.common &#8212; Pharmpy 0.46.1 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -406,6 +406,7 @@
         <span class="n">new</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
         <span class="n">new</span><span class="o">.</span><span class="n">dependent_variable</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span>
         <span class="n">new</span><span class="o">.</span><span class="n">observation_transformation</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">observation_transformation</span>
+        <span class="n">new</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">new</span><span class="o">.</span><span class="n">filename_extension</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">filename_extension</span>
         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
@@ -452,6 +453,57 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">model_code</span></div>
+
+
+<div class="viewcode-block" id="print_model_code"><a class="viewcode-back" href="../../../api/pharmpy.modeling.print_model_code.html#pharmpy.modeling.print_model_code">[docs]</a><span class="k">def</span> <span class="nf">print_model_code</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Print the model code of the underlying model language</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import print_model_code, load_example_model</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; print_model_code(model)</span>
+<span class="sd">    $PROBLEM PHENOBARB SIMPLE MODEL</span>
+<span class="sd">    $DATA &#39;pheno.dta&#39; IGNORE=@</span>
+<span class="sd">    $INPUT ID TIME AMT WGT APGR DV FA1 FA2</span>
+<span class="sd">    $SUBROUTINE ADVAN1 TRANS2</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    $PK</span>
+<span class="sd">    IF(AMT.GT.0) BTIME=TIME</span>
+<span class="sd">    TAD=TIME-BTIME</span>
+<span class="sd">    TVCL=THETA(1)*WGT</span>
+<span class="sd">    TVV=THETA(2)*WGT</span>
+<span class="sd">    IF(APGR.LT.5) TVV=TVV*(1+THETA(3))</span>
+<span class="sd">    CL=TVCL*EXP(ETA(1))</span>
+<span class="sd">    V=TVV*EXP(ETA(2))</span>
+<span class="sd">    S1=V</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    $ERROR</span>
+<span class="sd">    W=F</span>
+<span class="sd">    Y=F+W*EPS(1)</span>
+<span class="sd">    IPRED=F</span>
+<span class="sd">    IRES=DV-IPRED</span>
+<span class="sd">    IWRES=IRES/W</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    $THETA (0,0.00469307) ; PTVCL</span>
+<span class="sd">    $THETA (0,1.00916) ; PTVV</span>
+<span class="sd">    $THETA (-.99,.1)</span>
+<span class="sd">    $OMEGA DIAGONAL(2)</span>
+<span class="sd">     0.0309626  ;       IVCL</span>
+<span class="sd">     0.031128  ;        IVV</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+<span class="sd">    $SIGMA 0.013241</span>
+<span class="sd">    $ESTIMATION METHOD=1 INTERACTION</span>
+<span class="sd">    $COVARIANCE UNCONDITIONAL</span>
+<span class="sd">    $TABLE ID TIME AMT WGT APGR IPRED PRED TAD CWRES NPDE NOAPPEND</span>
+<span class="sd">           NOPRINT ONEHEADER FILE=pheno.tab</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_code</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="copy_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.copy_model.html#pharmpy.modeling.copy_model">[docs]</a><span class="k">def</span> <span class="nf">copy_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

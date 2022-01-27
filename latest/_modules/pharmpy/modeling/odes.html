@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.45.0 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.46.1 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -202,7 +202,7 @@
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">ModelError</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.help_functions</span> <span class="kn">import</span> <span class="n">_as_integer</span>
 <span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
-<span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">Infusion</span>
+<span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">,</span> <span class="n">Infusion</span>
 
 <span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">remove_unused_parameters_and_rvs</span>
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">get_observations</span>
@@ -288,6 +288,36 @@
 <span class="sd">    set_michaelis_menten_elimination</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">has_first_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">has_zero_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="ow">or</span> <span class="n">has_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_CLMM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;POP_CL&#39;</span>
+        <span class="n">ass</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;CLMM&#39;</span><span class="p">)</span>
+        <span class="n">ass</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="s1">&#39;CL&#39;</span>
+        <span class="n">ass</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="s1">&#39;POP_CLMM&#39;</span><span class="p">:</span> <span class="s1">&#39;POP_CL&#39;</span><span class="p">})</span>
+        <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+        <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;V&#39;</span><span class="p">)</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;VC&#39;</span><span class="p">)</span>
+        <span class="n">odes</span><span class="o">.</span><span class="n">remove_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">({</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;KM&#39;</span><span class="p">)},</span> <span class="n">odes</span><span class="p">)</span>
+        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">has_mixed_mm_fo_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+        <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;V&#39;</span><span class="p">)</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;VC&#39;</span><span class="p">)</span>
+        <span class="n">odes</span><span class="o">.</span><span class="n">remove_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">v</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">({</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;KM&#39;</span><span class="p">),</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CLMM&#39;</span><span class="p">)},</span> <span class="n">odes</span><span class="p">)</span>
+        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -324,12 +354,175 @@
 <span class="sd">    set_michaelis_menten_elimination</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="n">obs</span> <span class="o">=</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="n">init</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">/</span> <span class="mi">100</span>  <span class="c1"># 1% of smallest observation</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="n">init</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fix</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">if</span> <span class="n">has_zero_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">has_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fix</span> <span class="o">=</span> <span class="kc">True</span>
+    <span class="k">elif</span> <span class="n">has_mixed_mm_fo_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fix</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+        <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="n">rate</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">odes</span><span class="o">.</span><span class="n">remove_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">({</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)},</span> <span class="n">odes</span><span class="p">)</span>
+        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">obs</span> <span class="o">=</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">init</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">/</span> <span class="mi">100</span>  <span class="c1"># 1% of smallest observation</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">=</span> <span class="n">init</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fix</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="has_michaelis_menten_elimination"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_michaelis_menten_elimination.html#pharmpy.modeling.has_michaelis_menten_elimination">[docs]</a><span class="k">def</span> <span class="nf">has_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if the model describes Michaelis-Menten elimination</span>
+
+<span class="sd">    This function relies on heuristics and will not be able to detect all</span>
+<span class="sd">    possible ways of coding the Michalis-Menten elimination.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if model has describes Michaelis-Menten elimination</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; has_michaelis_menten_elimination(model)</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; set_michaelis_menten_elimination(model)   # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; has_michaelis_menten_elimination(model)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
+    <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+    <span class="n">rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="n">is_nonlinear</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">in</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="n">is_zero_order</span> <span class="o">=</span> <span class="s1">&#39;POP_KM&#39;</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fix</span>
+    <span class="n">could_be_mixed</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="k">return</span> <span class="n">is_nonlinear</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_zero_order</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">could_be_mixed</span></div>
+
+
+<div class="viewcode-block" id="has_zero_order_elimination"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_zero_order_elimination.html#pharmpy.modeling.has_zero_order_elimination">[docs]</a><span class="k">def</span> <span class="nf">has_zero_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if the model describes zero-order elimination</span>
+
+<span class="sd">    This function relies on heuristics and will not be able to detect all</span>
+<span class="sd">    possible ways of coding the zero-order elimination.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if model has describes zero order elimination</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; has_zero_order_elimination(model)</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; set_zero_order_elimination(model)   # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; has_zero_order_elimination(model)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
+    <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+    <span class="n">rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="n">is_nonlinear</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">in</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="n">is_zero_order</span> <span class="o">=</span> <span class="s1">&#39;POP_KM&#39;</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fix</span>
+    <span class="n">could_be_mixed</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="k">return</span> <span class="n">is_nonlinear</span> <span class="ow">and</span> <span class="n">is_zero_order</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">could_be_mixed</span></div>
+
+
+<div class="viewcode-block" id="has_mixed_mm_fo_elimination"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_mixed_mm_fo_elimination.html#pharmpy.modeling.has_mixed_mm_fo_elimination">[docs]</a><span class="k">def</span> <span class="nf">has_mixed_mm_fo_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if the model describes mixed Michaelis-Menten and first order elimination</span>
+
+<span class="sd">    This function relies on heuristics and will not be able to detect all</span>
+<span class="sd">    possible ways of coding the mixed Michalis-Menten and first order elimination.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if model has describes Michaelis-Menten elimination</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; has_mixed_mm_fo_elimination(model)</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; set_mixed_mm_fo_elimination(model)   # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; has_mixed_mm_fo_elimination(model)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
+    <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+    <span class="n">rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="n">is_nonlinear</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">in</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="n">is_zero_order</span> <span class="o">=</span> <span class="s1">&#39;POP_KM&#39;</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fix</span>
+    <span class="n">could_be_mixed</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="k">return</span> <span class="n">is_nonlinear</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">is_zero_order</span> <span class="ow">and</span> <span class="n">could_be_mixed</span></div>
+
+
+<div class="viewcode-block" id="has_first_order_elimination"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_first_order_elimination.html#pharmpy.modeling.has_first_order_elimination">[docs]</a><span class="k">def</span> <span class="nf">has_first_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if the model describes first order elimination</span>
+
+<span class="sd">    This function relies on heuristics and will not be able to detect all</span>
+<span class="sd">    possible ways of coding the first order elimination.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if model has describes first order elimination</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; has_first_order_elimination(model)</span>
+<span class="sd">    True</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
+    <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+    <span class="n">rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="n">is_nonlinear</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">in</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="n">is_nonlinear</span></div>
 
 
 <div class="viewcode-block" id="set_michaelis_menten_elimination"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_michaelis_menten_elimination.html#pharmpy.modeling.set_michaelis_menten_elimination">[docs]</a><span class="k">def</span> <span class="nf">set_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
@@ -365,7 +558,22 @@
 <span class="sd">    set_zero_order_elimination</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">has_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">has_zero_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fix</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">elif</span> <span class="n">has_mixed_mm_fo_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+        <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="n">rate</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">odes</span><span class="o">.</span><span class="n">remove_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">({</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)},</span> <span class="n">odes</span><span class="p">)</span>
+        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -403,11 +611,27 @@
 <span class="sd">    set_michaelis_menten_elimination</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">has_mixed_mm_fo_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="k">pass</span>
+    <span class="k">elif</span> <span class="n">has_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="ow">or</span> <span class="n">has_zero_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">fix</span> <span class="o">=</span> <span class="kc">False</span>
+        <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+        <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+        <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
+        <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">)</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">odes</span><span class="o">.</span><span class="n">remove_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">v</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;V&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+            <span class="n">v</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;VC&#39;</span><span class="p">)</span>
+        <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">v</span> <span class="o">+</span> <span class="n">rate</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
 <span class="k">def</span> <span class="nf">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
@@ -489,6 +713,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">transits</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_transit_compartments</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
     <span class="k">try</span><span class="p">:</span>
@@ -637,6 +862,7 @@
 <span class="sd">    remove_lag_time</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="n">old_lag_time</span> <span class="o">=</span> <span class="n">dosing_comp</span><span class="o">.</span><span class="n">lag_time</span>
@@ -675,6 +901,7 @@
 
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="n">lag_time</span> <span class="o">=</span> <span class="n">dosing_comp</span><span class="o">.</span><span class="n">lag_time</span>
@@ -721,9 +948,8 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">odes</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Setting absorption is not supported for ExplicitODESystem&quot;</span><span class="p">)</span>
     <span class="n">_disallow_infusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
 
@@ -834,9 +1060,8 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">odes</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Setting absorption is not supported for ExplicitODESystem&quot;</span><span class="p">)</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
         <span class="n">to_comp</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">depot</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
@@ -896,9 +1121,8 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">odes</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">):</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Setting absorption is not supported for ExplicitODESystem&quot;</span><span class="p">)</span>
     <span class="n">_disallow_infusion</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
 
@@ -1064,6 +1288,7 @@
 <span class="sd">    remove_peripheral_compartment</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">n</span> <span class="o">=</span> <span class="n">_as_integer</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
     <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
@@ -1134,6 +1359,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">per</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">peripheral_compartments</span>
     <span class="n">n</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">per</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span>
@@ -1245,6 +1471,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">peripherals</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">peripheral_compartments</span>
     <span class="k">if</span> <span class="n">peripherals</span><span class="p">:</span>

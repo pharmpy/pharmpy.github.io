@@ -21,6 +21,7 @@ Model
       ~Model.name
       ~Model.observation_transformation
       ~Model.parameters
+      ~Model.parent_model
       ~Model.random_variables
       ~Model.statements
 
@@ -46,6 +47,7 @@ Model
    .. autoattribute:: name
    .. autoattribute:: observation_transformation
    .. autoattribute:: parameters
+   .. autoattribute:: parent_model
    .. autoattribute:: random_variables
    .. autoattribute:: statements
 

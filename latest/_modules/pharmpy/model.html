@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model &#8212; Pharmpy 0.45.0 documentation</title>
+    <title>pharmpy.model &#8212; Pharmpy 0.46.1 documentation</title>
     
     <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -243,6 +243,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">dependent_variable</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">observation_transformation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependent_variable</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;Pharmpy model object </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&gt;&#39;</span>
@@ -395,6 +396,15 @@
         <span class="sd">&quot;&quot;&quot;Model type specific code&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Generic model does not implement the model_code property&quot;</span><span class="p">)</span>
 
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">parent_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Name of parent model&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent_model</span>
+
+    <span class="nd">@parent_model</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">parent_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_parent_model</span> <span class="o">=</span> <span class="n">value</span>
+
 <div class="viewcode-block" id="Model.read_modelfit_results"><a class="viewcode-back" href="../../api/pharmpy.Model.html#pharmpy.Model.read_modelfit_results">[docs]</a>    <span class="k">def</span> <span class="nf">read_modelfit_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Read in modelfit results&quot;&quot;&quot;</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="s2">&quot;Read modelfit results not implemented for generic models&quot;</span><span class="p">)</span></div>
@@ -420,7 +430,9 @@
 
 <div class="viewcode-block" id="Model.copy"><a class="viewcode-back" href="../../api/pharmpy.Model.html#pharmpy.Model.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Create a deepcopy of the model object&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span></div>
+        <span class="n">model_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+        <span class="n">model_copy</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">return</span> <span class="n">model_copy</span></div>
 
 <div class="viewcode-block" id="Model.create_model"><a class="viewcode-back" href="../../api/pharmpy.Model.html#pharmpy.Model.create_model">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
