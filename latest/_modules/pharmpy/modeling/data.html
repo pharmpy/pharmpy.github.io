@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.data &#8212; Pharmpy 0.46.1 documentation</title>
+    <title>pharmpy.modeling.data &#8212; Pharmpy 0.47.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -192,7 +192,8 @@
               <div>
                 
   <h1>Source code for pharmpy.modeling.data</h1><div class="highlight"><pre>
-<span></span><span class="c1"># Functional interface to extract dataset information</span>
+<span></span><span class="kn">import</span> <span class="nn">re</span>
+
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 
@@ -476,67 +477,67 @@
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, get_baselines</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; get_baselines(model)</span>
-<span class="sd">       TIME   AMT  WGT  APGR   DV  FA1  FA2</span>
+<span class="sd">         TIME  AMT  WGT  APGR   DV  FA1  FA2</span>
 <span class="sd">    ID</span>
-<span class="sd">    1    0.  25.0  1.4   7.0  0.0  1.0  1.0</span>
-<span class="sd">    2    0.  15.0  1.5   9.0  0.0  1.0  1.0</span>
-<span class="sd">    3    0.  30.0  1.5   6.0  0.0  1.0  1.0</span>
-<span class="sd">    4    0.  18.6  0.9   6.0  0.0  1.0  1.0</span>
-<span class="sd">    5    0.  27.0  1.4   7.0  0.0  1.0  1.0</span>
-<span class="sd">    6    0.  24.0  1.2   5.0  0.0  1.0  1.0</span>
-<span class="sd">    7    0.  19.0  1.0   5.0  0.0  1.0  1.0</span>
-<span class="sd">    8    0.  24.0  1.2   7.0  0.0  1.0  1.0</span>
-<span class="sd">    9    0.  27.0  1.4   8.0  0.0  1.0  1.0</span>
-<span class="sd">    10   0.  27.0  1.4   7.0  0.0  1.0  1.0</span>
-<span class="sd">    11   0.  24.0  1.2   7.0  0.0  1.0  1.0</span>
-<span class="sd">    12   0.  26.0  1.3   6.0  0.0  1.0  1.0</span>
-<span class="sd">    13   0.  11.0  1.1   6.0  0.0  1.0  1.0</span>
-<span class="sd">    14   0.  22.0  1.1   7.0  0.0  1.0  1.0</span>
-<span class="sd">    15   0.  26.0  1.3   7.0  0.0  1.0  1.0</span>
-<span class="sd">    16   0.  12.0  1.2   9.0  0.0  1.0  1.0</span>
-<span class="sd">    17   0.  22.0  1.1   5.0  0.0  1.0  1.0</span>
-<span class="sd">    18   0.  20.0  1.0   5.0  0.0  1.0  1.0</span>
-<span class="sd">    19   0.  10.0  1.0   1.0  0.0  1.0  1.0</span>
-<span class="sd">    20   0.  24.0  1.2   6.0  0.0  1.0  1.0</span>
-<span class="sd">    21   0.  17.5  1.8   7.0  0.0  1.0  1.0</span>
-<span class="sd">    22   0.  15.0  1.5   8.0  0.0  1.0  1.0</span>
-<span class="sd">    23   0.  60.0  3.1   3.0  0.0  1.0  1.0</span>
-<span class="sd">    24   0.  63.0  3.2   2.0  0.0  1.0  1.0</span>
-<span class="sd">    25   0.  15.0  0.7   1.0  0.0  1.0  1.0</span>
-<span class="sd">    26   0.  70.0  3.5   9.0  0.0  1.0  1.0</span>
-<span class="sd">    27   0.  35.0  1.9   5.0  0.0  1.0  1.0</span>
-<span class="sd">    28   0.  60.0  3.2   9.0  0.0  1.0  1.0</span>
-<span class="sd">    29   0.  20.0  1.0   7.0  0.0  1.0  1.0</span>
-<span class="sd">    30   0.  18.0  1.8   8.0  0.0  1.0  1.0</span>
-<span class="sd">    31   0.  30.0  1.4   8.0  0.0  1.0  1.0</span>
-<span class="sd">    32   0.  70.0  3.6   9.0  0.0  1.0  1.0</span>
-<span class="sd">    33   0.  17.0  1.7   8.0  0.0  1.0  1.0</span>
-<span class="sd">    34   0.  34.0  1.7   4.0  0.0  1.0  1.0</span>
-<span class="sd">    35   0.  25.0  2.5   5.0  0.0  1.0  1.0</span>
-<span class="sd">    36   0.  30.0  1.5   5.0  0.0  1.0  1.0</span>
-<span class="sd">    37   0.  24.0  1.2   9.0  0.0  1.0  1.0</span>
-<span class="sd">    38   0.  26.0  1.3   8.0  0.0  1.0  1.0</span>
-<span class="sd">    39   0.  56.0  1.9  10.0  0.0  1.0  1.0</span>
-<span class="sd">    40   0.  19.0  1.1   3.0  0.0  1.0  1.0</span>
-<span class="sd">    41   0.  34.0  1.7   7.0  0.0  1.0  1.0</span>
-<span class="sd">    42   0.  28.0  2.8   9.0  0.0  1.0  1.0</span>
-<span class="sd">    43   0.  18.0  0.9   1.0  0.0  1.0  1.0</span>
-<span class="sd">    44   0.  14.0  1.4   7.0  0.0  1.0  1.0</span>
-<span class="sd">    45   0.  16.0  0.8   2.0  0.0  1.0  1.0</span>
-<span class="sd">    46   0.  11.0  1.1   8.0  0.0  1.0  1.0</span>
-<span class="sd">    47   0.  40.0  2.6   9.0  0.0  1.0  1.0</span>
-<span class="sd">    48   0.  14.0  0.7   8.0  0.0  1.0  1.0</span>
-<span class="sd">    49   0.  26.0  1.3   8.0  0.0  1.0  1.0</span>
-<span class="sd">    50   0.  20.0  1.1   6.0  0.0  1.0  1.0</span>
-<span class="sd">    51   0.  18.0  0.9   9.0  0.0  1.0  1.0</span>
-<span class="sd">    52   0.   9.5  0.9   7.0  0.0  1.0  1.0</span>
-<span class="sd">    53   0.  17.0  1.7   8.0  0.0  1.0  1.0</span>
-<span class="sd">    54   0.  18.0  1.8   8.0  0.0  1.0  1.0</span>
-<span class="sd">    55   0.  25.0  1.1   4.0  0.0  1.0  1.0</span>
-<span class="sd">    56   0.  12.0  0.6   4.0  0.0  1.0  1.0</span>
-<span class="sd">    57   0.  20.0  2.1   6.0  0.0  1.0  1.0</span>
-<span class="sd">    58   0.  14.0  1.4   8.0  0.0  1.0  1.0</span>
-<span class="sd">    59   0.  22.8  1.1   6.0  0.0  1.0  1.0</span>
+<span class="sd">    1    0.0  25.0  1.4   7.0  0.0  1.0  1.0</span>
+<span class="sd">    2    0.0  15.0  1.5   9.0  0.0  1.0  1.0</span>
+<span class="sd">    3    0.0  30.0  1.5   6.0  0.0  1.0  1.0</span>
+<span class="sd">    4    0.0  18.6  0.9   6.0  0.0  1.0  1.0</span>
+<span class="sd">    5    0.0  27.0  1.4   7.0  0.0  1.0  1.0</span>
+<span class="sd">    6    0.0  24.0  1.2   5.0  0.0  1.0  1.0</span>
+<span class="sd">    7    0.0  19.0  1.0   5.0  0.0  1.0  1.0</span>
+<span class="sd">    8    0.0  24.0  1.2   7.0  0.0  1.0  1.0</span>
+<span class="sd">    9    0.0  27.0  1.4   8.0  0.0  1.0  1.0</span>
+<span class="sd">    10   0.0  27.0  1.4   7.0  0.0  1.0  1.0</span>
+<span class="sd">    11   0.0  24.0  1.2   7.0  0.0  1.0  1.0</span>
+<span class="sd">    12   0.0  26.0  1.3   6.0  0.0  1.0  1.0</span>
+<span class="sd">    13   0.0  11.0  1.1   6.0  0.0  1.0  1.0</span>
+<span class="sd">    14   0.0  22.0  1.1   7.0  0.0  1.0  1.0</span>
+<span class="sd">    15   0.0  26.0  1.3   7.0  0.0  1.0  1.0</span>
+<span class="sd">    16   0.0  12.0  1.2   9.0  0.0  1.0  1.0</span>
+<span class="sd">    17   0.0  22.0  1.1   5.0  0.0  1.0  1.0</span>
+<span class="sd">    18   0.0  20.0  1.0   5.0  0.0  1.0  1.0</span>
+<span class="sd">    19   0.0  10.0  1.0   1.0  0.0  1.0  1.0</span>
+<span class="sd">    20   0.0  24.0  1.2   6.0  0.0  1.0  1.0</span>
+<span class="sd">    21   0.0  17.5  1.8   7.0  0.0  1.0  1.0</span>
+<span class="sd">    22   0.0  15.0  1.5   8.0  0.0  1.0  1.0</span>
+<span class="sd">    23   0.0  60.0  3.1   3.0  0.0  1.0  1.0</span>
+<span class="sd">    24   0.0  63.0  3.2   2.0  0.0  1.0  1.0</span>
+<span class="sd">    25   0.0  15.0  0.7   1.0  0.0  1.0  1.0</span>
+<span class="sd">    26   0.0  70.0  3.5   9.0  0.0  1.0  1.0</span>
+<span class="sd">    27   0.0  35.0  1.9   5.0  0.0  1.0  1.0</span>
+<span class="sd">    28   0.0  60.0  3.2   9.0  0.0  1.0  1.0</span>
+<span class="sd">    29   0.0  20.0  1.0   7.0  0.0  1.0  1.0</span>
+<span class="sd">    30   0.0  18.0  1.8   8.0  0.0  1.0  1.0</span>
+<span class="sd">    31   0.0  30.0  1.4   8.0  0.0  1.0  1.0</span>
+<span class="sd">    32   0.0  70.0  3.6   9.0  0.0  1.0  1.0</span>
+<span class="sd">    33   0.0  17.0  1.7   8.0  0.0  1.0  1.0</span>
+<span class="sd">    34   0.0  34.0  1.7   4.0  0.0  1.0  1.0</span>
+<span class="sd">    35   0.0  25.0  2.5   5.0  0.0  1.0  1.0</span>
+<span class="sd">    36   0.0  30.0  1.5   5.0  0.0  1.0  1.0</span>
+<span class="sd">    37   0.0  24.0  1.2   9.0  0.0  1.0  1.0</span>
+<span class="sd">    38   0.0  26.0  1.3   8.0  0.0  1.0  1.0</span>
+<span class="sd">    39   0.0  56.0  1.9  10.0  0.0  1.0  1.0</span>
+<span class="sd">    40   0.0  19.0  1.1   3.0  0.0  1.0  1.0</span>
+<span class="sd">    41   0.0  34.0  1.7   7.0  0.0  1.0  1.0</span>
+<span class="sd">    42   0.0  28.0  2.8   9.0  0.0  1.0  1.0</span>
+<span class="sd">    43   0.0  18.0  0.9   1.0  0.0  1.0  1.0</span>
+<span class="sd">    44   0.0  14.0  1.4   7.0  0.0  1.0  1.0</span>
+<span class="sd">    45   0.0  16.0  0.8   2.0  0.0  1.0  1.0</span>
+<span class="sd">    46   0.0  11.0  1.1   8.0  0.0  1.0  1.0</span>
+<span class="sd">    47   0.0  40.0  2.6   9.0  0.0  1.0  1.0</span>
+<span class="sd">    48   0.0  14.0  0.7   8.0  0.0  1.0  1.0</span>
+<span class="sd">    49   0.0  26.0  1.3   8.0  0.0  1.0  1.0</span>
+<span class="sd">    50   0.0  20.0  1.1   6.0  0.0  1.0  1.0</span>
+<span class="sd">    51   0.0  18.0  0.9   9.0  0.0  1.0  1.0</span>
+<span class="sd">    52   0.0   9.5  0.9   7.0  0.0  1.0  1.0</span>
+<span class="sd">    53   0.0  17.0  1.7   8.0  0.0  1.0  1.0</span>
+<span class="sd">    54   0.0  18.0  1.8   8.0  0.0  1.0  1.0</span>
+<span class="sd">    55   0.0  25.0  1.1   4.0  0.0  1.0  1.0</span>
+<span class="sd">    56   0.0  12.0  0.6   4.0  0.0  1.0  1.0</span>
+<span class="sd">    57   0.0  20.0  2.1   6.0  0.0  1.0  1.0</span>
+<span class="sd">    58   0.0  14.0  1.4   8.0  0.0  1.0  1.0</span>
+<span class="sd">    59   0.0  22.8  1.1   6.0  0.0  1.0  1.0</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">idlab</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_column</span><span class="o">.</span><span class="n">name</span>
     <span class="n">baselines</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idlab</span><span class="p">)</span><span class="o">.</span><span class="n">nth</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
@@ -903,6 +904,267 @@
     <span class="n">params2</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="n">dv</span><span class="p">:</span> <span class="s1">&#39;Cmin&#39;</span><span class="p">,</span> <span class="s1">&#39;TAD&#39;</span><span class="p">:</span> <span class="s1">&#39;Tmin&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">params2</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">res</span></div>
+
+
+<div class="viewcode-block" id="drop_dropped_columns"><a class="viewcode-back" href="../../../api/pharmpy.modeling.drop_dropped_columns.html#pharmpy.modeling.drop_dropped_columns">[docs]</a><span class="k">def</span> <span class="nf">drop_dropped_columns</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Drop columns marked as dropped from the dataset</span>
+
+<span class="sd">    NM-TRAN date columns will not be dropped by this function</span>
+<span class="sd">    even if marked as dropped.</span>
+<span class="sd">    Columns not specified in the datainfo ($INPUT for NONMEM)</span>
+<span class="sd">    will also be dropped from the dataset.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Reference to same model object</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; drop_dropped_columns(model)    # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; list(model.dataset.columns)</span>
+<span class="sd">    [&#39;ID&#39;, &#39;TIME&#39;, &#39;AMT&#39;, &#39;WGT&#39;, &#39;APGR&#39;, &#39;DV&#39;]</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    drop_columns : Drop specific columns or mark them as drop</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">datainfo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span>
+    <span class="n">todrop</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">colname</span>
+        <span class="k">for</span> <span class="n">colname</span> <span class="ow">in</span> <span class="n">datainfo</span><span class="o">.</span><span class="n">names</span>
+        <span class="k">if</span> <span class="n">datainfo</span><span class="p">[</span><span class="n">colname</span><span class="p">]</span><span class="o">.</span><span class="n">drop</span> <span class="ow">and</span> <span class="n">datainfo</span><span class="p">[</span><span class="n">colname</span><span class="p">]</span><span class="o">.</span><span class="n">datatype</span> <span class="o">!=</span> <span class="s1">&#39;nmtran-date&#39;</span>
+    <span class="p">]</span>
+    <span class="n">todrop</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">datainfo</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
+    <span class="n">drop_columns</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">todrop</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="drop_columns"><a class="viewcode-back" href="../../../api/pharmpy.modeling.drop_columns.html#pharmpy.modeling.drop_columns">[docs]</a><span class="k">def</span> <span class="nf">drop_columns</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">column_names</span><span class="p">,</span> <span class="n">mark</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Drop columns from the dataset or mark as dropped</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+<span class="sd">    column_names : list or str</span>
+<span class="sd">        List of column names or one column name to drop or mark as dropped</span>
+<span class="sd">    mark : bool</span>
+<span class="sd">        Default is to remove column from dataset set this to True to only mark as dropped</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Reference to same model object</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; drop_columns(model, [&#39;WGT&#39;, &#39;APGR&#39;])    # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; list(model.dataset.columns)</span>
+<span class="sd">    [&#39;ID&#39;, &#39;TIME&#39;, &#39;AMT&#39;, &#39;DV&#39;, &#39;FA1&#39;, &#39;FA2&#39;]</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    drop_dropped_columns : Drop all columns marked as drop</span>
+<span class="sd">    undrop_columns : Undrop columns of model</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">column_names</span><span class="p">]</span>
+    <span class="n">datainfo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span>
+    <span class="k">for</span> <span class="n">colname</span> <span class="ow">in</span> <span class="n">column_names</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">mark</span><span class="p">:</span>
+            <span class="n">datainfo</span><span class="p">[</span><span class="n">colname</span><span class="p">]</span><span class="o">.</span><span class="n">drop</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="k">del</span> <span class="n">datainfo</span><span class="p">[</span><span class="n">colname</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="undrop_columns"><a class="viewcode-back" href="../../../api/pharmpy.modeling.undrop_columns.html#pharmpy.modeling.undrop_columns">[docs]</a><span class="k">def</span> <span class="nf">undrop_columns</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">column_names</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Undrop columns of model</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+<span class="sd">    column_names : list or str</span>
+<span class="sd">        List of column names or one column name to undrop</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Reference to same model object</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; drop_columns(model, [&#39;WGT&#39;, &#39;APGR&#39;], mark=True)    # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; undrop_columns(model, &#39;WGT&#39;)    # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    drop_dropped_columns : Drop all columns marked as drop</span>
+<span class="sd">    drop_columns : Drop or mark columns as dropped</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">column_names</span><span class="p">]</span>
+    <span class="k">for</span> <span class="n">colname</span> <span class="ow">in</span> <span class="n">column_names</span><span class="p">:</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">[</span><span class="n">colname</span><span class="p">]</span><span class="o">.</span><span class="n">drop</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<span class="k">def</span> <span class="nf">_translate_nonmem_time_value</span><span class="p">(</span><span class="n">time</span><span class="p">):</span>
+    <span class="k">if</span> <span class="s1">&#39;:&#39;</span> <span class="ow">in</span> <span class="n">time</span><span class="p">:</span>
+        <span class="n">components</span> <span class="o">=</span> <span class="n">time</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;:&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">components</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="n">DatasetError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Bad TIME format: </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">hours</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">components</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">components</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span> <span class="o">/</span> <span class="mi">60</span>
+        <span class="k">return</span> <span class="n">hours</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">float</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_translate_time_column</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">timecol</span><span class="p">,</span> <span class="n">idcol</span><span class="p">):</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">_translate_nonmem_time_value</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idcol</span><span class="p">)[</span><span class="n">timecol</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span>
+
+
+<span class="k">def</span> <span class="nf">_translate_nonmem_time_and_date_value</span><span class="p">(</span><span class="n">ser</span><span class="p">,</span> <span class="n">timecol</span><span class="p">,</span> <span class="n">datecol</span><span class="p">):</span>
+    <span class="n">timeval</span> <span class="o">=</span> <span class="n">_translate_nonmem_time_value</span><span class="p">(</span><span class="n">ser</span><span class="p">[</span><span class="n">timecol</span><span class="p">])</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="n">ser</span><span class="p">[</span><span class="n">datecol</span><span class="p">]</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;[^0-9]&#39;</span><span class="p">,</span> <span class="n">date</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">date</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">timeval</span> <span class="o">+</span> <span class="nb">float</span><span class="p">(</span><span class="n">date</span><span class="p">)</span> <span class="o">*</span> <span class="mi">24</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="mi">2001</span>  <span class="c1"># Non leap year</span>
+        <span class="n">month</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">day</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="mi">3</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">datecol</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">):</span>
+            <span class="n">month</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">day</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">year</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">datecol</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="p">):</span>
+            <span class="n">day</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">month</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">year</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">elif</span> <span class="n">datecol</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;3&#39;</span><span class="p">):</span>
+            <span class="n">year</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">day</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">month</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>  <span class="c1"># Let DAT2 be default if other name</span>
+            <span class="n">year</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">month</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
+            <span class="n">day</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span>
+        <span class="n">year</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">year</span><span class="p">)</span>
+        <span class="n">month</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">month</span><span class="p">)</span>
+        <span class="n">day</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">day</span><span class="p">)</span>
+        <span class="n">hour</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeval</span><span class="p">)</span>
+        <span class="n">timeval</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeval</span> <span class="o">-</span> <span class="n">hour</span><span class="p">)</span> <span class="o">*</span> <span class="mi">60</span>
+        <span class="n">minute</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeval</span><span class="p">)</span>
+        <span class="n">timeval</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeval</span> <span class="o">-</span> <span class="n">minute</span><span class="p">)</span> <span class="o">*</span> <span class="mi">60</span>
+        <span class="n">second</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeval</span><span class="p">)</span>
+        <span class="n">timeval</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeval</span> <span class="o">-</span> <span class="n">second</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000000</span>
+        <span class="n">microsecond</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeval</span><span class="p">)</span>
+        <span class="n">timeval</span> <span class="o">=</span> <span class="p">(</span><span class="n">timeval</span> <span class="o">-</span> <span class="n">microsecond</span><span class="p">)</span> <span class="o">*</span> <span class="mi">1000</span>
+        <span class="n">nanosecond</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">timeval</span><span class="p">)</span>
+        <span class="n">ts</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Timestamp</span><span class="p">(</span>
+            <span class="n">year</span><span class="o">=</span><span class="n">year</span><span class="p">,</span>
+            <span class="n">month</span><span class="o">=</span><span class="n">month</span><span class="p">,</span>
+            <span class="n">day</span><span class="o">=</span><span class="n">day</span><span class="p">,</span>
+            <span class="n">hour</span><span class="o">=</span><span class="n">hour</span><span class="p">,</span>
+            <span class="n">minute</span><span class="o">=</span><span class="n">minute</span><span class="p">,</span>
+            <span class="n">second</span><span class="o">=</span><span class="n">second</span><span class="p">,</span>
+            <span class="n">microsecond</span><span class="o">=</span><span class="n">microsecond</span><span class="p">,</span>
+            <span class="n">nanosecond</span><span class="o">=</span><span class="n">nanosecond</span><span class="p">,</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">ts</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="n">DatasetError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Bad DATE value: </span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_translate_time_and_date_columns</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">timecol</span><span class="p">,</span> <span class="n">datecol</span><span class="p">,</span> <span class="n">idcol</span><span class="p">):</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="n">_translate_nonmem_time_and_date_value</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">timecol</span><span class="o">=</span><span class="n">timecol</span><span class="p">,</span> <span class="n">datecol</span><span class="o">=</span><span class="n">datecol</span>
+    <span class="p">)</span>
+    <span class="n">timediff</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idcol</span><span class="p">)[</span><span class="n">timecol</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
+    <span class="n">df</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span> <span class="o">=</span> <span class="n">timediff</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">3600</span>
+    <span class="k">return</span> <span class="n">df</span>
+
+
+<span class="k">def</span> <span class="nf">_find_time_and_date_columns</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="c1"># Both time and date can be None. If date is None time must be not None</span>
+    <span class="n">time</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">date</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">di</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span>
+    <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">di</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;nmtran-time&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">time</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Multiple time columns found </span><span class="si">{</span><span class="n">time</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">col</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">col</span><span class="o">.</span><span class="n">datatype</span> <span class="o">==</span> <span class="s1">&#39;nmtran-date&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">date</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">date</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Multiple date columns found </span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="s2"> and </span><span class="si">{</span><span class="n">col</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">time</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">date</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Found date column </span><span class="si">{</span><span class="n">date</span><span class="si">}</span><span class="s2">, but no time column&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">time</span><span class="p">,</span> <span class="n">date</span>
+
+
+<div class="viewcode-block" id="translate_nmtran_time"><a class="viewcode-back" href="../../../api/pharmpy.modeling.translate_nmtran_time.html#pharmpy.modeling.translate_nmtran_time">[docs]</a><span class="k">def</span> <span class="nf">translate_nmtran_time</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Translate NM-TRAN TIME and DATE column into one TIME column</span>
+
+<span class="sd">    If dataset of model have special NM-TRAN TIME and DATE columns these</span>
+<span class="sd">    will be translated into one single time column with time in hours.</span>
+
+<span class="sd">    Warnings</span>
+<span class="sd">    --------</span>
+<span class="sd">    Use this function with caution. For example reset events are currently not taken into account.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Reference to the same model object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">timecol</span><span class="p">,</span> <span class="n">datecol</span> <span class="o">=</span> <span class="n">_find_time_and_date_columns</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
+    <span class="n">idcol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_column</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">if</span> <span class="n">datecol</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">timecol</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">_translate_time_column</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">timecol</span><span class="p">,</span> <span class="n">idcol</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">model</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">_translate_time_and_date_columns</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">timecol</span><span class="p">,</span> <span class="n">datecol</span><span class="p">,</span> <span class="n">idcol</span><span class="p">)</span>
+        <span class="n">drop_columns</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">datecol</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;h&#39;</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span>
+    <span class="k">return</span> <span class="n">model</span></div>
 </pre></div>
 
               </div>
