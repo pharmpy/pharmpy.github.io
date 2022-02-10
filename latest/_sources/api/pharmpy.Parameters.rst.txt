@@ -24,7 +24,6 @@ Parameters
 
       ~Parameters.copy
       ~Parameters.insert
-      ~Parameters.is_close_to_bound
       ~Parameters.remove_fixed
       ~Parameters.to_dataframe
 
@@ -42,6 +41,5 @@ Parameters
 
    .. automethod:: copy
    .. automethod:: insert
-   .. automethod:: is_close_to_bound
    .. automethod:: remove_fixed
    .. automethod:: to_dataframe

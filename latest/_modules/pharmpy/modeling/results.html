@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.48.0 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.49.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -192,14 +192,16 @@
               <div>
                 
   <h1>Source code for pharmpy.modeling.results</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">warnings</span>
+<span></span><span class="kn">import</span> <span class="nn">math</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 
 <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 <span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">sympy</span>
 
+<span class="kn">from</span> <span class="nn">pharmpy.math</span> <span class="kn">import</span> <span class="n">round_to_n_sigdig</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">create_rng</span><span class="p">,</span> <span class="n">sample_parameters_from_covariance_matrix</span>
+<span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">create_rng</span><span class="p">,</span> <span class="n">get_observations</span><span class="p">,</span> <span class="n">sample_parameters_from_covariance_matrix</span>
 
 
 <div class="viewcode-block" id="calculate_eta_shrinkage"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_eta_shrinkage.html#pharmpy.modeling.calculate_eta_shrinkage">[docs]</a><span class="k">def</span> <span class="nf">calculate_eta_shrinkage</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -629,7 +631,7 @@
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, summarize_modelfit_results</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; summarize_modelfit_results([model]) # doctest: +ELLIPSIS</span>
-<span class="sd">          minimization_successful         ofv runtime_total  runtime_estimation  ... SIGMA(1,1)_RSE</span>
+<span class="sd">          minimization_successful         ofv runtime_total  estimation_runtime  ... SIGMA(1,1)_RSE</span>
 <span class="sd">    pheno                    True  586.276056           4.0                0.32  ...       0.172147</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
@@ -669,6 +671,8 @@
 <div class="viewcode-block" id="calculate_aic"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_aic.html#pharmpy.modeling.calculate_aic">[docs]</a><span class="k">def</span> <span class="nf">calculate_aic</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate final AIC for model assuming the OFV to be -2LL</span>
 
+<span class="sd">    AIC = OFV + 2*n_estimated_parameters</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
@@ -682,6 +686,125 @@
     <span class="n">parameters</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">parameters</span><span class="o">.</span><span class="n">remove_fixed</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="calculate_bic"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_bic.html#pharmpy.modeling.calculate_bic">[docs]</a><span class="k">def</span> <span class="nf">calculate_bic</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Calculate final BIC value assuming the OFV to be -2LL</span>
+
+<span class="sd">    BIC = OFV + n_estimated_parameters * log(n_observations)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        BIC of model fit</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="n">parameters</span><span class="o">.</span><span class="n">remove_fixed</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span></div>
+
+
+<div class="viewcode-block" id="check_high_correlations"><a class="viewcode-back" href="../../../api/pharmpy.modeling.check_high_correlations.html#pharmpy.modeling.check_high_correlations">[docs]</a><span class="k">def</span> <span class="nf">check_high_correlations</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check for highly correlated parameter estimates</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+<span class="sd">    limit : float</span>
+<span class="sd">        Lower limit for a high correlation</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.Series</span>
+<span class="sd">        Correlation values indexed on pairs of parameters for (absolute) correlations above limit</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; check_high_correlations(model, limit=0.3)</span>
+<span class="sd">    THETA(1)  OMEGA(1,1)   -0.388059</span>
+<span class="sd">    THETA(2)  THETA(3)     -0.356899</span>
+<span class="sd">              OMEGA(2,2)    0.356662</span>
+<span class="sd">    dtype: float64</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">correlation_matrix</span>
+    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">high_and_below_diagonal</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">ge</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">high_and_below_diagonal</span><span class="p">)</span><span class="o">.</span><span class="n">stack</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="check_parameters_near_bounds"><a class="viewcode-back" href="../../../api/pharmpy.modeling.check_parameters_near_bounds.html#pharmpy.modeling.check_parameters_near_bounds">[docs]</a><span class="k">def</span> <span class="nf">check_parameters_near_bounds</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">values</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zero_limit</span><span class="o">=</span><span class="mf">0.001</span><span class="p">,</span> <span class="n">significant_digits</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Check if any estimated parameter value is close to its bounds</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+<span class="sd">    values : pd.Series</span>
+<span class="sd">        Series of values with index a subset of parameter names.</span>
+<span class="sd">        Default is to use all parameter estimates</span>
+<span class="sd">    zero_limit : number</span>
+<span class="sd">        maximum distance to 0 bounds</span>
+<span class="sd">    significant_digits : int</span>
+<span class="sd">        maximum distance to non-zero bounds in number of significant digits</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.Series</span>
+<span class="sd">        Logical Series with same index as values</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; check_parameters_near_bounds(model)</span>
+<span class="sd">    THETA(1)      False</span>
+<span class="sd">    THETA(2)      False</span>
+<span class="sd">    THETA(3)      False</span>
+<span class="sd">    OMEGA(1,1)    False</span>
+<span class="sd">    OMEGA(2,2)    False</span>
+<span class="sd">    SIGMA(1,1)    False</span>
+<span class="sd">    dtype: bool</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">values</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">values</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span>
+    <span class="n">ser</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
+        <span class="p">[</span>
+            <span class="n">_is_close_to_bound</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">p</span><span class="p">],</span> <span class="n">values</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">p</span><span class="p">],</span> <span class="n">zero_limit</span><span class="p">,</span> <span class="n">significant_digits</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">values</span><span class="o">.</span><span class="n">index</span>
+        <span class="p">],</span>
+        <span class="n">index</span><span class="o">=</span><span class="n">values</span><span class="o">.</span><span class="n">index</span><span class="p">,</span>
+        <span class="n">dtype</span><span class="o">=</span><span class="nb">bool</span><span class="p">,</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">ser</span></div>
+
+
+<span class="k">def</span> <span class="nf">_is_close_to_bound</span><span class="p">(</span><span class="n">param</span><span class="p">,</span> <span class="n">value</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">zero_limit</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span> <span class="n">significant_digits</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="n">param</span><span class="o">.</span><span class="n">init</span>
+    <span class="k">return</span> <span class="p">(</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">lower</span> <span class="o">&gt;</span> <span class="o">-</span><span class="n">sympy</span><span class="o">.</span><span class="n">oo</span>
+        <span class="ow">and</span> <span class="n">_is_near_target</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">lower</span><span class="p">,</span> <span class="n">zero_limit</span><span class="p">,</span> <span class="n">significant_digits</span><span class="p">)</span>
+    <span class="p">)</span> <span class="ow">or</span> <span class="p">(</span>
+        <span class="n">param</span><span class="o">.</span><span class="n">upper</span> <span class="o">&lt;</span> <span class="n">sympy</span><span class="o">.</span><span class="n">oo</span>
+        <span class="ow">and</span> <span class="n">_is_near_target</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">param</span><span class="o">.</span><span class="n">upper</span><span class="p">,</span> <span class="n">zero_limit</span><span class="p">,</span> <span class="n">significant_digits</span><span class="p">)</span>
+    <span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_is_near_target</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">target</span><span class="p">,</span> <span class="n">zero_limit</span><span class="p">,</span> <span class="n">significant_digits</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">target</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">abs</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="o">&lt;</span> <span class="nb">abs</span><span class="p">(</span><span class="n">zero_limit</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">round_to_n_sigdig</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">significant_digits</span><span class="p">)</span> <span class="o">==</span> <span class="n">round_to_n_sigdig</span><span class="p">(</span>
+            <span class="n">target</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">significant_digits</span>
+        <span class="p">)</span>
 </pre></div>
 
               </div>

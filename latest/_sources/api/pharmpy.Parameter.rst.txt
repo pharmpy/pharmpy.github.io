@@ -23,7 +23,6 @@ Parameter
    .. autosummary::
 
       ~Parameter.copy
-      ~Parameter.is_close_to_bound
       ~Parameter.unconstrain
       ~Parameter.verify_init
 
@@ -40,6 +39,5 @@ Parameter
    .. rubric:: Methods Documentation
 
    .. automethod:: copy
-   .. automethod:: is_close_to_bound
    .. automethod:: unconstrain
    .. automethod:: verify_init
