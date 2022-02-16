@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.data &#8212; Pharmpy 0.49.0 documentation</title>
+    <title>pharmpy.modeling.data &#8212; Pharmpy 0.50.1 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -1106,7 +1106,8 @@
         <span class="n">_translate_nonmem_time_and_date_value</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">timecol</span><span class="o">=</span><span class="n">timecol</span><span class="p">,</span> <span class="n">datecol</span><span class="o">=</span><span class="n">datecol</span>
     <span class="p">)</span>
     <span class="n">timediff</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span> <span class="o">-</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idcol</span><span class="p">)[</span><span class="n">timecol</span><span class="p">]</span><span class="o">.</span><span class="n">transform</span><span class="p">(</span><span class="s1">&#39;first&#39;</span><span class="p">)</span>
-    <span class="n">df</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span> <span class="o">=</span> <span class="n">timediff</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">3600</span>
+    <span class="k">if</span> <span class="n">df</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">!=</span> <span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">:</span>
+        <span class="n">df</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span> <span class="o">=</span> <span class="n">timediff</span><span class="o">.</span><span class="n">dt</span><span class="o">.</span><span class="n">total_seconds</span><span class="p">()</span> <span class="o">/</span> <span class="mi">3600</span>
     <span class="k">return</span> <span class="n">df</span>
 
 
@@ -1164,6 +1165,46 @@
         <span class="n">drop_columns</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">datecol</span><span class="p">)</span>
         <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">[</span><span class="n">timecol</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span> <span class="o">=</span> <span class="s1">&#39;h&#39;</span>
     <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="remove_loq_data"><a class="viewcode-back" href="../../../api/pharmpy.modeling.remove_loq_data.html#pharmpy.modeling.remove_loq_data">[docs]</a><span class="k">def</span> <span class="nf">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">uloq</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Remove loq data records from the dataset</span>
+
+<span class="sd">    Does nothing if none of the limits is specified.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+<span class="sd">    lloq : float</span>
+<span class="sd">        Lower limit of quantification. Default not specified.</span>
+<span class="sd">    uloq : float</span>
+<span class="sd">        Upper limit of quantification. Default not specified.</span>
+
+<span class="sd">    Results</span>
+<span class="sd">    -------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Reference to the same model object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; remove_loq_data(model, lloq=10, uloq=40)        # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; len(model.dataset)</span>
+<span class="sd">    736</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
+    <span class="n">dv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">dv_column</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">mdv</span> <span class="o">=</span> <span class="n">get_mdv</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">lloq</span><span class="p">:</span>
+        <span class="n">keep</span> <span class="o">&amp;=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">lloq</span><span class="p">)</span> <span class="o">|</span> <span class="n">mdv</span>
+    <span class="k">if</span> <span class="n">uloq</span><span class="p">:</span>
+        <span class="n">keep</span> <span class="o">&amp;=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">uloq</span><span class="p">)</span> <span class="o">|</span> <span class="n">mdv</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">model</span></div>
 </pre></div>
 

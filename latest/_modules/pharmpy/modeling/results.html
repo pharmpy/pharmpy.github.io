@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.49.0 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.50.1 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -805,6 +805,77 @@
         <span class="k">return</span> <span class="n">round_to_n_sigdig</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">significant_digits</span><span class="p">)</span> <span class="o">==</span> <span class="n">round_to_n_sigdig</span><span class="p">(</span>
             <span class="n">target</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="n">significant_digits</span>
         <span class="p">)</span>
+
+
+<div class="viewcode-block" id="write_results"><a class="viewcode-back" href="../../../api/pharmpy.modeling.write_results.html#pharmpy.modeling.write_results">[docs]</a><span class="k">def</span> <span class="nf">write_results</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">lzma</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">csv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Write results object to json (or csv) file</span>
+
+<span class="sd">    Note that the csv-file cannot be read into a results object again.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    results : Results</span>
+<span class="sd">        Pharmpy results object</span>
+<span class="sd">    path : Path</span>
+<span class="sd">        Path to results file</span>
+<span class="sd">    lzma : bool</span>
+<span class="sd">        True for lzma compression. Not applicable to csv file</span>
+<span class="sd">    csv : bool</span>
+<span class="sd">        Save as csv file</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">csv</span><span class="p">:</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">to_csv</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">results</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">lzma</span><span class="o">=</span><span class="n">lzma</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="print_fit_summary"><a class="viewcode-back" href="../../../api/pharmpy.modeling.print_fit_summary.html#pharmpy.modeling.print_fit_summary">[docs]</a><span class="k">def</span> <span class="nf">print_fit_summary</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Print a summary of the model fit</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span> <span class="nf">bool_ok_error</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;OK&quot;</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="s2">&quot;ERROR&quot;</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Parameter estimation status&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;---------------------------&quot;</span><span class="p">)</span>
+    <span class="n">minsucc</span> <span class="o">=</span> <span class="n">bool_ok_error</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">minimization_successful</span><span class="p">)</span>
+    <span class="n">minsucc_text</span> <span class="o">=</span> <span class="s2">&quot;Minimization successful&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">minsucc_text</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">minsucc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">no_rounding_errors</span> <span class="o">=</span> <span class="n">bool_ok_error</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">termination_cause</span> <span class="o">!=</span> <span class="s1">&#39;rounding_errors&#39;</span><span class="p">)</span>
+    <span class="n">no_rounding_text</span> <span class="o">=</span> <span class="s2">&quot;No rounding errors&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">no_rounding_text</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">no_rounding_errors</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">ofv_txt</span> <span class="o">=</span> <span class="s2">&quot;Objective function value&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ofv_txt</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">ofv</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Parameter uncertainty status&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;----------------------------&quot;</span><span class="p">)</span>
+    <span class="n">cond_txt</span> <span class="o">=</span> <span class="s2">&quot;Condition number&quot;</span>
+    <span class="n">condno</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">correlation_matrix</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">cond_lttxt</span> <span class="o">=</span> <span class="s2">&quot;Condition number &lt; 1000&quot;</span>
+    <span class="n">cond_lt1000</span> <span class="o">=</span> <span class="n">bool_ok_error</span><span class="p">(</span><span class="n">condno</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond_lttxt</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">cond_lt1000</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond_txt</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">condno</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">hicorr</span> <span class="o">=</span> <span class="n">check_high_correlations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">nohicorr</span> <span class="o">=</span> <span class="n">bool_ok_error</span><span class="p">(</span><span class="n">hicorr</span><span class="o">.</span><span class="n">empty</span><span class="p">)</span>
+    <span class="n">nohicorr_txt</span> <span class="o">=</span> <span class="s2">&quot;No correlations larger than 0.9&quot;</span>
+    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nohicorr_txt</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">nohicorr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">()</span>
+
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Parameter estimates&quot;</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-------------------&quot;</span><span class="p">)</span>
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates</span>
+    <span class="n">se</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">standard_errors</span>
+    <span class="n">rse</span> <span class="o">=</span> <span class="n">se</span> <span class="o">/</span> <span class="n">pe</span>
+    <span class="n">rse</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;RSE&#39;</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pe</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">rse</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span></div>
 </pre></div>
 
               </div>
