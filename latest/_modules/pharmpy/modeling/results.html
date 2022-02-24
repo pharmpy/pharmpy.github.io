@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.50.1 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.51.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -202,6 +202,8 @@
 <span class="kn">from</span> <span class="nn">pharmpy.math</span> <span class="kn">import</span> <span class="n">round_to_n_sigdig</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">create_rng</span><span class="p">,</span> <span class="n">get_observations</span><span class="p">,</span> <span class="n">sample_parameters_from_covariance_matrix</span>
+
+<span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">get_ids</span>
 
 
 <div class="viewcode-block" id="calculate_eta_shrinkage"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_eta_shrinkage.html#pharmpy.modeling.calculate_eta_shrinkage">[docs]</a><span class="k">def</span> <span class="nf">calculate_eta_shrinkage</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sd</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
@@ -604,6 +606,60 @@
     <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="n">expr</span>
 
 
+<span class="k">def</span> <span class="nf">_result_summary</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">include_all_estimation_steps</span><span class="p">:</span>
+        <span class="n">summary_dict</span> <span class="o">=</span> <span class="n">_summarize_step</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">summary_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">model_name</span><span class="p">])</span>
+        <span class="k">return</span> <span class="n">summary_df</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">summary_dicts</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">tuples</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)):</span>
+            <span class="n">summary_dict</span> <span class="o">=</span> <span class="n">_summarize_step</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">is_evaluation</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">evaluation</span>
+            <span class="k">if</span> <span class="n">is_evaluation</span><span class="p">:</span>
+                <span class="n">run_type</span> <span class="o">=</span> <span class="s1">&#39;evaluation&#39;</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">run_type</span> <span class="o">=</span> <span class="s1">&#39;estimation&#39;</span>
+            <span class="n">summary_dict</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="p">{</span><span class="s1">&#39;run_type&#39;</span><span class="p">:</span> <span class="n">run_type</span><span class="p">},</span> <span class="o">**</span><span class="n">summary_dict</span><span class="p">}</span>
+            <span class="n">summary_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">)</span>
+            <span class="n">tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">res</span><span class="o">.</span><span class="n">model_name</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span><span class="n">tuples</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">,</span> <span class="s1">&#39;step&#39;</span><span class="p">])</span>
+        <span class="n">summary_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary_dicts</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">summary_df</span>
+
+
+<span class="k">def</span> <span class="nf">_summarize_step</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="n">summary_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">res</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">step</span> <span class="o">=</span> <span class="n">res</span>
+
+    <span class="k">if</span> <span class="n">step</span><span class="o">.</span><span class="n">minimization_successful</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;minimization_successful&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">minimization_successful</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;minimization_successful&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
+
+    <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;ofv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">ofv</span>
+    <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;runtime_total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">runtime_total</span>
+    <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;estimation_runtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">estimation_runtime</span>
+
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">parameter_estimates</span>
+    <span class="n">ses</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">standard_errors</span>
+    <span class="n">rses</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">relative_standard_errors</span>
+
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">pe</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+        <span class="n">summary_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">_estimate&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">pe</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">ses</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">summary_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">_SE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ses</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">rses</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">summary_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">_RSE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rses</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">summary_dict</span>
+
+
 <div class="viewcode-block" id="summarize_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.modeling.summarize_modelfit_results.html#pharmpy.modeling.summarize_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">summarize_modelfit_results</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Summarize results of model runs</span>
 
@@ -642,7 +698,7 @@
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
         <span class="k">if</span> <span class="n">res</span><span class="p">:</span>
-            <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">result_summary</span><span class="p">(</span><span class="n">include_all_estimation_steps</span><span class="p">))</span>
+            <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_result_summary</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="c1"># FIXME: in read_modelfit_results, maybe some parts can be extracted (i.e.</span>
             <span class="c1">#   create modelfit_results object)</span>
@@ -688,24 +744,68 @@
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="calculate_bic"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_bic.html#pharmpy.modeling.calculate_bic">[docs]</a><span class="k">def</span> <span class="nf">calculate_bic</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="calculate_bic"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_bic.html#pharmpy.modeling.calculate_bic">[docs]</a><span class="k">def</span> <span class="nf">calculate_bic</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate final BIC value assuming the OFV to be -2LL</span>
 
-<span class="sd">    BIC = OFV + n_estimated_parameters * log(n_observations)</span>
+<span class="sd">    Different variations of the BIC can be calculated:</span>
+
+<span class="sd">    * | mixed (default)</span>
+<span class="sd">      | BIC = OFV + n_random_parameters * log(n_individuals) +</span>
+<span class="sd">      |       n_fixed_parameters * log(n_observations)</span>
+<span class="sd">    * | fixed</span>
+<span class="sd">      | BIC = OFV + n_estimated_parameters * log(n_observations)</span>
+<span class="sd">    * | random</span>
+<span class="sd">      | BIC = OFV + n_estimated_parameters * log(n_individals)</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model object</span>
+<span class="sd">    type : str</span>
+<span class="sd">        Type of BIC to calculate. Default is the mixed effects.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    float</span>
 <span class="sd">        BIC of model fit</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; calculate_bic(model)</span>
+<span class="sd">    611.7071686183284</span>
+<span class="sd">    &gt;&gt;&gt; calculate_bic(model, type=&#39;fixed&#39;)</span>
+<span class="sd">    616.536606983396</span>
+<span class="sd">    &gt;&gt;&gt; calculate_bic(model, type=&#39;random&#39;)</span>
+<span class="sd">    610.7412809453149</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">parameters</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">parameters</span><span class="o">.</span><span class="n">remove_fixed</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span></div>
+    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;fixed&#39;</span><span class="p">:</span>
+        <span class="n">penalty</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;random&#39;</span><span class="p">:</span>
+        <span class="n">penalty</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">succ</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">direct_dependencies</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">)</span>
+        <span class="n">random_thetas</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">succ</span><span class="p">:</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">eta</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+                    <span class="n">symbols</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">}</span>
+                    <span class="n">random_thetas</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+                    <span class="k">break</span>
+        <span class="n">nomegas</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">parameter_names</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">dim_theta_r</span> <span class="o">=</span> <span class="n">nomegas</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">random_thetas</span><span class="p">)</span>
+        <span class="n">dim_theta_f</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">-</span> <span class="n">dim_theta_r</span>
+        <span class="n">nsubs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+        <span class="n">nobs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+        <span class="n">penalty</span> <span class="o">=</span> <span class="n">dim_theta_r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">nsubs</span><span class="p">)</span> <span class="o">+</span> <span class="n">dim_theta_f</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">nobs</span><span class="p">)</span>
+    <span class="n">ofv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span>
+    <span class="k">return</span> <span class="n">ofv</span> <span class="o">+</span> <span class="n">penalty</span></div>
 
 
 <div class="viewcode-block" id="check_high_correlations"><a class="viewcode-back" href="../../../api/pharmpy.modeling.check_high_correlations.html#pharmpy.modeling.check_high_correlations">[docs]</a><span class="k">def</span> <span class="nf">check_high_correlations</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
@@ -841,40 +941,45 @@
     <span class="k">def</span> <span class="nf">bool_ok_error</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
         <span class="k">return</span> <span class="s2">&quot;OK&quot;</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="s2">&quot;ERROR&quot;</span>
 
+    <span class="k">def</span> <span class="nf">bool_yes_no</span><span class="p">(</span><span class="n">x</span><span class="p">):</span>
+        <span class="k">return</span> <span class="s2">&quot;YES&quot;</span> <span class="k">if</span> <span class="n">x</span> <span class="k">else</span> <span class="s2">&quot;NO&quot;</span>
+
+    <span class="k">def</span> <span class="nf">print_header</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">first</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">first</span><span class="p">:</span>
+            <span class="nb">print</span><span class="p">()</span>
+        <span class="nb">print</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+        <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-&quot;</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">text</span><span class="p">))</span>
+
+    <span class="k">def</span> <span class="nf">print_fmt</span><span class="p">(</span><span class="n">text</span><span class="p">,</span> <span class="n">result</span><span class="p">):</span>
+        <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">text</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">result</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
     <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Parameter estimation status&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;---------------------------&quot;</span><span class="p">)</span>
-    <span class="n">minsucc</span> <span class="o">=</span> <span class="n">bool_ok_error</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">minimization_successful</span><span class="p">)</span>
-    <span class="n">minsucc_text</span> <span class="o">=</span> <span class="s2">&quot;Minimization successful&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">minsucc_text</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">minsucc</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">no_rounding_errors</span> <span class="o">=</span> <span class="n">bool_ok_error</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">termination_cause</span> <span class="o">!=</span> <span class="s1">&#39;rounding_errors&#39;</span><span class="p">)</span>
-    <span class="n">no_rounding_text</span> <span class="o">=</span> <span class="s2">&quot;No rounding errors&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">no_rounding_text</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">no_rounding_errors</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">ofv_txt</span> <span class="o">=</span> <span class="s2">&quot;Objective function value&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">ofv_txt</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="nb">round</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">ofv</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">()</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Parameter uncertainty status&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;----------------------------&quot;</span><span class="p">)</span>
-    <span class="n">cond_txt</span> <span class="o">=</span> <span class="s2">&quot;Condition number&quot;</span>
-    <span class="n">condno</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">correlation_matrix</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
-    <span class="n">cond_lttxt</span> <span class="o">=</span> <span class="s2">&quot;Condition number &lt; 1000&quot;</span>
-    <span class="n">cond_lt1000</span> <span class="o">=</span> <span class="n">bool_ok_error</span><span class="p">(</span><span class="n">condno</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond_lttxt</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">cond_lt1000</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">cond_txt</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">condno</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
-    <span class="n">hicorr</span> <span class="o">=</span> <span class="n">check_high_correlations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="n">nohicorr</span> <span class="o">=</span> <span class="n">bool_ok_error</span><span class="p">(</span><span class="n">hicorr</span><span class="o">.</span><span class="n">empty</span><span class="p">)</span>
-    <span class="n">nohicorr_txt</span> <span class="o">=</span> <span class="s2">&quot;No correlations larger than 0.9&quot;</span>
-    <span class="nb">print</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">nohicorr_txt</span><span class="si">:</span><span class="s2">33</span><span class="si">}</span><span class="s2"> </span><span class="si">{</span><span class="n">nohicorr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">()</span>
+    <span class="n">print_header</span><span class="p">(</span><span class="s2">&quot;Parameter estimation status&quot;</span><span class="p">,</span> <span class="n">first</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">print_fmt</span><span class="p">(</span><span class="s2">&quot;Minimization successful&quot;</span><span class="p">,</span> <span class="n">bool_ok_error</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">minimization_successful</span><span class="p">))</span>
+    <span class="n">print_fmt</span><span class="p">(</span><span class="s2">&quot;No rounding errors&quot;</span><span class="p">,</span> <span class="n">bool_ok_error</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">termination_cause</span> <span class="o">!=</span> <span class="s1">&#39;rounding_errors&#39;</span><span class="p">))</span>
+    <span class="n">print_fmt</span><span class="p">(</span><span class="s2">&quot;Objective function value&quot;</span><span class="p">,</span> <span class="nb">round</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">ofv</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
 
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;Parameter estimates&quot;</span><span class="p">)</span>
-    <span class="nb">print</span><span class="p">(</span><span class="s2">&quot;-------------------&quot;</span><span class="p">)</span>
+    <span class="n">print_header</span><span class="p">(</span><span class="s2">&quot;Parameter uncertainty status&quot;</span><span class="p">)</span>
+    <span class="n">cov_run</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">cov</span>
+    <span class="n">print_fmt</span><span class="p">(</span><span class="s2">&quot;Covariance step run&quot;</span><span class="p">,</span> <span class="n">bool_yes_no</span><span class="p">(</span><span class="n">cov_run</span><span class="p">))</span>
+
+    <span class="k">if</span> <span class="n">cov_run</span><span class="p">:</span>
+        <span class="n">condno</span> <span class="o">=</span> <span class="nb">round</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cond</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">correlation_matrix</span><span class="p">),</span> <span class="mi">1</span><span class="p">)</span>
+        <span class="n">print_fmt</span><span class="p">(</span><span class="s2">&quot;Condition number&quot;</span><span class="p">,</span> <span class="n">condno</span><span class="p">)</span>
+        <span class="n">print_fmt</span><span class="p">(</span><span class="s2">&quot;Condition number &lt; 1000&quot;</span><span class="p">,</span> <span class="n">bool_ok_error</span><span class="p">(</span><span class="n">condno</span> <span class="o">&lt;</span> <span class="mi">1000</span><span class="p">))</span>
+        <span class="n">hicorr</span> <span class="o">=</span> <span class="n">check_high_correlations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">print_fmt</span><span class="p">(</span><span class="s2">&quot;No correlations arger than 0.9&quot;</span><span class="p">,</span> <span class="n">bool_ok_error</span><span class="p">(</span><span class="n">hicorr</span><span class="o">.</span><span class="n">empty</span><span class="p">))</span>
+
+    <span class="n">print_header</span><span class="p">(</span><span class="s2">&quot;Parameter estimates&quot;</span><span class="p">)</span>
     <span class="n">pe</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates</span>
-    <span class="n">se</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">standard_errors</span>
-    <span class="n">rse</span> <span class="o">=</span> <span class="n">se</span> <span class="o">/</span> <span class="n">pe</span>
-    <span class="n">rse</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;RSE&#39;</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pe</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">rse</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">cov_run</span><span class="p">:</span>
+        <span class="n">se</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">standard_errors</span>
+        <span class="n">rse</span> <span class="o">=</span> <span class="n">se</span> <span class="o">/</span> <span class="n">pe</span>
+        <span class="n">rse</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;RSE&#39;</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pe</span><span class="p">,</span> <span class="n">se</span><span class="p">,</span> <span class="n">rse</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">pe</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span></div>
 </pre></div>
 

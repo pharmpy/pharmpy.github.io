@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.50.1 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.51.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -641,18 +641,24 @@
     <span class="n">km_init</span><span class="p">,</span> <span class="n">clmm_init</span> <span class="o">=</span> <span class="n">_get_mm_inits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">numer</span><span class="p">,</span> <span class="n">combined</span><span class="p">)</span>
 
     <span class="n">km</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;KM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">km_init</span><span class="p">)</span>
-    <span class="n">clmm</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">clmm_init</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">upper</span> <span class="o">=</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">denom</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">combined</span><span class="p">:</span>
             <span class="n">cl</span> <span class="o">=</span> <span class="n">numer</span>
+            <span class="n">clmm</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">clmm_init</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">_rename_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">)</span>
+            <span class="n">clmm</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CLMM&#39;</span><span class="p">)</span>
+            <span class="n">cl</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">vc</span> <span class="o">=</span> <span class="n">denom</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">combined</span><span class="p">:</span>
             <span class="n">cl</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="n">clmm_init</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">cl</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">vc</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;VC&#39;</span><span class="p">)</span>  <span class="c1"># FIXME: decide better initial estimate</span>
-    <span class="k">if</span> <span class="ow">not</span> <span class="n">combined</span><span class="p">:</span>
-        <span class="n">cl</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">clmm</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">clmm_init</span><span class="p">)</span>
 
     <span class="n">amount</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">central</span><span class="o">.</span><span class="n">amount</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">))</span>
     <span class="n">rate</span> <span class="o">=</span> <span class="p">(</span><span class="n">clmm</span> <span class="o">*</span> <span class="n">km</span> <span class="o">/</span> <span class="p">(</span><span class="n">km</span> <span class="o">+</span> <span class="n">amount</span> <span class="o">/</span> <span class="n">vc</span><span class="p">)</span> <span class="o">+</span> <span class="n">cl</span><span class="p">)</span> <span class="o">/</span> <span class="n">vc</span>
@@ -660,6 +666,34 @@
     <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">numer</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
     <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span>
+
+
+<span class="k">def</span> <span class="nf">_rename_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">old_name</span><span class="p">,</span> <span class="n">new_name</span><span class="p">):</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">old_name</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="n">old_par</span> <span class="o">=</span> <span class="n">s</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;POP_</span><span class="si">{</span><span class="n">new_name</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">new_par</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;POP_</span><span class="si">{</span><span class="n">new_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">old_par</span><span class="p">:</span> <span class="n">new_par</span><span class="p">})</span>
+            <span class="k">break</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv</span><span class="p">:</span>
+            <span class="n">rv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">[</span><span class="n">s</span><span class="p">]</span>
+            <span class="n">cov</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv</span><span class="o">.</span><span class="n">covariance_matrix</span>
+            <span class="n">ind</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span>
+            <span class="n">pars</span> <span class="o">=</span> <span class="p">[</span><span class="n">e</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">cov</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="p">:]</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">is_Symbol</span><span class="p">]</span>
+            <span class="n">diag</span> <span class="o">=</span> <span class="n">cov</span><span class="p">[</span><span class="n">ind</span><span class="p">,</span> <span class="n">ind</span><span class="p">]</span>
+            <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="n">diag</span><span class="p">:</span> <span class="sa">f</span><span class="s1">&#39;IIV_</span><span class="si">{</span><span class="n">new_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pars</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span> <span class="o">!=</span> <span class="n">diag</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;IIV&#39;</span><span class="p">):</span>
+                        <span class="n">d</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IIV_</span><span class="si">{</span><span class="n">old_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;IIV_</span><span class="si">{</span><span class="n">new_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">key</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">val</span>
+            <span class="k">break</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">old_name</span><span class="p">:</span> <span class="n">new_name</span><span class="p">})</span>
 
 
 <span class="k">def</span> <span class="nf">_get_mm_inits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rate_numer</span><span class="p">,</span> <span class="n">combined</span><span class="p">):</span>
@@ -1584,7 +1618,7 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="n">odes</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span>
+    <span class="n">odes</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
 </pre></div>
 

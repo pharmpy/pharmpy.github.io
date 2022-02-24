@@ -21,6 +21,7 @@ ModelStatements
 
       ~ModelStatements.copy
       ~ModelStatements.dependencies
+      ~ModelStatements.direct_dependencies
       ~ModelStatements.find_assignment
       ~ModelStatements.full_expression
       ~ModelStatements.insert
@@ -44,6 +45,7 @@ ModelStatements
 
    .. automethod:: copy
    .. automethod:: dependencies
+   .. automethod:: direct_dependencies
    .. automethod:: find_assignment
    .. automethod:: full_expression
    .. automethod:: insert

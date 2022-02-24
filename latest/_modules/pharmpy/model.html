@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model &#8212; Pharmpy 0.50.1 documentation</title>
+    <title>pharmpy.model &#8212; Pharmpy 0.51.0 documentation</title>
     
     <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -208,8 +208,10 @@
 <span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">io</span>
 <span class="kn">import</span> <span class="nn">pathlib</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
+<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
 <span class="kn">import</span> <span class="nn">sympy</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.datainfo</span> <span class="kn">import</span> <span class="n">ColumnInfo</span><span class="p">,</span> <span class="n">DataInfo</span>
@@ -303,9 +305,42 @@
 
     <span class="nd">@parameters</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
+            <span class="n">inits</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">inits</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">inits</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inits</span><span class="p">,</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">):</span>
+            <span class="n">inits</span> <span class="o">=</span> <span class="n">inits</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">inits</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">validate_parameters</span><span class="p">(</span><span class="n">inits</span><span class="p">):</span>
+            <span class="n">nearest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">nearest_valid_parameters</span><span class="p">(</span><span class="n">inits</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">nearest</span> <span class="o">!=</span> <span class="n">inits</span><span class="p">:</span>
+                <span class="n">before</span><span class="p">,</span> <span class="n">after</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_compare_before_after_params</span><span class="p">(</span><span class="n">inits</span><span class="p">,</span> <span class="n">nearest</span><span class="p">)</span>
+                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Adjusting initial estimates to create positive semidefinite &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;omega/sigma matrices.</span><span class="se">\n</span><span class="s2">Before adjusting:  </span><span class="si">{</span><span class="n">before</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;After adjusting: </span><span class="si">{</span><span class="n">after</span><span class="si">}</span><span class="s2">&quot;</span>
+                <span class="p">)</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
+                    <span class="n">value</span><span class="o">.</span><span class="n">inits</span> <span class="o">=</span> <span class="n">nearest</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">value</span> <span class="o">=</span> <span class="n">nearest</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;New parameter inits are not valid&quot;</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.parameters must be of Parameters type&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="n">value</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="o">.</span><span class="n">inits</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_compare_before_after_params</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
+        <span class="n">before</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="n">after</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">old</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="k">if</span> <span class="n">new</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">!=</span> <span class="n">value</span><span class="p">:</span>
+                <span class="n">before</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+                <span class="n">after</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">new</span><span class="p">[</span><span class="n">key</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">before</span><span class="p">,</span> <span class="n">after</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">random_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

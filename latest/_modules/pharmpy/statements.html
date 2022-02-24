@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.statements &#8212; Pharmpy 0.50.1 documentation</title>
+    <title>pharmpy.statements &#8212; Pharmpy 0.51.0 documentation</title>
     
     <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -2015,13 +2015,44 @@
                         <span class="n">graph</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">graph</span>
 
-<div class="viewcode-block" id="ModelStatements.dependencies"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.dependencies">[docs]</a>    <span class="k">def</span> <span class="nf">dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Find all dependencies of a symbol</span>
+<div class="viewcode-block" id="ModelStatements.direct_dependencies"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.direct_dependencies">[docs]</a>    <span class="k">def</span> <span class="nf">direct_dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">statement</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find all direct dependencies of a statement</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        symbol : Symbol or str</span>
-<span class="sd">            Input symbol</span>
+<span class="sd">        statement : Statement</span>
+<span class="sd">            Input statement</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        ModelStatements</span>
+<span class="sd">            Direct dependency statements</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
+<span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; odes = model.statements.ode_system</span>
+<span class="sd">        &gt;&gt;&gt; model.statements.direct_dependencies(odes)</span>
+<span class="sd">                    ETA(1)</span>
+<span class="sd">        CL := TVCL⋅ℯ</span>
+<span class="sd">                  ETA(2)</span>
+<span class="sd">        V := TVV⋅ℯ</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_dependency_graph</span><span class="p">()</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">statement</span><span class="p">)</span>
+        <span class="n">succ</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">successors</span><span class="p">(</span><span class="n">index</span><span class="p">)))</span>
+        <span class="n">stats</span> <span class="o">=</span> <span class="n">ModelStatements</span><span class="p">()</span>
+        <span class="n">stats</span><span class="o">.</span><span class="n">_statements</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">succ</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">stats</span></div>
+
+<div class="viewcode-block" id="ModelStatements.dependencies"><a class="viewcode-back" href="../../api/pharmpy.ModelStatements.html#pharmpy.ModelStatements.dependencies">[docs]</a>    <span class="k">def</span> <span class="nf">dependencies</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">symbol</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Find all dependencies of a symbol or statement</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        symbol : Symbol, str or Statement</span>
+<span class="sd">            Input symbol or statement</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
@@ -2035,17 +2066,20 @@
 <span class="sd">        &gt;&gt;&gt; model.statements.dependencies(&quot;CL&quot;)   # doctest: +SKIP</span>
 <span class="sd">        {ETA(1), THETA(1), WGT}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">symbol</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
-            <span class="k">if</span> <span class="p">(</span>
-                <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Assignment</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">symbol</span>
-                <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ODESystem</span><span class="p">)</span>
-                <span class="ow">and</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">amounts</span>
-            <span class="p">):</span>
-                <span class="k">break</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">Statement</span><span class="p">):</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find symbol </span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
+                <span class="k">if</span> <span class="p">(</span>
+                    <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">Assignment</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span> <span class="o">==</span> <span class="n">symbol</span>
+                    <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">],</span> <span class="n">ODESystem</span><span class="p">)</span>
+                    <span class="ow">and</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">amounts</span>
+                <span class="p">):</span>
+                    <span class="k">break</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find symbol </span><span class="si">{</span><span class="n">symbol</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">g</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_create_dependency_graph</span><span class="p">()</span>
         <span class="n">symbs</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rhs_symbols</span>
         <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
