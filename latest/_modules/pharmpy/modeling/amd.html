@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.amd &#8212; Pharmpy 0.51.0 documentation</title>
+    <title>pharmpy.modeling.amd &#8212; Pharmpy 0.52.1 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -194,6 +194,7 @@
   <h1>Source code for pharmpy.modeling.amd</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
 
+<span class="kn">import</span> <span class="nn">pharmpy.tools.scm</span> <span class="k">as</span> <span class="nn">scm</span>
 <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">Results</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">default_tool_database</span>
 
@@ -206,7 +207,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">final_model</span> <span class="o">=</span> <span class="n">final_model</span>
 
 
-<div class="viewcode-block" id="run_amd"><a class="viewcode-back" href="../../../api/pharmpy.modeling.run_amd.html#pharmpy.modeling.run_amd">[docs]</a><span class="k">def</span> <span class="nf">run_amd</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mfl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="run_amd"><a class="viewcode-back" href="../../../api/pharmpy.modeling.run_amd.html#pharmpy.modeling.run_amd">[docs]</a><span class="k">def</span> <span class="nf">run_amd</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mfl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Run Automatic Model Development (AMD) tool</span>
 
 <span class="sd">    Runs structural modelsearch, IIV building, and resmod</span>
@@ -221,6 +222,10 @@
 <span class="sd">        Lower limit of quantification. LOQ data will be removed.</span>
 <span class="sd">    order : list</span>
 <span class="sd">        Runorder of components</span>
+<span class="sd">    categorical : list</span>
+<span class="sd">        List of categorical covariates</span>
+<span class="sd">    continuous : list</span>
+<span class="sd">        List of continuouts covariates</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -242,7 +247,7 @@
     <span class="k">if</span> <span class="n">lloq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq</span><span class="p">)</span>
 
-    <span class="n">default_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;structural&#39;</span><span class="p">,</span> <span class="s1">&#39;iiv&#39;</span><span class="p">,</span> <span class="s1">&#39;residual&#39;</span><span class="p">]</span>
+    <span class="n">default_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;structural&#39;</span><span class="p">,</span> <span class="s1">&#39;iiv&#39;</span><span class="p">,</span> <span class="s1">&#39;residual&#39;</span><span class="p">,</span> <span class="s1">&#39;covariates&#39;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">order</span> <span class="o">=</span> <span class="n">default_order</span>
 
@@ -255,54 +260,84 @@
             <span class="s1">&#39;PERIPHERALS([1,2])&#39;</span>
         <span class="p">)</span>
 
+    <span class="n">db</span> <span class="o">=</span> <span class="n">default_tool_database</span><span class="p">(</span><span class="n">toolname</span><span class="o">=</span><span class="s1">&#39;amd&#39;</span><span class="p">)</span>
+
     <span class="n">run_funcs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;structural&#39;</span><span class="p">:</span>
-            <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_modelsearch</span><span class="p">,</span> <span class="n">mfl</span><span class="o">=</span><span class="n">mfl</span><span class="p">)</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_modelsearch</span><span class="p">,</span> <span class="n">mfl</span><span class="o">=</span><span class="n">mfl</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">run_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;iiv&#39;</span><span class="p">:</span>
-            <span class="n">func</span> <span class="o">=</span> <span class="n">_run_iiv</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_iiv</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">run_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;residual&#39;</span><span class="p">:</span>
-            <span class="n">func</span> <span class="o">=</span> <span class="n">_run_resmod</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_resmod</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">run_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;covariates&#39;</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">scm</span><span class="o">.</span><span class="n">have_scm</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="n">continuous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">categorical</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
+                <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
+                    <span class="n">_run_covariates</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="n">categorical</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span>
+                <span class="p">)</span>
+                <span class="n">run_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s2">&quot;Unrecognized section </span><span class="si">{</span><span class="n">section</span><span class="si">}</span><span class="s2"> in order. Must be one of </span><span class="si">{</span><span class="n">default_order</span><span class="si">}</span><span class="s2">&quot;</span>
             <span class="p">)</span>
-        <span class="n">run_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
 
-    <span class="n">db</span> <span class="o">=</span> <span class="n">default_tool_database</span><span class="p">(</span><span class="n">toolname</span><span class="o">=</span><span class="s1">&#39;amd&#39;</span><span class="p">)</span>
     <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;modelfit&#39;</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;modelfit&#39;</span><span class="p">)</span>
 
     <span class="n">next_model</span> <span class="o">=</span> <span class="n">model</span>
     <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">run_funcs</span><span class="p">:</span>
+        <span class="kn">import</span> <span class="nn">os</span>
+
+        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ls -l </span><span class="si">{</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">next_model</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">next_model</span><span class="p">)</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">AMDResults</span><span class="p">(</span><span class="n">final_model</span><span class="o">=</span><span class="n">next_model</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">res</span></div>
 
 
-<span class="k">def</span> <span class="nf">_run_modelsearch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mfl</span><span class="p">):</span>
-    <span class="n">res_modelsearch</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;modelsearch&#39;</span><span class="p">,</span> <span class="s1">&#39;exhaustive_stepwise&#39;</span><span class="p">,</span> <span class="n">mfl</span><span class="o">=</span><span class="n">mfl</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_run_modelsearch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mfl</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">res_modelsearch</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span>
+        <span class="s1">&#39;modelsearch&#39;</span><span class="p">,</span> <span class="s1">&#39;exhaustive_stepwise&#39;</span><span class="p">,</span> <span class="n">mfl</span><span class="o">=</span><span class="n">mfl</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;modelsearch&#39;</span>
+    <span class="p">)</span>
     <span class="n">selected_model</span> <span class="o">=</span> <span class="n">res_modelsearch</span><span class="o">.</span><span class="n">best_model</span>
     <span class="k">return</span> <span class="n">selected_model</span>
 
 
-<span class="k">def</span> <span class="nf">_run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="n">res_iiv</span> <span class="o">=</span> <span class="n">run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">res_iiv</span> <span class="o">=</span> <span class="n">run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
     <span class="n">selected_iiv_model</span> <span class="o">=</span> <span class="n">res_iiv</span><span class="o">.</span><span class="n">best_model</span>
     <span class="k">return</span> <span class="n">selected_iiv_model</span>
 
 
-<span class="k">def</span> <span class="nf">_run_resmod</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_run_resmod</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;resmod1&#39;</span><span class="p">)</span>
     <span class="n">selected_model</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">best_model</span>
-    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">selected_model</span><span class="p">)</span>
+    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">selected_model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;resmod2&#39;</span><span class="p">)</span>
     <span class="n">selected_model</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">best_model</span>
-    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">selected_model</span><span class="p">)</span>
+    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">selected_model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;resmod3&#39;</span><span class="p">)</span>
     <span class="n">selected_model</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">best_model</span>
     <span class="k">return</span> <span class="n">selected_model</span>
 
 
-<div class="viewcode-block" id="run_iiv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.run_iiv.html#pharmpy.modeling.run_iiv">[docs]</a><span class="k">def</span> <span class="nf">run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">add_iivs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">iiv_as_fullblock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rankfunc</span><span class="o">=</span><span class="s1">&#39;ofv&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_run_covariates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">continuous</span><span class="p">,</span> <span class="n">categorical</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="s1">&#39;VC&#39;</span><span class="p">,</span> <span class="s1">&#39;KMM&#39;</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="s1">&#39;QP1&#39;</span><span class="p">,</span> <span class="s1">&#39;QP2&#39;</span><span class="p">,</span> <span class="s1">&#39;VP1&#39;</span><span class="p">,</span> <span class="s1">&#39;VP2&#39;</span><span class="p">]</span>
+    <span class="n">relations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">continuous</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">covariates</span> <span class="o">=</span> <span class="n">categorical</span>
+    <span class="k">elif</span> <span class="n">categorical</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">covariates</span> <span class="o">=</span> <span class="n">continuous</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">covariates</span> <span class="o">=</span> <span class="n">continuous</span> <span class="o">+</span> <span class="n">categorical</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
+            <span class="n">relations</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">covariates</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">scm</span><span class="o">.</span><span class="n">run_scm</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">relations</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="n">categorical</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">final_model</span>
+
+
+<div class="viewcode-block" id="run_iiv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.run_iiv.html#pharmpy.modeling.run_iiv">[docs]</a><span class="k">def</span> <span class="nf">run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">add_iivs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">iiv_as_fullblock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rankfunc</span><span class="o">=</span><span class="s1">&#39;ofv&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Run IIV tool</span>
 
 <span class="sd">    Runs two IIV workflows: testing the number of etas and testing which block structure</span>
@@ -320,6 +355,8 @@
 <span class="sd">    cutoff : float</span>
 <span class="sd">        Cutoff for which value of the ranking function that is considered significant. Default</span>
 <span class="sd">        is 3.84</span>
+<span class="sd">    path : Path</span>
+<span class="sd">        Path of rundirectory</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -338,6 +375,13 @@
 <span class="sd">    run_tool</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
+        <span class="n">path1</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;iiv1&#39;</span>
+        <span class="n">path2</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;iiv2&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">path1</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="n">path2</span> <span class="o">=</span> <span class="n">path</span>
+
     <span class="n">res_no_of_etas</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span>
         <span class="s1">&#39;iiv&#39;</span><span class="p">,</span>
         <span class="s1">&#39;brute_force_no_of_etas&#39;</span><span class="p">,</span>
@@ -346,6 +390,7 @@
         <span class="n">rankfunc</span><span class="o">=</span><span class="n">rankfunc</span><span class="p">,</span>
         <span class="n">cutoff</span><span class="o">=</span><span class="n">cutoff</span><span class="p">,</span>
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
+        <span class="n">path</span><span class="o">=</span><span class="n">path1</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">res_block_structure</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span>
         <span class="s1">&#39;iiv&#39;</span><span class="p">,</span>
@@ -353,6 +398,7 @@
         <span class="n">rankfunc</span><span class="o">=</span><span class="n">rankfunc</span><span class="p">,</span>
         <span class="n">cutoff</span><span class="o">=</span><span class="n">cutoff</span><span class="p">,</span>
         <span class="n">model</span><span class="o">=</span><span class="n">res_no_of_etas</span><span class="o">.</span><span class="n">best_model</span><span class="p">,</span>
+        <span class="n">path</span><span class="o">=</span><span class="n">path2</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">summarize_modelfit_results</span>
