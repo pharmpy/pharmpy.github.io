@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.amd &#8212; Pharmpy 0.52.1 documentation</title>
+    <title>pharmpy.modeling.amd &#8212; Pharmpy 0.53.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -37,7 +37,7 @@
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^0.21.0-beta.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -312,27 +312,47 @@
 
 
 <span class="k">def</span> <span class="nf">_run_resmod</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+    <span class="n">skip</span> <span class="o">=</span> <span class="p">[]</span>
+
     <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;resmod1&#39;</span><span class="p">)</span>
     <span class="n">selected_model</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">best_model</span>
-    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">selected_model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;resmod2&#39;</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">selected_model_name</span>
+    <span class="k">if</span> <span class="n">name</span><span class="p">[:</span><span class="mi">12</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;time_varying&#39;</span><span class="p">:</span>
+        <span class="n">skip</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;time_varying&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">skip</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">selected_model</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;resmod2&#39;</span><span class="p">)</span>
     <span class="n">selected_model</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">best_model</span>
-    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">selected_model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;resmod3&#39;</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">selected_model_name</span>
+    <span class="k">if</span> <span class="n">name</span><span class="p">[:</span><span class="mi">12</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;time_varying&#39;</span><span class="p">:</span>
+        <span class="n">skip</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;time_varying&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">skip</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">selected_model</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;resmod3&#39;</span><span class="p">)</span>
     <span class="n">selected_model</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">best_model</span>
     <span class="k">return</span> <span class="n">selected_model</span>
 
 
 <span class="k">def</span> <span class="nf">_run_covariates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">continuous</span><span class="p">,</span> <span class="n">categorical</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
     <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="s1">&#39;VC&#39;</span><span class="p">,</span> <span class="s1">&#39;KMM&#39;</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="s1">&#39;QP1&#39;</span><span class="p">,</span> <span class="s1">&#39;QP2&#39;</span><span class="p">,</span> <span class="s1">&#39;VP1&#39;</span><span class="p">,</span> <span class="s1">&#39;VP2&#39;</span><span class="p">]</span>
-    <span class="n">relations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+
     <span class="k">if</span> <span class="n">continuous</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">covariates</span> <span class="o">=</span> <span class="n">categorical</span>
     <span class="k">elif</span> <span class="n">categorical</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">covariates</span> <span class="o">=</span> <span class="n">continuous</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">covariates</span> <span class="o">=</span> <span class="n">continuous</span> <span class="o">+</span> <span class="n">categorical</span>
+
+    <span class="n">relations</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">p</span><span class="p">):</span>
-            <span class="n">relations</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">covariates</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
+            <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">eta</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+                    <span class="n">relations</span><span class="p">[</span><span class="n">p</span><span class="p">]</span> <span class="o">=</span> <span class="n">covariates</span>
+                    <span class="k">break</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">scm</span><span class="o">.</span><span class="n">run_scm</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">relations</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="n">categorical</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">final_model</span>
 

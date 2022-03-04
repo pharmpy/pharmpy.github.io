@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.ml &#8212; Pharmpy 0.52.1 documentation</title>
+    <title>pharmpy.modeling.ml &#8212; Pharmpy 0.53.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -37,7 +37,7 @@
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="https://unpkg.com/@jupyter-widgets/html-manager@^0.20.0/dist/embed-amd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^0.21.0-beta.1/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -212,10 +212,13 @@
     <span class="n">nobs</span> <span class="o">=</span> <span class="n">get_number_of_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">nobsi</span> <span class="o">=</span> <span class="n">get_number_of_observations_per_individual</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">cwres</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">residuals</span><span class="p">[</span><span class="s1">&#39;CWRES&#39;</span><span class="p">]</span>
+    <span class="n">iofv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">individual_estimates</span>
+    <span class="n">npar</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+    <span class="n">ofv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span>
 
     <span class="c1"># Max ratio of abs(ETAi) and omegai</span>
     <span class="n">variance_omegas</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">variance_parameters</span>
-    <span class="n">omega_estimates</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="p">[</span><span class="n">variance_omegas</span><span class="p">]</span>
+    <span class="n">omega_estimates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="p">[</span><span class="n">variance_omegas</span><span class="p">])</span>
     <span class="n">abs_ebes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">individual_estimates</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
     <span class="n">ebe_ratio</span> <span class="o">=</span> <span class="n">abs_ebes</span> <span class="o">/</span> <span class="nb">list</span><span class="p">(</span><span class="n">omega_estimates</span><span class="p">)</span>
     <span class="n">max_ebe_ratio</span> <span class="o">=</span> <span class="n">ebe_ratio</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
@@ -226,7 +229,7 @@
 
     <span class="c1"># mean(ETA / OMEGA)</span>
     <span class="n">cov</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">individual_estimates_covariance</span>
-    <span class="n">etc_diag</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">cov</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">cov</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span>
+    <span class="n">etc_diag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">cov</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">cov</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
     <span class="n">etc_ratio</span> <span class="o">=</span> <span class="n">etc_diag</span> <span class="o">/</span> <span class="nb">list</span><span class="p">(</span><span class="n">omega_estimates</span><span class="p">)</span>
     <span class="n">mean_etc_ratio</span> <span class="o">=</span> <span class="n">etc_ratio</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">mean_etc_ratio</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">ofv_ratio</span><span class="o">.</span><span class="n">index</span>
@@ -235,20 +238,24 @@
     <span class="n">cov_names</span> <span class="o">=</span> <span class="n">get_model_covariates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">strings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">covariates</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">cov_names</span> <span class="o">+</span> <span class="p">[</span><span class="n">idcol</span><span class="p">]]</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">idcol</span><span class="p">)</span>
     <span class="n">mean_covs</span> <span class="o">=</span> <span class="n">covariates</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idcol</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">cov_ratio</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">mean_covs</span> <span class="o">-</span> <span class="n">mean_covs</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">mean_covs</span><span class="o">.</span><span class="n">std</span><span class="p">())</span><span class="o">.</span><span class="n">mean</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">maxcov</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">mean_covs</span> <span class="o">-</span> <span class="n">mean_covs</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">mean_covs</span><span class="o">.</span><span class="n">std</span><span class="p">())</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
 
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="s1">&#39;nids&#39;</span><span class="p">:</span> <span class="n">nids</span><span class="p">,</span>
             <span class="s1">&#39;nobs&#39;</span><span class="p">:</span> <span class="n">nobs</span><span class="p">,</span>
             <span class="s1">&#39;nobs_subj&#39;</span><span class="p">:</span> <span class="n">nobsi</span> <span class="o">/</span> <span class="p">(</span><span class="n">nobs</span> <span class="o">/</span> <span class="n">nids</span><span class="p">),</span>
+            <span class="s1">&#39;nobsi&#39;</span><span class="p">:</span> <span class="n">nobsi</span><span class="p">,</span>
             <span class="s1">&#39;ncovs&#39;</span><span class="p">:</span> <span class="nb">len</span><span class="p">(</span><span class="n">cov_names</span><span class="p">),</span>
-            <span class="s1">&#39;cov_ratio&#39;</span><span class="p">:</span> <span class="n">cov_ratio</span><span class="p">,</span>
+            <span class="s1">&#39;maxcov&#39;</span><span class="p">:</span> <span class="n">maxcov</span><span class="p">,</span>
             <span class="s1">&#39;max_cwres&#39;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cwres</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idcol</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">(),</span>
             <span class="s1">&#39;median_cwres&#39;</span><span class="p">:</span> <span class="nb">abs</span><span class="p">(</span><span class="n">cwres</span><span class="p">)</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idcol</span><span class="p">)</span><span class="o">.</span><span class="n">median</span><span class="p">(),</span>
             <span class="s1">&#39;max_ebe_ratio&#39;</span><span class="p">:</span> <span class="n">max_ebe_ratio</span><span class="p">,</span>
             <span class="s1">&#39;ofv_ratio&#39;</span><span class="p">:</span> <span class="n">ofv_ratio</span><span class="p">,</span>
             <span class="s1">&#39;etc_ratio&#39;</span><span class="p">:</span> <span class="n">mean_etc_ratio</span><span class="p">,</span>
+            <span class="s1">&#39;iofv&#39;</span><span class="p">:</span> <span class="n">iofv</span><span class="p">,</span>
+            <span class="s1">&#39;npar&#39;</span><span class="p">:</span> <span class="n">npar</span><span class="p">,</span>
+            <span class="s1">&#39;ofv&#39;</span><span class="p">:</span> <span class="n">ofv</span><span class="p">,</span>
         <span class="p">}</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span>
@@ -276,66 +283,66 @@
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; predict_outliers(model)</span>
-<span class="sd">        residual  outlier</span>
-<span class="sd">    1  -0.272152    False</span>
-<span class="sd">    2   1.723895    False</span>
-<span class="sd">    3  -0.621257    False</span>
-<span class="sd">    4  -0.426955    False</span>
-<span class="sd">    5   1.639485    False</span>
-<span class="sd">    6   1.147173    False</span>
-<span class="sd">    7  -0.399760    False</span>
-<span class="sd">    8   0.283858    False</span>
-<span class="sd">    9   0.606595    False</span>
-<span class="sd">    10 -0.505307    False</span>
-<span class="sd">    11  5.413732     True</span>
-<span class="sd">    12 -0.464585    False</span>
-<span class="sd">    13  0.140510    False</span>
-<span class="sd">    14  0.168691    False</span>
-<span class="sd">    15 -0.472065    False</span>
-<span class="sd">    16 -0.143271    False</span>
-<span class="sd">    17 -0.225547    False</span>
-<span class="sd">    18  3.730850     True</span>
-<span class="sd">    19 -0.268493    False</span>
-<span class="sd">    20 -0.616852    False</span>
-<span class="sd">    21 -0.526294    False</span>
-<span class="sd">    22 -0.393106    False</span>
-<span class="sd">    23  1.242479    False</span>
-<span class="sd">    24 -0.352115    False</span>
-<span class="sd">    25  3.262130     True</span>
-<span class="sd">    26 -0.309581    False</span>
-<span class="sd">    27  2.062735    False</span>
-<span class="sd">    28 -0.188629    False</span>
-<span class="sd">    29 -0.434607    False</span>
-<span class="sd">    30 -0.439220    False</span>
-<span class="sd">    31 -0.227505    False</span>
-<span class="sd">    32  3.245315     True</span>
-<span class="sd">    33 -0.226902    False</span>
-<span class="sd">    34  0.319238    False</span>
-<span class="sd">    35  2.549845    False</span>
-<span class="sd">    36 -0.086605    False</span>
-<span class="sd">    37 -0.341915    False</span>
-<span class="sd">    38  0.661809    False</span>
-<span class="sd">    39 -0.678476    False</span>
-<span class="sd">    40 -0.371514    False</span>
-<span class="sd">    41 -0.901976    False</span>
-<span class="sd">    42  6.411962     True</span>
-<span class="sd">    43  1.326782    False</span>
-<span class="sd">    44 -0.754095    False</span>
-<span class="sd">    45 -0.453803    False</span>
-<span class="sd">    46 -0.398793    False</span>
-<span class="sd">    47 -0.133017    False</span>
-<span class="sd">    48  2.460449    False</span>
-<span class="sd">    49 -0.505857    False</span>
-<span class="sd">    50 -0.077484    False</span>
-<span class="sd">    51  2.011316    False</span>
-<span class="sd">    52  1.789271    False</span>
-<span class="sd">    53  0.579177    False</span>
-<span class="sd">    54  0.892111    False</span>
-<span class="sd">    55  1.943623    False</span>
-<span class="sd">    56 -0.232907    False</span>
-<span class="sd">    57 -0.345342    False</span>
-<span class="sd">    58 -0.666367    False</span>
-<span class="sd">    59 -0.578347    False</span>
+<span class="sd">       residual  outlier</span>
+<span class="sd">    1  -0.281443    False</span>
+<span class="sd">    2   1.057392    False</span>
+<span class="sd">    3  -0.119105    False</span>
+<span class="sd">    4  -0.846849    False</span>
+<span class="sd">    5   0.600540    False</span>
+<span class="sd">    6   1.014008    False</span>
+<span class="sd">    7  -0.750734    False</span>
+<span class="sd">    8   0.247175    False</span>
+<span class="sd">    9   0.117002    False</span>
+<span class="sd">    10 -0.835389    False</span>
+<span class="sd">    11  3.529582     True</span>
+<span class="sd">    12 -0.035670    False</span>
+<span class="sd">    13  0.292333    False</span>
+<span class="sd">    14  0.303278    False</span>
+<span class="sd">    15 -0.565949    False</span>
+<span class="sd">    16 -0.078192    False</span>
+<span class="sd">    17 -0.291295    False</span>
+<span class="sd">    18  2.466421    False</span>
+<span class="sd">    19 -0.402343    False</span>
+<span class="sd">    20 -0.699996    False</span>
+<span class="sd">    21 -0.567987    False</span>
+<span class="sd">    22 -0.526776    False</span>
+<span class="sd">    23  0.303918    False</span>
+<span class="sd">    24 -0.177588    False</span>
+<span class="sd">    25  1.272142    False</span>
+<span class="sd">    26 -0.390000    False</span>
+<span class="sd">    27  0.775876    False</span>
+<span class="sd">    28 -0.501528    False</span>
+<span class="sd">    29 -0.700951    False</span>
+<span class="sd">    30 -0.352599    False</span>
+<span class="sd">    31  0.294196    False</span>
+<span class="sd">    32  0.744014    False</span>
+<span class="sd">    33 -0.215364    False</span>
+<span class="sd">    34  0.208691    False</span>
+<span class="sd">    35  1.713130    False</span>
+<span class="sd">    36  0.300293    False</span>
+<span class="sd">    37 -0.810736    False</span>
+<span class="sd">    38  0.459877    False</span>
+<span class="sd">    39 -0.675125    False</span>
+<span class="sd">    40 -0.563835    False</span>
+<span class="sd">    41 -0.526945    False</span>
+<span class="sd">    42  4.449199     True</span>
+<span class="sd">    43  0.720714    False</span>
+<span class="sd">    44 -0.792248    False</span>
+<span class="sd">    45 -0.860923    False</span>
+<span class="sd">    46 -0.731858    False</span>
+<span class="sd">    47 -0.247131    False</span>
+<span class="sd">    48  1.894190    False</span>
+<span class="sd">    49 -0.282737    False</span>
+<span class="sd">    50 -0.153398    False</span>
+<span class="sd">    51  1.200546    False</span>
+<span class="sd">    52  0.902774    False</span>
+<span class="sd">    53  0.586427    False</span>
+<span class="sd">    54  0.183329    False</span>
+<span class="sd">    55  1.036930    False</span>
+<span class="sd">    56 -0.639868    False</span>
+<span class="sd">    57 -0.765279    False</span>
+<span class="sd">    58 -0.209665    False</span>
+<span class="sd">    59 -0.225693    False</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -374,7 +381,6 @@
 
     <span class="n">model_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">/</span> <span class="s1">&#39;ml_models&#39;</span> <span class="o">/</span> <span class="s1">&#39;infinds.tflite&#39;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">_create_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="n">data</span><span class="p">[</span><span class="s1">&#39;linearized&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.0</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">_predict_with_tflite</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="n">output</span><span class="p">,</span> <span class="s1">&#39;influential&#39;</span><span class="p">:</span> <span class="n">output</span> <span class="o">&gt;</span> <span class="mf">3.84</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">df</span></div>

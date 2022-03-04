@@ -13,6 +13,7 @@ ColumnInfo
       ~ColumnInfo.categories
       ~ColumnInfo.continuous
       ~ColumnInfo.datatype
+      ~ColumnInfo.descriptor
       ~ColumnInfo.drop
       ~ColumnInfo.name
       ~ColumnInfo.scale
@@ -32,6 +33,7 @@ ColumnInfo
    .. autoattribute:: categories
    .. autoattribute:: continuous
    .. autoattribute:: datatype
+   .. autoattribute:: descriptor
    .. autoattribute:: drop
    .. autoattribute:: name
    .. autoattribute:: scale
