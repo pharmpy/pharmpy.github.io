@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>sympy.core.symbol &#8212; Pharmpy 0.53.0 documentation</title>
+    <title>sympy.core.symbol &#8212; Pharmpy 0.54.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -192,23 +192,25 @@
               <div>
                 
   <h1>Source code for sympy.core.symbol</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">sympy.core.assumptions</span> <span class="kn">import</span> <span class="n">StdFactKB</span><span class="p">,</span> <span class="n">_assume_defined</span>
-<span class="kn">from</span> <span class="nn">sympy.core.compatibility</span> <span class="kn">import</span> <span class="n">is_sequence</span><span class="p">,</span> <span class="n">ordered</span>
+<span></span><span class="kn">from</span> <span class="nn">.assumptions</span> <span class="kn">import</span> <span class="n">StdFactKB</span><span class="p">,</span> <span class="n">_assume_defined</span>
 <span class="kn">from</span> <span class="nn">.basic</span> <span class="kn">import</span> <span class="n">Basic</span><span class="p">,</span> <span class="n">Atom</span>
-<span class="kn">from</span> <span class="nn">.sympify</span> <span class="kn">import</span> <span class="n">sympify</span>
-<span class="kn">from</span> <span class="nn">.singleton</span> <span class="kn">import</span> <span class="n">S</span>
-<span class="kn">from</span> <span class="nn">.expr</span> <span class="kn">import</span> <span class="n">Expr</span><span class="p">,</span> <span class="n">AtomicExpr</span>
 <span class="kn">from</span> <span class="nn">.cache</span> <span class="kn">import</span> <span class="n">cacheit</span>
-<span class="kn">from</span> <span class="nn">.function</span> <span class="kn">import</span> <span class="n">FunctionClass</span>
+<span class="kn">from</span> <span class="nn">.containers</span> <span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">.expr</span> <span class="kn">import</span> <span class="n">Expr</span><span class="p">,</span> <span class="n">AtomicExpr</span>
+<span class="kn">from</span> <span class="nn">.function</span> <span class="kn">import</span> <span class="n">AppliedUndef</span><span class="p">,</span> <span class="n">FunctionClass</span>
 <span class="kn">from</span> <span class="nn">.kind</span> <span class="kn">import</span> <span class="n">NumberKind</span><span class="p">,</span> <span class="n">UndefinedKind</span>
-<span class="kn">from</span> <span class="nn">sympy.core.logic</span> <span class="kn">import</span> <span class="n">fuzzy_bool</span>
+<span class="kn">from</span> <span class="nn">.logic</span> <span class="kn">import</span> <span class="n">fuzzy_bool</span>
+<span class="kn">from</span> <span class="nn">.singleton</span> <span class="kn">import</span> <span class="n">S</span>
+<span class="kn">from</span> <span class="nn">.sorting</span> <span class="kn">import</span> <span class="n">ordered</span>
+<span class="kn">from</span> <span class="nn">.sympify</span> <span class="kn">import</span> <span class="n">sympify</span>
 <span class="kn">from</span> <span class="nn">sympy.logic.boolalg</span> <span class="kn">import</span> <span class="n">Boolean</span>
-<span class="kn">from</span> <span class="nn">sympy.utilities.iterables</span> <span class="kn">import</span> <span class="n">cartes</span><span class="p">,</span> <span class="n">sift</span>
-<span class="kn">from</span> <span class="nn">sympy.core.containers</span> <span class="kn">import</span> <span class="n">Tuple</span>
+<span class="kn">from</span> <span class="nn">sympy.utilities.iterables</span> <span class="kn">import</span> <span class="n">sift</span><span class="p">,</span> <span class="n">is_sequence</span>
+<span class="kn">from</span> <span class="nn">sympy.utilities.misc</span> <span class="kn">import</span> <span class="n">filldedent</span>
 
 <span class="kn">import</span> <span class="nn">string</span>
 <span class="kn">import</span> <span class="nn">re</span> <span class="k">as</span> <span class="nn">_re</span>
 <span class="kn">import</span> <span class="nn">random</span>
+<span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">product</span>
 
 <span class="k">class</span> <span class="nc">Str</span><span class="p">(</span><span class="n">Atom</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
@@ -316,35 +318,52 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;symbol must be string for symbol name or Symbol&#39;</span><span class="p">)</span>
 
 <span class="k">def</span> <span class="nf">uniquely_named_symbol</span><span class="p">(</span><span class="n">xname</span><span class="p">,</span> <span class="n">exprs</span><span class="o">=</span><span class="p">(),</span> <span class="n">compare</span><span class="o">=</span><span class="nb">str</span><span class="p">,</span> <span class="n">modify</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">assumptions</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Return a symbol which, when printed, will have a name unique</span>
-<span class="sd">    from any other already in the expressions given. The name is made</span>
-<span class="sd">    unique by appending numbers (default) but this can be</span>
-<span class="sd">    customized with the keyword &#39;modify&#39;.</span>
+    <span class="sd">&quot;&quot;&quot;</span>
+<span class="sd">    Return a symbol whose name is derivated from *xname* but is unique</span>
+<span class="sd">    from any other symbols in *exprs*.</span>
+
+<span class="sd">    *xname* and symbol names in *exprs* are passed to *compare* to be</span>
+<span class="sd">    converted to comparable forms. If ``compare(xname)`` is not unique,</span>
+<span class="sd">    it is recursively passed to *modify* until unique name is acquired.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ==========</span>
 
-<span class="sd">        xname : a string or a Symbol (when symbol xname &lt;- str(xname))</span>
+<span class="sd">    xname : str or Symbol</span>
+<span class="sd">        Base name for the new symbol.</span>
 
-<span class="sd">        compare : a single arg function that takes a symbol and returns</span>
-<span class="sd">            a string to be compared with xname (the default is the str</span>
-<span class="sd">            function which indicates how the name will look when it</span>
-<span class="sd">            is printed, e.g. this includes underscores that appear on</span>
-<span class="sd">            Dummy symbols)</span>
+<span class="sd">    exprs : Expr or iterable of Expr</span>
+<span class="sd">        Expressions whose symbols are compared to *xname*.</span>
 
-<span class="sd">        modify : a single arg function that changes its string argument</span>
-<span class="sd">            in some way (the default is to append numbers)</span>
+<span class="sd">    compare : function</span>
+<span class="sd">        Unary function which transforms *xname* and symbol names from</span>
+<span class="sd">        *exprs* to comparable form.</span>
+
+<span class="sd">    modify : function</span>
+<span class="sd">        Unary function which modifies the string. Default is appending</span>
+<span class="sd">        the number, or increasing the number if exists.</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    ========</span>
 
-<span class="sd">    &gt;&gt;&gt; from sympy.core.symbol import uniquely_named_symbol</span>
-<span class="sd">    &gt;&gt;&gt; from sympy.abc import x</span>
-<span class="sd">    &gt;&gt;&gt; uniquely_named_symbol(&#39;x&#39;, x)</span>
-<span class="sd">    x0</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">sympy.core.function</span> <span class="kn">import</span> <span class="n">AppliedUndef</span>
+<span class="sd">    By default, a number is appended to *xname* to generate unique name.</span>
+<span class="sd">    If the number already exists, it is recursively increased.</span>
 
+<span class="sd">    &gt;&gt;&gt; from sympy.core.symbol import uniquely_named_symbol, Symbol</span>
+<span class="sd">    &gt;&gt;&gt; uniquely_named_symbol(&#39;x&#39;, Symbol(&#39;x&#39;))</span>
+<span class="sd">    x0</span>
+<span class="sd">    &gt;&gt;&gt; uniquely_named_symbol(&#39;x&#39;, (Symbol(&#39;x&#39;), Symbol(&#39;x0&#39;)))</span>
+<span class="sd">    x1</span>
+<span class="sd">    &gt;&gt;&gt; uniquely_named_symbol(&#39;x0&#39;, (Symbol(&#39;x1&#39;), Symbol(&#39;x0&#39;)))</span>
+<span class="sd">    x2</span>
+
+<span class="sd">    Name generation can be controlled by passing *modify* parameter.</span>
+
+<span class="sd">    &gt;&gt;&gt; from sympy.abc import x</span>
+<span class="sd">    &gt;&gt;&gt; uniquely_named_symbol(&#39;x&#39;, x, modify=lambda s: 2*s)</span>
+<span class="sd">    xx</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">def</span> <span class="nf">numbered_string_incr</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">0</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">s</span><span class="p">:</span>
             <span class="k">return</span> <span class="nb">str</span><span class="p">(</span><span class="n">start</span><span class="p">)</span>
@@ -359,7 +378,7 @@
     <span class="n">default</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">xname</span><span class="p">):</span>
         <span class="n">xname</span><span class="p">,</span> <span class="n">default</span> <span class="o">=</span> <span class="n">xname</span>
-    <span class="n">x</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">xname</span><span class="p">)</span>
+    <span class="n">x</span> <span class="o">=</span> <span class="n">compare</span><span class="p">(</span><span class="n">xname</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">exprs</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">_symbol</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">default</span><span class="p">,</span> <span class="o">**</span><span class="n">assumptions</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">is_sequence</span><span class="p">(</span><span class="n">exprs</span><span class="p">):</span>
@@ -396,6 +415,8 @@
     <span class="n">is_comparable</span> <span class="o">=</span> <span class="kc">False</span>
 
     <span class="vm">__slots__</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,)</span>
+
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span>
 
     <span class="n">is_Symbol</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="n">is_symbol</span> <span class="o">=</span> <span class="kc">True</span>
@@ -444,7 +465,6 @@
         <span class="n">base</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">assumptions0</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">set</span><span class="p">(</span><span class="n">assumptions</span><span class="p">)</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">base</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">assumptions</span><span class="p">[</span><span class="n">k</span><span class="p">]</span> <span class="o">!=</span> <span class="n">base</span><span class="p">[</span><span class="n">k</span><span class="p">]:</span>
-                <span class="kn">from</span> <span class="nn">sympy.utilities.misc</span> <span class="kn">import</span> <span class="n">filldedent</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">filldedent</span><span class="p">(</span><span class="s1">&#39;&#39;&#39;</span>
 <span class="s1">                    non-matching assumptions for </span><span class="si">%s</span><span class="s1">: existing value</span>
 <span class="s1">                    is </span><span class="si">%s</span><span class="s1"> and new value is </span><span class="si">%s</span><span class="s1">&#39;&#39;&#39;</span> <span class="o">%</span> <span class="p">(</span>
@@ -497,13 +517,22 @@
     <span class="k">def</span> <span class="nf">__getnewargs_ex__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,),</span> <span class="bp">self</span><span class="o">.</span><span class="n">assumptions0</span><span class="p">)</span>
 
+    <span class="c1"># NOTE: __setstate__ is not needed for pickles created by __getnewargs_ex__</span>
+    <span class="c1"># but was used before Symbol was changed to use __getnewargs_ex__ in v1.9.</span>
+    <span class="c1"># Pickles created in previous SymPy versions will still need __setstate__</span>
+    <span class="c1"># so that they can be unpickled in SymPy &gt; v1.9.</span>
+
+    <span class="k">def</span> <span class="nf">__setstate__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">state</span><span class="p">):</span>
+        <span class="k">for</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="nb">setattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">value</span><span class="p">)</span>
+
     <span class="k">def</span> <span class="nf">_hashable_content</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="c1"># Note: user-specified assumptions not hashed, just derived ones</span>
         <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">assumptions0</span><span class="o">.</span><span class="n">items</span><span class="p">()))</span>
 
     <span class="k">def</span> <span class="nf">_eval_subs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">sympy.core.power</span> <span class="kn">import</span> <span class="n">Pow</span>
         <span class="k">if</span> <span class="n">old</span><span class="o">.</span><span class="n">is_Pow</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">sympy.core.power</span> <span class="kn">import</span> <span class="n">Pow</span>
             <span class="k">return</span> <span class="n">Pow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">S</span><span class="o">.</span><span class="n">One</span><span class="p">,</span> <span class="n">evaluate</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">_eval_subs</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_eval_refine</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">assumptions</span><span class="p">):</span>
@@ -524,16 +553,16 @@
             <span class="k">else</span> <span class="n">Dummy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">commutative</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">is_commutative</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">as_real_imag</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">deep</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="o">**</span><span class="n">hints</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">im</span><span class="p">,</span> <span class="n">re</span>
         <span class="k">if</span> <span class="n">hints</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span> <span class="o">==</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">sympy.functions.elementary.complexes</span> <span class="kn">import</span> <span class="n">im</span><span class="p">,</span> <span class="n">re</span>
             <span class="k">return</span> <span class="p">(</span><span class="n">re</span><span class="p">(</span><span class="bp">self</span><span class="p">),</span> <span class="n">im</span><span class="p">(</span><span class="bp">self</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="nf">is_constant</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">*</span><span class="n">wrt</span><span class="p">,</span> <span class="o">**</span><span class="n">flags</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">wrt</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
-        <span class="k">return</span> <span class="ow">not</span> <span class="bp">self</span> <span class="ow">in</span> <span class="n">wrt</span>
+        <span class="k">return</span> <span class="bp">self</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">wrt</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">free_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -727,12 +756,15 @@
         <span class="k">return</span> <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="n">_hashable_content</span><span class="p">()</span> <span class="o">+</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">exclude</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">)</span>
 
     <span class="c1"># TODO add check against another Wild</span>
-    <span class="k">def</span> <span class="nf">matches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">repl_dict</span><span class="o">=</span><span class="p">{},</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">matches</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">repl_dict</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">old</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">has</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">exclude</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="k">if</span> <span class="nb">any</span><span class="p">(</span><span class="ow">not</span> <span class="n">f</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">f</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">properties</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">None</span>
-        <span class="n">repl_dict</span> <span class="o">=</span> <span class="n">repl_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">repl_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">repl_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">repl_dict</span> <span class="o">=</span> <span class="n">repl_dict</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
         <span class="n">repl_dict</span><span class="p">[</span><span class="bp">self</span><span class="p">]</span> <span class="o">=</span> <span class="n">expr</span>
         <span class="k">return</span> <span class="n">repl_dict</span>
 
@@ -932,7 +964,7 @@
                 <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">split</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
                     <span class="n">names</span> <span class="o">=</span> <span class="n">split</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">else</span><span class="p">:</span>
-                    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">cartes</span><span class="p">(</span><span class="o">*</span><span class="n">split</span><span class="p">)]</span>
+                    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">s</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="o">*</span><span class="n">split</span><span class="p">)]</span>
                 <span class="k">if</span> <span class="n">literals</span><span class="p">:</span>
                     <span class="n">result</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="bp">cls</span><span class="p">(</span><span class="n">literal</span><span class="p">(</span><span class="n">s</span><span class="p">),</span> <span class="o">**</span><span class="n">args</span><span class="p">)</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">names</span><span class="p">])</span>
                 <span class="k">else</span><span class="p">:</span>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.ml &#8212; Pharmpy 0.53.0 documentation</title>
+    <title>pharmpy.modeling.ml &#8212; Pharmpy 0.54.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -261,7 +261,7 @@
     <span class="k">return</span> <span class="n">df</span>
 
 
-<div class="viewcode-block" id="predict_outliers"><a class="viewcode-back" href="../../../api/pharmpy.modeling.predict_outliers.html#pharmpy.modeling.predict_outliers">[docs]</a><span class="k">def</span> <span class="nf">predict_outliers</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="predict_outliers"><a class="viewcode-back" href="../../../api/pharmpy.modeling.predict_outliers.html#pharmpy.modeling.predict_outliers">[docs]</a><span class="k">def</span> <span class="nf">predict_outliers</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">3.0</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Predict outliers for a model using a machine learning model.</span>
 
 <span class="sd">    See the :ref:`simeval &lt;Individual OFV summary&gt;` documentation for a definition of the `residual`</span>
@@ -270,6 +270,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model</span>
+<span class="sd">    cutoff : float</span>
+<span class="sd">        Cutoff threshold for a residual singalling an outlier</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -283,7 +285,8 @@
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; predict_outliers(model)</span>
-<span class="sd">       residual  outlier</span>
+<span class="sd">        residual  outlier</span>
+<span class="sd">    ID</span>
 <span class="sd">    1  -0.281443    False</span>
 <span class="sd">    2   1.057392    False</span>
 <span class="sd">    3  -0.119105    False</span>
@@ -353,17 +356,20 @@
     <span class="n">model_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">/</span> <span class="s1">&#39;ml_models&#39;</span> <span class="o">/</span> <span class="s1">&#39;outliers.tflite&#39;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">_create_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">_predict_with_tflite</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;residual&#39;</span><span class="p">:</span> <span class="n">output</span><span class="p">,</span> <span class="s1">&#39;outlier&#39;</span><span class="p">:</span> <span class="n">output</span> <span class="o">&gt;</span> <span class="mi">3</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;residual&#39;</span><span class="p">:</span> <span class="n">output</span><span class="p">,</span> <span class="s1">&#39;outlier&#39;</span><span class="p">:</span> <span class="n">output</span> <span class="o">&gt;</span> <span class="n">cutoff</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_column</span><span class="o">.</span><span class="n">name</span>
     <span class="k">return</span> <span class="n">df</span></div>
 
 
-<div class="viewcode-block" id="predict_influential_individuals"><a class="viewcode-back" href="../../../api/pharmpy.modeling.predict_influential_individuals.html#pharmpy.modeling.predict_influential_individuals">[docs]</a><span class="k">def</span> <span class="nf">predict_influential_individuals</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="predict_influential_individuals"><a class="viewcode-back" href="../../../api/pharmpy.modeling.predict_influential_individuals.html#pharmpy.modeling.predict_influential_individuals">[docs]</a><span class="k">def</span> <span class="nf">predict_influential_individuals</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="mf">3.84</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Predict influential individuals for a model using a machine learning model.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model</span>
+<span class="sd">    cutoff : float</span>
+<span class="sd">        Cutoff threshold for a dofv signalling an influential individual</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -382,17 +388,22 @@
     <span class="n">model_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span> <span class="o">/</span> <span class="s1">&#39;ml_models&#39;</span> <span class="o">/</span> <span class="s1">&#39;infinds.tflite&#39;</span>
     <span class="n">data</span> <span class="o">=</span> <span class="n">_create_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">_predict_with_tflite</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">data</span><span class="p">)</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="n">output</span><span class="p">,</span> <span class="s1">&#39;influential&#39;</span><span class="p">:</span> <span class="n">output</span> <span class="o">&gt;</span> <span class="mf">3.84</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;dofv&#39;</span><span class="p">:</span> <span class="n">output</span><span class="p">,</span> <span class="s1">&#39;influential&#39;</span><span class="p">:</span> <span class="n">output</span> <span class="o">&gt;</span> <span class="n">cutoff</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_column</span><span class="o">.</span><span class="n">name</span>
     <span class="k">return</span> <span class="n">df</span></div>
 
 
-<div class="viewcode-block" id="predict_influential_outliers"><a class="viewcode-back" href="../../../api/pharmpy.modeling.predict_influential_outliers.html#pharmpy.modeling.predict_influential_outliers">[docs]</a><span class="k">def</span> <span class="nf">predict_influential_outliers</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="predict_influential_outliers"><a class="viewcode-back" href="../../../api/pharmpy.modeling.predict_influential_outliers.html#pharmpy.modeling.predict_influential_outliers">[docs]</a><span class="k">def</span> <span class="nf">predict_influential_outliers</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">outlier_cutoff</span><span class="o">=</span><span class="mi">3</span><span class="p">,</span> <span class="n">influential_cutoff</span><span class="o">=</span><span class="mf">3.84</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Predict influential outliers for a model using a machine learning model.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model</span>
+<span class="sd">    outlier_cutoff : float</span>
+<span class="sd">        Cutoff threshold for a residual singalling an outlier</span>
+<span class="sd">    influential_cutoff : float</span>
+<span class="sd">        Cutoff threshold for a dofv signalling an influential individual</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -407,8 +418,8 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="n">outliers</span> <span class="o">=</span> <span class="n">predict_outliers</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="n">infinds</span> <span class="o">=</span> <span class="n">predict_influential_individuals</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">outliers</span> <span class="o">=</span> <span class="n">predict_outliers</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="n">outlier_cutoff</span><span class="p">)</span>
+    <span class="n">infinds</span> <span class="o">=</span> <span class="n">predict_influential_individuals</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="n">influential_cutoff</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">outliers</span><span class="p">,</span> <span class="n">infinds</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;influential_outlier&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;outlier&#39;</span><span class="p">]</span> <span class="o">&amp;</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;influential&#39;</span><span class="p">]</span>
     <span class="k">return</span> <span class="n">df</span></div>

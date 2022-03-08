@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.amd &#8212; Pharmpy 0.53.0 documentation</title>
+    <title>pharmpy.modeling.amd &#8212; Pharmpy 0.54.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -198,8 +198,9 @@
 <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">Results</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">default_tool_database</span>
 
+<span class="kn">from</span> <span class="nn">.allometry</span> <span class="kn">import</span> <span class="n">add_allometry</span>
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">remove_loq_data</span>
-<span class="kn">from</span> <span class="nn">.run</span> <span class="kn">import</span> <span class="n">run_tool</span>
+<span class="kn">from</span> <span class="nn">.run</span> <span class="kn">import</span> <span class="n">fit</span><span class="p">,</span> <span class="n">run_tool</span>
 
 
 <span class="k">class</span> <span class="nc">AMDResults</span><span class="p">(</span><span class="n">Results</span><span class="p">):</span>
@@ -247,7 +248,7 @@
     <span class="k">if</span> <span class="n">lloq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq</span><span class="p">)</span>
 
-    <span class="n">default_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;structural&#39;</span><span class="p">,</span> <span class="s1">&#39;iiv&#39;</span><span class="p">,</span> <span class="s1">&#39;residual&#39;</span><span class="p">,</span> <span class="s1">&#39;covariates&#39;</span><span class="p">]</span>
+    <span class="n">default_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;structural&#39;</span><span class="p">,</span> <span class="s1">&#39;iiv&#39;</span><span class="p">,</span> <span class="s1">&#39;residual&#39;</span><span class="p">,</span> <span class="s1">&#39;allometry&#39;</span><span class="p">,</span> <span class="s1">&#39;covariates&#39;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">order</span> <span class="o">=</span> <span class="n">default_order</span>
 
@@ -273,6 +274,9 @@
         <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;residual&#39;</span><span class="p">:</span>
             <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_resmod</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="n">run_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;allometry&#39;</span><span class="p">:</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_allometry</span><span class="p">,</span> <span class="n">allometric_variable</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="n">run_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;covariates&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">scm</span><span class="o">.</span><span class="n">have_scm</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="n">continuous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">categorical</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
                 <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span>
@@ -288,9 +292,6 @@
 
     <span class="n">next_model</span> <span class="o">=</span> <span class="n">model</span>
     <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">run_funcs</span><span class="p">:</span>
-        <span class="kn">import</span> <span class="nn">os</span>
-
-        <span class="n">os</span><span class="o">.</span><span class="n">system</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;ls -l </span><span class="si">{</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
         <span class="n">next_model</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">next_model</span><span class="p">)</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">AMDResults</span><span class="p">(</span><span class="n">final_model</span><span class="o">=</span><span class="n">next_model</span><span class="p">)</span>
@@ -355,6 +356,20 @@
                     <span class="k">break</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">scm</span><span class="o">.</span><span class="n">run_scm</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">relations</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="n">categorical</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">final_model</span>
+
+
+<span class="k">def</span> <span class="nf">_run_allometry</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">allometric_variable</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">allometric_variable</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">==</span> <span class="s1">&#39;body weight&#39;</span><span class="p">:</span>
+                <span class="n">allometric_variable</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">break</span>
+
+    <span class="k">if</span> <span class="n">allometric_variable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">add_allometry</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">allometric_variable</span><span class="o">=</span><span class="n">allometric_variable</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;scaled_model&quot;</span>
+        <span class="n">fit</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
 
 
 <div class="viewcode-block" id="run_iiv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.run_iiv.html#pharmpy.modeling.run_iiv">[docs]</a><span class="k">def</span> <span class="nf">run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">add_iivs</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">iiv_as_fullblock</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">rankfunc</span><span class="o">=</span><span class="s1">&#39;ofv&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>

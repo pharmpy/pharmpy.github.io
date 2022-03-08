@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.53.0 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.54.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -765,6 +765,8 @@
 <span class="sd">      | BIC = OFV + n_estimated_parameters * log(n_observations)</span>
 <span class="sd">    * | random</span>
 <span class="sd">      | BIC = OFV + n_estimated_parameters * log(n_individals)</span>
+<span class="sd">    * | iiv</span>
+<span class="sd">      | BIC = OFV + n_estimated_iiv_omega_parameters * log(n_individals)</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -790,6 +792,8 @@
 <span class="sd">    616.536606983396</span>
 <span class="sd">    &gt;&gt;&gt; calculate_bic(model, type=&#39;random&#39;)</span>
 <span class="sd">    610.7412809453149</span>
+<span class="sd">    &gt;&gt;&gt; calculate_bic(model, type=&#39;iiv&#39;)</span>
+<span class="sd">    594.431131169692</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">modelfit_results</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">modelfit_results</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
@@ -800,6 +804,11 @@
         <span class="n">penalty</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span>
     <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;random&#39;</span><span class="p">:</span>
         <span class="n">penalty</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;iiv&#39;</span><span class="p">:</span>
+        <span class="n">nomegas_iiv</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
+            <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv</span><span class="o">.</span><span class="n">parameter_names</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
+        <span class="p">)</span>
+        <span class="n">penalty</span> <span class="o">=</span> <span class="n">nomegas_iiv</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">random_thetas</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
