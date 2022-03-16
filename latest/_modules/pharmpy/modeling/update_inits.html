@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.update_inits &#8212; Pharmpy 0.54.0 documentation</title>
+    <title>pharmpy.modeling.update_inits &#8212; Pharmpy 0.55.1 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -37,7 +37,7 @@
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^0.21.0-beta.1/dist/embed-amd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.0-rc.0/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -197,7 +197,7 @@
 <span class="sd">&quot;&quot;&quot;</span>
 
 
-<div class="viewcode-block" id="update_inits"><a class="viewcode-back" href="../../../api/pharmpy.modeling.update_inits.html#pharmpy.modeling.update_inits">[docs]</a><span class="k">def</span> <span class="nf">update_inits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">force_individual_estimates</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="update_inits"><a class="viewcode-back" href="../../../api/pharmpy.modeling.update_inits.html#pharmpy.modeling.update_inits">[docs]</a><span class="k">def</span> <span class="nf">update_inits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">force_individual_estimates</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">move_est_close_to_bounds</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Update initial parameter estimate for a model</span>
 
 <span class="sd">    Updates initial estimates of population parameters for a model from</span>
@@ -211,6 +211,9 @@
 <span class="sd">        Pharmpy model to update initial estimates</span>
 <span class="sd">    force_individual_estimates : bool</span>
 <span class="sd">        Update initial individual estimates even if model din&#39;t use them previously.</span>
+<span class="sd">    move_est_close_to_bounds : bool</span>
+<span class="sd">        Move estimates that are close to bounds. If correlation &gt;0.99 the correlation will</span>
+<span class="sd">        be set to 0.9, if variance is &lt;0.001 the variance will be set to 0.01.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -238,8 +241,13 @@
             <span class="s1">&#39;Cannot update initial parameter estimates since no modelfit results are available&#39;</span>
         <span class="p">)</span>
 
+    <span class="k">if</span> <span class="n">move_est_close_to_bounds</span><span class="p">:</span>
+        <span class="n">param_est</span> <span class="o">=</span> <span class="n">_move_est_close_to_bounds</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">param_est</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates</span>
+
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">param_est</span>
     <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;Initial estimate cannot be set to NaN&#39;</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;One or more parameter estimates are NaN&#39;</span><span class="p">)</span>
@@ -250,6 +258,35 @@
         <span class="n">model</span><span class="o">.</span><span class="n">initial_individual_estimates</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_estimates</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
+
+
+<span class="k">def</span> <span class="nf">_move_est_close_to_bounds</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
+    <span class="n">est</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+    <span class="n">sdcorr</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">parameters_sdcorr</span><span class="p">(</span><span class="n">est</span><span class="p">)</span>
+    <span class="n">newdict</span> <span class="o">=</span> <span class="n">est</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="n">rvs</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">sigma_sym</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">sigma</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sigma_sym</span><span class="o">.</span><span class="n">rows</span><span class="p">):</span>
+                <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sigma_sym</span><span class="o">.</span><span class="n">cols</span><span class="p">):</span>
+                    <span class="n">param_name</span> <span class="o">=</span> <span class="n">sigma_sym</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+                    <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">sdcorr</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.99</span><span class="p">:</span>
+                            <span class="n">name_i</span><span class="p">,</span> <span class="n">name_j</span> <span class="o">=</span> <span class="n">sigma_sym</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">sigma_sym</span><span class="p">[</span><span class="n">j</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+                            <span class="c1"># From correlation to covariance</span>
+                            <span class="n">corr_new</span> <span class="o">=</span> <span class="mf">0.9</span>
+                            <span class="n">sd_i</span><span class="p">,</span> <span class="n">sd_j</span> <span class="o">=</span> <span class="n">sdcorr</span><span class="p">[</span><span class="n">name_i</span><span class="p">],</span> <span class="n">sdcorr</span><span class="p">[</span><span class="n">name_j</span><span class="p">]</span>
+                            <span class="n">newdict</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">corr_new</span> <span class="o">*</span> <span class="n">sd_i</span> <span class="o">*</span> <span class="n">sd_j</span>
+                    <span class="k">else</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">est</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
+                            <span class="n">newdict</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.01</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">param_name</span> <span class="o">=</span> <span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
+            <span class="k">if</span> <span class="n">est</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
+                <span class="n">newdict</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.01</span>
+    <span class="k">return</span> <span class="n">newdict</span>
 </pre></div>
 
               </div>

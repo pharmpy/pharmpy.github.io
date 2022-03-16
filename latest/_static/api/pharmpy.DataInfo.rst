@@ -15,6 +15,7 @@ DataInfo
       ~DataInfo.idv_column
       ~DataInfo.names
       ~DataInfo.path
+      ~DataInfo.separator
       ~DataInfo.typeix
       ~DataInfo.types
 
@@ -35,6 +36,7 @@ DataInfo
    .. autoattribute:: idv_column
    .. autoattribute:: names
    .. autoattribute:: path
+   .. autoattribute:: separator
    .. autoattribute:: typeix
    .. autoattribute:: types
 

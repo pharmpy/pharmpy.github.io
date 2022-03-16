@@ -20,6 +20,8 @@ EstimationStep
       ~EstimationStep.maximum_evaluations
       ~EstimationStep.method
       ~EstimationStep.niter
+      ~EstimationStep.predictions
+      ~EstimationStep.residuals
       ~EstimationStep.supported_methods
       ~EstimationStep.tool_options
 
@@ -41,6 +43,8 @@ EstimationStep
    .. autoattribute:: maximum_evaluations
    .. autoattribute:: method
    .. autoattribute:: niter
+   .. autoattribute:: predictions
+   .. autoattribute:: residuals
    .. autoattribute:: supported_methods
    .. autoattribute:: tool_options
 
