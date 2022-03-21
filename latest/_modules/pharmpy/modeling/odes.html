@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.56.1 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.57.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -632,7 +632,8 @@
 
 <span class="k">def</span> <span class="nf">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
-    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
     <span class="n">old_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
@@ -654,11 +655,21 @@
         <span class="n">vc</span> <span class="o">=</span> <span class="n">denom</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">combined</span><span class="p">:</span>
-            <span class="n">cl</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="n">clmm_init</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">):</span>
+                <span class="n">cl</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">symbol</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">cl</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="n">clmm_init</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cl</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">vc</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;VC&#39;</span><span class="p">)</span>  <span class="c1"># FIXME: decide better initial estimate</span>
-        <span class="n">clmm</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">clmm_init</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;VC&#39;</span><span class="p">):</span>
+            <span class="n">vc</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;VC&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">vc</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;VC&#39;</span><span class="p">)</span>  <span class="c1"># FIXME: decide better initial estimate</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">combined</span> <span class="ow">and</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">):</span>
+            <span class="n">_rename_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">)</span>
+            <span class="n">clmm</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;CLMM&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">symbol</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">clmm</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">clmm_init</span><span class="p">)</span>
 
     <span class="n">amount</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">central</span><span class="o">.</span><span class="n">amount</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="n">pharmpy</span><span class="o">.</span><span class="n">symbols</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">))</span>
     <span class="n">rate</span> <span class="o">=</span> <span class="p">(</span><span class="n">clmm</span> <span class="o">*</span> <span class="n">km</span> <span class="o">/</span> <span class="p">(</span><span class="n">km</span> <span class="o">+</span> <span class="n">amount</span> <span class="o">/</span> <span class="n">vc</span><span class="p">)</span> <span class="o">+</span> <span class="n">cl</span><span class="p">)</span> <span class="o">/</span> <span class="n">vc</span>
@@ -999,7 +1010,12 @@
         <span class="n">to_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">dose</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">to_comp</span> <span class="o">=</span> <span class="n">dose_comp</span>
+    <span class="n">mat_assign</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;MAT&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mat_assign</span><span class="p">:</span>
+        <span class="n">mat_idx</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">mat_assign</span><span class="p">)</span>
     <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mat_assign</span><span class="p">:</span>
+        <span class="n">statements</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">mat_idx</span><span class="p">,</span> <span class="n">mat_assign</span><span class="p">)</span>
     <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="n">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">)</span>
@@ -1053,7 +1069,12 @@
         <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">depot</span><span class="p">:</span>
         <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">mat_assign</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;MAT&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mat_assign</span><span class="p">:</span>
+        <span class="n">mat_idx</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">mat_assign</span><span class="p">)</span>
     <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mat_assign</span><span class="p">:</span>
+        <span class="n">statements</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="n">mat_idx</span><span class="p">,</span> <span class="n">mat_assign</span><span class="p">)</span>
     <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">depot</span><span class="p">:</span>
         <span class="n">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">amount</span><span class="p">),</span> <span class="n">dose_comp</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">)</span>
@@ -1223,6 +1244,10 @@
             <span class="n">name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">):</span>
+            <span class="n">names</span> <span class="o">=</span> <span class="p">{</span><span class="n">symb</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">value</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">}</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="n">name</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">names</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">):</span>
+                <span class="k">return</span> <span class="kc">True</span>
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
@@ -1231,12 +1256,13 @@
 <span class="sd">    the previous rate if available, otherwise it is set to the time of first observation/2 is used.</span>
 <span class="sd">    Disregards what is currently in the model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># if parameter_name == model.statements.find_assignment(lag_time.name).expression.name:</span>
-    <span class="c1">#     mat_symb = model.parameters[f&#39;POP_{parameter_name}&#39;].symbol</span>
-    <span class="c1"># else:</span>
-    <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span>
-        <span class="n">model</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span>
-    <span class="p">)</span>
+    <span class="n">mat_assign</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">parameter_name</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mat_assign</span><span class="p">:</span>
+        <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">mat_assign</span><span class="o">.</span><span class="n">symbol</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span>
+        <span class="p">)</span>
     <span class="n">new_dose</span> <span class="o">=</span> <span class="n">Infusion</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">mat_symb</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">to_comp</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">new_dose</span>
     <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">and</span> <span class="n">lag_time</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
@@ -1250,7 +1276,11 @@
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">add_compartment</span><span class="p">(</span><span class="s1">&#39;DEPOT&#39;</span><span class="p">)</span>
     <span class="n">depot</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">dose</span>
-    <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">))</span>
+    <span class="n">mat_assign</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;MAT&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">mat_assign</span><span class="p">:</span>
+        <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">mat_assign</span><span class="o">.</span><span class="n">symbol</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">))</span>
     <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">mat_symb</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">and</span> <span class="n">lag_time</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">depot</span><span class="o">.</span><span class="n">lag_time</span> <span class="o">=</span> <span class="n">lag_time</span>

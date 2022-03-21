@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.amd &#8212; Pharmpy 0.56.1 documentation</title>
+    <title>pharmpy.modeling.amd &#8212; Pharmpy 0.57.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -196,9 +196,11 @@
 
 <span class="kn">import</span> <span class="nn">pharmpy.tools.scm</span> <span class="k">as</span> <span class="nn">scm</span>
 <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">Results</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.amd.funcs</span> <span class="kn">import</span> <span class="n">create_start_model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">default_tool_database</span>
 
 <span class="kn">from</span> <span class="nn">.allometry</span> <span class="kn">import</span> <span class="n">add_allometry</span>
+<span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">convert_model</span><span class="p">,</span> <span class="n">read_model</span><span class="p">,</span> <span class="n">write_model</span>
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">remove_loq_data</span>
 <span class="kn">from</span> <span class="nn">.run</span> <span class="kn">import</span> <span class="n">fit</span><span class="p">,</span> <span class="n">run_tool</span>
 
@@ -208,15 +210,34 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">final_model</span> <span class="o">=</span> <span class="n">final_model</span>
 
 
-<div class="viewcode-block" id="run_amd"><a class="viewcode-back" href="../../../api/pharmpy.modeling.run_amd.html#pharmpy.modeling.run_amd">[docs]</a><span class="k">def</span> <span class="nf">run_amd</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mfl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="run_amd"><a class="viewcode-back" href="../../../api/pharmpy.modeling.run_amd.html#pharmpy.modeling.run_amd">[docs]</a><span class="k">def</span> <span class="nf">run_amd</span><span class="p">(</span>
+    <span class="n">dataset_path</span><span class="p">,</span>
+    <span class="n">modeltype</span><span class="o">=</span><span class="s1">&#39;pk_oral&#39;</span><span class="p">,</span>
+    <span class="n">cl_init</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
+    <span class="n">vc_init</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
+    <span class="n">mat_init</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">mfl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">lloq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">categorical</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">continuous</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Run Automatic Model Development (AMD) tool</span>
 
 <span class="sd">    Runs structural modelsearch, IIV building, and resmod</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    model : Model</span>
-<span class="sd">        Pharmpy model</span>
+<span class="sd">    dataset_path : Model</span>
+<span class="sd">        Path to a dataset</span>
+<span class="sd">    modeltype : str</span>
+<span class="sd">        Type of model to build. Either &#39;pk_oral&#39; or &#39;pk_iv&#39;</span>
+<span class="sd">    cl_init : float</span>
+<span class="sd">        Initial estimate for the population clearance</span>
+<span class="sd">    vc_init : float</span>
+<span class="sd">        Initial estimate for the central compartment population volume</span>
+<span class="sd">    mat_init : float</span>
+<span class="sd">        Initial estimate for the mean absorption time (not for iv models)</span>
 <span class="sd">    mfl : str</span>
 <span class="sd">        MFL for search space for structural model</span>
 <span class="sd">    lloq : float</span>
@@ -245,6 +266,12 @@
 <span class="sd">    run_tool</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">create_start_model</span><span class="p">(</span>
+        <span class="n">dataset_path</span><span class="p">,</span> <span class="n">modeltype</span><span class="o">=</span><span class="n">modeltype</span><span class="p">,</span> <span class="n">cl_init</span><span class="o">=</span><span class="n">cl_init</span><span class="p">,</span> <span class="n">vc_init</span><span class="o">=</span><span class="n">vc_init</span><span class="p">,</span> <span class="n">mat_init</span><span class="o">=</span><span class="n">mat_init</span>
+    <span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">convert_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;nonmem&#39;</span><span class="p">)</span>  <span class="c1"># FIXME: Workaround for results retrieval system</span>
+
     <span class="k">if</span> <span class="n">lloq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq</span><span class="p">)</span>
 
@@ -253,15 +280,22 @@
         <span class="n">order</span> <span class="o">=</span> <span class="n">default_order</span>
 
     <span class="k">if</span> <span class="n">mfl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">mfl</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="s1">&#39;ABSORPTION([ZO,SEQ-ZO-FO]);&#39;</span>
-            <span class="s1">&#39;ELIMINATION([MM,MIX-FO-MM]);&#39;</span>
-            <span class="s1">&#39;LAGTIME();&#39;</span>
-            <span class="s1">&#39;TRANSITS([1,3,10],*);&#39;</span>
-            <span class="s1">&#39;PERIPHERALS([1,2])&#39;</span>
-        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">modeltype</span> <span class="o">==</span> <span class="s1">&#39;pk_oral&#39;</span><span class="p">:</span>
+            <span class="n">mfl</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="s1">&#39;ABSORPTION([ZO,SEQ-ZO-FO]);&#39;</span>
+                <span class="s1">&#39;ELIMINATION([MM,MIX-FO-MM]);&#39;</span>
+                <span class="s1">&#39;LAGTIME();&#39;</span>
+                <span class="s1">&#39;TRANSITS([1,3,10],*);&#39;</span>
+                <span class="s1">&#39;PERIPHERALS([1,2])&#39;</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">mfl</span> <span class="o">=</span> <span class="s1">&#39;ELIMINATION([MM,MIX-FO-MM]);&#39;</span> <span class="s1">&#39;PERIPHERALS([1,2])&#39;</span>
 
     <span class="n">db</span> <span class="o">=</span> <span class="n">default_tool_database</span><span class="p">(</span><span class="n">toolname</span><span class="o">=</span><span class="s1">&#39;amd&#39;</span><span class="p">)</span>
+    <span class="c1"># FIXME: Workaround for nonmem&lt;-&gt;generic eta names gets lost somewhere</span>
+    <span class="n">write_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">read_model</span><span class="p">(</span><span class="n">db</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.ctl&#39;</span><span class="p">))</span>
+    <span class="n">fit</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
     <span class="n">run_funcs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
@@ -307,7 +341,7 @@
 
 
 <span class="k">def</span> <span class="nf">_run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-    <span class="n">res_iiv</span> <span class="o">=</span> <span class="n">run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="n">res_iiv</span> <span class="o">=</span> <span class="n">run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
     <span class="n">selected_iiv_model</span> <span class="o">=</span> <span class="n">res_iiv</span><span class="o">.</span><span class="n">best_model</span>
     <span class="k">return</span> <span class="n">selected_iiv_model</span>
 

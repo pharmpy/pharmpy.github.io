@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.workflows.execute &#8212; Pharmpy 0.56.1 documentation</title>
+    <title>pharmpy.workflows.execute &#8212; Pharmpy 0.57.0 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -257,8 +257,15 @@
                 <span class="n">model_file</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">filename_extension</span>
                 <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">model_file</span> <span class="ow">or</span> <span class="ow">not</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">model_file</span><span class="p">)</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
                     <span class="n">model</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">store_local_file</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
-        <span class="c1"># Set modelfit_results for local model objects</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">read_modelfit_results</span><span class="p">()</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
+            <span class="c1"># Special case to handle modelfit for generic models</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">modelfit_results</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Set modelfit_results for local model objects</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">read_modelfit_results</span><span class="p">()</span>
+            <span class="k">except</span> <span class="ne">NotImplementedError</span><span class="p">:</span>
+                <span class="k">pass</span>
 
     <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">Results</span>
 
