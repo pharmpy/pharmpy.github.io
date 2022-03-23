@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.eta_additions &#8212; Pharmpy 0.57.0 documentation</title>
+    <title>pharmpy.modeling.eta_additions &#8212; Pharmpy 0.58.2 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -252,6 +252,7 @@
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
+<span class="sd">    add_pk_iiv</span>
 <span class="sd">    add_iov</span>
 <span class="sd">    remove_iiv</span>
 <span class="sd">    remove_iov</span>
@@ -340,6 +341,7 @@
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
 <span class="sd">    add_iiv</span>
+<span class="sd">    add_pk_iiv</span>
 <span class="sd">    remove_iiv</span>
 <span class="sd">    remove_iov</span>
 
@@ -399,6 +401,69 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
+<div class="viewcode-block" id="add_pk_iiv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_pk_iiv.html#pharmpy.modeling.add_pk_iiv">[docs]</a><span class="k">def</span> <span class="nf">add_pk_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Adds IIVs to all PK parameters in :class:`pharmpy.model`.</span>
+
+<span class="sd">    Will add exponential IIVs to all parameters that are included in the ODE.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model to add new IIVs to.</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Reference to the same model</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; set_first_order_absorption(model) # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;MAT&quot;)</span>
+<span class="sd">    MAT := POP_MAT</span>
+<span class="sd">    &gt;&gt;&gt; add_pk_iiv(model) # doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;MAT&quot;)</span>
+<span class="sd">                    ETA_MAT</span>
+<span class="sd">    MAT := POP_MAT⋅ℯ</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    add_iiv</span>
+<span class="sd">    add_iov</span>
+<span class="sd">    remove_iiv</span>
+<span class="sd">    remove_iov</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sset</span><span class="p">,</span> <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">ode_system</span>
+
+    <span class="n">params_to_add_etas</span> <span class="o">=</span> <span class="p">[]</span>
+
+    <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">odes</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+        <span class="n">assign</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">assign</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">_has_iiv</span><span class="p">(</span><span class="n">sset</span><span class="p">,</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">assign</span><span class="p">):</span>
+                <span class="k">continue</span>
+            <span class="n">dep_assignments</span> <span class="o">=</span> <span class="n">_get_dependent_assignments</span><span class="p">(</span><span class="n">sset</span><span class="p">,</span> <span class="n">assign</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">dep_assignments</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">dep_assign</span> <span class="ow">in</span> <span class="n">dep_assignments</span><span class="p">:</span>
+                    <span class="n">param_name</span> <span class="o">=</span> <span class="n">dep_assign</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">name</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">_has_iiv</span><span class="p">(</span><span class="n">sset</span><span class="p">,</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dep_assign</span><span class="p">)</span> <span class="ow">and</span> <span class="n">param_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params_to_add_etas</span><span class="p">:</span>
+                        <span class="n">params_to_add_etas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_name</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">params_to_add_etas</span><span class="p">:</span>
+                    <span class="n">params_to_add_etas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">params_to_add_etas</span><span class="p">:</span>
+        <span class="n">add_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">params_to_add_etas</span><span class="p">,</span> <span class="s1">&#39;exp&#39;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
 <span class="k">def</span> <span class="nf">_create_template</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
     <span class="n">operation_func</span> <span class="o">=</span> <span class="n">_get_operation_func</span><span class="p">(</span><span class="n">operation</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">expression</span> <span class="o">==</span> <span class="s1">&#39;add&#39;</span><span class="p">:</span>
@@ -436,6 +501,20 @@
             <span class="n">categories_rounded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
     <span class="n">categories_rounded</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">categories_rounded</span>
+
+
+<span class="k">def</span> <span class="nf">_get_dependent_assignments</span><span class="p">(</span><span class="n">sset</span><span class="p">,</span> <span class="n">assignment</span><span class="p">):</span>
+    <span class="c1"># Finds dependant assignments one layer deep</span>
+    <span class="n">dep_assignments</span> <span class="o">=</span> <span class="p">[</span><span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">symb</span><span class="p">)</span> <span class="k">for</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">assignment</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">]</span>
+    <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="nb">filter</span><span class="p">(</span><span class="kc">None</span><span class="p">,</span> <span class="n">dep_assignments</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_has_iiv</span><span class="p">(</span><span class="n">sset</span><span class="p">,</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">assignment</span><span class="p">):</span>
+    <span class="n">full_expression</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">assignment</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
+    <span class="n">symb_names</span> <span class="o">=</span> <span class="p">{</span><span class="n">symb</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">full_expression</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">}</span>
+    <span class="k">if</span> <span class="n">symb_names</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">rvs</span><span class="o">.</span><span class="n">iiv</span><span class="o">.</span><span class="n">names</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">True</span>
+    <span class="k">return</span> <span class="kc">False</span>
 
 
 <span class="k">class</span> <span class="nc">EtaAddition</span><span class="p">:</span>

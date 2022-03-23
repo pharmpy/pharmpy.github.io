@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.57.0 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.58.2 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -202,6 +202,7 @@
 <span class="kn">from</span> <span class="nn">pharmpy.math</span> <span class="kn">import</span> <span class="n">round_to_n_sigdig</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">create_rng</span><span class="p">,</span> <span class="n">get_observations</span><span class="p">,</span> <span class="n">sample_parameters_from_covariance_matrix</span>
+<span class="kn">from</span> <span class="nn">pharmpy.random_variables</span> <span class="kn">import</span> <span class="n">RandomVariables</span>
 <span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">sympify</span>
 
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">get_ids</span>
@@ -753,6 +754,16 @@
     <span class="k">return</span> <span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span> <span class="o">+</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span></div>
 
 
+<span class="k">def</span> <span class="nf">_random_etas</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">variance_parameters</span>
+    <span class="n">zerofix</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">fix</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">var</span><span class="p">]</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">eta</span><span class="p">,</span> <span class="n">zf</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">,</span> <span class="n">zerofix</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">zf</span><span class="p">:</span>
+            <span class="n">keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">RandomVariables</span><span class="p">(</span><span class="n">keep</span><span class="p">)</span>
+
+
 <div class="viewcode-block" id="calculate_bic"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_bic.html#pharmpy.modeling.calculate_bic">[docs]</a><span class="k">def</span> <span class="nf">calculate_bic</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">modelfit_results</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Calculate final BIC value assuming the OFV to be -2LL</span>
 
@@ -815,13 +826,13 @@
             <span class="n">assignment</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">assignment</span><span class="p">:</span>
                 <span class="n">expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">assignment</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">:</span>
+                <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="n">_random_etas</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
                     <span class="k">if</span> <span class="n">eta</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
                         <span class="n">symbols</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">}</span>
                         <span class="n">random_thetas</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
                         <span class="k">break</span>
         <span class="n">yexpr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="n">_random_etas</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">eta</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">yexpr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
                 <span class="n">symbols</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">yexpr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">}</span>
                 <span class="n">random_thetas</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
