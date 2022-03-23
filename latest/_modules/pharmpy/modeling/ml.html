@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.ml &#8212; Pharmpy 0.58.2 documentation</title>
+    <title>pharmpy.modeling.ml &#8212; Pharmpy 0.58.3 documentation</title>
     
     <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
 <link href="../../../_static/styles/pydata-sphinx-theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -236,9 +236,12 @@
 
     <span class="c1"># max((abs(indcov - mean(cov))) / sd(cov))</span>
     <span class="n">cov_names</span> <span class="o">=</span> <span class="n">get_model_covariates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">strings</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">covariates</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">cov_names</span> <span class="o">+</span> <span class="p">[</span><span class="n">idcol</span><span class="p">]]</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">idcol</span><span class="p">)</span>
-    <span class="n">mean_covs</span> <span class="o">=</span> <span class="n">covariates</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idcol</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
-    <span class="n">maxcov</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">mean_covs</span> <span class="o">-</span> <span class="n">mean_covs</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">mean_covs</span><span class="o">.</span><span class="n">std</span><span class="p">())</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cov_names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+        <span class="n">covariates</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">cov_names</span> <span class="o">+</span> <span class="p">[</span><span class="n">idcol</span><span class="p">]]</span><span class="o">.</span><span class="n">set_index</span><span class="p">(</span><span class="n">idcol</span><span class="p">)</span>
+        <span class="n">mean_covs</span> <span class="o">=</span> <span class="n">covariates</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idcol</span><span class="p">)</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+        <span class="n">maxcov</span> <span class="o">=</span> <span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">mean_covs</span> <span class="o">-</span> <span class="n">mean_covs</span><span class="o">.</span><span class="n">mean</span><span class="p">())</span> <span class="o">/</span> <span class="n">mean_covs</span><span class="o">.</span><span class="n">std</span><span class="p">())</span><span class="o">.</span><span class="n">max</span><span class="p">(</span><span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">maxcov</span> <span class="o">=</span> <span class="mf">0.0</span>
 
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
         <span class="p">{</span>
