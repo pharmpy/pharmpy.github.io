@@ -14,7 +14,6 @@ extensions = [
     'sphinx.ext.inheritance_diagram',
     'sphinx.ext.mathjax',
     'sphinx.ext.napoleon',
-    'sphinx.ext.todo',
     'sphinx.ext.viewcode',
     'sphinx_automodapi.automodapi',
     'jupyter_sphinx',
@@ -28,10 +27,11 @@ if os.getenv('SPELLCHECK'):
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'Pharmpy'
-year = '2018-2021'
+year = '2018-2022'
 authors = ['the Pharmpy development team']
 copyright = '{0}; {1}'.format(year, ', '.join(authors))
-version = release = '0.58.4'
+version = release = '0.60.0'
+html_show_sourcelink = False
 
 pygments_style = 'trac'
 templates_path = ['.']
@@ -56,12 +56,7 @@ napoleon_use_ivar = True
 napoleon_use_rtype = False
 napoleon_use_param = False
 
-# if this is True, todo and todolist produce output, else they produce nothing
-todo_include_todos = True
-
-inheritance_graph_attrs = dict()
-inheritance_node_attrs = dict(font='Palatino', color='gray50', fontcolor='black')
-inheritance_edge_attrs = dict(color='maroon')
+automodapi_inheritance_diagram = False
 graphviz_output_format = 'svg'
 
 import doctest
