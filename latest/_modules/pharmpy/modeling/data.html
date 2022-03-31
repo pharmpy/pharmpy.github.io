@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.data &#8212; Pharmpy 0.61.2 documentation</title>
+    <title>pharmpy.modeling.data &#8212; Pharmpy 0.61.3 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -849,6 +849,7 @@
 
     <span class="c1"># Adjust for dose and observation at the same time point</span>
     <span class="c1"># Observation is moved to previous dose group</span>
+    <span class="c1"># Except for steady state dose where the dose group is kept</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">eventcol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;event&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
     <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
@@ -856,6 +857,11 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">df</span><span class="p">[</span><span class="s1">&#39;_FLAG&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">eventcol</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="mi">3</span>
         <span class="n">df</span><span class="p">[</span><span class="s1">&#39;_RESETGROUP&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)[</span><span class="s1">&#39;_FLAG&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
+
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;ss&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="kc">None</span>
 
     <span class="n">idvcol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">idv_column</span><span class="o">.</span><span class="n">name</span>
     <span class="n">ser</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">idcol</span><span class="p">,</span> <span class="n">idvcol</span><span class="p">,</span> <span class="s1">&#39;_RESETGROUP&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">size</span><span class="p">()</span>
@@ -865,11 +871,15 @@
         <span class="n">groupind</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="n">idcol</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">idvcol</span><span class="p">]</span> <span class="o">==</span> <span class="n">time</span><span class="p">)]</span><span class="o">.</span><span class="n">index</span>
         <span class="n">obsind</span> <span class="o">=</span> <span class="n">df</span><span class="p">[(</span><span class="n">df</span><span class="p">[</span><span class="n">idcol</span><span class="p">]</span> <span class="o">==</span> <span class="n">i</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">idvcol</span><span class="p">]</span> <span class="o">==</span> <span class="n">time</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">dose</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)]</span><span class="o">.</span><span class="n">index</span>
         <span class="n">doseind</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">groupind</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">obsind</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">doseind</span><span class="p">:</span>
+            <span class="k">continue</span>
         <span class="n">maxind</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">doseind</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">index</span> <span class="ow">in</span> <span class="n">obsind</span><span class="p">:</span>
             <span class="k">if</span> <span class="mi">0</span> <span class="ow">in</span> <span class="n">groupind</span><span class="p">:</span>  <span class="c1"># This is the first dose</span>
                 <span class="k">continue</span>
             <span class="k">if</span> <span class="n">maxind</span> <span class="o">&gt;</span> <span class="n">index</span><span class="p">:</span>  <span class="c1"># Dose record is after the observation</span>
+                <span class="k">continue</span>
+            <span class="k">if</span> <span class="n">ss</span> <span class="ow">and</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">maxind</span><span class="p">,</span> <span class="n">ss</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>  <span class="c1"># No swap for SS dosing</span>
                 <span class="k">continue</span>
             <span class="n">curdoseid</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s1">&#39;DOSEID&#39;</span><span class="p">]</span>
             <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">index</span><span class="p">,</span> <span class="s1">&#39;DOSEID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">curdoseid</span> <span class="o">-</span> <span class="mi">1</span>
@@ -951,17 +961,41 @@
         <span class="n">df</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">dataset</span>
 
     <span class="c1"># Sort in case DOSEIDs are non-increasing</span>
-    <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idlab</span><span class="p">)</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
-        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;_DOSEID&#39;</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;stable&#39;</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idlab</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;_DOSEID&#39;</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;stable&#39;</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="p">)</span>
 
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;TAD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">idlab</span><span class="p">,</span> <span class="s1">&#39;_DOSEID&#39;</span><span class="p">])[</span><span class="s1">&#39;_NEWTIME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;TAD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">idlab</span><span class="p">,</span> <span class="s1">&#39;_DOSEID&#39;</span><span class="p">])[</span><span class="s1">&#39;TAD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
-    <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;_NEWTIME&#39;</span><span class="p">,</span> <span class="s1">&#39;_DOSEID&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">addl</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;EXPANDED&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
         <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;EXPANDED&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="c1"># Handle case for observation at same timepoint as SS dose</span>
+    <span class="c1"># In this case II should be used as TAD (imaginary previous dose)</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">ss</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;ss&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">ii</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;ii&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="k">pass</span>
+    <span class="k">else</span><span class="p">:</span>
+
+        <span class="k">def</span> <span class="nf">fn</span><span class="p">(</span><span class="n">df</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">&lt;</span> <span class="mi">2</span><span class="p">:</span>
+                <span class="k">return</span> <span class="n">df</span>
+            <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ss</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">ii_time</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">ii</span><span class="p">]</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="s1">&#39;TAD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ii_time</span>
+            <span class="k">return</span> <span class="n">df</span>
+
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">idlab</span><span class="p">,</span> <span class="n">idv</span><span class="p">,</span> <span class="s1">&#39;_DOSEID&#39;</span><span class="p">])</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+
+    <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;_NEWTIME&#39;</span><span class="p">,</span> <span class="s1">&#39;_DOSEID&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span>
     <span class="n">ci</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="p">(</span><span class="s1">&#39;TAD&#39;</span><span class="p">)</span>
@@ -1006,9 +1040,9 @@
 <span class="sd">    [589 rows x 4 columns]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
     <span class="n">add_time_after_dose</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">doseid</span> <span class="o">=</span> <span class="n">get_doseid</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;DOSEID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">doseid</span>
     <span class="n">idlab</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_column</span><span class="o">.</span><span class="n">name</span>
     <span class="n">dv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">dv_column</span><span class="o">.</span><span class="n">name</span>

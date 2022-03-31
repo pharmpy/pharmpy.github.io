@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.61.2 documentation</title>
+    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.61.3 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -272,12 +272,13 @@
 
     <span class="n">cov_to_params</span> <span class="o">=</span> <span class="n">all_rvs</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rvs</span><span class="p">,</span> <span class="n">name_template</span><span class="o">=</span><span class="s1">&#39;IIV_</span><span class="si">{}</span><span class="s1">_IIV_</span><span class="si">{}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">param_names</span><span class="o">=</span><span class="n">paramnames</span><span class="p">)</span>
 
-    <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
+    <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">cov_name</span><span class="p">,</span> <span class="n">param_names</span> <span class="ow">in</span> <span class="n">cov_to_params</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
         <span class="n">parent_params</span> <span class="o">=</span> <span class="p">(</span><span class="n">pset</span><span class="p">[</span><span class="n">param_names</span><span class="p">[</span><span class="mi">0</span><span class="p">]],</span> <span class="n">pset</span><span class="p">[</span><span class="n">param_names</span><span class="p">[</span><span class="mi">1</span><span class="p">]])</span>
         <span class="n">covariance_init</span> <span class="o">=</span> <span class="n">_choose_param_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">all_rvs</span><span class="p">,</span> <span class="n">parent_params</span><span class="p">)</span>
         <span class="n">param_new</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">cov_name</span><span class="p">,</span> <span class="n">covariance_init</span><span class="p">)</span>
         <span class="n">pset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">param_new</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">pset</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
 
@@ -327,9 +328,10 @@
     <span class="n">parameters_after</span> <span class="o">=</span> <span class="n">all_rvs</span><span class="o">.</span><span class="n">parameter_names</span>
 
     <span class="n">removed_parameters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">parameters_before</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">parameters_after</span><span class="p">)</span>
-    <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
+    <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">removed_parameters</span><span class="p">:</span>
         <span class="k">del</span> <span class="n">pset</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">pset</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
 

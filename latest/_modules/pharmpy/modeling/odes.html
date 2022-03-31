@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.61.2 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.61.3 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -766,6 +766,7 @@
     <span class="c1"># Handle keep_depot option</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
     <span class="n">mdt_init</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">mdt_assign</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">keep_depot</span> <span class="ow">and</span> <span class="n">depot</span><span class="p">:</span>
         <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
         <span class="n">rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>
@@ -785,18 +786,26 @@
             <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">innode</span><span class="p">,</span> <span class="n">central</span><span class="p">,</span> <span class="n">inflow</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">central</span><span class="o">.</span><span class="n">dose</span> <span class="o">=</span> <span class="n">depot</span><span class="o">.</span><span class="n">dose</span>
+        <span class="k">if</span> <span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;MAT&#39;</span><span class="p">):</span>
+            <span class="n">_rename_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
+            <span class="n">mdt_assign</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
         <span class="n">odes</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">depot</span><span class="p">)</span>
         <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">mdt_assign</span><span class="p">:</span>
+            <span class="n">statements</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">mdt_assign</span><span class="p">)</span>
         <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">transits</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span><span class="p">:</span>
         <span class="k">pass</span>
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">transits</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">mdt_init</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">init</span> <span class="o">=</span> <span class="n">mdt_init</span>
+        <span class="k">if</span> <span class="n">mdt_assign</span><span class="p">:</span>
+            <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">mdt_assign</span><span class="o">.</span><span class="n">symbol</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">init</span> <span class="o">=</span> <span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
-        <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">mdt_init</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">init</span> <span class="o">=</span> <span class="n">mdt_init</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">init</span> <span class="o">=</span> <span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
+            <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">)</span>
         <span class="n">rate</span> <span class="o">=</span> <span class="n">n</span> <span class="o">/</span> <span class="n">mdt_symb</span>
         <span class="n">comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
         <span class="n">dose</span> <span class="o">=</span> <span class="n">comp</span><span class="o">.</span><span class="n">dose</span>
