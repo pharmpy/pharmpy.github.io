@@ -14,6 +14,7 @@ ModelDatabase
       ~ModelDatabase.retrieve_file
       ~ModelDatabase.retrieve_local_files
       ~ModelDatabase.store_local_file
+      ~ModelDatabase.store_model
 
    .. rubric:: Methods Documentation
 
@@ -21,3 +22,4 @@ ModelDatabase
    .. automethod:: retrieve_file
    .. automethod:: retrieve_local_files
    .. automethod:: store_local_file
+   .. automethod:: store_model

@@ -14,6 +14,7 @@ default_model_database
       ~default_model_database.retrieve_file
       ~default_model_database.retrieve_local_files
       ~default_model_database.store_local_file
+      ~default_model_database.store_model
 
    .. rubric:: Methods Documentation
 
@@ -21,3 +22,4 @@ default_model_database
    .. automethod:: retrieve_file
    .. automethod:: retrieve_local_files
    .. automethod:: store_local_file
+   .. automethod:: store_model

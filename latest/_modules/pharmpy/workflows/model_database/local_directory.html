@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.workflows.model_database.local_directory &#8212; Pharmpy 0.61.3 documentation</title>
+    <title>pharmpy.workflows.model_database.local_directory &#8212; Pharmpy 0.62.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -189,9 +189,12 @@
               <div>
                 
   <h1>Source code for pharmpy.workflows.model_database.local_directory</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">shutil</span>
+<span></span><span class="kn">import</span> <span class="nn">os.path</span>
+<span class="kn">import</span> <span class="nn">shutil</span>
 <span class="kn">from</span> <span class="nn">os</span> <span class="kn">import</span> <span class="n">stat</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+
+<span class="kn">from</span> <span class="nn">pharmpy.datainfo</span> <span class="kn">import</span> <span class="n">DataInfo</span>
 
 <span class="kn">from</span> <span class="nn">.baseclass</span> <span class="kn">import</span> <span class="n">ModelDatabase</span>
 
@@ -219,6 +222,9 @@
             <span class="n">path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">file_extension</span> <span class="o">=</span> <span class="n">file_extension</span>
+
+<div class="viewcode-block" id="LocalDirectoryDatabase.store_model"><a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalDirectoryDatabase.html#pharmpy.workflows.LocalDirectoryDatabase.store_model">[docs]</a>    <span class="k">def</span> <span class="nf">store_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="k">pass</span></div>
 
 <div class="viewcode-block" id="LocalDirectoryDatabase.store_local_file"><a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalDirectoryDatabase.html#pharmpy.workflows.LocalDirectoryDatabase.store_local_file">[docs]</a>    <span class="k">def</span> <span class="nf">store_local_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
@@ -269,6 +275,32 @@
 <span class="sd">    file_extension : str</span>
 <span class="sd">        File extension to use for model files.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+
+<div class="viewcode-block" id="LocalModelDirectoryDatabase.store_model"><a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalModelDirectoryDatabase.html#pharmpy.workflows.LocalModelDirectoryDatabase.store_model">[docs]</a>    <span class="k">def</span> <span class="nf">store_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">write_csv</span><span class="p">,</span> <span class="n">write_model</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">update_datainfo</span><span class="p">()</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;.datasets&#39;</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">di</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">dipath</span> <span class="ow">in</span> <span class="n">path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*.datainfo&#39;</span><span class="p">):</span>
+            <span class="n">curdi</span> <span class="o">=</span> <span class="n">DataInfo</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">dipath</span><span class="p">)</span>
+            <span class="n">di</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">curdi</span><span class="o">.</span><span class="n">path</span>  <span class="c1"># This could be different in comparison</span>
+            <span class="k">if</span> <span class="n">curdi</span> <span class="o">==</span> <span class="n">di</span><span class="p">:</span>  <span class="c1"># TODO: Should compare dataset here as well</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">curdi</span><span class="o">.</span><span class="n">path</span>
+                <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">data_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span><span class="p">)</span>
+            <span class="n">di</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">os</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">relpath</span><span class="p">(</span><span class="n">data_path</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="n">di</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.datainfo&#39;</span><span class="p">))</span>
+            <span class="n">write_csv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">data_path</span><span class="p">)</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span> <span class="o">=</span> <span class="n">di</span>
+        <span class="n">model_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">model_path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">model_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
+        <span class="n">write_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model_path</span> <span class="o">/</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">filename_extension</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="LocalModelDirectoryDatabase.store_local_file"><a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalModelDirectoryDatabase.html#pharmpy.workflows.LocalModelDirectoryDatabase.store_local_file">[docs]</a>    <span class="k">def</span> <span class="nf">store_local_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
