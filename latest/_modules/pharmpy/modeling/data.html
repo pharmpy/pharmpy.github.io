@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.data &#8212; Pharmpy 0.62.0 documentation</title>
+    <title>pharmpy.modeling.data &#8212; Pharmpy 0.63.2 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -200,7 +200,7 @@
 <span class="kn">from</span> <span class="nn">rich.table</span> <span class="kn">import</span> <span class="n">Table</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.data</span> <span class="kn">import</span> <span class="n">DatasetError</span>
-<span class="kn">from</span> <span class="nn">pharmpy.datainfo</span> <span class="kn">import</span> <span class="n">ColumnInfo</span>
+<span class="kn">from</span> <span class="nn">pharmpy.datainfo</span> <span class="kn">import</span> <span class="n">ColumnInfo</span><span class="p">,</span> <span class="n">DataInfo</span>
 
 <span class="n">SI</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">si</span><span class="o">.</span><span class="n">SI</span>
 
@@ -945,8 +945,6 @@
     <span class="n">idlab</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_column</span><span class="o">.</span><span class="n">name</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;_NEWTIME&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">idv</span><span class="p">]</span>
-    <span class="n">doseid</span> <span class="o">=</span> <span class="n">get_doseid</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
-    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;_DOSEID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">doseid</span>
 
     <span class="k">try</span><span class="p">:</span>
         <span class="n">addl</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;additional&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
@@ -955,10 +953,11 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">temp</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span>
         <span class="n">temp</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">idv_column</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s1">&#39;unknown&#39;</span>
-        <span class="n">ci</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="p">(</span><span class="s1">&#39;_NEWTIME&#39;</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;idv&#39;</span><span class="p">)</span>
-        <span class="n">temp</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ci</span><span class="p">)</span>
+        <span class="n">temp</span><span class="o">.</span><span class="n">datainfo</span><span class="p">[</span><span class="s1">&#39;_NEWTIME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="s1">&#39;idv&#39;</span>
         <span class="n">expand_additional_doses</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">dataset</span>
+
+    <span class="n">df</span><span class="p">[</span><span class="s1">&#39;_DOSEID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_doseid</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
 
     <span class="c1"># Sort in case DOSEIDs are non-increasing</span>
     <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
@@ -971,7 +970,7 @@
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;TAD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">idlab</span><span class="p">,</span> <span class="s1">&#39;_DOSEID&#39;</span><span class="p">])[</span><span class="s1">&#39;TAD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">addl</span><span class="p">:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;EXPANDED&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;EXPANDED&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;EXPANDED&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="c1"># Handle case for observation at same timepoint as SS dose</span>
@@ -1582,6 +1581,33 @@
         <span class="k">return</span> <span class="n">checker</span><span class="o">.</span><span class="n">get_dataframe</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">checker</span><span class="o">.</span><span class="n">print</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="read_dataset_from_datainfo"><a class="viewcode-back" href="../../../api/pharmpy.modeling.read_dataset_from_datainfo.html#pharmpy.modeling.read_dataset_from_datainfo">[docs]</a><span class="k">def</span> <span class="nf">read_dataset_from_datainfo</span><span class="p">(</span><span class="n">datainfo</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read a dataset given a datainfo object or path to a datainfo file</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    datainfo : DataInfo | Path | str</span>
+<span class="sd">        A datainfo object or a path to a datainfo object</span>
+
+<span class="sd">    Results</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        The dataset</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datainfo</span><span class="p">,</span> <span class="n">DataInfo</span><span class="p">):</span>
+        <span class="n">datainfo</span> <span class="o">=</span> <span class="n">DataInfo</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">datainfo</span><span class="p">)</span>
+
+    <span class="n">dtypes</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">col</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">col</span><span class="o">.</span><span class="n">datatype</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">col</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;nmtran&#39;</span><span class="p">)</span> <span class="k">else</span> <span class="s1">&#39;str&#39;</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">datainfo</span>
+    <span class="p">}</span>
+
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
+        <span class="n">datainfo</span><span class="o">.</span><span class="n">path</span><span class="p">,</span> <span class="n">sep</span><span class="o">=</span><span class="n">datainfo</span><span class="o">.</span><span class="n">separator</span><span class="p">,</span> <span class="n">dtype</span><span class="o">=</span><span class="n">dtypes</span><span class="p">,</span> <span class="n">float_precision</span><span class="o">=</span><span class="s1">&#39;round_trip&#39;</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">df</span></div>
 </pre></div>
 
               </div>
