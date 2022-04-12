@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Model Search &#8212; Pharmpy 0.63.2 documentation</title>
+    <title>modelsearch &#8212; Pharmpy 0.64.1 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -205,6 +205,13 @@
   <a class="reference internal nav-link" href="#running">
    Running
   </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#arguments">
+     Arguments
+    </a>
+   </li>
+  </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#the-search-space">
@@ -221,11 +228,26 @@
      Exhaustive search
     </a>
    </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#exhaustive-stepwise-search">
+     Exhaustive stepwise search
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#reduced-stepwise-search">
+     Reduced stepwise search
+    </a>
+   </li>
   </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#comparing-and-ranking-candidates">
    Comparing and ranking candidates
+  </a>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#iiv-strategies">
+   IIV strategies
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
@@ -281,35 +303,85 @@
               
               <div>
                 
-  <section id="model-search">
-<h1>Model Search<a class="headerlink" href="#model-search" title="Permalink to this headline">#</a></h1>
-<p>The Model search tool is a general tool to search for the best model given a base model and a search space of model features.</p>
+  <section id="modelsearch">
+<h1>modelsearch<a class="headerlink" href="#modelsearch" title="Permalink to this headline">#</a></h1>
+<p>The modelsearch tool is a general tool to decide the best structural model given a base model and a search space of model features. The tool
+supports different algorithms and selection criteria.</p>
 <div class="admonition warning">
 <p class="admonition-title">Warning</p>
-<p>This tool is currently under development. The API can and will change rapidly.</p>
+<p>This tool and its documentation is currently under development. The API may change.</p>
 </div>
 <section id="running">
 <h2>Running<a class="headerlink" href="#running" title="Permalink to this headline">#</a></h2>
-<p>The easiest way to start a model search run is to use the <cite>run_modelsearch</cite> function.</p>
-<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.tools.modelsearch</span> <span class="kn">import</span> <span class="n">run_modelsearch</span>
+<p>The modelsearch tool is available both in Pharmpy/pharmr and from the command line.</p>
+<div class="highlight-python notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">run_tool</span>
 
-<span class="n">run_modelsearch</span><span class="p">(</span><span class="n">base_model</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">mfl</span><span class="p">,</span> <span class="n">rankfunc</span><span class="o">=</span><span class="s1">&#39;ofv&#39;</span><span class="p">)</span>
+<span class="n">start_model</span> <span class="o">=</span> <span class="n">load_example_model</span><span class="p">(</span><span class="s1">&#39;pheno&#39;</span><span class="p">)</span>
+<span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;modelsearch&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;ABSORPTION(ZO);ELIMINATION(ZO)&#39;</span><span class="p">,</span>
+         <span class="s1">&#39;exhaustive&#39;</span><span class="p">,</span>
+         <span class="n">rankfunc</span><span class="o">=</span><span class="s1">&#39;ofv&#39;</span><span class="p">,</span>
+         <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+         <span class="n">iiv_strategy</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
+         <span class="n">model</span><span class="o">=</span><span class="n">start_model</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This would start a search starting with <cite>base_model</cite> using the <cite>algorithm</cite> search algorithm, search space given by the <cite>mfl</cite> model feature language description and ranking candidate models using <cite>ofv</cite>.</p>
+<p>This would start a search starting with an input model <cite>model</cite> with <cite>mfl</cite> as the search space using the <cite>algorithm</cite> search algorithm. The candidate models
+will be ranked using <cite>ofv</cite> with default <cite>cutoff</cite>. Structural IIVs will be added according to strategy 0.</p>
+<p>To run modelsearch from the command line:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pharmpy</span> <span class="n">run</span> <span class="n">modelsearch</span> <span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">model</span> <span class="s1">&#39;ABSORPTION(ZO);ELIMINATION(ZO)&#39;</span> <span class="s1">&#39;exhaustive&#39;</span> <span class="o">--</span><span class="n">rankfunc</span> <span class="s1">&#39;aic&#39;</span>
+</pre></div>
+</div>
+<section id="arguments">
+<h3>Arguments<a class="headerlink" href="#arguments" title="Permalink to this headline">#</a></h3>
+<p>For a more detailed description of each argument, see their respective chapter on this page.</p>
+<table class="table">
+<colgroup>
+<col style="width: 17%" />
+<col style="width: 83%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Argument</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>mfl</p></td>
+<td><p>Search space to test</p></td>
+</tr>
+<tr class="row-odd"><td><p>algorithm</p></td>
+<td><p>Algorithm to use (e.g. exhaustive)</p></td>
+</tr>
+<tr class="row-even"><td><p>rankfunc</p></td>
+<td><p>Which selection criteria to rank models on (e.g. OFV, AIC)</p></td>
+</tr>
+<tr class="row-odd"><td><p>cutoff</p></td>
+<td><p>Cutoff for the ranking function (exclude models that are below)</p></td>
+</tr>
+<tr class="row-even"><td><p>iiv_strategy</p></td>
+<td><p>If/how IIV should be added to candidate models</p></td>
+</tr>
+<tr class="row-odd"><td><p>model</p></td>
+<td><p>Start model</p></td>
+</tr>
+</tbody>
+</table>
+</section>
 </section>
 <section id="the-search-space">
 <h2>The search space<a class="headerlink" href="#the-search-space" title="Permalink to this headline">#</a></h2>
-<p>The model feature search space is a set of possible combinations of model features that we would like to concider to be candidates for the search. This is input
-to the tool in the form of a <cite>Model Feature Language</cite> string. The <cite>MFL</cite> is a domain specific language designed to describe model features and sets of model features in a concise way. See the detailed description below.</p>
+<p>The model feature search space is a set of possible combinations of model features that will be applied and tested on the input model. Supported features cover
+absorption, elimination, distribution, and delay. The search space is given as a string with a specific grammar, which is called <cite>Model Feature Language</cite>
+(MFL). The <cite>MFL</cite> is a domain specific language designed to describe model features and sets of model features in a concise way. See the detailed description
+below.</p>
 </section>
 <section id="algorithms">
 <h2>Algorithms<a class="headerlink" href="#algorithms" title="Permalink to this headline">#</a></h2>
-<p>The tool can conduct the searching using different search algorithms. The current built in algorithms can be seen in the table below</p>
+<p>The tool can conduct the searching using different search algorithms. The current built in algorithms can be seen in the table below.</p>
 <table class="table">
 <colgroup>
-<col style="width: 15%" />
-<col style="width: 85%" />
+<col style="width: 24%" />
+<col style="width: 76%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Algorithm</p></th>
@@ -320,9 +392,13 @@ to the tool in the form of a <cite>Model Feature Language</cite> string. The <ci
 <tr class="row-even"><td><p>exhaustive</p></td>
 <td><p>All possible combinations of the search space are tested</p></td>
 </tr>
-<tr class="row-odd"><td><p>stepwise</p></td>
-<td><p>Add one feature in each step.
-Select the best model to use as starting point for the next step.</p></td>
+<tr class="row-odd"><td><p>exhaustive_stepwise</p></td>
+<td><p>Add one feature in each step in all possible orders</p></td>
+</tr>
+<tr class="row-even"><td><p>reduced_stepwise</p></td>
+<td><p>Add one feature in each step in all possible orders.
+After each feature layer, choose best model between models
+with same features</p></td>
 </tr>
 </tbody>
 </table>
@@ -355,15 +431,50 @@ Select the best model to use as starting point for the next step.</p></td>
     base -&gt; s8
 }</p></object></div>
 </section>
+<section id="exhaustive-stepwise-search">
+<h3>Exhaustive stepwise search<a class="headerlink" href="#exhaustive-stepwise-search" title="Permalink to this headline">#</a></h3>
+<p>An exhaustive stepwise search will apply features in a stepwise manner such that only one feature is changed at a time.</p>
+<p>Some combinations of features have been excluded in this algorithm, the following combinations are never run:</p>
+<table class="table">
+<colgroup>
+<col style="width: 55%" />
+<col style="width: 45%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Feature A</p></th>
+<th class="head"><p>Feature B</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ABSORPTION(ZO)</p></td>
+<td><p>TRANSITS</p></td>
+</tr>
+<tr class="row-odd"><td><p>ABSORPTION(SEQ-ZO-FO)</p></td>
+<td><p>TRANSITS</p></td>
+</tr>
+<tr class="row-even"><td><p>ABSORPTION(SEQ-ZO-FO)</p></td>
+<td><p>LAGTIME</p></td>
+</tr>
+<tr class="row-odd"><td><p>LAGTIME</p></td>
+<td><p>TRANSITS</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="reduced-stepwise-search">
+<h3>Reduced stepwise search<a class="headerlink" href="#reduced-stepwise-search" title="Permalink to this headline">#</a></h3>
+<p>The reduced stepwise is similar to the exhaustive stepwise search, but it will after each layer compare models with
+the same features (but from different order) and only send the best model for the next transformations.</p>
+</section>
 </section>
 <section id="comparing-and-ranking-candidates">
 <h2>Comparing and ranking candidates<a class="headerlink" href="#comparing-and-ranking-candidates" title="Permalink to this headline">#</a></h2>
-<p>The supplied <cite>rankfunc</cite> will be used to compare a set of candidate models and rank them. The ranking will be used in different ways depending on the
-selected algorithm. The following rank functions are available:</p>
+<p>The supplied <cite>rankfunc</cite> will be used to compare a set of candidate models and rank them. A cutoff may also be provided
+if the user does not want to use the default. The following rank functions are available:</p>
 <table class="table">
 <colgroup>
-<col style="width: 15%" />
-<col style="width: 85%" />
+<col style="width: 14%" />
+<col style="width: 86%" />
 </colgroup>
 <thead>
 <tr class="row-odd"><th class="head"><p>Rankfunc</p></th>
@@ -372,20 +483,53 @@ selected algorithm. The following rank functions are available:</p>
 </thead>
 <tbody>
 <tr class="row-even"><td><p>ofv</p></td>
-<td><p>ΔOFV. Do not rank candidates with dOFV &lt; 3.84</p></td>
+<td><p>ΔOFV. Default is to not rank candidates with ΔOFV &lt; cutoff (default 3.84)</p></td>
 </tr>
 <tr class="row-odd"><td><p>aic</p></td>
-<td><p>ΔAIC. Do not rank candidates with dOFV &lt; 3.84</p></td>
+<td><p>ΔAIC. Default is to rank all candidates if no cutoff is provided.</p></td>
 </tr>
 <tr class="row-even"><td><p>bic</p></td>
-<td><p>ΔBIC. Do not rank candidates with dOFV &lt; 3.84</p></td>
+<td><p>ΔBIC (mixed). Default is to rank all candidates if no cutoff is provided.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="iiv-strategies">
+<h2>IIV strategies<a class="headerlink" href="#iiv-strategies" title="Permalink to this headline">#</a></h2>
+<p>The <cite>iiv_strategy</cite> option determines whether or not IIV on the PK parameters should be added to the candidate models.
+The different strategies can be seen here:</p>
+<table class="table">
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 84%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Strategy</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>0</p></td>
+<td><p>No IIVs are added during the search</p></td>
+</tr>
+<tr class="row-odd"><td><p>1</p></td>
+<td><p>IIV is added to all structural parameters as diagonal</p></td>
+</tr>
+<tr class="row-even"><td><p>2</p></td>
+<td><p>IIV is added to all structural parameters as full block</p></td>
+</tr>
+<tr class="row-odd"><td><p>3</p></td>
+<td><p>IIV is added to MDT parameters.</p></td>
 </tr>
 </tbody>
 </table>
 </section>
 <section id="the-model-search-results">
 <h2>The Model Search results<a class="headerlink" href="#the-model-search-results" title="Permalink to this headline">#</a></h2>
-<p>The results contain a <cite>runs</cite> table with an overview of all model runs that were performed and which models were selected.</p>
+<p>The results object contains the candidate models, the start model, and the selected best model (based on the input
+selection criteria). The tool will also create various summary tables which can be accessed in the results object,
+as well as files in .csv/.json format. In those you can find information about the ranking and relevant features
+(<cite>summary_tool</cite>), the estimated models (<cite>summary_models</cite>), and individuals in each model (<cite>summary_individuals</cite>).</p>
 </section>
 <section id="model-feature-language-reference">
 <h2>Model feature language reference<a class="headerlink" href="#model-feature-language-reference" title="Permalink to this headline">#</a></h2>

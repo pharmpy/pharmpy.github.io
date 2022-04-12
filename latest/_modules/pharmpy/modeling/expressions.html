@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.63.2 documentation</title>
+    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.64.1 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -191,7 +191,7 @@
   <h1>Source code for pharmpy.modeling.expressions</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">sympy</span>
 
-<span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">sympify</span>
+<span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">SolvedODESystem</span><span class="p">,</span> <span class="n">sympify</span>
 
 
 <div class="viewcode-block" id="get_observation_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_observation_expression.html#pharmpy.modeling.get_observation_expression">[docs]</a><span class="k">def</span> <span class="nf">get_observation_expression</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
@@ -538,6 +538,56 @@
             <span class="n">d</span><span class="p">[</span><span class="n">new</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span>
     <span class="n">simp</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">simplify</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>  <span class="c1"># Subs symbols back to non-constrained</span>
     <span class="k">return</span> <span class="n">simp</span></div>
+
+
+<div class="viewcode-block" id="solve_ode_system"><a class="viewcode-back" href="../../../api/pharmpy.modeling.solve_ode_system.html#pharmpy.modeling.solve_ode_system">[docs]</a><span class="k">def</span> <span class="nf">solve_ode_system</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Replace ODE system with analytical solution if possible</span>
+
+<span class="sd">    Warnings</span>
+<span class="sd">    --------</span>
+<span class="sd">    This function can currently only handle the most simple of ODE systems.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Reference to the same pharmpy model object</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
+<span class="sd">    Bolus(AMT)</span>
+<span class="sd">    ┌───────┐       ┌──────┐</span>
+<span class="sd">    │CENTRAL│──CL/V→│OUTPUT│</span>
+<span class="sd">    └───────┘       └──────┘</span>
+<span class="sd">    &gt;&gt;&gt; solve_ode_system(model)		# doctest: +ELLIPSIS</span>
+<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
+<span class="sd">    ⎧                    -CL⋅t</span>
+<span class="sd">    ⎨                    ──────</span>
+<span class="sd">    ⎪                      V</span>
+<span class="sd">    ⎩A_CENTRAL(t) = AMT⋅ℯ</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="k">if</span> <span class="n">odes</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">odes</span><span class="p">,</span> <span class="n">SolvedODESystem</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">model</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">odes</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">):</span>
+        <span class="n">odes</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">to_explicit_system</span><span class="p">()</span>
+    <span class="n">ics</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">odes</span><span class="o">.</span><span class="n">ics</span><span class="p">)</span>
+    <span class="n">ics</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
+    <span class="c1"># FIXME: Should set assumptions on symbols before solving</span>
+    <span class="c1"># FIXME: Need a way to handle systems with no explicit solutions</span>
+    <span class="n">sol</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">dsolve</span><span class="p">(</span><span class="n">odes</span><span class="o">.</span><span class="n">odes</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ics</span><span class="o">=</span><span class="n">ics</span><span class="p">)</span>
+    <span class="n">new</span> <span class="o">=</span> <span class="n">SolvedODESystem</span><span class="p">(</span><span class="n">sol</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span> <span class="o">=</span> <span class="n">new</span>
+    <span class="k">return</span> <span class="n">model</span></div>
 </pre></div>
 
               </div>

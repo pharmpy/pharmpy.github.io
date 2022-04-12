@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model &#8212; Pharmpy 0.63.2 documentation</title>
+    <title>pharmpy.model &#8212; Pharmpy 0.64.1 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -249,6 +249,65 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">observation_transformation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependent_variable</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">initial_individual_estimates</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compare two models for equality</span>
+
+<span class="sd">        Tests whether a model is equal to another model. This ignores</span>
+<span class="sd">        implementation-specific details such as NONMEM $DATA and FILE</span>
+<span class="sd">        pointers, or certain $TABLE printing options.</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        other : Model</span>
+<span class="sd">            Other model to compare this one with</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy import Model</span>
+<span class="sd">        &gt;&gt;&gt; a = Model()</span>
+<span class="sd">        &gt;&gt;&gt; a == a</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; a == 0</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">         ...</span>
+<span class="sd">        NotImplementedError: Cannot compare Model with &lt;class &#39;int&#39;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; a == None</span>
+<span class="sd">        Traceback (most recent call last):</span>
+<span class="sd">         ...</span>
+<span class="sd">        NotImplementedError: Cannot compare Model with &lt;class &#39;NoneType&#39;&gt;</span>
+<span class="sd">        &gt;&gt;&gt; b = Model()</span>
+<span class="sd">        &gt;&gt;&gt; b == a</span>
+<span class="sd">        True</span>
+<span class="sd">        &gt;&gt;&gt; a.name = &#39;a&#39;</span>
+<span class="sd">        &gt;&gt;&gt; b.name = &#39;b&#39;</span>
+<span class="sd">        &gt;&gt;&gt; a == b</span>
+<span class="sd">        True</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="bp">self</span> <span class="ow">is</span> <span class="n">other</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot compare Model with </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">other</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">random_variables</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">statements</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">statements</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependent_variable</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_transformation</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">observation_transformation</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_individual_estimates</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">initial_individual_estimates</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">datainfo</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">datainfo</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+        <span class="k">return</span> <span class="kc">True</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;Pharmpy model object </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&gt;&#39;</span>

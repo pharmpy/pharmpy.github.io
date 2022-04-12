@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.63.2 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.64.1 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -605,25 +605,24 @@
     <span class="k">return</span> <span class="n">name</span><span class="p">,</span> <span class="n">expr</span>
 
 
-<span class="k">def</span> <span class="nf">_result_summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
+<span class="k">def</span> <span class="nf">_get_model_result_summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">include_all_estimation_steps</span><span class="p">:</span>
         <span class="n">summary_dict</span> <span class="o">=</span> <span class="n">_summarize_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">summary_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">model_name</span><span class="p">])</span>
+        <span class="n">summary_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
         <span class="k">return</span> <span class="n">summary_df</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">summary_dicts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">tuples</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="p">)):</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">)):</span>
             <span class="n">summary_dict</span> <span class="o">=</span> <span class="n">_summarize_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
-            <span class="n">is_evaluation</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">evaluation</span>
+            <span class="n">is_evaluation</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">evaluation</span>
             <span class="k">if</span> <span class="n">is_evaluation</span><span class="p">:</span>
                 <span class="n">run_type</span> <span class="o">=</span> <span class="s1">&#39;evaluation&#39;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">run_type</span> <span class="o">=</span> <span class="s1">&#39;estimation&#39;</span>
             <span class="n">summary_dict</span> <span class="o">=</span> <span class="p">{</span><span class="o">**</span><span class="p">{</span><span class="s1">&#39;run_type&#39;</span><span class="p">:</span> <span class="n">run_type</span><span class="p">},</span> <span class="o">**</span><span class="n">summary_dict</span><span class="p">}</span>
             <span class="n">summary_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">)</span>
-            <span class="n">tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">res</span><span class="o">.</span><span class="n">model_name</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span><span class="n">tuples</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;model_name&#39;</span><span class="p">,</span> <span class="s1">&#39;step&#39;</span><span class="p">])</span>
         <span class="n">summary_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary_dicts</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">summary_df</span>
@@ -701,10 +700,8 @@
 
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="p">:</span>
-            <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_result_summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="p">))</span>
+            <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_get_model_result_summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># FIXME: in read_modelfit_results, maybe some parts can be extracted (i.e.</span>
-            <span class="c1">#   create modelfit_results object)</span>
             <span class="k">if</span> <span class="n">include_all_estimation_steps</span><span class="p">:</span>
                 <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">est</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">):</span>
                     <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span>
@@ -714,12 +711,10 @@
                         <span class="n">run_type</span> <span class="o">=</span> <span class="s1">&#39;evaluation&#39;</span>
                     <span class="k">else</span><span class="p">:</span>
                         <span class="n">run_type</span> <span class="o">=</span> <span class="s1">&#39;estimation&#39;</span>
-                    <span class="n">empty_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
-                        <span class="p">{</span><span class="s1">&#39;run_type&#39;</span><span class="p">:</span> <span class="n">run_type</span><span class="p">,</span> <span class="s1">&#39;minimization_successful&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span>
-                    <span class="p">)</span>
+                    <span class="n">empty_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;run_type&#39;</span><span class="p">:</span> <span class="n">run_type</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
                     <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">empty_df</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">empty_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;minimization_successful&#39;</span><span class="p">:</span> <span class="kc">False</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+                <span class="n">empty_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
                 <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">empty_df</span><span class="p">)</span>
 
     <span class="n">summary</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">summaries</span><span class="p">)</span><span class="o">.</span><span class="n">sort_index</span><span class="p">()</span>
