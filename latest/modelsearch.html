@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>modelsearch &#8212; Pharmpy 0.64.1 documentation</title>
+    <title>modelsearch &#8212; Pharmpy 0.65.1 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -241,13 +241,13 @@
   </ul>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#comparing-and-ranking-candidates">
-   Comparing and ranking candidates
+  <a class="reference internal nav-link" href="#iiv-strategies">
+   IIV strategies
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
-  <a class="reference internal nav-link" href="#iiv-strategies">
-   IIV strategies
+  <a class="reference internal nav-link" href="#comparing-and-ranking-candidates">
+   Comparing and ranking candidates
   </a>
  </li>
  <li class="toc-h2 nav-item toc-entry">
@@ -320,14 +320,14 @@ supports different algorithms and selection criteria.</p>
 <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;modelsearch&#39;</span><span class="p">,</span>
          <span class="s1">&#39;ABSORPTION(ZO);ELIMINATION(ZO)&#39;</span><span class="p">,</span>
          <span class="s1">&#39;exhaustive&#39;</span><span class="p">,</span>
+         <span class="n">iiv_strategy</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
          <span class="n">rankfunc</span><span class="o">=</span><span class="s1">&#39;ofv&#39;</span><span class="p">,</span>
          <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-         <span class="n">iiv_strategy</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span>
          <span class="n">model</span><span class="o">=</span><span class="n">start_model</span><span class="p">)</span>
 </pre></div>
 </div>
-<p>This would start a search starting with an input model <cite>model</cite> with <cite>mfl</cite> as the search space using the <cite>algorithm</cite> search algorithm. The candidate models
-will be ranked using <cite>ofv</cite> with default <cite>cutoff</cite>. Structural IIVs will be added according to strategy 0.</p>
+<p>This would start a search starting with an input model <cite>model</cite> with <cite>mfl</cite> as the search space using the <cite>algorithm</cite> search algorithm, where
+structural IIVs will be added to candidates according to strategy 0. The candidate models will be ranked using <cite>ofv</cite> with default <cite>cutoff</cite>.</p>
 <p>To run modelsearch from the command line:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pharmpy</span> <span class="n">run</span> <span class="n">modelsearch</span> <span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">model</span> <span class="s1">&#39;ABSORPTION(ZO);ELIMINATION(ZO)&#39;</span> <span class="s1">&#39;exhaustive&#39;</span> <span class="o">--</span><span class="n">rankfunc</span> <span class="s1">&#39;aic&#39;</span>
 </pre></div>
@@ -467,33 +467,6 @@ with same features</p></td>
 the same features (but from different order) and only send the best model for the next transformations.</p>
 </section>
 </section>
-<section id="comparing-and-ranking-candidates">
-<h2>Comparing and ranking candidates<a class="headerlink" href="#comparing-and-ranking-candidates" title="Permalink to this headline">#</a></h2>
-<p>The supplied <cite>rankfunc</cite> will be used to compare a set of candidate models and rank them. A cutoff may also be provided
-if the user does not want to use the default. The following rank functions are available:</p>
-<table class="table">
-<colgroup>
-<col style="width: 14%" />
-<col style="width: 86%" />
-</colgroup>
-<thead>
-<tr class="row-odd"><th class="head"><p>Rankfunc</p></th>
-<th class="head"><p>Description</p></th>
-</tr>
-</thead>
-<tbody>
-<tr class="row-even"><td><p>ofv</p></td>
-<td><p>ΔOFV. Default is to not rank candidates with ΔOFV &lt; cutoff (default 3.84)</p></td>
-</tr>
-<tr class="row-odd"><td><p>aic</p></td>
-<td><p>ΔAIC. Default is to rank all candidates if no cutoff is provided.</p></td>
-</tr>
-<tr class="row-even"><td><p>bic</p></td>
-<td><p>ΔBIC (mixed). Default is to rank all candidates if no cutoff is provided.</p></td>
-</tr>
-</tbody>
-</table>
-</section>
 <section id="iiv-strategies">
 <h2>IIV strategies<a class="headerlink" href="#iiv-strategies" title="Permalink to this headline">#</a></h2>
 <p>The <cite>iiv_strategy</cite> option determines whether or not IIV on the PK parameters should be added to the candidate models.
@@ -520,6 +493,33 @@ The different strategies can be seen here:</p>
 </tr>
 <tr class="row-odd"><td><p>3</p></td>
 <td><p>IIV is added to MDT parameters.</p></td>
+</tr>
+</tbody>
+</table>
+</section>
+<section id="comparing-and-ranking-candidates">
+<h2>Comparing and ranking candidates<a class="headerlink" href="#comparing-and-ranking-candidates" title="Permalink to this headline">#</a></h2>
+<p>The supplied <cite>rankfunc</cite> will be used to compare a set of candidate models and rank them. A cutoff may also be provided
+if the user does not want to use the default. The following rank functions are available:</p>
+<table class="table">
+<colgroup>
+<col style="width: 14%" />
+<col style="width: 86%" />
+</colgroup>
+<thead>
+<tr class="row-odd"><th class="head"><p>Rankfunc</p></th>
+<th class="head"><p>Description</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ofv</p></td>
+<td><p>ΔOFV. Default is to not rank candidates with ΔOFV &lt; cutoff (default 3.84)</p></td>
+</tr>
+<tr class="row-odd"><td><p>aic</p></td>
+<td><p>ΔAIC. Default is to rank all candidates if no cutoff is provided.</p></td>
+</tr>
+<tr class="row-even"><td><p>bic</p></td>
+<td><p>ΔBIC (mixed). Default is to rank all candidates if no cutoff is provided.</p></td>
 </tr>
 </tbody>
 </table>
