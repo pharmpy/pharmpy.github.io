@@ -10,6 +10,7 @@ ExplicitODESystem
 
    .. autosummary::
 
+      ~ExplicitODESystem.amounts
       ~ExplicitODESystem.free_symbols
       ~ExplicitODESystem.ics
       ~ExplicitODESystem.odes
@@ -24,6 +25,7 @@ ExplicitODESystem
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: amounts
    .. autoattribute:: free_symbols
    .. autoattribute:: ics
    .. autoattribute:: odes
