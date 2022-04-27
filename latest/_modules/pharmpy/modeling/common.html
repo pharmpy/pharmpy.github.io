@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.common &#8212; Pharmpy 0.66.0 documentation</title>
+    <title>pharmpy.modeling.common &#8212; Pharmpy 0.68.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -1037,6 +1037,107 @@
             <span class="n">new_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">new_params</span>
     <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="get_thetas"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_thetas.html#pharmpy.modeling.get_thetas">[docs]</a><span class="k">def</span> <span class="nf">get_thetas</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get all thetas (structural parameters) of a model</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">        A copy of all theta parameters</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; get_thetas(model)</span>
+<span class="sd">                 value  lower    upper    fix</span>
+<span class="sd">    THETA(1)  0.004693   0.00  1000000  False</span>
+<span class="sd">    THETA(2)  1.009160   0.00  1000000  False</span>
+<span class="sd">    THETA(3)  0.100000  -0.99  1000000  False</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    get_omegas : Get omega parameters</span>
+<span class="sd">    get_sigmas : Get sigma parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">thetas</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">thetas</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_omegas"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_omegas.html#pharmpy.modeling.get_omegas">[docs]</a><span class="k">def</span> <span class="nf">get_omegas</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get all omegas (variability parameters) of a model</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">        A copy of all omega parameters</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; get_omegas(model)</span>
+<span class="sd">                   value  lower upper    fix</span>
+<span class="sd">    OMEGA(1,1)  0.030963      0    oo  False</span>
+<span class="sd">    OMEGA(2,2)  0.031128      0    oo  False</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    get_thetas : Get theta parameters</span>
+<span class="sd">    get_sigmas : Get sigma parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">omegas</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">omegas</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="get_sigmas"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_sigmas.html#pharmpy.modeling.get_sigmas">[docs]</a><span class="k">def</span> <span class="nf">get_sigmas</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Get all sigmas (residual error variability parameters) of a model</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Parameters</span>
+<span class="sd">        A copy of all sigma parameters</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; get_sigmas(model)</span>
+<span class="sd">                   value  lower upper    fix</span>
+<span class="sd">    SIGMA(1,1)  0.013241      0    oo  False</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    get_thetas : Get theta parameters</span>
+<span class="sd">    get_omegas : Get omega parameters</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">sigmas</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">p</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">epsilons</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="p">]</span>
+    <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">sigmas</span><span class="p">)</span></div>
 </pre></div>
 
               </div>

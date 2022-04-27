@@ -22,6 +22,9 @@ EstimationStep
       ~EstimationStep.niter
       ~EstimationStep.predictions
       ~EstimationStep.residuals
+      ~EstimationStep.solver
+      ~EstimationStep.solver_atol
+      ~EstimationStep.solver_rtol
       ~EstimationStep.supported_methods
       ~EstimationStep.tool_options
 
@@ -45,6 +48,9 @@ EstimationStep
    .. autoattribute:: niter
    .. autoattribute:: predictions
    .. autoattribute:: residuals
+   .. autoattribute:: solver
+   .. autoattribute:: solver_atol
+   .. autoattribute:: solver_rtol
    .. autoattribute:: supported_methods
    .. autoattribute:: tool_options
 

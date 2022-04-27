@@ -12,7 +12,6 @@ ODESystem
 
       ~ODESystem.free_symbols
       ~ODESystem.rhs_symbols
-      ~ODESystem.solver
       ~ODESystem.t
 
    .. rubric:: Methods Summary
@@ -25,7 +24,6 @@ ODESystem
 
    .. autoattribute:: free_symbols
    .. autoattribute:: rhs_symbols
-   .. autoattribute:: solver
    .. autoattribute:: t
 
    .. rubric:: Methods Documentation

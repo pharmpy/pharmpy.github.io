@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.66.0 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.68.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -1451,6 +1451,14 @@
             <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">peripheral</span><span class="p">,</span> <span class="n">kcp</span><span class="p">)</span>
             <span class="n">odes</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">,</span> <span class="n">kpc</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Heuristic to handle the MM case</span>
+            <span class="k">if</span> <span class="n">vc</span><span class="o">.</span><span class="n">is_Mul</span><span class="p">:</span>
+                <span class="n">vc</span> <span class="o">=</span> <span class="n">vc</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="c1"># Heurstic to handle the Mixed MM-FO case</span>
+            <span class="k">if</span> <span class="n">cl</span><span class="o">.</span><span class="n">is_Add</span><span class="p">:</span>
+                <span class="n">cl1</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+                <span class="k">if</span> <span class="n">cl1</span><span class="o">.</span><span class="n">is_Mul</span><span class="p">:</span>
+                    <span class="n">cl</span> <span class="o">=</span> <span class="n">cl1</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">full_cl</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
             <span class="n">full_vc</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">vc</span><span class="p">)</span>
             <span class="n">pop_cl_candidates</span> <span class="o">=</span> <span class="n">full_cl</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
@@ -1624,10 +1632,6 @@
 <span class="sd">    +----------------------------+------------------+</span>
 <span class="sd">    | IDA                        | ADVAN15          |</span>
 <span class="sd">    +----------------------------+------------------+</span>
-<span class="sd">    | GL (general linear)        | ADVAN5           |</span>
-<span class="sd">    +----------------------------+------------------+</span>
-<span class="sd">    | GL_REAL (real eigenvalues) | ADVAN7           |</span>
-<span class="sd">    +----------------------------+------------------+</span>
 <span class="sd">    | LSODA                      | ADVAN13          |</span>
 <span class="sd">    +----------------------------+------------------+</span>
 <span class="sd">    | LSODI                      | ADVAN9           |</span>
@@ -1653,8 +1657,8 @@
 <span class="sd">    &lt;...&gt;</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="n">odes</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">:</span>
+        <span class="n">step</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span>
     <span class="k">return</span> <span class="n">model</span></div>
 </pre></div>
 

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.estimation &#8212; Pharmpy 0.66.0 documentation</title>
+    <title>pharmpy.estimation &#8212; Pharmpy 0.68.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -200,7 +200,7 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    steps : EstimationStepsi, iterable or None</span>
+<span class="sd">    steps : EstimationSteps, iterable or None</span>
 <span class="sd">        Used for initialization</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -316,6 +316,9 @@
         <span class="n">keep_every_nth_iter</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">residuals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">predictions</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">solver</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">solver_rtol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">solver_atol</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">tool_options</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">method</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicalize_and_check_method</span><span class="p">(</span><span class="n">method</span><span class="p">)</span>
@@ -337,6 +340,9 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">predictions</span> <span class="o">=</span> <span class="n">predictions</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver_rtol</span> <span class="o">=</span> <span class="n">solver_rtol</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">solver_atol</span> <span class="o">=</span> <span class="n">solver_atol</span>
         <span class="k">if</span> <span class="n">tool_options</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">tool_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -466,6 +472,56 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">_predictions</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">solver</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Numerical solver to use when numerically solving the ODE system</span>
+<span class="sd">        Supported solvers and their corresponding NONMEM ADVAN</span>
+
+<span class="sd">        +----------------------------+------------------+</span>
+<span class="sd">        | Solver                     | NONMEM ADVAN     |</span>
+<span class="sd">        +============================+==================+</span>
+<span class="sd">        | CVODES                     | ADVAN14          |</span>
+<span class="sd">        +----------------------------+------------------+</span>
+<span class="sd">        | DGEAR                      | ADVAN8           |</span>
+<span class="sd">        +----------------------------+------------------+</span>
+<span class="sd">        | DVERK                      | ADVAN6           |</span>
+<span class="sd">        +----------------------------+------------------+</span>
+<span class="sd">        | IDA                        | ADVAN15          |</span>
+<span class="sd">        +----------------------------+------------------+</span>
+<span class="sd">        | LSODA                      | ADVAN13          |</span>
+<span class="sd">        +----------------------------+------------------+</span>
+<span class="sd">        | LSODI                      | ADVAN9           |</span>
+<span class="sd">        +----------------------------+------------------+</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span>
+
+    <span class="nd">@solver</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">solver</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">supported</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CVODES&#39;</span><span class="p">,</span> <span class="s1">&#39;DGEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;DVERK&#39;</span><span class="p">,</span> <span class="s1">&#39;IDA&#39;</span><span class="p">,</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">,</span> <span class="s1">&#39;LSODI&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">value</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">supported</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown solver </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">. Recognized solvers are </span><span class="si">{</span><span class="n">supported</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">solver_rtol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Relative tolerance for numerical ODE system solver&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_rtol</span>
+
+    <span class="nd">@solver_rtol</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">solver_rtol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_rtol</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">solver_atol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Absolute tolerance for numerical ODE system solver&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_solver_atol</span>
+
+    <span class="nd">@solver_atol</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">solver_atol</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_solver_atol</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">tool_options</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Dictionary of tool specific options&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_tool_options</span>
@@ -486,6 +542,9 @@
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">niter</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">niter</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">auto</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">auto</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">keep_every_nth_iter</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">keep_every_nth_iter</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">solver</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_rtol</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">solver_rtol</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver_atol</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">solver_atol</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">tool_options</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">tool_options</span>
         <span class="p">)</span>
 
@@ -495,7 +554,8 @@
             <span class="sa">f</span><span class="s1">&#39;cov=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cov</span><span class="si">}</span><span class="s1">, evaluation=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluation</span><span class="si">}</span><span class="s1">, &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;maximum_evaluations=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum_evaluations</span><span class="si">}</span><span class="s1">, laplace=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">laplace</span><span class="si">}</span><span class="s1">, &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;isample=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">isample</span><span class="si">}</span><span class="s1">, niter=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">niter</span><span class="si">}</span><span class="s1">, auto=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">auto</span><span class="si">}</span><span class="s1">, &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;keep_every_nth_iter=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">keep_every_nth_iter</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;keep_every_nth_iter=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">keep_every_nth_iter</span><span class="si">}</span><span class="s1">, solver=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;solver_rtol=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">solver_rtol</span><span class="si">}</span><span class="s1">, solver_atol=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">solver_atol</span><span class="si">}</span><span class="s1">, &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;tool_options=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tool_options</span><span class="si">}</span><span class="s1">)&#39;</span>
         <span class="p">)</span>
 
