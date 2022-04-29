@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.datainfo &#8212; Pharmpy 0.68.0 documentation</title>
+    <title>pharmpy.datainfo &#8212; Pharmpy 0.69.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -239,6 +239,7 @@
         <span class="s1">&#39;event&#39;</span><span class="p">,</span>
         <span class="s1">&#39;covariate&#39;</span><span class="p">,</span>
         <span class="s1">&#39;mdv&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;compartment&#39;</span><span class="p">,</span>
     <span class="p">]</span>
     <span class="n">_all_scales</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;nominal&#39;</span><span class="p">,</span> <span class="s1">&#39;ordinal&#39;</span><span class="p">,</span> <span class="s1">&#39;interval&#39;</span><span class="p">,</span> <span class="s1">&#39;ratio&#39;</span><span class="p">]</span>
     <span class="n">_all_dtypes</span> <span class="o">=</span> <span class="p">[</span>
@@ -258,7 +259,16 @@
         <span class="s1">&#39;nmtran-date&#39;</span><span class="p">,</span>
         <span class="s1">&#39;str&#39;</span><span class="p">,</span>
     <span class="p">]</span>
-    <span class="n">_all_descriptors</span> <span class="o">=</span> <span class="p">[</span><span class="kc">None</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span><span class="p">,</span> <span class="s1">&#39;body weight&#39;</span><span class="p">,</span> <span class="s1">&#39;lean body mass&#39;</span><span class="p">,</span> <span class="s1">&#39;fat free mass&#39;</span><span class="p">]</span>
+    <span class="n">_all_descriptors</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="kc">None</span><span class="p">,</span>
+        <span class="s1">&#39;age&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;body weight&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;lean body mass&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;fat free mass&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;time after dose&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;plasma concentration&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;subject identifier&#39;</span><span class="p">,</span>
+    <span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -325,6 +335,7 @@
 <span class="sd">        ss            Steady state dosing</span>
 <span class="sd">        event         0 = observation</span>
 <span class="sd">        mdv           0 = DV is observation value, 1 = DV is missing</span>
+<span class="sd">        compartment   Compartment information (not yet exactly specified)</span>
 <span class="sd">        unknown       Unkown type. This will be the default for columns that hasn&#39;t been</span>
 <span class="sd">                      assigned a type</span>
 <span class="sd">        ============  =============</span>
@@ -341,14 +352,17 @@
     <span class="k">def</span> <span class="nf">descriptor</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Kind of data</span>
 
-<span class="sd">        ================ =================</span>
-<span class="sd">        descriptor       Description</span>
-<span class="sd">        ================ =================</span>
-<span class="sd">        age              Age (since birth)</span>
-<span class="sd">        body weight      Human body weight</span>
-<span class="sd">        lean body mass   Lean body mass</span>
-<span class="sd">        fat free mass    Fat free mass</span>
-<span class="sd">        ================ =================</span>
+<span class="sd">        ==================== ==========================================</span>
+<span class="sd">        descriptor           Description</span>
+<span class="sd">        ==================== ==========================================</span>
+<span class="sd">        age                  Age (since birth)</span>
+<span class="sd">        body weight          Human body weight</span>
+<span class="sd">        lean body mass       Lean body mass</span>
+<span class="sd">        fat free mass        Fat free mass</span>
+<span class="sd">        time after dose      Time after dose</span>
+<span class="sd">        plasma concentration Concentration of substance in blood plasma</span>
+<span class="sd">        subject identifier   Unique integer identifier for a subject</span>
+<span class="sd">        ==================== ==========================================</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor</span>
 
@@ -665,6 +679,19 @@
         <span class="k">return</span> <span class="n">TypeIndexer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">descriptorix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Descriptor indexer</span>
+
+<span class="sd">        Example</span>
+<span class="sd">        -------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
+<span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; model.datainfo.descriptorix[&#39;body weight&#39;].names</span>
+<span class="sd">        [&#39;WGT&#39;]</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">DescriptorIndexer</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">id_column</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;The id column</span>
 
@@ -868,6 +895,17 @@
         <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="n">i</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">col</span><span class="o">.</span><span class="n">drop</span><span class="p">]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">cols</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No columns of type </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> available&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">DataInfo</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span>
+
+
+<span class="k">class</span> <span class="nc">DescriptorIndexer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="o">=</span> <span class="n">obj</span>
+
+    <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+        <span class="n">cols</span> <span class="o">=</span> <span class="p">[</span><span class="n">col</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_obj</span> <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">==</span> <span class="n">i</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">col</span><span class="o">.</span><span class="n">drop</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">cols</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No columns with descriptor </span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s2"> available&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">DataInfo</span><span class="p">(</span><span class="n">cols</span><span class="p">)</span>
 </pre></div>
 

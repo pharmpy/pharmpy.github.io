@@ -24,6 +24,7 @@ Model
       ~Model.parent_model
       ~Model.random_variables
       ~Model.statements
+      ~Model.value_type
 
    .. rubric:: Methods Summary
 
@@ -50,6 +51,7 @@ Model
    .. autoattribute:: parent_model
    .. autoattribute:: random_variables
    .. autoattribute:: statements
+   .. autoattribute:: value_type
 
    .. rubric:: Methods Documentation
 

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.amd &#8212; Pharmpy 0.68.0 documentation</title>
+    <title>pharmpy.modeling.amd &#8212; Pharmpy 0.69.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -213,7 +213,7 @@
     <span class="n">cl_init</span><span class="o">=</span><span class="mf">0.01</span><span class="p">,</span>
     <span class="n">vc_init</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">mat_init</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span>
-    <span class="n">mfl</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">search_space</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">lloq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">categorical</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -235,7 +235,7 @@
 <span class="sd">        Initial estimate for the central compartment population volume</span>
 <span class="sd">    mat_init : float</span>
 <span class="sd">        Initial estimate for the mean absorption time (not for iv models)</span>
-<span class="sd">    mfl : str</span>
+<span class="sd">    search_space : str</span>
 <span class="sd">        MFL for search space for structural model</span>
 <span class="sd">    lloq : float</span>
 <span class="sd">        Lower limit of quantification. LOQ data will be removed.</span>
@@ -276,9 +276,9 @@
     <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">order</span> <span class="o">=</span> <span class="n">default_order</span>
 
-    <span class="k">if</span> <span class="n">mfl</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">search_space</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">modeltype</span> <span class="o">==</span> <span class="s1">&#39;pk_oral&#39;</span><span class="p">:</span>
-            <span class="n">mfl</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">search_space</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="s1">&#39;ABSORPTION([ZO,SEQ-ZO-FO]);&#39;</span>
                 <span class="s1">&#39;ELIMINATION([MM,MIX-FO-MM]);&#39;</span>
                 <span class="s1">&#39;LAGTIME();&#39;</span>
@@ -286,7 +286,7 @@
                 <span class="s1">&#39;PERIPHERALS(1)&#39;</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">mfl</span> <span class="o">=</span> <span class="s1">&#39;ELIMINATION([MM,MIX-FO-MM]);&#39;</span> <span class="s1">&#39;PERIPHERALS([1,2])&#39;</span>
+            <span class="n">search_space</span> <span class="o">=</span> <span class="s1">&#39;ELIMINATION([MM,MIX-FO-MM]);&#39;</span> <span class="s1">&#39;PERIPHERALS([1,2])&#39;</span>
 
     <span class="n">db</span> <span class="o">=</span> <span class="n">default_tool_database</span><span class="p">(</span><span class="n">toolname</span><span class="o">=</span><span class="s1">&#39;amd&#39;</span><span class="p">)</span>
     <span class="n">fit</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -294,7 +294,7 @@
     <span class="n">run_funcs</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;structural&#39;</span><span class="p">:</span>
-            <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_modelsearch</span><span class="p">,</span> <span class="n">mfl</span><span class="o">=</span><span class="n">mfl</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_modelsearch</span><span class="p">,</span> <span class="n">search_space</span><span class="o">=</span><span class="n">search_space</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="n">run_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;iiv&#39;</span><span class="p">:</span>
             <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_iiv</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
@@ -326,10 +326,10 @@
     <span class="k">return</span> <span class="n">res</span></div>
 
 
-<span class="k">def</span> <span class="nf">_run_modelsearch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">mfl</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_run_modelsearch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">search_space</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
     <span class="n">res_modelsearch</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span>
         <span class="s1">&#39;modelsearch&#39;</span><span class="p">,</span>
-        <span class="n">mfl</span><span class="o">=</span><span class="n">mfl</span><span class="p">,</span>
+        <span class="n">search_space</span><span class="o">=</span><span class="n">search_space</span><span class="p">,</span>
         <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;exhaustive_stepwise&#39;</span><span class="p">,</span>
         <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
         <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;modelsearch&#39;</span><span class="p">,</span>

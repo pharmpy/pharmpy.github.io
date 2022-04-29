@@ -10,6 +10,7 @@ DataInfo
 
    .. autosummary::
 
+      ~DataInfo.descriptorix
       ~DataInfo.dv_column
       ~DataInfo.id_column
       ~DataInfo.idv_column
@@ -31,6 +32,7 @@ DataInfo
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: descriptorix
    .. autoattribute:: dv_column
    .. autoattribute:: id_column
    .. autoattribute:: idv_column

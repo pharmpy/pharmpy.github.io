@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model &#8212; Pharmpy 0.68.0 documentation</title>
+    <title>pharmpy.model &#8212; Pharmpy 0.69.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -250,6 +250,7 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">initial_individual_estimates</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">value_type</span> <span class="o">=</span> <span class="s1">&#39;PREDICTION&#39;</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Compare two models for equality</span>
@@ -306,6 +307,8 @@
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">datainfo</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">datainfo</span><span class="p">:</span>
             <span class="k">return</span> <span class="kc">False</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_type</span> <span class="o">!=</span> <span class="n">other</span><span class="o">.</span><span class="n">value_type</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">return</span> <span class="kc">True</span>
 
@@ -347,6 +350,32 @@
     <span class="nd">@dependent_variable</span><span class="o">.</span><span class="n">setter</span>
     <span class="k">def</span> <span class="nf">dependent_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variable</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">value_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;The type of the model value (dependent variable)</span>
+
+<span class="sd">        By default this is set to &#39;PREDICTION&#39; to mean that the model outputs a prediction.</span>
+<span class="sd">        It could optionally be set to &#39;LIKELIHOOD&#39; or &#39;-2LL&#39; to let the model output the likelihood</span>
+<span class="sd">        or -2*log(likelihood) of the prediction. If set to a symbol this variable can be used to</span>
+<span class="sd">        change the type for different records. The model would then set this symbol to 0 for</span>
+<span class="sd">        a prediction value, 1 for likelihood and 2 for -2ll.</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span>
+
+    <span class="nd">@value_type</span><span class="o">.</span><span class="n">setter</span>
+    <span class="k">def</span> <span class="nf">value_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">allowed_strings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PREDICTION&#39;</span><span class="p">,</span> <span class="s1">&#39;LIKELIHOOD&#39;</span><span class="p">,</span> <span class="s1">&#39;-2LL&#39;</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_strings</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cannot set value_type to </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">. Must be one of </span><span class="si">{</span><span class="n">allowed_strings</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;or a symbol&quot;</span>
+                <span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Can only set value_type to one of </span><span class="si">{allowed_strings}</span><span class="s2"> or a symbol&quot;</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">observation_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
