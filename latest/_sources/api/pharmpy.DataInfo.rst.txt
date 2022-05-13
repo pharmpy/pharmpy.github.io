@@ -26,6 +26,7 @@ DataInfo
 
       ~DataInfo.copy
       ~DataInfo.from_json
+      ~DataInfo.get_dtype_dict
       ~DataInfo.insert
       ~DataInfo.read_json
       ~DataInfo.to_json
@@ -46,6 +47,7 @@ DataInfo
 
    .. automethod:: copy
    .. automethod:: from_json
+   .. automethod:: get_dtype_dict
    .. automethod:: insert
    .. automethod:: read_json
    .. automethod:: to_json

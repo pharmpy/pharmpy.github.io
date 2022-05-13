@@ -13,6 +13,7 @@ default_model_database
       ~default_model_database.retrieve_file
       ~default_model_database.retrieve_local_files
       ~default_model_database.retrieve_model
+      ~default_model_database.retrieve_modelfit_results
       ~default_model_database.store_local_file
       ~default_model_database.store_metadata
       ~default_model_database.store_model
@@ -23,6 +24,7 @@ default_model_database
    .. automethod:: retrieve_file
    .. automethod:: retrieve_local_files
    .. automethod:: retrieve_model
+   .. automethod:: retrieve_modelfit_results
    .. automethod:: store_local_file
    .. automethod:: store_metadata
    .. automethod:: store_model

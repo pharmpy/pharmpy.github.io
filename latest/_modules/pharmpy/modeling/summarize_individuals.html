@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.summarize_individuals &#8212; Pharmpy 0.69.0 documentation</title>
+    <title>pharmpy.modeling.summarize_individuals &#8212; Pharmpy 0.70.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -23,6 +23,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/tabs.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
     
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -33,6 +34,7 @@
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/tabs.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.0-rc.0/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -203,6 +205,22 @@
     <span class="sd">&quot;&quot;&quot;Creates a summary dataframe keyed by model-individual pairs for an input</span>
 <span class="sd">    list of models.</span>
 
+<span class="sd">    Content of the various columns:</span>
+
+<span class="sd">    +-------------------------+----------------------------------------------------------------------+</span>
+<span class="sd">    | Column                  | Description                                                          |</span>
+<span class="sd">    +=========================+======================================================================+</span>
+<span class="sd">    | ``outlier_count``       | Number of observations with CWRES &gt; 5                                |</span>
+<span class="sd">    +-------------------------+----------------------------------------------------------------------+</span>
+<span class="sd">    | ``ofv``                 | Individual OFV                                                       |</span>
+<span class="sd">    +-------------------------+----------------------------------------------------------------------+</span>
+<span class="sd">    | ``dofv_vs_parent``      | Difference in individual OFV between this model and its parent model |</span>
+<span class="sd">    +-------------------------+----------------------------------------------------------------------+</span>
+<span class="sd">    | ``predicted_dofv``      | Predicted dOFV if this individual was excluded                       |</span>
+<span class="sd">    +-------------------------+----------------------------------------------------------------------+</span>
+<span class="sd">    | ``predicted_residual``  | Predicted residual                                                   |</span>
+<span class="sd">    +-------------------------+----------------------------------------------------------------------+</span>
+
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    models : List[Model]</span>
@@ -227,7 +245,7 @@
 <span class="sd">    ... ) # doctest: +SKIP</span>
 <span class="sd">    &gt;&gt;&gt; summarize_individuals([results.start_model, *results.models]) # doctest: +SKIP</span>
 
-<span class="sd">    &quot;&quot;&quot;</span>
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
 
     <span class="n">modelsDict</span> <span class="o">=</span> <span class="p">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">model</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">}</span>
 
@@ -253,13 +271,13 @@
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
 
 
-<span class="k">def</span> <span class="nf">outliers_fda_func</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">outlier_count_func</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="c1"># NOTE this returns a float because we will potentially concat this</span>
     <span class="c1"># with NaNs</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">((</span><span class="nb">abs</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
 
 
-<span class="k">def</span> <span class="nf">outliers_fda</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">outlier_count</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
     <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
@@ -268,7 +286,7 @@
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">groupedByID</span> <span class="o">=</span> <span class="n">residuals</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;ID&#39;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">groupedByID</span><span class="p">[</span><span class="s1">&#39;CWRES&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">outliers_fda_func</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">groupedByID</span><span class="p">[</span><span class="s1">&#39;CWRES&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">agg</span><span class="p">(</span><span class="n">outlier_count_func</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_predicted</span><span class="p">(</span>
@@ -312,7 +330,7 @@
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
         <span class="p">{</span>
             <span class="s1">&#39;parent_model&#39;</span><span class="p">:</span> <span class="n">parent_model_name</span><span class="p">(</span><span class="n">model</span><span class="p">),</span>
-            <span class="s1">&#39;outliers_fda&#39;</span><span class="p">:</span> <span class="n">outliers_fda</span><span class="p">(</span><span class="n">model</span><span class="p">),</span>
+            <span class="s1">&#39;outlier_count&#39;</span><span class="p">:</span> <span class="n">outlier_count</span><span class="p">(</span><span class="n">model</span><span class="p">),</span>
             <span class="s1">&#39;ofv&#39;</span><span class="p">:</span> <span class="n">ofv</span><span class="p">(</span><span class="n">model</span><span class="p">),</span>
             <span class="s1">&#39;dofv_vs_parent&#39;</span><span class="p">:</span> <span class="n">dofv</span><span class="p">(</span><span class="n">modelsDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parent_model</span><span class="p">),</span> <span class="n">model</span><span class="p">),</span>
             <span class="s1">&#39;predicted_dofv&#39;</span><span class="p">:</span> <span class="n">predicted_dofv</span><span class="p">(</span><span class="n">model</span><span class="p">),</span>
@@ -321,6 +339,91 @@
         <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="k">return</span> <span class="n">df</span>
+
+
+<div class="viewcode-block" id="summarize_individuals_count_table"><a class="viewcode-back" href="../../../api/pharmpy.modeling.summarize_individuals_count_table.html#pharmpy.modeling.summarize_individuals_count_table">[docs]</a><span class="k">def</span> <span class="nf">summarize_individuals_count_table</span><span class="p">(</span><span class="n">models</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Create a count table for individual data</span>
+
+<span class="sd">    Content of the various columns:</span>
+
+<span class="sd">    +-------------------------+---------------------------------------------------------------------------------+</span>
+<span class="sd">    | Column                  | Description                                                                     |</span>
+<span class="sd">    +=========================+=================================================================================+</span>
+<span class="sd">    | ``inf_selection``       | Number of subjects influential on model selection.                              |</span>
+<span class="sd">    |                         | :math:`||dOFV_i|  - |OFV_{parent} - OFV|| &gt; 3.84`                               |</span>
+<span class="sd">    +-------------------------+---------------------------------------------------------------------------------+</span>
+<span class="sd">    | ``inf_params``          | Number of subjects influential on parameters. predicted_dofv &gt; 3.84             |</span>
+<span class="sd">    +-------------------------+---------------------------------------------------------------------------------+</span>
+<span class="sd">    | ``out_obs``             | Number of subjects having at least one outlying observation                     |</span>
+<span class="sd">    +-------------------------+---------------------------------------------------------------------------------+</span>
+<span class="sd">    | ``out_ind``             | Number of outlying subjects. predicted_residual &gt; 3.0                           |</span>
+<span class="sd">    +-------------------------+---------------------------------------------------------------------------------+</span>
+<span class="sd">    | ``inf_outlier``         | Number of subjects both influential by any criteria and outlier by any criteria |</span>
+<span class="sd">    +-------------------------+---------------------------------------------------------------------------------+</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    models : list of models</span>
+<span class="sd">        List of models to summarize.</span>
+<span class="sd">    df : pd.DataFrame</span>
+<span class="sd">        Output from a previous call to summarize_individuals.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    pd.DataFrame</span>
+<span class="sd">        Table with one row per model.</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    summarize_individuals : Get raw individual data</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>  <span class="c1"># noqa: E501</span>
+    <span class="k">if</span> <span class="n">models</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">summarize_individuals</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">None</span>
+
+    <span class="n">is_out_obs</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;outlier_count&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">0.0</span>
+    <span class="n">is_out_ind</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;predicted_residual&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">3.0</span>
+    <span class="n">is_inf_params</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;predicted_dofv&#39;</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mf">3.84</span>
+
+    <span class="n">out_obs</span> <span class="o">=</span> <span class="n">is_out_obs</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="n">out_ind</span> <span class="o">=</span> <span class="n">is_out_ind</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="n">inf_params</span> <span class="o">=</span> <span class="n">is_inf_params</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+    <span class="n">ninds</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;ID&#39;</span><span class="p">))</span>
+    <span class="n">parents</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;parent_model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[::</span><span class="n">ninds</span><span class="p">]</span>
+    <span class="n">parent_ofvs</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">parents</span><span class="p">][</span><span class="s1">&#39;ofv&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">parent_ofvs</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span>
+    <span class="n">dofvi</span> <span class="o">=</span> <span class="n">parent_ofvs</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ofv&#39;</span><span class="p">]</span>
+
+    <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;parent_model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+            <span class="n">start_name</span> <span class="o">=</span> <span class="n">name</span>
+            <span class="k">break</span>
+    <span class="c1"># FIXME: Doesn&#39;t have to have a start model</span>
+
+    <span class="n">ofv_sums</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ofv&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">parent_sums</span> <span class="o">=</span> <span class="n">parent_ofvs</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
+    <span class="n">full_ofv_diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">parent_sums</span> <span class="o">-</span> <span class="n">ofv_sums</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;ID&#39;</span><span class="p">))</span>
+    <span class="n">full_ofv_diff</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="n">is_inf_selection</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dofvi</span><span class="p">)</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">full_ofv_diff</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mf">3.84</span>
+    <span class="n">inf_selection</span> <span class="o">=</span> <span class="n">is_inf_selection</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+
+    <span class="n">is_inf_outlier</span> <span class="o">=</span> <span class="p">(</span><span class="n">is_out_obs</span> <span class="o">|</span> <span class="n">is_out_ind</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">is_inf_params</span> <span class="o">|</span> <span class="n">is_inf_selection</span><span class="p">)</span>
+    <span class="n">inf_outlier</span> <span class="o">=</span> <span class="n">is_inf_outlier</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+    <span class="n">parents</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">inf_selection</span><span class="o">.</span><span class="n">index</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
+        <span class="p">{</span>
+            <span class="s1">&#39;parent_model&#39;</span><span class="p">:</span> <span class="n">parents</span><span class="p">,</span>
+            <span class="s1">&#39;inf_selection&#39;</span><span class="p">:</span> <span class="n">inf_selection</span><span class="p">,</span>
+            <span class="s1">&#39;inf_params&#39;</span><span class="p">:</span> <span class="n">inf_params</span><span class="p">,</span>
+            <span class="s1">&#39;out_obs&#39;</span><span class="p">:</span> <span class="n">out_obs</span><span class="p">,</span>
+            <span class="s1">&#39;out_ind&#39;</span><span class="p">:</span> <span class="n">out_ind</span><span class="p">,</span>
+            <span class="s1">&#39;inf_outlier&#39;</span><span class="p">:</span> <span class="n">inf_outlier</span><span class="p">,</span>
+        <span class="p">}</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>
 
               </div>

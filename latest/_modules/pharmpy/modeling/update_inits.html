@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.update_inits &#8212; Pharmpy 0.69.0 documentation</title>
+    <title>pharmpy.modeling.update_inits &#8212; Pharmpy 0.70.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -23,6 +23,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/tabs.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
     
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -33,6 +34,7 @@
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/tabs.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.0-rc.0/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -258,7 +260,7 @@
 
 
 <span class="k">def</span> <span class="nf">_move_est_close_to_bounds</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
+    <span class="n">rvs</span><span class="p">,</span> <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
     <span class="n">est</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
     <span class="n">sdcorr</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">parameters_sdcorr</span><span class="p">(</span><span class="n">est</span><span class="p">)</span>
@@ -277,13 +279,17 @@
                             <span class="n">sd_i</span><span class="p">,</span> <span class="n">sd_j</span> <span class="o">=</span> <span class="n">sdcorr</span><span class="p">[</span><span class="n">name_i</span><span class="p">],</span> <span class="n">sdcorr</span><span class="p">[</span><span class="n">name_j</span><span class="p">]</span>
                             <span class="n">newdict</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">corr_new</span> <span class="o">*</span> <span class="n">sd_i</span> <span class="o">*</span> <span class="n">sd_j</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="k">if</span> <span class="n">est</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_zero_fix</span><span class="p">(</span><span class="n">pset</span><span class="p">[</span><span class="n">param_name</span><span class="p">])</span> <span class="ow">and</span> <span class="n">est</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
                             <span class="n">newdict</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.01</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">param_name</span> <span class="o">=</span> <span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">std</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">name</span>
-            <span class="k">if</span> <span class="n">est</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">_is_zero_fix</span><span class="p">(</span><span class="n">pset</span><span class="p">[</span><span class="n">param_name</span><span class="p">])</span> <span class="ow">and</span> <span class="n">est</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">&lt;</span> <span class="mf">0.001</span><span class="p">:</span>
                 <span class="n">newdict</span><span class="p">[</span><span class="n">param_name</span><span class="p">]</span> <span class="o">=</span> <span class="mf">0.01</span>
     <span class="k">return</span> <span class="n">newdict</span>
+
+
+<span class="k">def</span> <span class="nf">_is_zero_fix</span><span class="p">(</span><span class="n">param</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">param</span><span class="o">.</span><span class="n">init</span> <span class="o">==</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">param</span><span class="o">.</span><span class="n">fix</span>
 </pre></div>
 
               </div>

@@ -1,3 +1,5 @@
+.. _modelsearch:
+
 ===========
 Modelsearch
 ===========
@@ -13,18 +15,17 @@ The modelsearch tool is available both in Pharmpy/pharmr and from the command li
 
 To initiate modelsearch in Python:
 
-.. code:: python
+.. pharmpy-code::
 
     from pharmpy.modeling import run_tool
 
     start_model = read_model('path/to/model')
-    run_tool('modelsearch',
-             search_space='ABSORPTION(ZO);PERIPHERALS(1)',
-             algorithm='exhaustive',
-             model=start_model,
-             iiv_strategy=0,
-             rankfunc='bic',
-             cutoff=None)
+    res = run_modelsearch(search_space='ABSORPTION(ZO);PERIPHERALS(1)',
+                          algorithm='exhaustive',
+                          model=start_model,
+                          iiv_strategy=0,
+                          rankfunc='bic',
+                          cutoff=None)
 
 This will take an input model ``model`` with ``search_space`` as the search space, meaning zero order absorption and adding one
 peripheral compartment will be tried. The tool will use the ``exhaustive`` search algorithm. Structural IIVs will be
@@ -48,15 +49,16 @@ For a more detailed description of each argument, see their respective chapter o
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
 | :ref:`algorithm<Algorithms>`                      | Algorithm to use (e.g. exhaustive)                                                      |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| :ref:`rankfunc<Comparing and ranking candidates>` | Which selection criteria to rank models on, e.g. OFV (default is BIC)                   |
+| :ref:`rankfunc<ranking>`                          | Which selection criteria to rank models on, e.g. OFV (default is BIC)                   |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| :ref:`cutoff<Comparing and ranking candidates>`   | Cutoff for the ranking function, exclude models that are below cutoff (default is None) |
+| :ref:`cutoff<ranking>`                            | Cutoff for the ranking function, exclude models that are below cutoff (default is None) |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
 | :ref:`iiv_strategy<IIV strategies>`               | If/how IIV should be added to candidate models (default is 0)                           |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
 | ``model``                                         | Start model                                                                             |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
 
+.. _the search space:
 
 ~~~~~~~~~~~~~~~~
 The search space
@@ -65,7 +67,7 @@ The search space
 The model feature search space is a set of possible combinations of model features that will be applied and tested on
 the input model. The supported features cover absorption, absorption delay, elimination, and distribution. The search
 space is given as a string with a specific grammar, according to the `Model Feature Language` (MFL) (see detailed
-description :ref:`below<Model feature language (MFL) reference>`).
+description :ref:`below<mfl>`).
 
 ~~~~~~~~~~
 Algorithms
@@ -159,6 +161,8 @@ The exhaustive stepwise search applies features in a stepwise manner such that o
         s9 -> s15
     }
 
+.. _feature combination exclusions:
+
 Feature combination exclusions
 ------------------------------
 
@@ -228,6 +232,9 @@ best model from each comparison to the next layer, where the subsequent feature 
 The same feature combinations as in the exhaustive stepwise algorithm will be excluded (described
 :ref:`here<Feature combination exclusions>`)
 
+
+.. _iiv_strategies:
+
 ~~~~~~~~~~~~~~
 IIV strategies
 ~~~~~~~~~~~~~~
@@ -247,6 +254,8 @@ The different strategies can be seen here:
 | ``3``     | IIV is added to the absorption delay parameter           |
 +-----------+----------------------------------------------------------+
 
+.. _ranking:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Comparing and ranking candidates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -264,9 +273,9 @@ if the user does not want to use the default. The following rank functions are a
 | ``'bic'``  | ΔBIC (mixed effects). Default is to rank all candidates if no cutoff is provided. |
 +------------+-----------------------------------------------------------------------------------+
 
-~~~~~~~~~~~~~~~~~~~~~~~~
-The Model Search results
-~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~
+The Modelsearch results
+~~~~~~~~~~~~~~~~~~~~~~~
 
 The results object contains the candidate models, the start model, and the selected best model (based on the input
 selection criteria). The tool also creates various summary tables which can be accessed in the results object,
@@ -274,7 +283,7 @@ as well as files in .csv/.json format.
 
 Consider a modelsearch run with the search space of zero order absorption and adding one peripheral compartment:
 
-.. code::
+.. pharmpy-code::
 
     res = run_tool('modelsearch',
                    'ABSORPTION(ZO);PERIPHERALS(1)',
@@ -288,7 +297,7 @@ Consider a modelsearch run with the search space of zero order absorption and ad
 The ``summary_tool`` table contains information such as which feature each model candidate has, the difference to the
 start model (in this case comparing BIC), and final ranking:
 
-.. jupyter-execute::
+.. pharmpy-execute::
     :hide-code:
 
     from pharmpy.results import read_results
@@ -299,21 +308,32 @@ To see information about the actual model runs, such as minimization status, est
 you can look at the ``summary_models`` table. The table is generated with
 :py:func:`pharmpy.modeling.summarize_modelfit_results`.
 
-
-.. jupyter-execute::
+.. pharmpy-execute::
     :hide-code:
 
     import pandas as pd
     pd.set_option("display.max_columns", 10)
     res.summary_models
 
-Finally, you can see different individual statistics ``summary_individuals``.
+A summary table of predicted influential individuals and outliers can be seen in ``summary_individuals_count``.
+See :py:func:`pharmpy.modeling.summarize_individuals_count_table` for information on the content of this table.
 
-.. jupyter-execute::
+.. pharmpy-execute::
+    :hide-code:
+
+    res.summary_individuals_count
+
+Finally, you can see different individual statistics ``summary_individuals``.
+See :py:func:`pharmpy.modeling.summarize_individuals` for information on the content of this table.
+
+.. pharmpy-execute::
     :hide-code:
 
     res.summary_individuals
 
+
+
+.. _mfl:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Model feature language (MFL) reference

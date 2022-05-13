@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.datainfo &#8212; Pharmpy 0.69.0 documentation</title>
+    <title>pharmpy.datainfo &#8212; Pharmpy 0.70.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -23,6 +23,7 @@
     <link rel="stylesheet" type="text/css" href="../../_static/graphviz.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../_static/tabs.css" />
     <link rel="stylesheet" type="text/css" href="../../_static/custom.css" />
     
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -33,6 +34,7 @@
     <script src="../../_static/underscore.js"></script>
     <script src="../../_static/doctools.js"></script>
     <script src="../../_static/thebelab-helper.js"></script>
+    <script src="../../_static/tabs.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.0-rc.0/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../genindex.html" />
@@ -269,6 +271,55 @@
         <span class="s1">&#39;plasma concentration&#39;</span><span class="p">,</span>
         <span class="s1">&#39;subject identifier&#39;</span><span class="p">,</span>
     <span class="p">]</span>
+
+<div class="viewcode-block" id="ColumnInfo.convert_pd_dtype_to_datatype"><a class="viewcode-back" href="../../api/pharmpy.ColumnInfo.html#pharmpy.ColumnInfo.convert_pd_dtype_to_datatype">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">convert_pd_dtype_to_datatype</span><span class="p">(</span><span class="n">dtype</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert pandas dtype to Pharmpy datatype</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        dtype : str</span>
+<span class="sd">            String representing a pandas dtype</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            String representing a Pharmpy datatype</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy import ColumnInfo</span>
+<span class="sd">        &gt;&gt;&gt; ColumnInfo.convert_pd_dtype_to_datatype(&quot;float64&quot;)</span>
+<span class="sd">        &#39;float64&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="n">dtype</span> <span class="k">if</span> <span class="n">dtype</span> <span class="ow">in</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">_all_dtypes</span> <span class="k">else</span> <span class="s1">&#39;str&#39;</span></div>
+
+<div class="viewcode-block" id="ColumnInfo.convert_datatype_to_pd_dtype"><a class="viewcode-back" href="../../api/pharmpy.ColumnInfo.html#pharmpy.ColumnInfo.convert_datatype_to_pd_dtype">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">convert_datatype_to_pd_dtype</span><span class="p">(</span><span class="n">datatype</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Convert Pharmpy datatype to pandas dtype</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        datatype : str</span>
+<span class="sd">            String representing a Pharmpy datatype</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        str</span>
+<span class="sd">            String representing a pandas dtype</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy import ColumnInfo</span>
+<span class="sd">        &gt;&gt;&gt; ColumnInfo.convert_datatype_to_pd_dtype(&quot;float64&quot;)</span>
+<span class="sd">        &#39;float64&#39;</span>
+<span class="sd">        &gt;&gt;&gt; ColumnInfo.convert_datatype_to_pd_dtype(&quot;nmtran-date&quot;)</span>
+<span class="sd">        &#39;str&#39;</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="n">datatype</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;nmtran&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="s1">&#39;str&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">datatype</span></div>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -774,6 +825,36 @@
         <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">):</span>
             <span class="n">col</span><span class="o">.</span><span class="n">type</span> <span class="o">=</span> <span class="n">v</span>
 
+<div class="viewcode-block" id="DataInfo.get_dtype_dict"><a class="viewcode-back" href="../../api/pharmpy.DataInfo.html#pharmpy.DataInfo.get_dtype_dict">[docs]</a>    <span class="k">def</span> <span class="nf">get_dtype_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Create a dictionary from column names to pandas dtypes</span>
+
+<span class="sd">        This can be used as input to some pandas functions to convert</span>
+<span class="sd">        column to the correct pandas dtype.</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        dict</span>
+<span class="sd">            Column name to pandas dtype</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; model.datainfo.get_dtype_dict()</span>
+<span class="sd">        {&#39;ID&#39;: &#39;int32&#39;,</span>
+<span class="sd">         &#39;TIME&#39;: &#39;float64&#39;,</span>
+<span class="sd">         &#39;AMT&#39;: &#39;float64&#39;,</span>
+<span class="sd">         &#39;WGT&#39;: &#39;float64&#39;,</span>
+<span class="sd">         &#39;APGR&#39;: &#39;float64&#39;,</span>
+<span class="sd">         &#39;DV&#39;: &#39;float64&#39;}</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="n">col</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">col</span><span class="o">.</span><span class="n">datatype</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">col</span><span class="o">.</span><span class="n">drop</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">col</span><span class="o">.</span><span class="n">datatype</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;nmtran&#39;</span><span class="p">)</span>
+            <span class="k">else</span> <span class="s1">&#39;str&#39;</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span>
+        <span class="p">}</span></div>
+
 <div class="viewcode-block" id="DataInfo.to_json"><a class="viewcode-back" href="../../api/pharmpy.DataInfo.html#pharmpy.DataInfo.to_json">[docs]</a>    <span class="k">def</span> <span class="nf">to_json</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="n">a</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">:</span>
@@ -831,6 +912,9 @@
         <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="n">di</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path</span>
+        <span class="n">separator</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;separator&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">separator</span><span class="p">:</span>
+            <span class="n">di</span><span class="o">.</span><span class="n">separator</span> <span class="o">=</span> <span class="n">separator</span>
         <span class="k">return</span> <span class="n">di</span></div>
 
 <div class="viewcode-block" id="DataInfo.read_json"><a class="viewcode-back" href="../../api/pharmpy.DataInfo.html#pharmpy.DataInfo.read_json">[docs]</a>    <span class="nd">@staticmethod</span>

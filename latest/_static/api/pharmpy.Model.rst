@@ -13,6 +13,7 @@ Model
       ~Model.datainfo
       ~Model.dataset
       ~Model.dependent_variable
+      ~Model.description
       ~Model.estimation_steps
       ~Model.filename_extension
       ~Model.initial_individual_estimates
@@ -32,6 +33,7 @@ Model
 
       ~Model.copy
       ~Model.create_model
+      ~Model.has_same_dataset_as
       ~Model.read_modelfit_results
       ~Model.update_datainfo
 
@@ -40,6 +42,7 @@ Model
    .. autoattribute:: datainfo
    .. autoattribute:: dataset
    .. autoattribute:: dependent_variable
+   .. autoattribute:: description
    .. autoattribute:: estimation_steps
    .. autoattribute:: filename_extension
    .. autoattribute:: initial_individual_estimates
@@ -57,5 +60,6 @@ Model
 
    .. automethod:: copy
    .. automethod:: create_model
+   .. automethod:: has_same_dataset_as
    .. automethod:: read_modelfit_results
    .. automethod:: update_datainfo

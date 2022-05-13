@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.amd &#8212; Pharmpy 0.69.0 documentation</title>
+    <title>pharmpy.modeling.amd &#8212; Pharmpy 0.70.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -23,6 +23,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/tabs.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
     
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -33,6 +34,7 @@
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/tabs.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.0-rc.0/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -196,7 +198,6 @@
 <span class="kn">from</span> <span class="nn">pharmpy.tools.amd.funcs</span> <span class="kn">import</span> <span class="n">create_start_model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">default_tool_database</span>
 
-<span class="kn">from</span> <span class="nn">.allometry</span> <span class="kn">import</span> <span class="n">add_allometry</span>
 <span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">convert_model</span>
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">remove_loq_data</span>
 <span class="kn">from</span> <span class="nn">.run</span> <span class="kn">import</span> <span class="n">fit</span><span class="p">,</span> <span class="n">run_tool</span>
@@ -272,7 +273,7 @@
     <span class="k">if</span> <span class="n">lloq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq</span><span class="p">)</span>
 
-    <span class="n">default_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;structural&#39;</span><span class="p">,</span> <span class="s1">&#39;iiv&#39;</span><span class="p">,</span> <span class="s1">&#39;residual&#39;</span><span class="p">,</span> <span class="s1">&#39;allometry&#39;</span><span class="p">,</span> <span class="s1">&#39;covariates&#39;</span><span class="p">]</span>
+    <span class="n">default_order</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;structural&#39;</span><span class="p">,</span> <span class="s1">&#39;iivsearch&#39;</span><span class="p">,</span> <span class="s1">&#39;residual&#39;</span><span class="p">,</span> <span class="s1">&#39;allometry&#39;</span><span class="p">,</span> <span class="s1">&#39;covariates&#39;</span><span class="p">]</span>
     <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">order</span> <span class="o">=</span> <span class="n">default_order</span>
 
@@ -296,14 +297,14 @@
         <span class="k">if</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;structural&#39;</span><span class="p">:</span>
             <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_modelsearch</span><span class="p">,</span> <span class="n">search_space</span><span class="o">=</span><span class="n">search_space</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="n">run_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;iiv&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;iivsearch&#39;</span><span class="p">:</span>
             <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_iiv</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="n">run_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;residual&#39;</span><span class="p">:</span>
             <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_resmod</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="n">run_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;allometry&#39;</span><span class="p">:</span>
-            <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_allometry</span><span class="p">,</span> <span class="n">allometric_variable</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_run_allometry</span><span class="p">,</span> <span class="n">allometric_variable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="n">run_funcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">func</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;covariates&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">scm</span><span class="o">.</span><span class="n">have_scm</span><span class="p">()</span> <span class="ow">and</span> <span class="p">(</span><span class="n">continuous</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">categorical</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">):</span>
@@ -339,35 +340,13 @@
 
 
 <span class="k">def</span> <span class="nf">_run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-    <span class="n">res_iiv</span> <span class="o">=</span> <span class="n">run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">iiv_strategy</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
+    <span class="n">res_iiv</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;iivsearch&#39;</span><span class="p">,</span> <span class="s1">&#39;brute_force&#39;</span><span class="p">,</span> <span class="n">iiv_strategy</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
     <span class="n">selected_iiv_model</span> <span class="o">=</span> <span class="n">res_iiv</span><span class="o">.</span><span class="n">best_model</span>
     <span class="k">return</span> <span class="n">selected_iiv_model</span>
 
 
 <span class="k">def</span> <span class="nf">_run_resmod</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
-    <span class="n">skip</span> <span class="o">=</span> <span class="p">[]</span>
-
-    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;resmod1&#39;</span><span class="p">)</span>
-    <span class="n">selected_model</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">best_model</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">selected_model_name</span>
-    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;base&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">selected_model</span>
-    <span class="k">elif</span> <span class="n">name</span><span class="p">[:</span><span class="mi">12</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;time_varying&#39;</span><span class="p">:</span>
-        <span class="n">skip</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;time_varying&#39;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">skip</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-
-    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">selected_model</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;resmod2&#39;</span><span class="p">)</span>
-    <span class="n">selected_model</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">best_model</span>
-    <span class="n">name</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">selected_model_name</span>
-    <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;base&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">selected_model</span>
-    <span class="k">elif</span> <span class="n">name</span><span class="p">[:</span><span class="mi">12</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;time_varying&#39;</span><span class="p">:</span>
-        <span class="n">skip</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="s1">&#39;time_varying&#39;</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">skip</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-
-    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">selected_model</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="n">skip</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;resmod3&#39;</span><span class="p">)</span>
+    <span class="n">res_resmod</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;resmod&#39;</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;resmod&#39;</span><span class="p">)</span>
     <span class="n">selected_model</span> <span class="o">=</span> <span class="n">res_resmod</span><span class="o">.</span><span class="n">best_model</span>
     <span class="k">return</span> <span class="n">selected_model</span>
 
@@ -394,7 +373,7 @@
     <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">final_model</span>
 
 
-<span class="k">def</span> <span class="nf">_run_allometry</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">allometric_variable</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_run_allometry</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">allometric_variable</span><span class="p">,</span> <span class="n">path</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">allometric_variable</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">==</span> <span class="s1">&#39;body weight&#39;</span><span class="p">:</span>
@@ -402,90 +381,10 @@
                 <span class="k">break</span>
 
     <span class="k">if</span> <span class="n">allometric_variable</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">add_allometry</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">allometric_variable</span><span class="o">=</span><span class="n">allometric_variable</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;scaled_model&quot;</span>
-        <span class="n">fit</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span>
-
-
-<div class="viewcode-block" id="run_iiv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.run_iiv.html#pharmpy.modeling.run_iiv">[docs]</a><span class="k">def</span> <span class="nf">run_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">iiv_strategy</span><span class="o">=</span><span class="mi">0</span><span class="p">,</span> <span class="n">rankfunc</span><span class="o">=</span><span class="s1">&#39;ofv&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Run IIV tool</span>
-
-<span class="sd">    Runs two IIV workflows: testing the number of etas and testing which block structure</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    model : Model</span>
-<span class="sd">        Pharmpy model</span>
-<span class="sd">    iiv_strategy : int</span>
-<span class="sd">        How IIVs should be added to start model. Default is 0 (no added IIVs)</span>
-<span class="sd">    rankfunc : str</span>
-<span class="sd">        Which ranking function should be used (OFV, AIC, BIC). Default is OFV</span>
-<span class="sd">    cutoff : float</span>
-<span class="sd">        Cutoff for which value of the ranking function that is considered significant. Default</span>
-<span class="sd">        is 3.84</span>
-<span class="sd">    path : Path</span>
-<span class="sd">        Path of rundirectory</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
-
-<span class="sd">    Examples</span>
-<span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
-<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; run_iiv(model)      # doctest: +SKIP</span>
-
-<span class="sd">    See also</span>
-<span class="sd">    --------</span>
-<span class="sd">    run_amd</span>
-<span class="sd">    run_tool</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">path</span><span class="p">:</span>
-        <span class="n">path1</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;iiv1&#39;</span>
-        <span class="n">path2</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;iiv2&#39;</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">path1</span> <span class="o">=</span> <span class="n">path</span>
-        <span class="n">path2</span> <span class="o">=</span> <span class="n">path</span>
-
-    <span class="n">res_no_of_etas</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span>
-        <span class="s1">&#39;iiv&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;brute_force_no_of_etas&#39;</span><span class="p">,</span>
-        <span class="n">iiv_strategy</span><span class="o">=</span><span class="n">iiv_strategy</span><span class="p">,</span>
-        <span class="n">rankfunc</span><span class="o">=</span><span class="n">rankfunc</span><span class="p">,</span>
-        <span class="n">cutoff</span><span class="o">=</span><span class="n">cutoff</span><span class="p">,</span>
-        <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-        <span class="n">path</span><span class="o">=</span><span class="n">path1</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">res_block_structure</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span>
-        <span class="s1">&#39;iiv&#39;</span><span class="p">,</span>
-        <span class="s1">&#39;brute_force_block_structure&#39;</span><span class="p">,</span>
-        <span class="n">rankfunc</span><span class="o">=</span><span class="n">rankfunc</span><span class="p">,</span>
-        <span class="n">cutoff</span><span class="o">=</span><span class="n">cutoff</span><span class="p">,</span>
-        <span class="n">model</span><span class="o">=</span><span class="n">res_no_of_etas</span><span class="o">.</span><span class="n">best_model</span><span class="p">,</span>
-        <span class="n">path</span><span class="o">=</span><span class="n">path2</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">summarize_modelfit_results</span>
-
-    <span class="n">summary_models</span> <span class="o">=</span> <span class="n">summarize_modelfit_results</span><span class="p">(</span>
-        <span class="p">[</span><span class="n">model</span><span class="p">]</span> <span class="o">+</span> <span class="n">res_no_of_etas</span><span class="o">.</span><span class="n">models</span> <span class="o">+</span> <span class="n">res_block_structure</span><span class="o">.</span><span class="n">models</span>
-    <span class="p">)</span>
-
-    <span class="kn">from</span> <span class="nn">pharmpy.tools.iiv.tool</span> <span class="kn">import</span> <span class="n">IIVResults</span>
-
-    <span class="n">res</span> <span class="o">=</span> <span class="n">IIVResults</span><span class="p">(</span>
-        <span class="n">summary_tool</span><span class="o">=</span><span class="p">[</span><span class="n">res_no_of_etas</span><span class="o">.</span><span class="n">summary_tool</span><span class="p">,</span> <span class="n">res_block_structure</span><span class="o">.</span><span class="n">summary_tool</span><span class="p">],</span>
-        <span class="n">summary_models</span><span class="o">=</span><span class="n">summary_models</span><span class="p">,</span>
-        <span class="n">best_model</span><span class="o">=</span><span class="n">res_block_structure</span><span class="o">.</span><span class="n">best_model</span><span class="p">,</span>
-        <span class="n">models</span><span class="o">=</span><span class="n">res_no_of_etas</span><span class="o">.</span><span class="n">models</span> <span class="o">+</span> <span class="n">res_block_structure</span><span class="o">.</span><span class="n">models</span><span class="p">,</span>
-        <span class="n">start_model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">res</span></div>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span>
+            <span class="s1">&#39;allometry&#39;</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">allometric_variable</span><span class="o">=</span><span class="n">allometric_variable</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;allometry&#39;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">res</span>
 </pre></div>
 
               </div>

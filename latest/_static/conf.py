@@ -1,9 +1,10 @@
 import os
+import sys
 
+sys.path.append(os.path.abspath('./_ext'))
 
 extensions = [
     'sphinx.ext.autodoc',
-    'sphinx.ext.autosectionlabel',
     'sphinx.ext.autosummary',
     'sphinx.ext.coverage',
     'sphinx.ext.doctest',
@@ -17,7 +18,9 @@ extensions = [
     'sphinx.ext.viewcode',
     'sphinx_automodapi.automodapi',
     'jupyter_sphinx',
+    'sphinx_tabs.tabs',
     'sphinxcontrib.autoprogram',
+    'pharmpy_snippet',
 ]
 if os.getenv('SPELLCHECK'):
     extensions += 'sphinxcontrib.spelling',
@@ -30,7 +33,7 @@ project = 'Pharmpy'
 year = '2018-2022'
 authors = ['the Pharmpy development team']
 copyright = '{0}; {1}'.format(year, ', '.join(authors))
-version = release = '0.69.0'
+version = release = '0.70.0'
 html_show_sourcelink = False
 
 pygments_style = 'trac'

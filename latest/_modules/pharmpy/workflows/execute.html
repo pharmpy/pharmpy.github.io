@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.workflows.execute &#8212; Pharmpy 0.69.0 documentation</title>
+    <title>pharmpy.workflows.execute &#8212; Pharmpy 0.70.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -23,6 +23,7 @@
     <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/tabs.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
     
   <!-- Pre-loaded scripts that we'll load fully later -->
@@ -33,6 +34,7 @@
     <script src="../../../_static/underscore.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
+    <script src="../../../_static/tabs.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.0-rc.0/dist/embed-amd.js"></script>
     <link rel="index" title="Index" href="../../../genindex.html" />
@@ -192,7 +194,7 @@
 <span></span><span class="kn">from</span> <span class="nn">pharmpy.utils</span> <span class="kn">import</span> <span class="n">normalize_user_given_path</span>
 
 
-<div class="viewcode-block" id="execute_workflow"><a class="viewcode-back" href="../../../api/pharmpy.workflows.execute_workflow.html#pharmpy.workflows.execute_workflow">[docs]</a><span class="k">def</span> <span class="nf">execute_workflow</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">,</span> <span class="n">database</span><span class="p">):</span>
+<div class="viewcode-block" id="execute_workflow"><a class="viewcode-back" href="../../../api/pharmpy.workflows.execute_workflow.html#pharmpy.workflows.execute_workflow">[docs]</a><span class="k">def</span> <span class="nf">execute_workflow</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">dispatcher</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">resume</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Execute workflow</span>
 
 <span class="sd">    Parameters</span>
@@ -202,13 +204,28 @@
 <span class="sd">    dispatcher : ExecutionDispatcher</span>
 <span class="sd">        Dispatcher to use</span>
 <span class="sd">    database : ToolDatabase</span>
-<span class="sd">        Tool database to use</span>
+<span class="sd">        Tool database to use. None for the default Tool database.</span>
+<span class="sd">    path : Path</span>
+<span class="sd">        Path to use for database if applicable.</span>
+<span class="sd">    resume : bool</span>
+<span class="sd">        Whether to allow resuming previous workflow execution.</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Results</span>
 <span class="sd">        Results object created by workflow</span>
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">dispatcher</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">default_dispatcher</span>
+
+        <span class="n">dispatcher</span> <span class="o">=</span> <span class="n">default_dispatcher</span>
+    <span class="k">if</span> <span class="n">database</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">default_tool_database</span>
+
+        <span class="n">database</span> <span class="o">=</span> <span class="n">default_tool_database</span><span class="p">(</span>
+            <span class="n">toolname</span><span class="o">=</span><span class="n">workflow</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="n">resume</span>
+        <span class="p">)</span>  <span class="c1"># TODO: database -&gt; tool_database</span>
+
     <span class="c1"># For all input models set new database and read in results</span>
     <span class="n">original_input_models</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">input_models</span> <span class="o">=</span> <span class="p">[]</span>
@@ -222,6 +239,7 @@
                     <span class="n">original_input_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
                     <span class="n">inp</span><span class="o">.</span><span class="n">modelfit_results</span>  <span class="c1"># To read in the results</span>
                     <span class="n">new_model</span> <span class="o">=</span> <span class="n">inp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                    <span class="n">new_model</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="n">new_model</span><span class="o">.</span><span class="n">name</span>
                     <span class="n">new_model</span><span class="o">.</span><span class="n">dataset</span>
                     <span class="n">new_model</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">model_database</span>
                     <span class="n">new_inp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_model</span><span class="p">)</span>
@@ -264,8 +282,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    Tuple of common options and other option dictionaries</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># FIXME: add dispatcher/database</span>
-    <span class="n">execute_options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]</span>
+    <span class="n">execute_options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="s1">&#39;resume&#39;</span><span class="p">]</span>
     <span class="n">common_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="n">other_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
@@ -277,6 +294,34 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">other_options</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
     <span class="k">return</span> <span class="n">common_options</span><span class="p">,</span> <span class="n">other_options</span></div>
+
+
+<div class="viewcode-block" id="call_workflow"><a class="viewcode-back" href="../../../api/pharmpy.workflows.call_workflow.html#pharmpy.workflows.call_workflow">[docs]</a><span class="k">def</span> <span class="nf">call_workflow</span><span class="p">(</span><span class="n">wf</span><span class="p">,</span> <span class="n">unique_name</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Dynamically call a workflow from another workflow.</span>
+
+<span class="sd">    Currently only supports dask distributed</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    wf : Workflow</span>
+<span class="sd">        A workflow object</span>
+<span class="sd">    unique_name : str</span>
+<span class="sd">        A name of the results node that is unique between parent and dynamically created workflows</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Any</span>
+<span class="sd">        Whatever the dynamic workflow returns</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">get_client</span><span class="p">,</span> <span class="n">rejoin</span><span class="p">,</span> <span class="n">secede</span>
+
+    <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
+    <span class="n">secede</span><span class="p">()</span>
+    <span class="n">d</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">as_dask_dict</span><span class="p">()</span>
+    <span class="n">d</span><span class="p">[</span><span class="n">unique_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;results&#39;</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">unique_name</span><span class="p">)</span>
+    <span class="n">rejoin</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>
 
               </div>
