@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.allometry &#8212; Pharmpy 0.70.1 documentation</title>
+    <title>pharmpy.modeling.allometry &#8212; Pharmpy 0.71.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -191,10 +191,10 @@
               <div>
                 
   <h1>Source code for pharmpy.modeling.allometry</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pharmpy</span> <span class="kn">import</span> <span class="n">ExplicitODESystem</span>
-<span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
+<span></span><span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
 <span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">sympify</span>
 
+<span class="kn">from</span> <span class="nn">.</span> <span class="kn">import</span> <span class="n">find_clearance_parameters</span><span class="p">,</span> <span class="n">find_volume_parameters</span>
 <span class="kn">from</span> <span class="nn">.expressions</span> <span class="kn">import</span> <span class="n">create_symbol</span>
 
 
@@ -271,77 +271,25 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">allometric_variable</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">allometric_variable</span><span class="p">)</span>
     <span class="n">reference_value</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">reference_value</span><span class="p">)</span>
-    <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ExplicitODESystem</span><span class="p">:</span>
-        <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
-
-    <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
-    <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
+    <span class="bp">cls</span> <span class="o">=</span> <span class="n">find_clearance_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">vcs</span> <span class="o">=</span> <span class="n">find_volume_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">parameters</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">inits</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">elimination_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
-        <span class="n">cl</span><span class="p">,</span> <span class="n">vc</span> <span class="o">=</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">cl</span><span class="o">.</span><span class="n">is_Symbol</span> <span class="ow">and</span> <span class="n">vc</span><span class="o">.</span><span class="n">is_Symbol</span><span class="p">:</span>
-            <span class="n">parameters</span> <span class="o">+=</span> <span class="p">[</span><span class="n">cl</span><span class="p">,</span> <span class="n">vc</span><span class="p">]</span>
-            <span class="n">inits</span> <span class="o">+=</span> <span class="p">[</span><span class="mf">0.75</span><span class="p">,</span> <span class="mf">1.0</span><span class="p">]</span>
-        <span class="k">for</span> <span class="n">periph</span> <span class="ow">in</span> <span class="n">odes</span><span class="o">.</span><span class="n">peripheral_compartments</span><span class="p">:</span>
-            <span class="n">rate1</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">periph</span><span class="p">)</span>
-            <span class="n">q1</span><span class="p">,</span> <span class="n">v1</span> <span class="o">=</span> <span class="n">rate1</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">q1</span><span class="o">.</span><span class="n">is_Symbol</span> <span class="ow">and</span> <span class="n">v1</span><span class="o">.</span><span class="n">is_Symbol</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">q1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
-                    <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q1</span><span class="p">)</span>
-                    <span class="n">inits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">v1</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
-                    <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
-                    <span class="n">inits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
-            <span class="n">rate2</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">periph</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>
-            <span class="n">q2</span><span class="p">,</span> <span class="n">v2</span> <span class="o">=</span> <span class="n">rate2</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">q2</span><span class="o">.</span><span class="n">is_Symbol</span> <span class="ow">and</span> <span class="n">v2</span><span class="o">.</span><span class="n">is_Symbol</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">q2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
-                    <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q2</span><span class="p">)</span>
-                    <span class="n">inits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">v2</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
-                    <span class="n">parameters</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span>
-                    <span class="n">inits</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">initials</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">initials</span> <span class="o">=</span> <span class="n">inits</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="bp">cls</span> <span class="o">+</span> <span class="n">vcs</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">parameters</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters found&quot;</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">parameters</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No parameters provided&quot;</span><span class="p">)</span>
-
         <span class="n">parameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">sympify</span><span class="p">(</span><span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">initials</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="c1"># Need to understand which parameter is CL or Q and which is V</span>
-            <span class="bp">cls</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">vcs</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="n">elimination_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
-            <span class="n">cl</span><span class="p">,</span> <span class="n">vc</span> <span class="o">=</span> <span class="n">elimination_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
-            <span class="k">if</span> <span class="n">cl</span><span class="o">.</span><span class="n">is_Symbol</span> <span class="ow">and</span> <span class="n">vc</span><span class="o">.</span><span class="n">is_Symbol</span><span class="p">:</span>
-                <span class="bp">cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
-                <span class="n">vcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">vc</span><span class="p">)</span>
-            <span class="k">for</span> <span class="n">periph</span> <span class="ow">in</span> <span class="n">odes</span><span class="o">.</span><span class="n">peripheral_compartments</span><span class="p">:</span>
-                <span class="n">rate1</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">periph</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>
-                <span class="n">q1</span><span class="p">,</span> <span class="n">v1</span> <span class="o">=</span> <span class="n">rate1</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">q1</span><span class="o">.</span><span class="n">is_Symbol</span> <span class="ow">and</span> <span class="n">v1</span><span class="o">.</span><span class="n">is_Symbol</span><span class="p">:</span>
-                    <span class="bp">cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q1</span><span class="p">)</span>
-                    <span class="n">vcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v1</span><span class="p">)</span>
-                <span class="n">rate2</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">periph</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>
-                <span class="n">q2</span><span class="p">,</span> <span class="n">v2</span> <span class="o">=</span> <span class="n">rate2</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
-                <span class="k">if</span> <span class="n">q2</span><span class="o">.</span><span class="n">is_Symbol</span> <span class="ow">and</span> <span class="n">v2</span><span class="o">.</span><span class="n">is_Symbol</span><span class="p">:</span>
-                    <span class="bp">cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">q2</span><span class="p">)</span>
-                    <span class="n">vcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v2</span><span class="p">)</span>
-
-            <span class="n">initials</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">cls</span><span class="p">:</span>
-                    <span class="n">initials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
-                <span class="k">elif</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">vcs</span><span class="p">:</span>
-                    <span class="n">initials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">initials</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="c1"># Need to understand which parameter is CL or Q and which is V</span>
+        <span class="n">initials</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">cls</span><span class="p">:</span>
+                <span class="n">initials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">0.75</span><span class="p">)</span>
+            <span class="k">elif</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">vcs</span><span class="p">:</span>
+                <span class="n">initials</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mf">1.0</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">lower_bounds</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">lower_bounds</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>

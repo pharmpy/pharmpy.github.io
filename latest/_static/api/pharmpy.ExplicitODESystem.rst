@@ -11,6 +11,7 @@ ExplicitODESystem
    .. autosummary::
 
       ~ExplicitODESystem.amounts
+      ~ExplicitODESystem.compartment_names
       ~ExplicitODESystem.free_symbols
       ~ExplicitODESystem.ics
       ~ExplicitODESystem.odes
@@ -22,10 +23,12 @@ ExplicitODESystem
 
       ~ExplicitODESystem.subs
       ~ExplicitODESystem.to_compartmental_system
+      ~ExplicitODESystem.to_explicit_system
 
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: amounts
+   .. autoattribute:: compartment_names
    .. autoattribute:: free_symbols
    .. autoattribute:: ics
    .. autoattribute:: odes
@@ -35,3 +38,4 @@ ExplicitODESystem
 
    .. automethod:: subs
    .. automethod:: to_compartmental_system
+   .. automethod:: to_explicit_system

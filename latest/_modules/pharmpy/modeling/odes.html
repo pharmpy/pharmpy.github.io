@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.70.1 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.71.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -198,6 +198,7 @@
 <span class="kn">import</span> <span class="nn">sympy</span>
 
 <span class="kn">import</span> <span class="nn">pharmpy.symbols</span>
+<span class="kn">from</span> <span class="nn">pharmpy</span> <span class="kn">import</span> <span class="n">ExplicitODESystem</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">ModelError</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.help_functions</span> <span class="kn">import</span> <span class="n">_as_integer</span>
 <span class="kn">from</span> <span class="nn">pharmpy.parameter</span> <span class="kn">import</span> <span class="n">Parameter</span>
@@ -205,6 +206,7 @@
 
 <span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">remove_unused_parameters_and_rvs</span>
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">get_observations</span>
+<span class="kn">from</span> <span class="nn">.eta_additions</span> <span class="kn">import</span> <span class="n">_get_dependent_assignments</span>
 <span class="kn">from</span> <span class="nn">.expressions</span> <span class="kn">import</span> <span class="n">create_symbol</span>
 
 
@@ -1662,6 +1664,97 @@
     <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">:</span>
         <span class="n">step</span><span class="o">.</span><span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span>
     <span class="k">return</span> <span class="n">model</span></div>
+
+
+<div class="viewcode-block" id="find_clearance_parameters"><a class="viewcode-back" href="../../../api/pharmpy.modeling.find_clearance_parameters.html#pharmpy.modeling.find_clearance_parameters">[docs]</a><span class="k">def</span> <span class="nf">find_clearance_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find clearance parameters in model</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    list</span>
+<span class="sd">        A list of clearance parameters</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">     &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">     &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">     &gt;&gt;&gt; find_clearance_parameters(model)</span>
+<span class="sd">     [CL]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="bp">cls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">rate_list</span> <span class="o">=</span> <span class="n">_find_rate</span><span class="p">(</span><span class="n">sset</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">rate</span> <span class="ow">in</span> <span class="n">rate_list</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">clearance</span> <span class="o">=</span> <span class="n">rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="k">if</span> <span class="n">clearance</span><span class="o">.</span><span class="n">is_Symbol</span><span class="p">:</span>
+                <span class="n">clearance</span> <span class="o">=</span> <span class="n">_find_real_symbol</span><span class="p">(</span><span class="n">sset</span><span class="p">,</span> <span class="n">clearance</span><span class="p">)</span>
+                <span class="k">if</span> <span class="n">clearance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="p">:</span>
+                    <span class="bp">cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clearance</span><span class="p">)</span>
+    <span class="k">return</span> <span class="bp">cls</span></div>
+
+
+<div class="viewcode-block" id="find_volume_parameters"><a class="viewcode-back" href="../../../api/pharmpy.modeling.find_volume_parameters.html#pharmpy.modeling.find_volume_parameters">[docs]</a><span class="k">def</span> <span class="nf">find_volume_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Find volume parameters in model</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    list</span>
+<span class="sd">        A list of volume parameters</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">     &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">     &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">     &gt;&gt;&gt; find_volume_parameters(model)</span>
+<span class="sd">     [V]</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">vcs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">rate_list</span> <span class="o">=</span> <span class="n">_find_rate</span><span class="p">(</span><span class="n">sset</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">rate</span> <span class="ow">in</span> <span class="n">rate_list</span><span class="p">:</span>
+        <span class="n">volume</span> <span class="o">=</span> <span class="n">rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="k">if</span> <span class="n">volume</span><span class="o">.</span><span class="n">is_Symbol</span><span class="p">:</span>
+            <span class="n">volume</span> <span class="o">=</span> <span class="n">_find_real_symbol</span><span class="p">(</span><span class="n">sset</span><span class="p">,</span> <span class="n">volume</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">volume</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vcs</span><span class="p">:</span>
+                <span class="n">vcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">vcs</span></div>
+
+
+<span class="k">def</span> <span class="nf">_find_rate</span><span class="p">(</span><span class="n">sset</span><span class="p">):</span>
+    <span class="n">rate_list</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ExplicitODESystem</span><span class="p">:</span>
+        <span class="n">odes</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
+    <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
+    <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
+    <span class="n">elimination_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+    <span class="n">rate_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">elimination_rate</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">periph</span> <span class="ow">in</span> <span class="n">odes</span><span class="o">.</span><span class="n">peripheral_compartments</span><span class="p">:</span>
+        <span class="n">rate1</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">periph</span><span class="p">)</span>
+        <span class="n">rate_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rate1</span><span class="p">)</span>
+        <span class="n">rate2</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">periph</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>
+        <span class="n">rate_list</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">rate2</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">rate_list</span>
+
+
+<span class="k">def</span> <span class="nf">_find_real_symbol</span><span class="p">(</span><span class="n">sset</span><span class="p">,</span> <span class="n">symbol</span><span class="p">):</span>
+    <span class="n">assign</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">assign</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">dep_assigns</span> <span class="o">=</span> <span class="n">_get_dependent_assignments</span><span class="p">(</span><span class="n">sset</span><span class="p">,</span> <span class="n">assign</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">dep_assign</span> <span class="ow">in</span> <span class="n">dep_assigns</span><span class="p">:</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="n">dep_assign</span><span class="o">.</span><span class="n">symbol</span>
+    <span class="k">return</span> <span class="n">symbol</span>
 </pre></div>
 
               </div>

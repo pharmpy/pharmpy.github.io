@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.summarize_individuals &#8212; Pharmpy 0.70.1 documentation</title>
+    <title>pharmpy.modeling.summarize_individuals &#8212; Pharmpy 0.71.0 documentation</title>
     
   <!-- Loaded before other Sphinx assets -->
   <link href="../../../_static/styles/theme.css?digest=1999514e3f237ded88cf" rel="stylesheet">
@@ -342,24 +342,25 @@
 
 
 <div class="viewcode-block" id="summarize_individuals_count_table"><a class="viewcode-back" href="../../../api/pharmpy.modeling.summarize_individuals_count_table.html#pharmpy.modeling.summarize_individuals_count_table">[docs]</a><span class="k">def</span> <span class="nf">summarize_individuals_count_table</span><span class="p">(</span><span class="n">models</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">df</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Create a count table for individual data</span>
+    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Create a count table for individual data</span>
 
 <span class="sd">    Content of the various columns:</span>
 
-<span class="sd">    +-------------------------+---------------------------------------------------------------------------------+</span>
-<span class="sd">    | Column                  | Description                                                                     |</span>
-<span class="sd">    +=========================+=================================================================================+</span>
-<span class="sd">    | ``inf_selection``       | Number of subjects influential on model selection.                              |</span>
-<span class="sd">    |                         | :math:`||dOFV_i|  - |OFV_{parent} - OFV|| &gt; 3.84`                               |</span>
-<span class="sd">    +-------------------------+---------------------------------------------------------------------------------+</span>
-<span class="sd">    | ``inf_params``          | Number of subjects influential on parameters. predicted_dofv &gt; 3.84             |</span>
-<span class="sd">    +-------------------------+---------------------------------------------------------------------------------+</span>
-<span class="sd">    | ``out_obs``             | Number of subjects having at least one outlying observation                     |</span>
-<span class="sd">    +-------------------------+---------------------------------------------------------------------------------+</span>
-<span class="sd">    | ``out_ind``             | Number of outlying subjects. predicted_residual &gt; 3.0                           |</span>
-<span class="sd">    +-------------------------+---------------------------------------------------------------------------------+</span>
-<span class="sd">    | ``inf_outlier``         | Number of subjects both influential by any criteria and outlier by any criteria |</span>
-<span class="sd">    +-------------------------+---------------------------------------------------------------------------------+</span>
+<span class="sd">    +-------------------------+------------------------------------------------------------------------------------------------+</span>
+<span class="sd">    | Column                  | Description                                                                                    |</span>
+<span class="sd">    +=========================+================================================================================================+</span>
+<span class="sd">    | ``inf_selection``       | Number of subjects influential on model selection.                                             |</span>
+<span class="sd">    |                         | :math:`\mathrm{OFV}_{parent} - \mathrm{OFV} &gt; 3.84 \veebar`                                    |</span>
+<span class="sd">    |                         | :math:`\mathrm{OFV}_{parent} - \mathrm{iOFV}_{parent} - (\mathrm{OFV} - \mathrm{iOFV}) &gt; 3.84` |</span>
+<span class="sd">    +-------------------------+------------------------------------------------------------------------------------------------+</span>
+<span class="sd">    | ``inf_params``          | Number of subjects influential on parameters. predicted_dofv &gt; 3.84                            |</span>
+<span class="sd">    +-------------------------+------------------------------------------------------------------------------------------------+</span>
+<span class="sd">    | ``out_obs``             | Number of subjects having at least one outlying observation (CWRES &gt; 5)                        |</span>
+<span class="sd">    +-------------------------+------------------------------------------------------------------------------------------------+</span>
+<span class="sd">    | ``out_ind``             | Number of outlying subjects. predicted_residual &gt; 3.0                                          |</span>
+<span class="sd">    +-------------------------+------------------------------------------------------------------------------------------------+</span>
+<span class="sd">    | ``inf_outlier``         | Number of subjects both influential by any criteria and outlier by any criteria                |</span>
+<span class="sd">    +-------------------------+------------------------------------------------------------------------------------------------+</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -395,7 +396,6 @@
     <span class="n">parents</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;parent_model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[::</span><span class="n">ninds</span><span class="p">]</span>
     <span class="n">parent_ofvs</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">parents</span><span class="p">][</span><span class="s1">&#39;ofv&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="n">parent_ofvs</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span>
-    <span class="n">dofvi</span> <span class="o">=</span> <span class="n">parent_ofvs</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ofv&#39;</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">name</span> <span class="o">==</span> <span class="n">df</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">name</span><span class="p">][</span><span class="s1">&#39;parent_model&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
@@ -405,9 +405,11 @@
 
     <span class="n">ofv_sums</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ofv&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
     <span class="n">parent_sums</span> <span class="o">=</span> <span class="n">parent_ofvs</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="s1">&#39;model&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span>
-    <span class="n">full_ofv_diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">parent_sums</span> <span class="o">-</span> <span class="n">ofv_sums</span><span class="p">)</span> <span class="o">/</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">unique</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;ID&#39;</span><span class="p">))</span>
+    <span class="n">full_ofv_diff</span> <span class="o">=</span> <span class="n">parent_sums</span> <span class="o">-</span> <span class="n">ofv_sums</span>  <span class="c1"># / len(df.index.unique(level=&#39;ID&#39;))</span>
     <span class="n">full_ofv_diff</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">start_name</span><span class="p">]</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="n">is_inf_selection</span> <span class="o">=</span> <span class="nb">abs</span><span class="p">(</span><span class="nb">abs</span><span class="p">(</span><span class="n">dofvi</span><span class="p">)</span> <span class="o">-</span> <span class="nb">abs</span><span class="p">(</span><span class="n">full_ofv_diff</span><span class="p">))</span> <span class="o">&gt;</span> <span class="mf">3.84</span>
+
+    <span class="n">removed_diff</span> <span class="o">=</span> <span class="p">(</span><span class="n">parent_sums</span> <span class="o">-</span> <span class="n">parent_ofvs</span><span class="p">)</span> <span class="o">-</span> <span class="p">(</span><span class="n">ofv_sums</span> <span class="o">-</span> <span class="n">df</span><span class="p">[</span><span class="s1">&#39;ofv&#39;</span><span class="p">])</span>
+    <span class="n">is_inf_selection</span> <span class="o">=</span> <span class="p">(</span><span class="n">full_ofv_diff</span> <span class="o">&gt;</span> <span class="mf">3.84</span><span class="p">)</span> <span class="o">^</span> <span class="p">(</span><span class="n">removed_diff</span> <span class="o">&gt;</span> <span class="mf">3.84</span><span class="p">)</span>
     <span class="n">inf_selection</span> <span class="o">=</span> <span class="n">is_inf_selection</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">level</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="n">sort</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">()</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
 
     <span class="n">is_inf_outlier</span> <span class="o">=</span> <span class="p">(</span><span class="n">is_out_obs</span> <span class="o">|</span> <span class="n">is_out_ind</span><span class="p">)</span> <span class="o">&amp;</span> <span class="p">(</span><span class="n">is_inf_params</span> <span class="o">|</span> <span class="n">is_inf_selection</span><span class="p">)</span>

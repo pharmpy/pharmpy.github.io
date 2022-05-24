@@ -12,10 +12,10 @@ CompartmentalSystem
 
       ~CompartmentalSystem.amounts
       ~CompartmentalSystem.central_compartment
+      ~CompartmentalSystem.compartment_names
       ~CompartmentalSystem.compartmental_matrix
       ~CompartmentalSystem.dosing_compartment
       ~CompartmentalSystem.free_symbols
-      ~CompartmentalSystem.names
       ~CompartmentalSystem.output_compartment
       ~CompartmentalSystem.peripheral_compartments
       ~CompartmentalSystem.rhs_symbols
@@ -38,16 +38,17 @@ CompartmentalSystem
       ~CompartmentalSystem.remove_compartment
       ~CompartmentalSystem.remove_flow
       ~CompartmentalSystem.subs
+      ~CompartmentalSystem.to_compartmental_system
       ~CompartmentalSystem.to_explicit_system
 
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: amounts
    .. autoattribute:: central_compartment
+   .. autoattribute:: compartment_names
    .. autoattribute:: compartmental_matrix
    .. autoattribute:: dosing_compartment
    .. autoattribute:: free_symbols
-   .. autoattribute:: names
    .. autoattribute:: output_compartment
    .. autoattribute:: peripheral_compartments
    .. autoattribute:: rhs_symbols
@@ -68,4 +69,5 @@ CompartmentalSystem
    .. automethod:: remove_compartment
    .. automethod:: remove_flow
    .. automethod:: subs
+   .. automethod:: to_compartmental_system
    .. automethod:: to_explicit_system
