@@ -11,6 +11,7 @@ Compartment
    .. autosummary::
 
       ~Compartment.amount
+      ~Compartment.bioavailability
       ~Compartment.dose
       ~Compartment.free_symbols
       ~Compartment.lag_time
@@ -25,6 +26,7 @@ Compartment
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: amount
+   .. autoattribute:: bioavailability
    .. autoattribute:: dose
    .. autoattribute:: free_symbols
    .. autoattribute:: lag_time

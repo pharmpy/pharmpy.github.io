@@ -4,16 +4,16 @@
 IIVsearch
 =========
 
-The IIV tool is a general tool to decide the best IIV structure given a start model. This includes deciding which IIV
+The IIVsearch tool is a general tool to decide the best IIV structure given a start model. This includes deciding which IIV
 to keep and the covariance structure based on a chosen selection criteria.
 
 ~~~~~~~
 Running
 ~~~~~~~
 
-The iiv tool is available both in Pharmpy/pharmr and from the command line.
+The IIVsearch tool is available both in Pharmpy/pharmr and from the command line.
 
-To initiate iiv in Python:
+To initiate IIVsearch in Python/R:
 
 .. pharmpy-code::
 
@@ -22,41 +22,41 @@ To initiate iiv in Python:
     start_model = read_model('path/to/model')
     res = run_iivsearch(algorithm='brute_force',
                         model=start_model,
-                        iiv_strategy=0,
+                        iiv_strategy='no_add',
                         rankfunc='bic',
                         cutoff=None)
 
-This will take an input model ``model`` and run the brute_force_no_of_etas ``algorithm``. The tool will add structural
-IIVs to the start model according to according to ``iiv_strategy`` 0, where no IIVs are added. The candidate models
-will be ranked using ``bic`` with default ``cutoff``, which for BIC is none.
+This will take an input model ``model`` and run the brute_force_no_of_etas ``algorithm``. Structural IIVs will not be
+added to the input model since ``iiv_strategy`` is set to be 'no_add'. The candidate models will be ranked using ``bic``
+with default ``cutoff``, which for BIC is none.
 
-To run iiv from the command line, the example code is redefined accordingly:
+To run IIVsearch from the command line, the example code is redefined accordingly:
 
 .. code::
 
-    pharmpy run iivsearch path/to/model 'brute_force' --iiv_strategy 0 --rankfunc 'bic'
+    pharmpy run iivsearch path/to/model 'brute_force' --iiv_strategy 'no_add' --rankfunc 'bic'
 
 ~~~~~~~~~
 Arguments
 ~~~~~~~~~
 
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| Argument                                          | Description                                                                             |
-+===================================================+=========================================================================================+
-| :ref:`algorithm<Algorithms>`                      | Algorithm to use (e.g. brute_force)                                                     |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| :ref:`iiv_strategy<IIV strategies>`               | If/how IIV should be added to start model (default is 0)                                |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| :ref:`rankfunc<Comparing and ranking candidates>` | Which selection criteria to rank models on, e.g. OFV (default is BIC)                   |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| :ref:`cutoff<Comparing and ranking candidates>`   | Cutoff for the ranking function, exclude models that are below cutoff (default is None) |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| :ref:`iiv_strategy<IIV strategies>`               | If/how IIV should be added to candidate models (default is 0)                           |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| ``model``                                         | Start model                                                                             |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
++-----------------------------------------------+--------------------------------------------------------------------+
+| Argument                                      | Description                                                        |
++===============================================+====================================================================+
+| :ref:`algorithm<algorithms_iivsearch>`        | Algorithm to use (e.g. ``'brute_force'``)                          |
++-----------------------------------------------+--------------------------------------------------------------------+
+| :ref:`iiv_strategy<iiv_strategies_iivsearch>` | If/how IIV should be added to start model (default is to not add)  |
++-----------------------------------------------+--------------------------------------------------------------------+
+| :ref:`rankfunc<ranking_iivsearch>`            | Which selection criteria to rank models on, e.g. OFV (default is   |
+|                                               | BIC)                                                               |
++-----------------------------------------------+--------------------------------------------------------------------+
+| :ref:`cutoff<ranking_iivsearch>`              | Cutoff for the ranking function, exclude models that are below     |
+|                                               | cutoff (default is none)                                           |
++-----------------------------------------------+--------------------------------------------------------------------+
+| ``model``                                     | Start model                                                        |
++-----------------------------------------------+--------------------------------------------------------------------+
 
-.. _algorithms:
+.. _algorithms_iivsearch:
 
 ~~~~~~~~~~
 Algorithms
@@ -65,15 +65,16 @@ Algorithms
 Different aspects of the IIV structure can be explored in the tool depending on which algorithm is chosen. The
 available algorithms can be seen in the table below.
 
-+-----------------------------------+---------------------------------------------------------------------------------+
-| Algorithm                         | Description                                                                     |
-+===================================+=================================================================================+
-| ``'brute_force_no_of_etas'``      | Removes available IIV in all possible combinations                              |
-+-----------------------------------+---------------------------------------------------------------------------------+
-| ``'brute_force_block_structure'`` | Tests all combinations of covariance structures                                 |
-+-----------------------------------+---------------------------------------------------------------------------------+
-| ``'brute_force'``                 | First runs ``'brute_force_no_of_etas'``, then ``'brute_force_block_structure'`` |
-+-----------------------------------+---------------------------------------------------------------------------------+
++-----------------------------------+--------------------------------------------------------------------------------+
+| Algorithm                         | Description                                                                    |
++===================================+================================================================================+
+| ``'brute_force_no_of_etas'``      | Removes available IIV in all possible combinations                             |
++-----------------------------------+--------------------------------------------------------------------------------+
+| ``'brute_force_block_structure'`` | Tests all combinations of covariance structures                                |
++-----------------------------------+--------------------------------------------------------------------------------+
+| ``'brute_force'``                 | First runs ``'brute_force_no_of_etas'``, then                                  |
+|                                   | ``'brute_force_block_structure'``                                              |
++-----------------------------------+--------------------------------------------------------------------------------+
 
 Brute force search for number of IIVs
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -173,22 +174,33 @@ algorithm for the block structure, by first choosing the number of etas then the
         }
 
 
-.. _iiv strategies:
+.. _iiv_strategies_iivsearch:
 
-~~~~~~~~~~~~~~
-IIV strategies
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Adding IIV to the start model
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The IIV strategy refers to if/how IIV should be added to the PK parameters of the input model. The different strategies
-can be seen the corresponding chapter in :ref:`modelsearch<iiv_strategies>`.
+The ``iiv_strategy`` option determines whether or not IIV on the PK parameters should be added to the input model.
+The different strategies can be seen here:
 
-.. _comparing and ranking candidates:
++------------------------+----------------------------------------------------------+
+| Strategy               | Description                                              |
++========================+==========================================================+
+| ``'no_add'``           | Input model is kept as base model                        |
++------------------------+----------------------------------------------------------+
+| ``'diagonal'``         | IIV is added to all structural parameters as diagonal    |
++------------------------+----------------------------------------------------------+
+| ``'fullblock'``        | IIV is added to all structural parameters as full block  |
++------------------------+----------------------------------------------------------+
+
+
+.. _ranking_iivsearch:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Comparing and ranking candidates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This system is the same as for modelsearch, see :ref:`here<ranking>`.
+This system is the same as for modelsearch, see :ref:`here<ranking_modelsearch>`.
 
 ~~~~~~~~~~~~~~~~~~~~~
 The IIVsearch results
@@ -204,7 +216,7 @@ Consider a iivsearch run with the search space of zero order absorption and addi
 
     res = run_iivsearch(algorithm='brute_force',
                         model=start_model,
-                        iiv_strategy=0,
+                        iiv_strategy='no_add',
                         rankfunc='bic',
                         cutoff=None)
 
@@ -236,10 +248,20 @@ See :py:func:`pharmpy.modeling.summarize_individuals_count_table` for informatio
 
     res.summary_individuals_count
 
-Finally, you can see different individual statistics ``summary_individuals``.
+You can see different individual statistics in ``summary_individuals``.
 See :py:func:`pharmpy.modeling.summarize_individuals` for information on the content of this table.
 
 .. pharmpy-execute::
     :hide-code:
 
     res.summary_individuals
+
+Finally, you can see a summary of different errors and warnings in ``summary_errors``.
+See :py:func:`pharmpy.modeling.summarize_errors` for information on the content of this table.
+
+.. pharmpy-execute::
+    :hide-code:
+
+    import pandas as pd
+    pd.set_option('display.max_colwidth', None)
+    res.summary_errors

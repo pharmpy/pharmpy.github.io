@@ -6,6 +6,12 @@ Log
 .. autoclass:: Log
    :show-inheritance:
 
+   .. rubric:: Attributes Summary
+
+   .. autosummary::
+
+      ~Log.log
+
    .. rubric:: Methods Summary
 
    .. autosummary::
@@ -13,6 +19,10 @@ Log
       ~Log.log_error
       ~Log.log_warning
       ~Log.to_dataframe
+
+   .. rubric:: Attributes Documentation
+
+   .. autoattribute:: log
 
    .. rubric:: Methods Documentation
 

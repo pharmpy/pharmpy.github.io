@@ -14,7 +14,6 @@ Parameter
       ~Parameter.init
       ~Parameter.lower
       ~Parameter.name
-      ~Parameter.parameter_space
       ~Parameter.symbol
       ~Parameter.upper
 
@@ -22,9 +21,7 @@ Parameter
 
    .. autosummary::
 
-      ~Parameter.copy
-      ~Parameter.unconstrain
-      ~Parameter.verify_init
+      ~Parameter.set_fix
 
    .. rubric:: Attributes Documentation
 
@@ -32,12 +29,9 @@ Parameter
    .. autoattribute:: init
    .. autoattribute:: lower
    .. autoattribute:: name
-   .. autoattribute:: parameter_space
    .. autoattribute:: symbol
    .. autoattribute:: upper
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: copy
-   .. automethod:: unconstrain
-   .. automethod:: verify_init
+   .. automethod:: set_fix

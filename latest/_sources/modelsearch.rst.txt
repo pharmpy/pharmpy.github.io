@@ -23,40 +23,43 @@ To initiate modelsearch in Python:
     res = run_modelsearch(search_space='ABSORPTION(ZO);PERIPHERALS(1)',
                           algorithm='exhaustive',
                           model=start_model,
-                          iiv_strategy=0,
+                          iiv_strategy='no_add',
                           rankfunc='bic',
                           cutoff=None)
 
 This will take an input model ``model`` with ``search_space`` as the search space, meaning zero order absorption and adding one
-peripheral compartment will be tried. The tool will use the ``exhaustive`` search algorithm. Structural IIVs will be
-added to candidates according to strategy 0, where no IIVs are added. The candidate models will be ranked using ``bic``
+peripheral compartment will be tried. The tool will use the ``exhaustive`` search algorithm. Structural IIVs will not be
+added to candidates since ``iiv_strategy`` is set to be 'no_add'. The candidate models will be ranked using ``bic``
 with default ``cutoff``, which for BIC is none.
 
 To run modelsearch from the command line, the example code is redefined accordingly:
 
 .. code::
 
-    pharmpy run modelsearch path/to/model 'ABSORPTION(ZO);PERIPHERALS(1)' 'exhaustive' --iv_strategy 0 --rankfunc 'bic'
+    pharmpy run modelsearch path/to/model 'ABSORPTION(ZO);PERIPHERALS(1)' 'exhaustive' --iiv_strategy 'no_add' --rankfunc 'bic'
 
 Arguments
 ~~~~~~~~~
 For a more detailed description of each argument, see their respective chapter on this page.
 
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| Argument                                          | Description                                                                             |
-+===================================================+=========================================================================================+
-| :ref:`search_space<The search space>`             | Search space to test                                                                    |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| :ref:`algorithm<Algorithms>`                      | Algorithm to use (e.g. exhaustive)                                                      |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| :ref:`rankfunc<ranking>`                          | Which selection criteria to rank models on, e.g. OFV (default is BIC)                   |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| :ref:`cutoff<ranking>`                            | Cutoff for the ranking function, exclude models that are below cutoff (default is None) |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| :ref:`iiv_strategy<IIV strategies>`               | If/how IIV should be added to candidate models (default is 0)                           |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| ``model``                                         | Start model                                                                             |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
++-------------------------------------------------+------------------------------------------------------------------+
+| Argument                                        | Description                                                      |
++=================================================+==================================================================+
+| :ref:`search_space<the search space>`           | Search space to test                                             |
++-------------------------------------------------+------------------------------------------------------------------+
+| :ref:`algorithm<algorithms_modelsearch>`        | Algorithm to use (e.g. ``'exhaustive'``)                         |
++-------------------------------------------------+------------------------------------------------------------------+
+| :ref:`rankfunc<ranking_modelsearch>`            | Which selection criteria to rank models on, e.g. OFV (default is |
+|                                                 | BIC)                                                             |
++-------------------------------------------------+------------------------------------------------------------------+
+| :ref:`cutoff<ranking_modelsearch>`              | Cutoff for the ranking function, exclude models that are below   |
+|                                                 | cutoff (default is none)                                         |
++-------------------------------------------------+------------------------------------------------------------------+
+| :ref:`iiv_strategy<iiv_strategies_modelsearch>` | If/how IIV should be added to candidate models (default is to    |
+|                                                 | not add)                                                         |
++-------------------------------------------------+------------------------------------------------------------------+
+| ``model``                                       | Start model                                                      |
++-------------------------------------------------+------------------------------------------------------------------+
 
 .. _the search space:
 
@@ -69,6 +72,8 @@ the input model. The supported features cover absorption, absorption delay, elim
 space is given as a string with a specific grammar, according to the `Model Feature Language` (MFL) (see detailed
 description :ref:`below<mfl>`).
 
+.. _algorithms_modelsearch:
+
 ~~~~~~~~~~
 Algorithms
 ~~~~~~~~~~
@@ -76,17 +81,16 @@ Algorithms
 The tool can conduct the model search using different algorithms. The available algorithms can be seen in the table
 below.
 
-+---------------------------+-------------------------------------------------------------------+
-| Algorithm                 | Description                                                       |
-+===========================+===================================================================+
-| ``'exhaustive'``          | All possible combinations of the search space are tested          |
-+---------------------------+-------------------------------------------------------------------+
-| ``'exhaustive_stepwise'`` | Add one feature in each step in all possible orders               |
-+---------------------------+-------------------------------------------------------------------+
-| ``'reduced_stepwise'``    | Add one feature in each step in all possible orders.              |
-|                           | After each feature layer, choose best model between models        |
-|                           | with same features                                                |
-+---------------------------+-------------------------------------------------------------------+
++---------------------------+----------------------------------------------------------------------------------------+
+| Algorithm                 | Description                                                                            |
++===========================+========================================================================================+
+| ``'exhaustive'``          | All possible combinations of the search space are tested                               |
++---------------------------+----------------------------------------------------------------------------------------+
+| ``'exhaustive_stepwise'`` | Add one feature in each step in all possible orders                                    |
++---------------------------+----------------------------------------------------------------------------------------+
+| ``'reduced_stepwise'``    | Add one feature in each step in all possible orders. After each feature layer, choose  |
+|                           | best model between models with same features                                           |
++---------------------------+----------------------------------------------------------------------------------------+
 
 Exhaustive search
 ~~~~~~~~~~~~~~~~~
@@ -186,8 +190,8 @@ compartment at a given step. This is done in order to allow for better initial e
 Reduced stepwise search
 ~~~~~~~~~~~~~~~~~~~~~~~
 The reduced stepwise is similar to the exhaustive stepwise search, but after each layer it compares models with
-the same features, where the compared models arrived at the features in a different order. Next, the algorithm sends the
-best model from each comparison to the next layer, where the subsequent feature is added.
+the same features, where the compared models arrived at the features in a different order. Next, the algorithm sends
+the best model from each comparison to the next layer, where the subsequent feature is added.
 
 .. graphviz::
 
@@ -233,28 +237,28 @@ The same feature combinations as in the exhaustive stepwise algorithm will be ex
 :ref:`here<Feature combination exclusions>`)
 
 
-.. _iiv_strategies:
+.. _iiv_strategies_modelsearch:
 
-~~~~~~~~~~~~~~
-IIV strategies
-~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Adding IIV to the candidate models during search
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``iiv_strategy`` option determines whether or not IIV on the PK parameters should be added to the candidate models.
 The different strategies can be seen here:
 
-+-----------+----------------------------------------------------------+
-| Strategy  | Description                                              |
-+===========+==========================================================+
-| ``0``     | No IIVs are added during the search (default)            |
-+-----------+----------------------------------------------------------+
-| ``1``     | IIV is added to all structural parameters as diagonal    |
-+-----------+----------------------------------------------------------+
-| ``2``     | IIV is added to all structural parameters as full block  |
-+-----------+----------------------------------------------------------+
-| ``3``     | IIV is added to the absorption delay parameter           |
-+-----------+----------------------------------------------------------+
++------------------------+----------------------------------------------------------+
+| Strategy               | Description                                              |
++========================+==========================================================+
+| ``'no_add'``           | No IIVs are added during the search (default)            |
++------------------------+----------------------------------------------------------+
+| ``'diagonal'``         | IIV is added to all structural parameters as diagonal    |
++------------------------+----------------------------------------------------------+
+| ``'fullblock'``        | IIV is added to all structural parameters as full block  |
++------------------------+----------------------------------------------------------+
+| ``'absorption_delay'`` | IIV is added to the absorption delay parameter           |
++------------------------+----------------------------------------------------------+
 
-.. _ranking:
+.. _ranking_modelsearch:
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Comparing and ranking candidates
@@ -288,7 +292,7 @@ Consider a modelsearch run with the search space of zero order absorption and ad
     res = run_modelsearch('ABSORPTION(ZO);PERIPHERALS(1)',
                           'exhaustive',
                           model=start_model,
-                          iiv_strategy=0,
+                          iiv_strategy='no_add',
                           rankfunc='bic',
                           cutoff=None)
 
@@ -310,8 +314,6 @@ you can look at the ``summary_models`` table. The table is generated with
 .. pharmpy-execute::
     :hide-code:
 
-    import pandas as pd
-    pd.set_option("display.max_columns", 10)
     res.summary_models
 
 A summary table of predicted influential individuals and outliers can be seen in ``summary_individuals_count``.
@@ -322,7 +324,7 @@ See :py:func:`pharmpy.modeling.summarize_individuals_count_table` for informatio
 
     res.summary_individuals_count
 
-Finally, you can see different individual statistics ``summary_individuals``.
+You can see different individual statistics in ``summary_individuals``.
 See :py:func:`pharmpy.modeling.summarize_individuals` for information on the content of this table.
 
 .. pharmpy-execute::
@@ -330,6 +332,15 @@ See :py:func:`pharmpy.modeling.summarize_individuals` for information on the con
 
     res.summary_individuals
 
+Finally, you can see a summary of different errors and warnings in ``summary_errors``.
+See :py:func:`pharmpy.modeling.summarize_errors` for information on the content of this table.
+
+.. pharmpy-execute::
+    :hide-code:
+
+    import pandas as pd
+    pd.set_option('display.max_colwidth', None)
+    res.summary_errors
 
 
 .. _mfl:
@@ -386,20 +397,21 @@ Model features
 
 MFL support the following model features:
 
-+---------------+-------------------------------+-------------------------------------------------------+
-| Category      | Options                       | Description                                           |
-+===============+===============================+=======================================================+
-| ABSORPTION    | :code:`FO, ZO, SEQ-ZO-FO`     | Absorption rate                                       |
-+---------------+-------------------------------+-------------------------------------------------------+
-| ELIMINATION   | :code:`FO, ZO, MM, MIX-FO-MM` | Elimination rate                                      |
-+---------------+-------------------------------+-------------------------------------------------------+
-| PERIPHERALS   | `number`                      | Number of peripheral compartments                     |
-+---------------+-------------------------------+-------------------------------------------------------+
-| TRANSITS      | `number`, DEPOT/NODEPOT       | Number of absorption transit compartments. Whether    |
-|               |                               | convert depot compartment into a transit compartment  |
-+---------------+-------------------------------+-------------------------------------------------------+
-| LAGTIME       | None                          | Absorption lagtime                                    |
-+---------------+-------------------------------+-------------------------------------------------------+
++---------------+-------------------------------+--------------------------------------------------------------------+
+| Category      | Options                       | Description                                                        |
++===============+===============================+====================================================================+
+| ABSORPTION    | :code:`FO, ZO, SEQ-ZO-FO`     | Absorption rate                                                    |
++---------------+-------------------------------+--------------------------------------------------------------------+
+| ELIMINATION   | :code:`FO, ZO, MM, MIX-FO-MM` | Elimination rate                                                   |
++---------------+-------------------------------+--------------------------------------------------------------------+
+| PERIPHERALS   | `number`                      | Number of peripheral compartments                                  |
++---------------+-------------------------------+--------------------------------------------------------------------+
+| TRANSITS      | `number`, DEPOT/NODEPOT       | Number of absorption transit compartments. Whether convert depot   |
+|               |                               | compartment into a transit compartment                             |
++---------------+-------------------------------+--------------------------------------------------------------------+
+| LAGTIME       | None                          | Absorption lagtime                                                 |
++---------------+-------------------------------+--------------------------------------------------------------------+
+
 
 Describe intervals
 ~~~~~~~~~~~~~~~~~~

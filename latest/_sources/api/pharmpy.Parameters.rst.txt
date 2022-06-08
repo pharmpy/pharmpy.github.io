@@ -11,10 +11,11 @@ Parameters
    .. autosummary::
 
       ~Parameters.fix
+      ~Parameters.fixed
       ~Parameters.inits
       ~Parameters.lower
       ~Parameters.names
-      ~Parameters.nonfixed_inits
+      ~Parameters.nonfixed
       ~Parameters.symbols
       ~Parameters.upper
 
@@ -22,24 +23,23 @@ Parameters
 
    .. autosummary::
 
-      ~Parameters.copy
-      ~Parameters.insert
-      ~Parameters.remove_fixed
+      ~Parameters.set_fix
+      ~Parameters.set_initial_estimates
       ~Parameters.to_dataframe
 
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: fix
+   .. autoattribute:: fixed
    .. autoattribute:: inits
    .. autoattribute:: lower
    .. autoattribute:: names
-   .. autoattribute:: nonfixed_inits
+   .. autoattribute:: nonfixed
    .. autoattribute:: symbols
    .. autoattribute:: upper
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: copy
-   .. automethod:: insert
-   .. automethod:: remove_fixed
+   .. automethod:: set_fix
+   .. automethod:: set_initial_estimates
    .. automethod:: to_dataframe
