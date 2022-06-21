@@ -28,6 +28,7 @@ CompartmentalSystem
       ~CompartmentalSystem.add_compartment
       ~CompartmentalSystem.add_flow
       ~CompartmentalSystem.atoms
+      ~CompartmentalSystem.copy
       ~CompartmentalSystem.find_compartment
       ~CompartmentalSystem.find_depot
       ~CompartmentalSystem.find_transit_compartments
@@ -59,6 +60,7 @@ CompartmentalSystem
    .. automethod:: add_compartment
    .. automethod:: add_flow
    .. automethod:: atoms
+   .. automethod:: copy
    .. automethod:: find_compartment
    .. automethod:: find_depot
    .. automethod:: find_transit_compartments

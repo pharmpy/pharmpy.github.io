@@ -17,13 +17,13 @@ To initiate IIVsearch in Python/R:
 
 .. pharmpy-code::
 
-    from pharmpy.modeling import run_iivsearch
+    from pharmpy.tools import run_iivsearch
 
     start_model = read_model('path/to/model')
     res = run_iivsearch(algorithm='brute_force',
                         model=start_model,
                         iiv_strategy='no_add',
-                        rankfunc='bic',
+                        rank_type='bic',
                         cutoff=None)
 
 This will take an input model ``model`` and run the brute_force_no_of_etas ``algorithm``. Structural IIVs will not be
@@ -34,7 +34,7 @@ To run IIVsearch from the command line, the example code is redefined accordingl
 
 .. code::
 
-    pharmpy run iivsearch path/to/model 'brute_force' --iiv_strategy 'no_add' --rankfunc 'bic'
+    pharmpy run iivsearch path/to/model 'brute_force' --iiv_strategy 'no_add' --rank_type 'bic'
 
 ~~~~~~~~~
 Arguments
@@ -47,7 +47,7 @@ Arguments
 +-----------------------------------------------+--------------------------------------------------------------------+
 | :ref:`iiv_strategy<iiv_strategies_iivsearch>` | If/how IIV should be added to start model (default is to not add)  |
 +-----------------------------------------------+--------------------------------------------------------------------+
-| :ref:`rankfunc<ranking_iivsearch>`            | Which selection criteria to rank models on, e.g. OFV (default is   |
+| :ref:`rank_type<ranking_iivsearch>`           | Which selection criteria to rank models on, e.g. OFV (default is   |
 |                                               | BIC)                                                               |
 +-----------------------------------------------+--------------------------------------------------------------------+
 | :ref:`cutoff<ranking_iivsearch>`              | Cutoff for the ranking function, exclude models that are below     |
@@ -183,15 +183,15 @@ Adding IIV to the start model
 The ``iiv_strategy`` option determines whether or not IIV on the PK parameters should be added to the input model.
 The different strategies can be seen here:
 
-+------------------------+----------------------------------------------------------+
-| Strategy               | Description                                              |
-+========================+==========================================================+
-| ``'no_add'``           | Input model is kept as base model                        |
-+------------------------+----------------------------------------------------------+
-| ``'diagonal'``         | IIV is added to all structural parameters as diagonal    |
-+------------------------+----------------------------------------------------------+
-| ``'fullblock'``        | IIV is added to all structural parameters as full block  |
-+------------------------+----------------------------------------------------------+
++------------------------+----------------------------------------------------------------------------------+
+| Strategy               | Description                                                                      |
++========================+==================================================================================+
+| ``'no_add'``           | Input model is kept as base model                                                |
++------------------------+----------------------------------------------------------------------------------+
+| ``'add_diagonal'``     | Diagonal IIV is added to all structural parameters                               |
++------------------------+----------------------------------------------------------------------------------+
+| ``'fullblock'``        | IIV is added to all structural parameters, and all IIVs will be in a full block  |
++------------------------+----------------------------------------------------------------------------------+
 
 
 .. _ranking_iivsearch:
@@ -200,7 +200,20 @@ The different strategies can be seen here:
 Comparing and ranking candidates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This system is the same as for modelsearch, see :ref:`here<ranking_modelsearch>`.
+The supplied ``rank_type`` will be used to compare a set of candidate models and rank them. A cutoff may also be provided
+if the user does not want to use the default. The following rank functions are available:
+
++------------+-----------------------------------------------------------------------------------+
+| Rank type  | Description                                                                       |
++============+===================================================================================+
+| ``'ofv'``  | ΔOFV. Default is to not rank candidates with ΔOFV < cutoff (default 3.84)         |
++------------+-----------------------------------------------------------------------------------+
+| ``'aic'``  | ΔAIC. Default is to rank all candidates if no cutoff is provided.                 |
++------------+-----------------------------------------------------------------------------------+
+| ``'bic'``  | ΔBIC (iiv). Default is to rank all candidates if no cutoff is provided.           |
++------------+-----------------------------------------------------------------------------------+
+
+Information about how BIC is calculated can be found in :py:func:`pharmpy.modeling.calculate_bic`.
 
 ~~~~~~~~~~~~~~~~~~~~~
 The IIVsearch results
@@ -210,14 +223,14 @@ The results object contains the candidate models, the start model, and the selec
 selection criteria). The tool also creates various summary tables which can be accessed in the results object,
 as well as files in .csv/.json format.
 
-Consider a iivsearch run with the search space of zero order absorption and adding one peripheral compartment:
+Consider a iivsearch run:
 
 .. pharmpy-code::
 
     res = run_iivsearch(algorithm='brute_force',
                         model=start_model,
                         iiv_strategy='no_add',
-                        rankfunc='bic',
+                        rank_type='bic',
                         cutoff=None)
 
 

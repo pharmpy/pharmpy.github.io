@@ -17,25 +17,26 @@ To initiate IOVsearch in Python/R:
 
 .. pharmpy-code::
 
-    from pharmpy.modeling import run_iovsearch
+    from pharmpy.tools import run_iovsearch
 
     start_model = read_model('path/to/model')
     res = run_iovsearch(model=start_model,
                         column='OCC',
                         list_of_parameters=None,
                         distribution='same-as-iiv',
-                        rankfunc='bic',
+                        rank_type='bic',
                         cutoff=None)
 
-This will take an input model ``model`` and use the ``column`` ``OCC`` as the occasion column. IOV will be tested on
-all parameters with IIV according to ``list_of_parameters`` with the same ``distribution`` as the IIVs. The candidate
-models will be ranked using ``bic`` with default ``cutoff``, which for BIC is none.
+This will take an input model ``model`` and use the ``column`` ``'OCC'`` as the occasion column. IOV will be tested on
+parameters in ``list_of_parameters``, which when none will be all parameters with IIV. The IOVs will have the same
+``distribution`` as the IIVs. The candidate models will be ranked using ``bic`` with default ``cutoff``, which for BIC
+is none.
 
 To run IOVsearch from the command line, the example code is redefined accordingly:
 
 .. code::
 
-    pharmpy run iovsearch path/to/model --column 'OCC' --distribution 'same-as-iiv' --rankfunc 'bic'
+    pharmpy run iovsearch path/to/model --column 'OCC' --distribution 'same-as-iiv' --rank_type 'bic'
 
 ~~~~~~~~~
 Arguments
@@ -52,7 +53,7 @@ Arguments
 +---------------------------------------------+----------------------------------------------------------------------+
 | :ref:`distribution<distribution_iovsearch>` | Which distribution added IOVs should have (default is same as IIVs)  |
 +---------------------------------------------+----------------------------------------------------------------------+
-| :ref:`rankfunc<ranking_iovsearch>`          | Which selection criteria to rank models on, e.g. OFV (default is     |
+| :ref:`rank_type<ranking_iovsearch>`         | Which selection criteria to rank models on, e.g. OFV (default is     |
 |                                             | BIC)                                                                 |
 +---------------------------------------------+----------------------------------------------------------------------+
 | :ref:`cutoff<ranking_iovsearch>`            | Cutoff for the ranking function, exclude models that are below       |
@@ -149,7 +150,7 @@ below.
 +===================+=================================================+
 | ``'same-as-iiv'`` | Copies the distribution of IIV etas (default)   |
 +-------------------+-------------------------------------------------+
-| ``'disjoint'``    | Disjoint normal distribution                    |
+| ``'disjoint'``    | Disjoint normal distributions                   |
 +-------------------+-------------------------------------------------+
 | ``'joint'``       | Joint normal distribution                       |
 +-------------------+-------------------------------------------------+
@@ -163,8 +164,82 @@ below.
 Comparing and ranking candidates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-This system is the same as for modelsearch, see :ref:`here<ranking_modelsearch>`.
+The supplied ``rank_type`` will be used to compare a set of candidate models and rank them. A cutoff may also be provided
+if the user does not want to use the default. The following rank functions are available:
+
++------------+-----------------------------------------------------------------------------------+
+| Rank type  | Description                                                                       |
++============+===================================================================================+
+| ``'ofv'``  | ΔOFV. Default is to not rank candidates with ΔOFV < cutoff (default 3.84)         |
++------------+-----------------------------------------------------------------------------------+
+| ``'aic'``  | ΔAIC. Default is to rank all candidates if no cutoff is provided.                 |
++------------+-----------------------------------------------------------------------------------+
+| ``'bic'``  | ΔBIC (random). Default is to rank all candidates if no cutoff is provided.        |
++------------+-----------------------------------------------------------------------------------+
+
+Information about how BIC is calculated can be found in :py:func:`pharmpy.modeling.calculate_bic`.
 
 ~~~~~~~
 Results
 ~~~~~~~
+
+The tool creates various summary tables which can be accessed in the results object,
+as well as files in .csv/.json format.
+
+Consider a IOVsearch run:
+
+.. pharmpy-code::
+
+    res = run_iovsearch(column='VISI',
+                        model=start_model,
+                        list_of_parameters=None,
+                        rank_type='bic',
+                        cutoff=None,
+                        distribution='same-as-iiv')
+
+
+The ``summary_tool`` table contains information such as which feature each model candidate has, the difference to the
+start model (in this case comparing BIC), and final ranking:
+
+.. pharmpy-execute::
+    :hide-code:
+
+    from pharmpy.results import read_results
+    res = read_results('tests/testdata/results/iovsearch_results.json')
+    res.summary_tool
+
+To see information about the actual model runs, such as minimization status, estimation time, and parameter estimates,
+you can look at the ``summary_models`` table. The table is generated with
+:py:func:`pharmpy.modeling.summarize_modelfit_results`.
+
+.. pharmpy-execute::
+    :hide-code:
+
+    res.summary_models
+
+A summary table of predicted influential individuals and outliers can be seen in ``summary_individuals_count``.
+See :py:func:`pharmpy.modeling.summarize_individuals_count_table` for information on the content of this table.
+
+.. pharmpy-execute::
+    :hide-code:
+
+    res.summary_individuals_count
+
+You can see different individual statistics in ``summary_individuals``.
+See :py:func:`pharmpy.modeling.summarize_individuals` for information on the content of this table.
+
+.. pharmpy-execute::
+    :hide-code:
+
+    res.summary_individuals
+
+Finally, you can see a summary of different errors and warnings in ``summary_errors``.
+See :py:func:`pharmpy.modeling.summarize_errors` for information on the content of this table.
+
+.. pharmpy-execute::
+    :hide-code:
+
+    import pandas as pd
+    pd.set_option('display.max_colwidth', None)
+    res.summary_errors
+

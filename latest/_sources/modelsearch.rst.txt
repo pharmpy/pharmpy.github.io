@@ -17,14 +17,14 @@ To initiate modelsearch in Python:
 
 .. pharmpy-code::
 
-    from pharmpy.modeling import run_modelsearch
+    from pharmpy.tools import run_modelsearch
 
     start_model = read_model('path/to/model')
     res = run_modelsearch(search_space='ABSORPTION(ZO);PERIPHERALS(1)',
                           algorithm='exhaustive',
                           model=start_model,
                           iiv_strategy='no_add',
-                          rankfunc='bic',
+                          rank_type='bic',
                           cutoff=None)
 
 This will take an input model ``model`` with ``search_space`` as the search space, meaning zero order absorption and adding one
@@ -36,7 +36,7 @@ To run modelsearch from the command line, the example code is redefined accordin
 
 .. code::
 
-    pharmpy run modelsearch path/to/model 'ABSORPTION(ZO);PERIPHERALS(1)' 'exhaustive' --iiv_strategy 'no_add' --rankfunc 'bic'
+    pharmpy run modelsearch path/to/model 'ABSORPTION(ZO);PERIPHERALS(1)' 'exhaustive' --iiv_strategy 'no_add' --rank_type 'bic'
 
 Arguments
 ~~~~~~~~~
@@ -47,16 +47,16 @@ For a more detailed description of each argument, see their respective chapter o
 +=================================================+==================================================================+
 | :ref:`search_space<the search space>`           | Search space to test                                             |
 +-------------------------------------------------+------------------------------------------------------------------+
-| :ref:`algorithm<algorithms_modelsearch>`        | Algorithm to use (e.g. ``'exhaustive'``)                         |
+| :ref:`algorithm<algorithms_modelsearch>`        | Algorithm to use (e.g. ``'reduced_stepwise'``)                   |
 +-------------------------------------------------+------------------------------------------------------------------+
-| :ref:`rankfunc<ranking_modelsearch>`            | Which selection criteria to rank models on, e.g. OFV (default is |
+| :ref:`rank_type<ranking_modelsearch>`           | Which selection criteria to rank models on, e.g. OFV (default is |
 |                                                 | BIC)                                                             |
 +-------------------------------------------------+------------------------------------------------------------------+
 | :ref:`cutoff<ranking_modelsearch>`              | Cutoff for the ranking function, exclude models that are below   |
 |                                                 | cutoff (default is none)                                         |
 +-------------------------------------------------+------------------------------------------------------------------+
 | :ref:`iiv_strategy<iiv_strategies_modelsearch>` | If/how IIV should be added to candidate models (default is to    |
-|                                                 | not add)                                                         |
+|                                                 | add to absorption delay parameters)                              |
 +-------------------------------------------------+------------------------------------------------------------------+
 | ``model``                                       | Start model                                                      |
 +-------------------------------------------------+------------------------------------------------------------------+
@@ -246,17 +246,17 @@ Adding IIV to the candidate models during search
 The ``iiv_strategy`` option determines whether or not IIV on the PK parameters should be added to the candidate models.
 The different strategies can be seen here:
 
-+------------------------+----------------------------------------------------------+
-| Strategy               | Description                                              |
-+========================+==========================================================+
-| ``'no_add'``           | No IIVs are added during the search (default)            |
-+------------------------+----------------------------------------------------------+
-| ``'diagonal'``         | IIV is added to all structural parameters as diagonal    |
-+------------------------+----------------------------------------------------------+
-| ``'fullblock'``        | IIV is added to all structural parameters as full block  |
-+------------------------+----------------------------------------------------------+
-| ``'absorption_delay'`` | IIV is added to the absorption delay parameter           |
-+------------------------+----------------------------------------------------------+
++------------------------+----------------------------------------------------------------------------------+
+| Strategy               | Description                                                                      |
++========================+==================================================================================+
+| ``'no_add'``           | No IIVs are added during the search                                              |
++------------------------+----------------------------------------------------------------------------------+
+| ``'add_diagonal'``     | IIV is added to all structural parameters as diagonal                            |
++------------------------+----------------------------------------------------------------------------------+
+| ``'fullblock'``        | IIV is added to all structural parameters, and all IIVs will be in a full block  |
++------------------------+----------------------------------------------------------------------------------+
+| ``'absorption_delay'`` | IIV is added to the absorption delay parameter (default)                         |
++------------------------+----------------------------------------------------------------------------------+
 
 .. _ranking_modelsearch:
 
@@ -264,18 +264,20 @@ The different strategies can be seen here:
 Comparing and ranking candidates
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The supplied ``rankfunc`` will be used to compare a set of candidate models and rank them. A cutoff may also be provided
+The supplied ``rank_type`` will be used to compare a set of candidate models and rank them. A cutoff may also be provided
 if the user does not want to use the default. The following rank functions are available:
 
 +------------+-----------------------------------------------------------------------------------+
-| Rankfunc   | Description                                                                       |
+| Rank type  | Description                                                                       |
 +============+===================================================================================+
 | ``'ofv'``  | ΔOFV. Default is to not rank candidates with ΔOFV < cutoff (default 3.84)         |
 +------------+-----------------------------------------------------------------------------------+
 | ``'aic'``  | ΔAIC. Default is to rank all candidates if no cutoff is provided.                 |
 +------------+-----------------------------------------------------------------------------------+
-| ``'bic'``  | ΔBIC (mixed effects). Default is to rank all candidates if no cutoff is provided. |
+| ``'bic'``  | ΔBIC (mixed). Default is to rank all candidates if no cutoff is provided.         |
 +------------+-----------------------------------------------------------------------------------+
+
+Information about how BIC is calculated can be found in :py:func:`pharmpy.modeling.calculate_bic`.
 
 ~~~~~~~~~~~~~~~~~~~~~~~
 The Modelsearch results
@@ -293,7 +295,7 @@ Consider a modelsearch run with the search space of zero order absorption and ad
                           'exhaustive',
                           model=start_model,
                           iiv_strategy='no_add',
-                          rankfunc='bic',
+                          rank_type='bic',
                           cutoff=None)
 
 
