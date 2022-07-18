@@ -22,22 +22,22 @@ To initiate COVsearch in Python/R:
     start_model = read_model('path/to/model')
     res = run_covsearch(algorithm='scm-forward',
                         model=start_model,
-                        effects='COVARIATE(@IIV, @CONTINUOUS, *); COVARIATE(@IIV, @CATEGORICAL, CAT, *)',
+                        effects='COVARIATE(@IIV, @CONTINUOUS, *); COVARIATE(@IIV, @CATEGORICAL, CAT)',
                         p_forward=0.05,
                         max_steps=5)
 
 In this example, we will attempt up to five forward steps of the Stepwise
 Covariate Modeling (SCM) algorithm on the model ``start_model``. The p-value
-threshold for theses steps if 5% and the candidate effects consists of all
+threshold for these steps is 5% and the candidate effects consists of all (\*)
 supported effects (multiplicative) of continuous covariates on parameters with IIV,
-and a multiplicative categorical effect of categorical covariates on parameters
+and a (multiplicative) categorical effect of categorical covariates on parameters
 with IIV.
 
 To run COVsearch from the command line, the example code is redefined accordingly:
 
 .. code::
 
-    pharmpy run covsearch path/to/model --algorithm scm-forward --effects 'COVARIATE(@IIV, @CONTINUOUS, *); COVARIATE(@IIV, @CATEGORICAL, CAT, *)' --p_forward 0.05 --max_steps 5
+    pharmpy run covsearch path/to/model --algorithm scm-forward --effects 'COVARIATE(@IIV, @CONTINUOUS, *); COVARIATE(@IIV, @CATEGORICAL, CAT)' --p_forward 0.05 --max_steps 5
 
 ~~~~~~~~~
 Arguments
@@ -46,7 +46,7 @@ Arguments
 +---------------------------------------------+----------------------------------------------------------------------+
 | Argument                                    | Description                                                          |
 +=============================================+======================================================================+
-| :ref:`effects<effects_covsearch>`           | The candidate effects to search through (required)                   |
+| :ref:`effects<effects_covsearch>`           | The candidate parameter-covariate effects to search through (required)                   |
 +---------------------------------------------+----------------------------------------------------------------------+
 | ``p_forward``                               | The p-value threshold for forward steps (default is `0.05`)          |
 +---------------------------------------------+----------------------------------------------------------------------+
@@ -116,8 +116,8 @@ can be simplified to
     )
 
 
-Finally, the candidate effects can be defined through a domain-specifc language
-(DSL) sentence. For instance, the example above can be given as
+Finally, the candidate effects can be defined through a model feature language
+(:ref:`MFL<mfl>`) sentence. For instance, the example above can be given as
 
 .. pharmpy-code::
 
@@ -127,14 +127,14 @@ Finally, the candidate effects can be defined through a domain-specifc language
         ...
     )
 
-This DSL also provides additional features such as automatic or manual
-aliases. For instance the example above can be rewritten as
+The `MFL` also provides additional features such as automatically- or
+manually-defined symbols. For instance the example above can be rewritten as
 
 .. pharmpy-code::
 
     run_covsearch(
         ...
-        effects='CONTINUOUS([AGE,WT]);COVARIATE([CL, V], @CONTINUOUS, EXP)'
+        effects='LET(CONTINUOUS, [AGE,WT]);COVARIATE([CL, V], @CONTINUOUS, EXP)'
         ...
     )
 
@@ -154,41 +154,25 @@ For instance,
 would test an exponential covariate effect on clearance and volume for each
 continuous covariate.
 
-More aliases are available and described in the next section.
+More automatic symbols are available. They are described in the :ref:`MFL
+symbols section<mfl_symbols>`.
 
-COVsearch DSL aliases
-~~~~~~~~~~~~~~~~~~~~~
+Wildcards
+~~~~~~~~~
 
-The DSL supports the following aliases:
+In addition to symbols, using a wildcard `\*` can help refer to computed list
+of values. For instance the MFL sentence `COVARIATE(*, *, *)` represents "All
+continuous covariate effects of all covariates on all PK parameters".
 
-+-----------------+-------------+----------------+---------------------------------------------+
-| Alias           | Type        | Definition     | Description                                 |
-+=================+=============+================+=============================================+
-| `@IIV`          | Parameter   | auto           | All parameters with a corresponding IIV ETA |
-+-----------------+-------------+----------------+---------------------------------------------+
-| `\*`            | Parameter   | auto           | All PK parameters                           |
-+-----------------+-------------+----------------+---------------------------------------------+
-| `@ABSORPTION`   | Parameter   | auto or manual | All PK absorption parameters                |
-+-----------------+-------------+----------------+---------------------------------------------+
-| `@ELIMINATION`  | Parameter   | auto or manual | All PK elimination parameters               |
-+-----------------+-------------+----------------+---------------------------------------------+
-| `@DISTRIBUTION` | Parameter   | auto or manual | All PK distribution parameters              |
-+-----------------+-------------+----------------+---------------------------------------------+
-| `@CONTINUOUS`   | Covariate   | auto or manual | All continuous covariates                   |
-+-----------------+-------------+----------------+---------------------------------------------+
-| `@CATEGORICAL`  | Covariate   | auto or manual | All categorical covariates                  |
-+-----------------+-------------+----------------+---------------------------------------------+
-| `\*`            | Covariate   | auto           | All covariates                              |
-+-----------------+-------------+----------------+---------------------------------------------+
-| `\*`            | Effect      | auto           | All continuous effects                      |
-+-----------------+-------------+----------------+---------------------------------------------+
-
-Manual aliases can be defined via the syntax `ALIAS([...])`. For instance to
-declare a list of absorption parameters use `ABSORPTION(KA)`.
-
-For aliases that are both automatic and manual, the automatic definition of an
-alias gets overriden as soon as a manual definition is used for the alias.
-
++-------------+---------------------------------------------+
+| Type        | Description of wildcard definition          |
++=============+=============================================+
+| Covariate   | All covariates                              |
++-------------+---------------------------------------------+
+| Effect      | All continuous effects                      |
++-------------+---------------------------------------------+
+| Parameter   | All PK parameters                           |
++-------------+---------------------------------------------+
 
 .. _algorithm_covsearch:
 

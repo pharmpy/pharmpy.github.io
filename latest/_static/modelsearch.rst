@@ -20,23 +20,23 @@ To initiate modelsearch in Python:
     from pharmpy.tools import run_modelsearch
 
     start_model = read_model('path/to/model')
-    res = run_modelsearch(search_space='ABSORPTION(ZO);PERIPHERALS(1)',
-                          algorithm='exhaustive',
+    res = run_modelsearch(search_space='PERIPHERALS(1);LAGTIME()',
+                          algorithm='reduced_stepwise',
                           model=start_model,
-                          iiv_strategy='no_add',
+                          iiv_strategy='absorption_delay',
                           rank_type='bic',
                           cutoff=None)
 
-This will take an input model ``model`` with ``search_space`` as the search space, meaning zero order absorption and adding one
-peripheral compartment will be tried. The tool will use the ``exhaustive`` search algorithm. Structural IIVs will not be
-added to candidates since ``iiv_strategy`` is set to be 'no_add'. The candidate models will be ranked using ``bic``
-with default ``cutoff``, which for BIC is none.
+This will take an input model ``model`` with ``search_space`` as the search space, meaning adding one peripheral
+compartment and lagtime will be tried. The tool will use the 'reduced_stepwise' search ``algorithm``. Structural IIVs
+will not be added to candidates since ``iiv_strategy`` is set to be 'absorption_delay'. The candidate models will have
+BIC as the ``rank_type`` with default ``cutoff``, which for BIC is none.
 
 To run modelsearch from the command line, the example code is redefined accordingly:
 
 .. code::
 
-    pharmpy run modelsearch path/to/model 'ABSORPTION(ZO);PERIPHERALS(1)' 'exhaustive' --iiv_strategy 'no_add' --rank_type 'bic'
+    pharmpy run modelsearch path/to/model 'PERIPHERALS(1);LAGTIME()' 'reduced_stepwise' --iiv_strategy 'absorption_delay' --rank_type 'bic'
 
 Arguments
 ~~~~~~~~~
@@ -69,8 +69,7 @@ The search space
 
 The model feature search space is a set of possible combinations of model features that will be applied and tested on
 the input model. The supported features cover absorption, absorption delay, elimination, and distribution. The search
-space is given as a string with a specific grammar, according to the `Model Feature Language` (MFL) (see detailed
-description :ref:`below<mfl>`).
+space is given as a string with a specific grammar, according to the `Model Feature Language` (MFL) (see :ref:`detailed description<mfl>`).
 
 .. _algorithms_modelsearch:
 
@@ -291,13 +290,12 @@ Consider a modelsearch run with the search space of zero order absorption and ad
 
 .. pharmpy-code::
 
-    res = run_modelsearch('ABSORPTION(ZO);PERIPHERALS(1)',
-                          'exhaustive',
+    res = run_modelsearch(search_space='PERIPHERALS(1);LAGTIME()',
+                          algorithm='reduced_stepwise',
                           model=start_model,
-                          iiv_strategy='no_add',
+                          iiv_strategy='absorption_delay',
                           rank_type='bic',
                           cutoff=None)
-
 
 The ``summary_tool`` table contains information such as which feature each model candidate has, the difference to the
 start model (in this case comparing BIC), and final ranking:
@@ -343,163 +341,3 @@ See :py:func:`pharmpy.modeling.summarize_errors` for information on the content 
     import pandas as pd
     pd.set_option('display.max_colwidth', None)
     res.summary_errors
-
-
-.. _mfl:
-
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-Model feature language (MFL) reference
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-The `MFL` is a domain specific language designed to describe model features and sets of model features in a concise way.
-It can be used to describe model features for one single model or an entire space of model features, i.e. descriptions
-for multiple models. The basic building block of MFL is the feature description. A feature description consists of the
-name of a feature category followed by a comma separated list of arguments within parentheses. For example:
-
-.. code::
-
-    ABSORPTION(FO)
-
-Each feature description describes one or multiple features of the same category, i.e. absorption, absorption delay,
-elimination, and distribution. Features of the same category are mutually exclusive and cannot be applied to the same
-model. Multiple model feature descriptions can be combined by separating them with either newline or a semi-colon.
-
-The following two examples are equivalent:
-
-.. code::
-
-    ABSORPTION(FO);ELIMINATION(ZO)
-
-.. code::
-
-    ABSORPTION(FO)
-    ELIMINATION(ZO)
-
-Option types
-~~~~~~~~~~~~
-
-MFL support the following types of options to feature descriptions:
-
-+---------------+------------------+-------------------------------------------------------+
-| Type          | Example          | Description                                           |
-+===============+==================+=======================================================+
-| token or name | :code:`FO`       | The name of a feature within a category               |
-+---------------+------------------+-------------------------------------------------------+
-| number        | :code:`1`        | A non-negative integer                                |
-+---------------+------------------+-------------------------------------------------------+
-| range         | :code:`0..2`     | A range of numbers (endpoints are included)           |
-+---------------+------------------+-------------------------------------------------------+
-| wildcard      | :code:`*`        | All features of a category                            |
-+---------------+------------------+-------------------------------------------------------+
-| array         | :code:`[FO, ZO]` | Multiple tokens or numbers                            |
-+---------------+------------------+-------------------------------------------------------+
-
-Model features
-~~~~~~~~~~~~~~
-
-MFL support the following model features:
-
-+---------------+-------------------------------+--------------------------------------------------------------------+
-| Category      | Options                       | Description                                                        |
-+===============+===============================+====================================================================+
-| ABSORPTION    | :code:`FO, ZO, SEQ-ZO-FO`     | Absorption rate                                                    |
-+---------------+-------------------------------+--------------------------------------------------------------------+
-| ELIMINATION   | :code:`FO, ZO, MM, MIX-FO-MM` | Elimination rate                                                   |
-+---------------+-------------------------------+--------------------------------------------------------------------+
-| PERIPHERALS   | `number`                      | Number of peripheral compartments                                  |
-+---------------+-------------------------------+--------------------------------------------------------------------+
-| TRANSITS      | `number`, DEPOT/NODEPOT       | Number of absorption transit compartments. Whether convert depot   |
-|               |                               | compartment into a transit compartment                             |
-+---------------+-------------------------------+--------------------------------------------------------------------+
-| LAGTIME       | None                          | Absorption lagtime                                                 |
-+---------------+-------------------------------+--------------------------------------------------------------------+
-
-
-Describe intervals
-~~~~~~~~~~~~~~~~~~
-
-It is possible to use ranges and arrays to describe the search space for e.g. transit and peripheral compartments.
-
-To add 1, 2 and 3 peripheral compartments:
-
-.. code::
-
-    PERIPHERALS(1)
-    PERIPHERALS(2)
-    PERIPHERALS(3)
-
-This is equivalent to:
-
-.. code::
-
-    PERIPHERALS(1..3)
-
-As well as:
-
-.. code::
-
-    PERIPHERALS([1,2,3])
-
-Redundant descriptions
-~~~~~~~~~~~~~~~~~~~~~~
-
-It is allowed to describe the same feature multiple times, however, this will not make any difference for which
-features are described.
-
-.. code::
-
-    ABSORPTION(FO)
-    ABSORPTION([FO, ZO])
-
-This is equivalent to:
-
-.. code::
-
-    ABSORPTION([FO, ZO])
-
-And:
-
-.. code::
-
-    PERIPHERALS(1..2)
-    PERIPHERALS(1)
-
-Is equivalent to:
-
-.. code::
-
-    PERIPHERALS(1..2)
-
-Examples
-~~~~~~~~
-
-An example of a search space for PK models with oral data:
-
-.. code::
-
-    ABSORPTION([ZO,SEQ-ZO-FO])
-    ELIMINATION([MM,MIX-FO-MM])
-    LAGTIME()
-    TRANSITS([1,3,10],*)
-    PERIPHERALS(1)
-
-An example of a search space for PK models with IV data:
-
-.. code::
-
-    ELIMINATION([MM,MIX-FO-MM])
-    PERIPHERALS([1,2])
-
-
-Search through all available absorption rates:
-
-.. code::
-
-    ABSORPTION(*)
-
-Allow all combinations of absorption and elimination rates:
-
-.. code::
-
-    ABSORPTION(*)
-    ELIMINATION(*)

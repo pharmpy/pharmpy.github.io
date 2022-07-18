@@ -21,7 +21,7 @@ Parameter
 
    .. autosummary::
 
-      ~Parameter.set_fix
+      ~Parameter.derive
 
    .. rubric:: Attributes Documentation
 
@@ -34,4 +34,4 @@ Parameter
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: set_fix
+   .. automethod:: derive

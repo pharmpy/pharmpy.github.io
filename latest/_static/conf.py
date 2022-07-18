@@ -33,7 +33,7 @@ project = 'Pharmpy'
 year = '2018-2022'
 authors = ['the Pharmpy development team']
 copyright = '{0}; {1}'.format(year, ', '.join(authors))
-version = release = '0.73.1'
+version = release = '0.74.1'
 html_show_sourcelink = False
 
 pygments_style = 'trac'
@@ -48,13 +48,25 @@ html_use_smartypants = True
 html_last_updated_fmt = '%b %d, %Y'
 html_split_index = False
 html_theme_options = {
-    'globaltoc_maxdepth': 2
+    'globaltoc_maxdepth': 2,
+    "logo": {
+        "image_light": "Pharmpy_logo.svg",
+        "image_dark": "Pharmpy_logo_dark.svg",
+    },
+    'github_url': 'https://github.com/pharmpy/pharmpy',
+    "icon_links": [
+        {
+            "name": "Report issues",
+            "url": "https://github.com/pharmpy/pharmpy/issues",
+            "icon": "fa fa-comments",
+        }
+    ]
 }
-html_sidebars = {
-   '**': ['searchbox.html', 'globaltoc.html', 'sourcelink.html'],
+html_favicon = 'images/Pharmpy_symbol.svg'
+html_context = {
+   "default_mode": "light"
 }
 html_short_title = '%s-%s' % (project, version)
-html_logo = 'Pharmpy_logo.svg'
 
 napoleon_use_ivar = True
 napoleon_use_rtype = False
