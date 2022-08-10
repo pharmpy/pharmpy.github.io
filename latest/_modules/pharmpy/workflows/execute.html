@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.workflows.execute &#8212; Pharmpy 0.74.1 documentation</title>
+    <title>pharmpy.workflows.execute &#8212; Pharmpy 0.75.0 documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -40,7 +40,7 @@
     <script src="../../../_static/thebelab-helper.js"></script>
     <script src="../../../_static/tabs.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.0-rc.1/dist/embed-amd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.0-rc.2/dist/embed-amd.js"></script>
     <link rel="shortcut icon" href="../../../_static/Pharmpy_symbol.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
@@ -329,11 +329,15 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">get_client</span><span class="p">,</span> <span class="n">rejoin</span><span class="p">,</span> <span class="n">secede</span>
 
+    <span class="kn">from</span> <span class="nn">.optimize</span> <span class="kn">import</span> <span class="n">optimize_task_graph_for_dask_distributed</span>
+
     <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
+    <span class="n">dsk</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">as_dask_dict</span><span class="p">()</span>
+    <span class="n">dsk</span><span class="p">[</span><span class="n">unique_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">dsk</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;results&#39;</span><span class="p">)</span>
+    <span class="n">dsk_optimized</span> <span class="o">=</span> <span class="n">optimize_task_graph_for_dask_distributed</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dsk</span><span class="p">)</span>
+    <span class="n">futures</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dsk_optimized</span><span class="p">,</span> <span class="n">unique_name</span><span class="p">,</span> <span class="n">sync</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">secede</span><span class="p">()</span>
-    <span class="n">d</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">as_dask_dict</span><span class="p">()</span>
-    <span class="n">d</span><span class="p">[</span><span class="n">unique_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;results&#39;</span><span class="p">)</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">unique_name</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span>
     <span class="n">rejoin</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>

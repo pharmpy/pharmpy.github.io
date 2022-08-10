@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.17.1: http://docutils.sourceforge.net/" />
 
-    <title>Pharmpy in R &#8212; Pharmpy 0.74.1 documentation</title>
+    <title>Pharmpy in R &#8212; Pharmpy 0.75.0 documentation</title>
 <script>
   document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
   document.documentElement.dataset.theme = localStorage.getItem("theme") || "light"
@@ -40,7 +40,7 @@
     <script src="_static/doctools.js"></script>
     <script src="_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.0-rc.1/dist/embed-amd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.0-rc.2/dist/embed-amd.js"></script>
     <link rel="shortcut icon" href="_static/Pharmpy_symbol.svg"/>
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
@@ -353,6 +353,35 @@
 <nav id="bd-toc-nav">
     <ul class="visible nav section-nav flex-column">
  <li class="toc-h2 nav-item toc-entry">
+  <a class="reference internal nav-link" href="#installing-pharmr">
+   Installing pharmr
+  </a>
+  <ul class="nav section-nav flex-column">
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#updating">
+     Updating
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#trouble-shooting">
+     Trouble shooting
+    </a>
+    <ul class="nav section-nav flex-column">
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#wrong-python-version">
+       Wrong Python version
+      </a>
+     </li>
+     <li class="toc-h4 nav-item toc-entry">
+      <a class="reference internal nav-link" href="#error-importing-pharmpy">
+       Error importing Pharmpy
+      </a>
+     </li>
+    </ul>
+   </li>
+  </ul>
+ </li>
+ <li class="toc-h2 nav-item toc-entry">
   <a class="reference internal nav-link" href="#using-pharmr">
    Using pharmr
   </a>
@@ -370,6 +399,21 @@
    <li class="toc-h3 nav-item toc-entry">
     <a class="reference internal nav-link" href="#list-indices">
      List indices
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#dataframes-with-multiindex">
+     Dataframes with multiindex
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#floats-and-integers">
+     Floats and integers
+    </a>
+   </li>
+   <li class="toc-h3 nav-item toc-entry">
+    <a class="reference internal nav-link" href="#single-element-vectors">
+     Single element vectors
     </a>
    </li>
   </ul>
@@ -397,29 +441,88 @@
 <span id="using-r"></span><h1>Pharmpy in R<a class="headerlink" href="#pharmpy-in-r" title="Permalink to this headline">#</a></h1>
 <p><a class="reference external" href="https://github.com/pharmpy/pharmr">pharmr</a> is an R wrapper to Pharmpy. It provides an R interface to all functions
 found in the modeling-module (documented <a class="reference external" href="https://pharmpy.github.io/latest/reference/pharmpy.modeling.html">here</a>).
-Each function is also available via the help-function (or <cite>?</cite>). The version number of pharmr
-mirrors Pharmpy, so it is import to make sure they have the same version number (a warning
-will appear if they are different). pharmr version 0.33.1 is on CRAN. However, since Pharmpy
-still is under development and different features constantly are being released, we still
-recommend using the development version on Github until Pharmpy/pharmr version 1.0.0 is released.</p>
-<section id="using-pharmr">
-<h2>Using pharmr<a class="headerlink" href="#using-pharmr" title="Permalink to this headline">#</a></h2>
-<p>In pharmr, you can pipe different Pharmpy functions together with the magrittr-package:</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">pharmr</span><span class="p">)</span>
-<span class="n">model</span> <span class="o">&lt;-</span> <span class="nf">load_example_model</span><span class="p">(</span><span class="s">&#39;pheno&#39;</span><span class="p">)</span> <span class="o">%&gt;%</span>
-  <span class="nf">add_parameter</span><span class="p">(</span><span class="s">&#39;MAT&#39;</span><span class="p">)</span> <span class="o">%&gt;%</span>
-  <span class="nf">fit</span><span class="p">()</span>
+Each function is also available via the help-function (or <code class="docutils literal notranslate"><span class="pre">?</span></code>). The version number of pharmr mirrors Pharmpy, so it is
+import to make sure they have the same version number (a warning will appear if they are different). pharmr version
+0.73.1 is on CRAN. However, since Pharmpy still is under development and different features constantly are being
+released, we still recommend using the development version on Github until Pharmpy/pharmr version 1.0.0 is released.</p>
+<section id="installing-pharmr">
+<span id="install-pharmr"></span><h2>Installing pharmr<a class="headerlink" href="#installing-pharmr" title="Permalink to this headline">#</a></h2>
+<p>pharmr uses the package <a class="reference external" href="https://rstudio.github.io/reticulate">reticulate</a> for calling Python from R. Install
+pharmr and Pharmpy with the following:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">remotes</span><span class="o">::</span><span class="nf">install_github</span><span class="p">(</span><span class="s">&quot;pharmpy/pharmr&quot;</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="s">&quot;main&quot;</span><span class="p">)</span>
+<span class="n">pharmr</span><span class="o">::</span><span class="nf">install_pharmpy</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>It is also possible to install from CRAN (but we still recommend using the GitHub installation until 1.0.0 is out):</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">install.packages</span><span class="p">(</span><span class="s">&quot;pharmr&quot;</span><span class="p">)</span>
+<span class="n">pharmr</span><span class="o">::</span><span class="nf">install_pharmpy</span><span class="p">()</span>
 </pre></div>
 </div>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>If you try to access data frames belonging to a Pharmpy object you need to reset the index.
-All functions available in pharmr do this internally, it is only when you have data frames
-nested in objects (such as a model object) that you need to do this. If we continue the previous
-example:</p>
-<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">residuals</span> <span class="o">&lt;-</span> <span class="nf">reset_index</span><span class="p">(</span><span class="n">model</span><span class="o">$</span><span class="n">modelfit_results</span><span class="o">$</span><span class="n">residuals</span><span class="p">)</span>
+<p>Make sure to clear your environment and restart the R session after installing/updating.</p>
+</div>
+<p>To make sure the versions of Pharmpy and pharmr are up-to-date and were installed successfully, run the following:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">pharmr</span><span class="p">)</span>
+<span class="nf">packageVersion</span><span class="p">(</span><span class="s">&quot;pharmr&quot;</span><span class="p">)</span>
+<span class="nf">print_pharmpy_version</span><span class="p">()</span>
 </pre></div>
 </div>
+<p>If you get any error during the installation or when running the code above, please check <a class="reference internal" href="#trouble-shoot-pharmr"><span class="std std-ref">Trouble shooting</span></a>.</p>
+<section id="updating">
+<h3>Updating<a class="headerlink" href="#updating" title="Permalink to this headline">#</a></h3>
+<p>As previously mentioned, it is very important that pharmr and Pharmpy have the same version, this means that you need
+to update both when you update. You update in the same way as you install:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">remotes</span><span class="o">::</span><span class="nf">install_github</span><span class="p">(</span><span class="s">&quot;pharmpy/pharmr&quot;</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="s">&quot;main&quot;</span><span class="p">)</span>
+<span class="n">pharmr</span><span class="o">::</span><span class="nf">install_pharmpy</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="trouble-shooting">
+<span id="trouble-shoot-pharmr"></span><h3>Trouble shooting<a class="headerlink" href="#trouble-shooting" title="Permalink to this headline">#</a></h3>
+<section id="wrong-python-version">
+<h4>Wrong Python version<a class="headerlink" href="#wrong-python-version" title="Permalink to this headline">#</a></h4>
+<p>When reticulate sets up Miniconda it can default to use Python 3.6 (which Pharmpy does not support). If you have any
+trouble installing Pharmpy or any of its dependencies, you can do the following to check the Python version in your
+reticulate environment:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">reticulate</span><span class="o">::</span><span class="nf">py_discover_config</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>Make sure the Python version is &gt;= 3.8. If it is not, you can run the following in R:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">reticulate</span><span class="o">::</span><span class="nf">conda_create</span><span class="p">(</span><span class="s">&#39;r-reticulate&#39;</span><span class="p">,</span> <span class="n">python_version</span> <span class="o">=</span> <span class="s">&#39;3.9&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Restart the session and try installing Pharmpy again:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">pharmr</span><span class="o">::</span><span class="nf">install_pharmpy</span><span class="p">()</span>
+</pre></div>
+</div>
+</section>
+<section id="error-importing-pharmpy">
+<h4>Error importing Pharmpy<a class="headerlink" href="#error-importing-pharmpy" title="Permalink to this headline">#</a></h4>
+<p>If you have followed the installation steps but still get an error asking you to install Pharmpy, the issue might be
+that pharmr is not using or finding the right virtual environment. If you used pharmr to set up your environment
+(default when you use <code class="docutils literal notranslate"><span class="pre">install_pharmpy()</span></code>), run the following:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">reticulate</span><span class="o">::</span><span class="nf">py_discover_config</span><span class="p">()</span>
+</pre></div>
+</div>
+<p>and make sure you have something similar to the following as the output:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">python</span><span class="p">:</span>         <span class="o">.../</span><span class="n">r</span><span class="o">-</span><span class="n">reticulate</span><span class="o">/</span><span class="nb">bin</span><span class="o">/</span><span class="n">python</span>
+<span class="n">libpython</span><span class="p">:</span>      <span class="o">.../</span><span class="n">r</span><span class="o">-</span><span class="n">reticulate</span><span class="o">/</span><span class="n">lib</span><span class="o">/</span><span class="n">libpython3</span><span class="mf">.10</span><span class="o">.</span><span class="n">so</span>
+<span class="o">...</span>
+</pre></div>
+</div>
+</section>
+</section>
+</section>
+<section id="using-pharmr">
+<h2>Using pharmr<a class="headerlink" href="#using-pharmr" title="Permalink to this headline">#</a></h2>
+<p>In pharmr, you can pipe different Pharmpy functions together with the magrittr-package:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">library</span><span class="p">(</span><span class="n">pharmr</span><span class="p">)</span>
+<span class="nf">library</span><span class="p">(</span><span class="n">magrittr</span><span class="p">)</span>
+<span class="n">model</span> <span class="o">&lt;-</span> <span class="nf">read_model</span><span class="p">(</span><span class="s">&#39;path/to/model&#39;</span><span class="p">)</span> <span class="o">%&gt;%</span>
+  <span class="nf">set_zero_order_absorption</span><span class="p">()</span> <span class="o">%&gt;%</span>
+  <span class="nf">fit</span><span class="p">()</span>
+</pre></div>
 </div>
 </section>
 <section id="gotchas">
@@ -450,6 +553,56 @@ the same way as usual:</p>
 <div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">etas</span> <span class="o">&lt;-</span> <span class="n">model</span><span class="o">$</span><span class="n">random_variables</span>
 <span class="n">etas</span><span class="p">[</span><span class="m">1</span><span class="p">]</span> <span class="c1"># access first element</span>
 </pre></div>
+</div>
+</section>
+<section id="dataframes-with-multiindex">
+<h3>Dataframes with multiindex<a class="headerlink" href="#dataframes-with-multiindex" title="Permalink to this headline">#</a></h3>
+<p>If you try to access data frames belonging to a Pharmpy object you need to reset the index. All functions available in
+pharmr do this internally, it is only when you have data frames nested in objects (such as a model object) that you
+need to do this. If we continue the previous example:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">residuals</span> <span class="o">&lt;-</span> <span class="nf">reset_index</span><span class="p">(</span><span class="n">model</span><span class="o">$</span><span class="n">modelfit_results</span><span class="o">$</span><span class="n">residuals</span><span class="p">)</span>
+</pre></div>
+</div>
+</section>
+<section id="floats-and-integers">
+<h3>Floats and integers<a class="headerlink" href="#floats-and-integers" title="Permalink to this headline">#</a></h3>
+<p>In some functions, it is currently necessary to specify when a number is an integer with e.g. <code class="docutils literal notranslate"><span class="pre">as.integer()</span></code> or <code class="docutils literal notranslate"><span class="pre">L</span></code>
+notation. The following would cause an error:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">&lt;-</span> <span class="nf">run_covsearch</span><span class="p">(</span><span class="n">algorithm</span><span class="o">=</span><span class="s">&#39;scm-forward&#39;</span><span class="p">,</span>
+                     <span class="kc">...</span><span class="p">,</span>
+                     <span class="n">max_steps</span><span class="o">=</span><span class="m">5</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Do the following instead:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">&lt;-</span> <span class="nf">run_covsearch</span><span class="p">(</span><span class="n">algorithm</span><span class="o">=</span><span class="s">&#39;scm-forward&#39;</span><span class="p">,</span>
+                     <span class="kc">...</span><span class="p">,</span>
+                     <span class="n">max_steps</span><span class="o">=</span><span class="m">5L</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Follow <a class="reference external" href="https://github.com/pharmpy/pharmr/issues/80">this</a> issue for updates.</p>
+</div>
+</section>
+<section id="single-element-vectors">
+<h3>Single element vectors<a class="headerlink" href="#single-element-vectors" title="Permalink to this headline">#</a></h3>
+<p>When having vectors as inputs, if they only have one element that could lead to errors. Instead of this:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">&lt;-</span> <span class="nf">run_amd</span><span class="p">(</span><span class="n">input</span><span class="o">=</span><span class="n">input_model</span><span class="p">,</span>
+               <span class="kc">...</span><span class="p">,</span>
+               <span class="n">categorical</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="s">&#39;DIS&#39;</span><span class="p">),</span>
+               <span class="kc">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Do this:</p>
+<div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">res</span> <span class="o">&lt;-</span> <span class="nf">run_amd</span><span class="p">(</span><span class="n">input</span><span class="o">=</span><span class="n">input_model</span><span class="p">,</span>
+               <span class="kc">...</span><span class="p">,</span>
+               <span class="n">categorical</span><span class="o">=</span><span class="nf">list</span><span class="p">(</span><span class="s">&#39;DIS&#39;</span><span class="p">),</span>
+               <span class="kc">...</span><span class="p">)</span>
+</pre></div>
+</div>
+<div class="admonition note">
+<p class="admonition-title">Note</p>
+<p>Follow <a class="reference external" href="https://github.com/pharmpy/pharmr/issues/86">this</a> issue for updates.</p>
 </div>
 </section>
 </section>
