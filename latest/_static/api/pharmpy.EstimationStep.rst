@@ -12,6 +12,8 @@ EstimationStep
 
       ~EstimationStep.auto
       ~EstimationStep.cov
+      ~EstimationStep.epsilon_derivatives
+      ~EstimationStep.eta_derivatives
       ~EstimationStep.evaluation
       ~EstimationStep.interaction
       ~EstimationStep.isample
@@ -32,12 +34,14 @@ EstimationStep
 
    .. autosummary::
 
-      ~EstimationStep.copy
+      ~EstimationStep.derive
 
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: auto
    .. autoattribute:: cov
+   .. autoattribute:: epsilon_derivatives
+   .. autoattribute:: eta_derivatives
    .. autoattribute:: evaluation
    .. autoattribute:: interaction
    .. autoattribute:: isample
@@ -56,4 +60,4 @@ EstimationStep
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: copy
+   .. automethod:: derive

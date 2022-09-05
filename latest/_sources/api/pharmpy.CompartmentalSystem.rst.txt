@@ -25,10 +25,7 @@ CompartmentalSystem
 
    .. autosummary::
 
-      ~CompartmentalSystem.add_compartment
-      ~CompartmentalSystem.add_flow
       ~CompartmentalSystem.atoms
-      ~CompartmentalSystem.copy
       ~CompartmentalSystem.find_compartment
       ~CompartmentalSystem.find_depot
       ~CompartmentalSystem.find_transit_compartments
@@ -36,8 +33,6 @@ CompartmentalSystem
       ~CompartmentalSystem.get_compartment_outflows
       ~CompartmentalSystem.get_flow
       ~CompartmentalSystem.get_n_connected
-      ~CompartmentalSystem.remove_compartment
-      ~CompartmentalSystem.remove_flow
       ~CompartmentalSystem.subs
       ~CompartmentalSystem.to_compartmental_system
       ~CompartmentalSystem.to_explicit_system
@@ -57,10 +52,7 @@ CompartmentalSystem
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: add_compartment
-   .. automethod:: add_flow
    .. automethod:: atoms
-   .. automethod:: copy
    .. automethod:: find_compartment
    .. automethod:: find_depot
    .. automethod:: find_transit_compartments
@@ -68,8 +60,6 @@ CompartmentalSystem
    .. automethod:: get_compartment_outflows
    .. automethod:: get_flow
    .. automethod:: get_n_connected
-   .. automethod:: remove_compartment
-   .. automethod:: remove_flow
    .. automethod:: subs
    .. automethod:: to_compartmental_system
    .. automethod:: to_explicit_system

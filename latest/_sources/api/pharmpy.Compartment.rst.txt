@@ -21,6 +21,7 @@ Compartment
 
    .. autosummary::
 
+      ~Compartment.create
       ~Compartment.subs
 
    .. rubric:: Attributes Documentation
@@ -34,4 +35,5 @@ Compartment
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: create
    .. automethod:: subs

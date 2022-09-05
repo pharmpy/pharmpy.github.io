@@ -21,6 +21,7 @@ Parameter
 
    .. autosummary::
 
+      ~Parameter.create
       ~Parameter.derive
 
    .. rubric:: Attributes Documentation
@@ -34,4 +35,5 @@ Parameter
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: create
    .. automethod:: derive

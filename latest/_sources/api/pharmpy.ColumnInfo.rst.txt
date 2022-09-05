@@ -26,7 +26,7 @@ ColumnInfo
 
       ~ColumnInfo.convert_datatype_to_pd_dtype
       ~ColumnInfo.convert_pd_dtype_to_datatype
-      ~ColumnInfo.copy
+      ~ColumnInfo.derive
       ~ColumnInfo.is_categorical
       ~ColumnInfo.is_numerical
 
@@ -46,6 +46,6 @@ ColumnInfo
 
    .. automethod:: convert_datatype_to_pd_dtype
    .. automethod:: convert_pd_dtype_to_datatype
-   .. automethod:: copy
+   .. automethod:: derive
    .. automethod:: is_categorical
    .. automethod:: is_numerical

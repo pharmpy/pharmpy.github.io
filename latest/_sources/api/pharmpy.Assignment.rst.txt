@@ -19,7 +19,7 @@ Assignment
 
    .. autosummary::
 
-      ~Assignment.copy
+      ~Assignment.create
       ~Assignment.subs
 
    .. rubric:: Attributes Documentation
@@ -31,5 +31,5 @@ Assignment
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: copy
+   .. automethod:: create
    .. automethod:: subs
