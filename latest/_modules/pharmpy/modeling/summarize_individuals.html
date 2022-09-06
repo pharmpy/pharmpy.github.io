@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.summarize_individuals &#8212; Pharmpy 0.76.0 documentation</title>
+    <title>pharmpy.modeling.summarize_individuals &#8212; Pharmpy 0.76.2 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -398,17 +398,20 @@
             <article class="bd-article" role="main">
               
   <h1>Source code for pharmpy.modeling.summarize_individuals</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
+<span></span><span class="kn">import</span> <span class="nn">importlib.util</span>
+<span class="kn">import</span> <span class="nn">warnings</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
-<span class="kn">import</span> <span class="nn">pandas</span> <span class="k">as</span> <span class="nn">pd</span>
-
+<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">ModelfitResultsError</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.ml</span> <span class="kn">import</span> <span class="n">predict_influential_individuals</span><span class="p">,</span> <span class="n">predict_outliers</span>
 
+<span class="n">DataFrame</span> <span class="o">=</span> <span class="n">Any</span>  <span class="c1"># NOTE should be pd.DataFrame but we want lazy loading</span>
+<span class="n">Series</span> <span class="o">=</span> <span class="n">Any</span>  <span class="c1"># NOTE same with pd.Series</span>
 
-<div class="viewcode-block" id="summarize_individuals"><a class="viewcode-back" href="../../../api/pharmpy.modeling.summarize_individuals.html#pharmpy.modeling.summarize_individuals">[docs]</a><span class="k">def</span> <span class="nf">summarize_individuals</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
+
+<div class="viewcode-block" id="summarize_individuals"><a class="viewcode-back" href="../../../api/pharmpy.modeling.summarize_individuals.html#pharmpy.modeling.summarize_individuals">[docs]</a><span class="k">def</span> <span class="nf">summarize_individuals</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">DataFrame</span><span class="p">,</span> <span class="kc">None</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Creates a summary dataframe keyed by model-individual pairs for an input</span>
 <span class="sd">    list of models.</span>
 
@@ -458,6 +461,10 @@
 
     <span class="n">modelsDict</span> <span class="o">=</span> <span class="p">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">model</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">}</span>
 
+    <span class="n">spec</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">util</span><span class="o">.</span><span class="n">find_spec</span><span class="p">(</span><span class="s1">&#39;tflite_runtime&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">spec</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;tflite is not installed, using NaN for predictions&quot;</span><span class="p">)</span>
+
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span>
         <span class="nb">map</span><span class="p">(</span>
             <span class="k">lambda</span> <span class="n">model</span><span class="p">:</span> <span class="n">groupedByIDAddColumnsOneModel</span><span class="p">(</span><span class="n">modelsDict</span><span class="p">,</span> <span class="n">model</span><span class="p">),</span>
@@ -480,13 +487,13 @@
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
 
 
-<span class="k">def</span> <span class="nf">outlier_count_func</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">outlier_count_func</span><span class="p">(</span><span class="n">df</span><span class="p">:</span> <span class="n">DataFrame</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
     <span class="c1"># NOTE this returns a float because we will potentially concat this</span>
     <span class="c1"># with NaNs</span>
     <span class="k">return</span> <span class="nb">float</span><span class="p">((</span><span class="nb">abs</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">sum</span><span class="p">())</span>
 
 
-<span class="k">def</span> <span class="nf">outlier_count</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">outlier_count</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
     <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
@@ -499,41 +506,37 @@
 
 
 <span class="k">def</span> <span class="nf">_predicted</span><span class="p">(</span>
-    <span class="n">predict</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Model</span><span class="p">],</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+    <span class="n">predict</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Model</span><span class="p">],</span> <span class="n">DataFrame</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">column</span><span class="p">:</span> <span class="nb">str</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">predicted</span> <span class="o">=</span> <span class="n">predict</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">except</span> <span class="n">ModelfitResultsError</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
-    <span class="k">except</span> <span class="ne">ModuleNotFoundError</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;tflite is not installed, returning nan&quot;</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="k">except</span> <span class="ne">ImportError</span><span class="p">:</span>
-        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="s2">&quot;tflite cannot be imported, returning nan&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="k">if</span> <span class="n">predicted</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
     <span class="k">return</span> <span class="n">predicted</span><span class="p">[</span><span class="n">column</span><span class="p">]</span>
 
 
-<span class="k">def</span> <span class="nf">predicted_residual</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">predicted_residual</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="k">return</span> <span class="n">_predicted</span><span class="p">(</span><span class="n">predict_outliers</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;residual&#39;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">predicted_dofv</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">predicted_dofv</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="k">return</span> <span class="n">_predicted</span><span class="p">(</span><span class="n">predict_influential_individuals</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="s1">&#39;dofv&#39;</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">ofv</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">ofv</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_ofv</span>
 
 
-<span class="k">def</span> <span class="nf">dofv</span><span class="p">(</span><span class="n">parent_model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">candidate_model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">dofv</span><span class="p">(</span><span class="n">parent_model</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="kc">None</span><span class="p">],</span> <span class="n">candidate_model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Series</span><span class="p">,</span> <span class="nb">float</span><span class="p">]:</span>
     <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span> <span class="k">if</span> <span class="n">parent_model</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">ofv</span><span class="p">(</span><span class="n">parent_model</span><span class="p">)</span> <span class="o">-</span> <span class="n">ofv</span><span class="p">(</span><span class="n">candidate_model</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">groupedByIDAddColumnsOneModel</span><span class="p">(</span><span class="n">modelsDict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Model</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">groupedByIDAddColumnsOneModel</span><span class="p">(</span><span class="n">modelsDict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Model</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataFrame</span><span class="p">:</span>
     <span class="n">id_column_name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_column</span><span class="o">.</span><span class="n">name</span>
     <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">id_column_name</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">id_column_name</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>

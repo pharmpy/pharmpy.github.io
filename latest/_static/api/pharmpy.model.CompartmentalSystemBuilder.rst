@@ -1,0 +1,29 @@
+CompartmentalSystemBuilder
+==========================
+
+.. currentmodule:: pharmpy.model
+
+.. autoclass:: CompartmentalSystemBuilder
+   :show-inheritance:
+
+   .. rubric:: Methods Summary
+
+   .. autosummary::
+
+      ~CompartmentalSystemBuilder.add_compartment
+      ~CompartmentalSystemBuilder.add_flow
+      ~CompartmentalSystemBuilder.move_dose
+      ~CompartmentalSystemBuilder.remove_compartment
+      ~CompartmentalSystemBuilder.remove_flow
+      ~CompartmentalSystemBuilder.set_dose
+      ~CompartmentalSystemBuilder.set_lag_time
+
+   .. rubric:: Methods Documentation
+
+   .. automethod:: add_compartment
+   .. automethod:: add_flow
+   .. automethod:: move_dose
+   .. automethod:: remove_compartment
+   .. automethod:: remove_flow
+   .. automethod:: set_dose
+   .. automethod:: set_lag_time

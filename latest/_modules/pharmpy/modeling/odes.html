@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.76.0 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.76.2 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -402,22 +402,22 @@
 <span class="sd">:meta private:</span>
 <span class="sd">&quot;&quot;&quot;</span>
 
-<span class="kn">import</span> <span class="nn">sympy</span>
-
-<span class="kn">from</span> <span class="nn">pharmpy</span> <span class="kn">import</span> <span class="n">ExplicitODESystem</span>
-<span class="kn">from</span> <span class="nn">pharmpy.estimation</span> <span class="kn">import</span> <span class="n">EstimationSteps</span>
-<span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">ModelError</span>
-<span class="kn">from</span> <span class="nn">pharmpy.modeling.help_functions</span> <span class="kn">import</span> <span class="n">_as_integer</span>
-<span class="kn">from</span> <span class="nn">pharmpy.parameters</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Parameters</span>
-<span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
+<span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Assignment</span><span class="p">,</span>
     <span class="n">Bolus</span><span class="p">,</span>
     <span class="n">Compartment</span><span class="p">,</span>
     <span class="n">CompartmentalSystem</span><span class="p">,</span>
     <span class="n">CompartmentalSystemBuilder</span><span class="p">,</span>
+    <span class="n">EstimationSteps</span><span class="p">,</span>
+    <span class="n">ExplicitODESystem</span><span class="p">,</span>
     <span class="n">Infusion</span><span class="p">,</span>
+    <span class="n">ModelError</span><span class="p">,</span>
+    <span class="n">Parameter</span><span class="p">,</span>
+    <span class="n">Parameters</span><span class="p">,</span>
     <span class="n">Statements</span><span class="p">,</span>
 <span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pharmpy.modeling.help_functions</span> <span class="kn">import</span> <span class="n">_as_integer</span>
 
 <span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">,</span> <span class="n">rename_symbols</span>
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">get_observations</span>
@@ -1570,7 +1570,7 @@
     <span class="k">return</span> <span class="kc">False</span></div>
 
 
-<span class="k">def</span> <span class="nf">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">lag_time</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
+<span class="k">def</span> <span class="nf">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">lag_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add zero order absorption to a compartment. Initial estimate for absorption rate is set</span>
 <span class="sd">    the previous rate if available, otherwise it is set to the time of first observation/2 is used.</span>
 <span class="sd">    Disregards what is currently in the model.</span>
@@ -1585,20 +1585,20 @@
     <span class="n">new_dose</span> <span class="o">=</span> <span class="n">Infusion</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">mat_symb</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
     <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">)</span>
     <span class="n">cb</span><span class="o">.</span><span class="n">set_dose</span><span class="p">(</span><span class="n">to_comp</span><span class="p">,</span> <span class="n">new_dose</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">lag_time</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lag_time</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">set_lag_time</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
     <span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="n">lag_time</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">)):</span>
+<span class="k">def</span> <span class="nf">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="n">lag_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Add first order absorption</span>
 <span class="sd">    Disregards what is currently in the model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
-    <span class="n">depot</span> <span class="o">=</span> <span class="n">Compartment</span><span class="p">(</span><span class="s1">&#39;DEPOT&#39;</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">)</span>
+    <span class="n">depot</span> <span class="o">=</span> <span class="n">Compartment</span><span class="p">(</span><span class="s1">&#39;DEPOT&#39;</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">lag_time</span><span class="p">)</span>
     <span class="n">cb</span><span class="o">.</span><span class="n">add_compartment</span><span class="p">(</span><span class="n">depot</span><span class="p">)</span>
     <span class="n">to_comp</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">set_dose</span><span class="p">(</span><span class="n">to_comp</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">to_comp</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">set_lag_time</span><span class="p">(</span><span class="n">to_comp</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
@@ -2018,17 +2018,20 @@
 <span class="sd">     &gt;&gt;&gt; find_clearance_parameters(model)</span>
 <span class="sd">     [CL]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="bp">cls</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="bp">cls</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">t</span>
     <span class="n">rate_list</span> <span class="o">=</span> <span class="n">_find_rate</span><span class="p">(</span><span class="n">sset</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">rate</span> <span class="ow">in</span> <span class="n">rate_list</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">clearance</span> <span class="o">=</span> <span class="n">rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="k">if</span> <span class="n">clearance</span><span class="o">.</span><span class="n">is_Symbol</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rate</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">):</span>
+            <span class="n">rate</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="o">.</span><span class="n">expression</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">,</span> <span class="n">rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">())</span>
+        <span class="k">if</span> <span class="n">b</span><span class="p">:</span>
+            <span class="n">clearance_symbols</span> <span class="o">=</span> <span class="n">a</span> <span class="o">-</span> <span class="n">b</span> <span class="o">-</span> <span class="p">{</span><span class="n">t</span><span class="p">}</span>
+            <span class="k">for</span> <span class="n">clearance</span> <span class="ow">in</span> <span class="n">clearance_symbols</span><span class="p">:</span>
                 <span class="n">clearance</span> <span class="o">=</span> <span class="n">_find_real_symbol</span><span class="p">(</span><span class="n">sset</span><span class="p">,</span> <span class="n">clearance</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">clearance</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">cls</span><span class="p">:</span>
-                    <span class="bp">cls</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">clearance</span><span class="p">)</span>
-    <span class="k">return</span> <span class="bp">cls</span></div>
+                <span class="bp">cls</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">clearance</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="find_volume_parameters"><a class="viewcode-back" href="../../../api/pharmpy.modeling.find_volume_parameters.html#pharmpy.modeling.find_volume_parameters">[docs]</a><span class="k">def</span> <span class="nf">find_volume_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
@@ -2051,23 +2054,27 @@
 <span class="sd">     &gt;&gt;&gt; find_volume_parameters(model)</span>
 <span class="sd">     [V]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">vcs</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">vcs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">t</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">t</span>
     <span class="n">rate_list</span> <span class="o">=</span> <span class="n">_find_rate</span><span class="p">(</span><span class="n">sset</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">rate</span> <span class="ow">in</span> <span class="n">rate_list</span><span class="p">:</span>
-        <span class="n">volume</span> <span class="o">=</span> <span class="n">rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()[</span><span class="mi">1</span><span class="p">]</span>
-        <span class="k">if</span> <span class="n">volume</span><span class="o">.</span><span class="n">is_Symbol</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rate</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">):</span>
+            <span class="n">rate</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span><span class="o">.</span><span class="n">expression</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">cancel</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+        <span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">,</span> <span class="n">rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">())</span>
+        <span class="n">volume_symbols</span> <span class="o">=</span> <span class="n">b</span> <span class="o">-</span> <span class="n">a</span> <span class="o">-</span> <span class="p">{</span><span class="n">t</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">volume</span> <span class="ow">in</span> <span class="n">volume_symbols</span><span class="p">:</span>
             <span class="n">volume</span> <span class="o">=</span> <span class="n">_find_real_symbol</span><span class="p">(</span><span class="n">sset</span><span class="p">,</span> <span class="n">volume</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">volume</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">vcs</span><span class="p">:</span>
-                <span class="n">vcs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">vcs</span></div>
+            <span class="n">vcs</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">volume</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">vcs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">_find_rate</span><span class="p">(</span><span class="n">sset</span><span class="p">):</span>
     <span class="n">rate_list</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span> <span class="ow">is</span> <span class="n">ExplicitODESystem</span><span class="p">:</span>
-        <span class="n">odes</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">odes</span><span class="p">,</span> <span class="n">ExplicitODESystem</span><span class="p">):</span>
+        <span class="n">odes</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
     <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
     <span class="n">output</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">output_compartment</span>
     <span class="n">elimination_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>

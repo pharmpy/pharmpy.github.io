@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.eta_transformations &#8212; Pharmpy 0.76.0 documentation</title>
+    <title>pharmpy.modeling.eta_transformations &#8212; Pharmpy 0.76.2 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -404,13 +404,9 @@
 
 <span class="kn">import</span> <span class="nn">re</span>
 
-<span class="kn">import</span> <span class="nn">sympy</span>
-<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">Symbol</span> <span class="k">as</span> <span class="n">S</span>
-<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">exp</span><span class="p">,</span> <span class="n">sign</span>
-
+<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
+<span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Parameters</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.help_functions</span> <span class="kn">import</span> <span class="n">_format_input_list</span><span class="p">,</span> <span class="n">_get_etas</span>
-<span class="kn">from</span> <span class="nn">pharmpy.parameters</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Parameters</span>
-<span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span>
 
 <span class="kn">from</span> <span class="nn">.expressions</span> <span class="kn">import</span> <span class="n">create_symbol</span>
 
@@ -606,8 +602,10 @@
     <span class="k">def</span> <span class="nf">boxcox</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">no_of_etas</span><span class="p">):</span>
         <span class="n">assignments</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">no_of_etas</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">symbol</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;etab</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">expression</span> <span class="o">=</span> <span class="p">(</span><span class="n">exp</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;eta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span> <span class="o">**</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;theta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;theta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;etab</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;eta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span> <span class="o">**</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;theta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span>
+                <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;theta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="p">)</span>
 
             <span class="n">assignment</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span>
             <span class="n">assignments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assignment</span><span class="p">)</span>
@@ -618,10 +616,10 @@
     <span class="k">def</span> <span class="nf">tdist</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">no_of_etas</span><span class="p">):</span>
         <span class="n">assignments</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">no_of_etas</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">symbol</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;etat</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;etat</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-            <span class="n">eta</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;eta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">theta</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;theta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">eta</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;eta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;theta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
             <span class="n">num_1</span> <span class="o">=</span> <span class="n">eta</span><span class="o">**</span><span class="mi">2</span> <span class="o">+</span> <span class="mi">1</span>
             <span class="n">denom_1</span> <span class="o">=</span> <span class="mi">4</span> <span class="o">*</span> <span class="n">theta</span>
@@ -643,12 +641,12 @@
     <span class="k">def</span> <span class="nf">john_draper</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">no_of_etas</span><span class="p">):</span>
         <span class="n">assignments</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">no_of_etas</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">symbol</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;etad</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;etad</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-            <span class="n">eta</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;eta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">theta</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;theta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">eta</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;eta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">theta</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;theta</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
-            <span class="n">expression</span> <span class="o">=</span> <span class="n">sign</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span> <span class="o">*</span> <span class="p">(((</span><span class="nb">abs</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="n">theta</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">theta</span><span class="p">)</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sign</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span> <span class="o">*</span> <span class="p">(((</span><span class="nb">abs</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span> <span class="o">**</span> <span class="n">theta</span> <span class="o">-</span> <span class="mi">1</span><span class="p">)</span> <span class="o">/</span> <span class="n">theta</span><span class="p">)</span>
 
             <span class="n">assignment</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span>
             <span class="n">assignments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">assignment</span><span class="p">)</span>

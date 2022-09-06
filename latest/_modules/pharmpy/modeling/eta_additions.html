@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.eta_additions &#8212; Pharmpy 0.76.0 documentation</title>
+    <title>pharmpy.modeling.eta_additions &#8212; Pharmpy 0.76.2 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -406,18 +406,15 @@
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">combinations</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">add</span><span class="p">,</span> <span class="n">mul</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">sympy</span>
-<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">Eq</span><span class="p">,</span> <span class="n">Piecewise</span>
-<span class="kn">from</span> <span class="nn">sympy</span> <span class="kn">import</span> <span class="n">Symbol</span> <span class="k">as</span> <span class="n">S</span>
-<span class="kn">from</span> <span class="nn">sympy.stats.crv_types</span> <span class="kn">import</span> <span class="n">NormalDistribution</span>
-<span class="kn">from</span> <span class="nn">sympy.stats.joint_rv_types</span> <span class="kn">import</span> <span class="n">MultivariateNormalDistribution</span>
+<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
+<span class="kn">from</span> <span class="nn">pharmpy.expressions</span> <span class="kn">import</span> <span class="n">sympify</span>
+<span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">,</span> <span class="n">RandomVariable</span>
 
-<span class="kn">from</span> <span class="nn">pharmpy.modeling.expressions</span> <span class="kn">import</span> <span class="n">create_symbol</span><span class="p">,</span> <span class="n">get_pk_parameters</span><span class="p">,</span> <span class="n">has_random_effect</span>
-<span class="kn">from</span> <span class="nn">pharmpy.modeling.help_functions</span> <span class="kn">import</span> <span class="n">_format_input_list</span><span class="p">,</span> <span class="n">_format_options</span><span class="p">,</span> <span class="n">_get_etas</span>
-<span class="kn">from</span> <span class="nn">pharmpy.parameters</span> <span class="kn">import</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Parameters</span>
-<span class="kn">from</span> <span class="nn">pharmpy.random_variables</span> <span class="kn">import</span> <span class="n">RandomVariable</span>
-<span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">sympify</span>
+<span class="kn">from</span> <span class="nn">.expressions</span> <span class="kn">import</span> <span class="n">create_symbol</span><span class="p">,</span> <span class="n">get_pk_parameters</span><span class="p">,</span> <span class="n">has_random_effect</span>
+<span class="kn">from</span> <span class="nn">.help_functions</span> <span class="kn">import</span> <span class="n">_format_input_list</span><span class="p">,</span> <span class="n">_format_options</span><span class="p">,</span> <span class="n">_get_etas</span>
 
 
 <div class="viewcode-block" id="add_iiv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_iiv.html#pharmpy.modeling.add_iiv">[docs]</a><span class="k">def</span> <span class="nf">add_iiv</span><span class="p">(</span>
@@ -494,7 +491,7 @@
         <span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">list_of_parameters</span><span class="p">)):</span>
-        <span class="n">omega</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IIV_</span><span class="si">{</span><span class="n">list_of_parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IIV_</span><span class="si">{</span><span class="n">list_of_parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">eta_names</span><span class="p">:</span>
             <span class="n">eta_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;ETA_</span><span class="si">{</span><span class="n">list_of_parameters</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="k">else</span><span class="p">:</span>
@@ -616,7 +613,7 @@
         <span class="k">for</span> <span class="n">dist</span><span class="p">,</span> <span class="n">grp</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">etas</span><span class="p">,</span> <span class="n">list_of_parameters</span><span class="p">):</span>
             <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="nb">len</span><span class="p">(</span><span class="n">grp</span><span class="p">)</span>
 
-    <span class="n">categories</span> <span class="o">=</span> <span class="n">_get_occ_levels</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">occ</span><span class="p">)</span>
+    <span class="n">categories</span> <span class="o">=</span> <span class="n">get_occasion_levels</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">occ</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">eta_names</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">eta_names</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">sum</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">len</span><span class="p">,</span> <span class="n">etas</span><span class="p">))</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">categories</span><span class="p">):</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -642,9 +639,9 @@
                 <span class="k">continue</span>
 
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">variables</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">NormalDistribution</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">MultivariateNormalDistribution</span><span class="p">)</span>
+                <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">joint_rv_types</span><span class="o">.</span><span class="n">MultivariateNormalDistribution</span><span class="p">)</span>
 
             <span class="n">etas</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">intersection</span><span class="p">)</span>
 
@@ -732,16 +729,19 @@
         <span class="c1"># NOTE This declares IOV-ETA case assignments and replaces the existing</span>
         <span class="c1"># ETA with its sum with the new IOV ETA</span>
 
-        <span class="n">iov</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="n">iov_name</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="n">iov</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">iov_name</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
 
-        <span class="n">expression</span> <span class="o">=</span> <span class="n">Piecewise</span><span class="p">(</span>
-            <span class="o">*</span><span class="p">((</span><span class="n">S</span><span class="p">(</span><span class="n">eta_name</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">)),</span> <span class="n">Eq</span><span class="p">(</span><span class="n">cat</span><span class="p">,</span> <span class="n">S</span><span class="p">(</span><span class="n">occ</span><span class="p">)))</span> <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">cat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">categories</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
+        <span class="n">expression</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Piecewise</span><span class="p">(</span>
+            <span class="o">*</span><span class="p">(</span>
+                <span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">eta_name</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">)),</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">cat</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">occ</span><span class="p">)))</span>
+                <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">cat</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">categories</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
         <span class="p">)</span>
 
         <span class="n">iovs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Assignment</span><span class="p">(</span><span class="n">iov</span><span class="p">,</span> <span class="n">sympify</span><span class="p">(</span><span class="mi">0</span><span class="p">)))</span>
         <span class="n">iovs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Assignment</span><span class="p">(</span><span class="n">iov</span><span class="p">,</span> <span class="n">expression</span><span class="p">))</span>
 
-        <span class="n">etai</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="n">etai_name</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
+        <span class="n">etai</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">etai_name</span><span class="p">(</span><span class="n">i</span><span class="p">))</span>
         <span class="n">etais</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Assignment</span><span class="p">(</span><span class="n">etai</span><span class="p">,</span> <span class="n">eta</span><span class="o">.</span><span class="n">symbol</span> <span class="o">+</span> <span class="n">iov</span><span class="p">))</span>
         <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">eta</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">etai</span><span class="p">})</span>
 
@@ -753,7 +753,7 @@
     <span class="n">_add_iov_declare_diagonal_omegas</span><span class="p">(</span><span class="n">rvs</span><span class="p">,</span> <span class="n">pset</span><span class="p">,</span> <span class="n">etas</span><span class="p">,</span> <span class="n">indices</span><span class="p">,</span> <span class="n">omega_iov_name</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
-        <span class="n">omega_iov</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="n">omega_iov_name</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+        <span class="n">omega_iov</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">omega_iov_name</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
         <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
             <span class="k">yield</span> <span class="n">RandomVariable</span><span class="o">.</span><span class="n">normal</span><span class="p">(</span><span class="n">eta_name</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="s1">&#39;iov&#39;</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">omega_iov</span><span class="p">)</span>
 
@@ -764,14 +764,14 @@
 
     <span class="c1"># NOTE Declare off-diagonal OMEGAs</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
-        <span class="n">omega_iov</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="n">omega_iov_name</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">))</span>
+        <span class="n">omega_iov</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">omega_iov_name</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">))</span>
         <span class="n">omega_iiv</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">get_covariance</span><span class="p">(</span><span class="n">etas</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">etas</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
         <span class="n">paramset</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">pset</span><span class="p">)</span>  <span class="c1"># FIXME!</span>
         <span class="n">init</span> <span class="o">=</span> <span class="n">paramset</span><span class="p">[</span><span class="n">omega_iiv</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">*</span> <span class="mf">0.1</span> <span class="k">if</span> <span class="n">omega_iiv</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">omega_iiv</span> <span class="ow">in</span> <span class="n">paramset</span> <span class="k">else</span> <span class="mf">0.001</span>
         <span class="n">pset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">omega_iov</span><span class="p">),</span> <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">))</span>
 
     <span class="n">mu</span> <span class="o">=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">indices</span><span class="p">)</span>
-    <span class="n">sigma</span> <span class="o">=</span> <span class="p">[[</span><span class="n">S</span><span class="p">(</span><span class="n">omega_iov_name</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="p">[[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">omega_iov_name</span><span class="p">(</span><span class="nb">min</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">),</span> <span class="nb">max</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">)))</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span> <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">]</span>
 
     <span class="k">for</span> <span class="n">k</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
         <span class="n">names</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">i</span><span class="p">:</span> <span class="n">eta_name</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">k</span><span class="p">),</span> <span class="n">indices</span><span class="p">))</span>
@@ -782,7 +782,7 @@
     <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">indices</span><span class="p">:</span>
         <span class="n">eta</span> <span class="o">=</span> <span class="n">etas</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">omega_iiv</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">get_variance</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span>
-        <span class="n">omega_iov</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="n">omega_iov_name</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+        <span class="n">omega_iov</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">omega_iov_name</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
         <span class="n">paramset</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">pset</span><span class="p">)</span>  <span class="c1"># FIXME!</span>
         <span class="n">init</span> <span class="o">=</span> <span class="n">paramset</span><span class="p">[</span><span class="n">omega_iiv</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">*</span> <span class="mf">0.1</span> <span class="k">if</span> <span class="n">omega_iiv</span> <span class="ow">in</span> <span class="n">paramset</span> <span class="k">else</span> <span class="mf">0.01</span>
         <span class="n">pset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">omega_iov</span><span class="p">),</span> <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">))</span>
@@ -860,20 +860,29 @@
         <span class="k">return</span> <span class="n">add</span>
 
 
-<span class="k">def</span> <span class="nf">_get_occ_levels</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">occ</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_occasion_levels</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">occ</span><span class="p">):</span>
     <span class="n">levels</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">occ</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">_round_categories</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_canonicalize_categories</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_round_categories</span><span class="p">(</span><span class="n">categories</span><span class="p">):</span>
-    <span class="n">categories_rounded</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">c</span> <span class="ow">in</span> <span class="n">categories</span><span class="p">:</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">int</span><span class="p">)</span> <span class="ow">or</span> <span class="n">c</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
-            <span class="n">categories_rounded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">categories_rounded</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
-    <span class="n">categories_rounded</span><span class="o">.</span><span class="n">sort</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">categories_rounded</span>
+<span class="k">def</span> <span class="nf">_canonicalize_categories</span><span class="p">(</span><span class="n">categories</span><span class="p">):</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">_canonicalize_category</span><span class="p">,</span> <span class="n">categories</span><span class="p">))</span>
+
+
+<span class="k">def</span> <span class="nf">_canonicalize_category</span><span class="p">(</span><span class="n">c</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">]):</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">c</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">int32</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">int64</span><span class="p">)):</span>
+        <span class="k">return</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">c</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">_canonicalize_category</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">c</span><span class="p">)</span> <span class="k">if</span> <span class="s1">&#39;.&#39;</span> <span class="ow">in</span> <span class="n">c</span> <span class="k">else</span> <span class="nb">int</span><span class="p">(</span><span class="n">c</span><span class="p">))</span>
+
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot canonicalize category &quot;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">c</span><span class="p">)</span><span class="si">}</span><span class="s1">(</span><span class="si">{</span><span class="n">c</span><span class="si">}</span><span class="s1">)&quot;&#39;</span><span class="p">)</span>
 
 
 <span class="k">class</span> <span class="nc">EtaAddition</span><span class="p">:</span>
@@ -897,25 +906,27 @@
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">additive</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="n">template</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;original&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">)</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;original&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">proportional</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="n">template</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;original&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">)</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;original&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">exponential</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">operation</span><span class="p">):</span>
-        <span class="n">template</span> <span class="o">=</span> <span class="n">operation</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;original&#39;</span><span class="p">),</span> <span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">)))</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">operation</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;original&#39;</span><span class="p">),</span> <span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">)))</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
 
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">logit</span><span class="p">(</span><span class="bp">cls</span><span class="p">):</span>
-        <span class="n">template</span> <span class="o">=</span> <span class="n">S</span><span class="p">(</span><span class="s1">&#39;original&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">S</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">))))</span>
+        <span class="n">template</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;original&#39;</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span>
+            <span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">))</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;eta_new&#39;</span><span class="p">)))</span>
+        <span class="p">)</span>
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">template</span><span class="p">)</span>
 </pre></div>

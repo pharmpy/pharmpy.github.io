@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.76.0 documentation</title>
+    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.76.2 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -399,24 +399,26 @@
               
   <h1>Source code for pharmpy.modeling.expressions</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">filterfalse</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span> <span class="nn">sympy</span>
-
-<span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">pharmpy.random_variables</span> <span class="kn">import</span> <span class="n">RandomVariable</span><span class="p">,</span> <span class="n">RandomVariables</span>
-<span class="kn">from</span> <span class="nn">pharmpy.statements</span> <span class="kn">import</span> <span class="p">(</span>
+<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
+<span class="kn">from</span> <span class="nn">pharmpy.expressions</span> <span class="kn">import</span> <span class="n">sympify</span>
+<span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Assignment</span><span class="p">,</span>
     <span class="n">Compartment</span><span class="p">,</span>
     <span class="n">CompartmentalSystem</span><span class="p">,</span>
+    <span class="n">Model</span><span class="p">,</span>
     <span class="n">ODESystem</span><span class="p">,</span>
+    <span class="n">RandomVariable</span><span class="p">,</span>
+    <span class="n">RandomVariables</span><span class="p">,</span>
     <span class="n">Statements</span><span class="p">,</span>
-    <span class="n">sympify</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.parameters</span> <span class="kn">import</span> <span class="n">get_thetas</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
+<span class="n">Symbol</span> <span class="o">=</span> <span class="n">Any</span>  <span class="c1"># NOTE should be sympy.Symbol but we want lazy loading</span>
+<span class="n">Expr</span> <span class="o">=</span> <span class="n">Any</span>  <span class="c1"># NOTE same with sympy.Expr</span>
 
 
 <div class="viewcode-block" id="get_observation_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_observation_expression.html#pharmpy.modeling.get_observation_expression">[docs]</a><span class="k">def</span> <span class="nf">get_observation_expression</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
@@ -1342,7 +1344,7 @@
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">_filter_symbols</span><span class="p">(</span><span class="n">dependency_graph</span><span class="p">,</span> <span class="n">free_symbols</span><span class="p">))</span></div>
 
 
-<span class="k">def</span> <span class="nf">_pk_free_symbols</span><span class="p">(</span><span class="n">cs</span><span class="p">:</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">_pk_free_symbols</span><span class="p">(</span><span class="n">cs</span><span class="p">:</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Symbol</span><span class="p">]:</span>
 
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">cs</span><span class="o">.</span><span class="n">free_symbols</span>
@@ -1365,7 +1367,7 @@
 
 <span class="k">def</span> <span class="nf">_pk_free_symbols_from_compartment</span><span class="p">(</span>
     <span class="n">cs</span><span class="p">:</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">compartment</span><span class="p">:</span> <span class="n">Compartment</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">]:</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Symbol</span><span class="p">]:</span>
     <span class="n">vertices</span> <span class="o">=</span> <span class="n">_get_component</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">compartment</span><span class="p">)</span>
     <span class="n">edges</span> <span class="o">=</span> <span class="n">_get_component_edges</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">vertices</span><span class="p">)</span>
     <span class="n">is_central</span> <span class="o">=</span> <span class="n">compartment</span> <span class="o">==</span> <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span>
@@ -1409,8 +1411,8 @@
 <span class="k">def</span> <span class="nf">_get_component_free_symbols</span><span class="p">(</span>
     <span class="n">is_central</span><span class="p">:</span> <span class="nb">bool</span><span class="p">,</span>
     <span class="n">vertices</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Compartment</span><span class="p">],</span>
-    <span class="n">edges</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Compartment</span><span class="p">,</span> <span class="n">Compartment</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">]],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">]:</span>
+    <span class="n">edges</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Compartment</span><span class="p">,</span> <span class="n">Compartment</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]],</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Symbol</span><span class="p">]:</span>
 
     <span class="k">for</span> <span class="p">(</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span> <span class="ow">in</span> <span class="n">edges</span><span class="p">:</span>
         <span class="c1"># NOTE These must not necessarily be outgoing edges</span>
@@ -1440,9 +1442,9 @@
 
 
 <span class="k">def</span> <span class="nf">_filter_symbols</span><span class="p">(</span>
-    <span class="n">dependency_graph</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">,</span> <span class="n">Set</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">]],</span>
-    <span class="n">roots</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">],</span>
-    <span class="n">leaves</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">dependency_graph</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">Symbol</span><span class="p">,</span> <span class="n">Set</span><span class="p">[</span><span class="n">Symbol</span><span class="p">]],</span>
+    <span class="n">roots</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Symbol</span><span class="p">],</span>
+    <span class="n">leaves</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="n">Symbol</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 
     <span class="n">dependents</span> <span class="o">=</span> <span class="n">_graph_inverse</span><span class="p">(</span><span class="n">dependency_graph</span><span class="p">)</span>
@@ -1558,7 +1560,7 @@
     <span class="k">return</span> <span class="n">h</span>
 
 
-<span class="k">def</span> <span class="nf">_reachable_from</span><span class="p">(</span><span class="n">start_nodes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">neighbors</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">]]):</span>
+<span class="k">def</span> <span class="nf">_reachable_from</span><span class="p">(</span><span class="n">start_nodes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">neighbors</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
     <span class="n">queue</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">start_nodes</span><span class="p">)</span>
     <span class="n">closure</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">start_nodes</span><span class="p">)</span>
     <span class="k">while</span> <span class="n">queue</span><span class="p">:</span>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.run &#8212; Pharmpy 0.76.0 documentation</title>
+    <title>pharmpy.tools.run &#8212; Pharmpy 0.76.2 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -402,6 +402,7 @@
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">pharmpy.results</span>
 <span class="kn">import</span> <span class="nn">pharmpy.tools.modelfit</span>
@@ -412,26 +413,28 @@
 <span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">execute_workflow</span><span class="p">,</span> <span class="n">split_common_options</span>
 
 
-<div class="viewcode-block" id="fit"><a class="viewcode-back" href="../../../api/pharmpy.tools.fit.html#pharmpy.tools.fit">[docs]</a><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="fit"><a class="viewcode-back" href="../../../api/pharmpy.tools.fit.html#pharmpy.tools.fit">[docs]</a><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
+    <span class="n">model_or_models</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">]],</span> <span class="n">tool</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">]]:</span>
     <span class="sd">&quot;&quot;&quot;Fit models.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    models : list</span>
+<span class="sd">    model_or_models : Model | list[Model]</span>
 <span class="sd">        List of models or one single model</span>
 <span class="sd">    tool : str</span>
 <span class="sd">        Estimation tool to use. None to use default</span>
 
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
-<span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">    Model | list[Model]</span>
+<span class="sd">        Input model or models with model fit results</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.tools import fit</span>
-<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)      # doctest: +SKIP</span>
 <span class="sd">    &gt;&gt;&gt; fit(model)      # doctest: +SKIP</span>
 
 <span class="sd">    See also</span>
@@ -439,11 +442,12 @@
 <span class="sd">    run_tool</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
-        <span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">models</span><span class="p">]</span>
-        <span class="n">single</span> <span class="o">=</span> <span class="kc">True</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">single</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">single</span><span class="p">,</span> <span class="n">models</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="p">(</span><span class="kc">True</span><span class="p">,</span> <span class="p">[</span><span class="n">model_or_models</span><span class="p">])</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_or_models</span><span class="p">,</span> <span class="n">Model</span><span class="p">)</span>
+        <span class="k">else</span> <span class="p">(</span><span class="kc">False</span><span class="p">,</span> <span class="n">model_or_models</span><span class="p">)</span>
+    <span class="p">)</span>
+
     <span class="n">kept</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="c1"># Do not fit model if already fit</span>
     <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
@@ -460,12 +464,11 @@
             <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="o">=</span> <span class="n">db_model</span><span class="o">.</span><span class="n">modelfit_results</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">kept</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">kept</span><span class="p">:</span>
         <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;modelfit&#39;</span><span class="p">,</span> <span class="n">kept</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="n">tool</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">single</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">models</span></div>
+
+    <span class="k">return</span> <span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="k">if</span> <span class="n">single</span> <span class="k">else</span> <span class="n">models</span></div>
 
 
 <div class="viewcode-block" id="create_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.create_results.html#pharmpy.tools.create_results">[docs]</a><span class="k">def</span> <span class="nf">create_results</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
