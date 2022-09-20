@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.random_variables &#8212; Pharmpy 0.76.5 documentation</title>
+    <title>pharmpy.model.random_variables &#8212; Pharmpy 0.78.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -407,7 +407,7 @@
 <span class="kn">import</span> <span class="nn">pharmpy.unicode</span> <span class="k">as</span> <span class="nn">unicode</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
-<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">symengine</span><span class="p">,</span> <span class="n">sympy</span>
+<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">symengine</span><span class="p">,</span> <span class="n">sympy</span><span class="p">,</span> <span class="n">sympy_stats</span>
 <span class="kn">from</span> <span class="nn">pharmpy.expressions</span> <span class="kn">import</span> <span class="n">sympify</span>
 
 
@@ -455,12 +455,12 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">symbol</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_sympy_rv</span> <span class="o">=</span> <span class="n">sympy_rv</span>
         <span class="k">if</span> <span class="n">sympy_rv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sympy_rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">sympy_rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">sympy_stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span><span class="p">):</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_mean</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">sympy_rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">mean</span><span class="p">])</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_variance</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">sympy_rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="o">.</span><span class="n">std</span><span class="o">**</span><span class="mi">2</span><span class="p">])</span>
             <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span>
                 <span class="n">sympy_rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span>
-                <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">joint_rv_types</span><span class="o">.</span><span class="n">MultivariateNormalDistribution</span><span class="p">,</span>
+                <span class="n">sympy_stats</span><span class="o">.</span><span class="n">joint_rv_types</span><span class="o">.</span><span class="n">MultivariateNormalDistribution</span><span class="p">,</span>
             <span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                     <span class="s2">&quot;Cannot create multivariate random variables using constructor. &quot;</span>
@@ -525,11 +525,13 @@
 <span class="sd">        IIV_CL ~ N(0, OMEGA_CL)</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">sympy_variance</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">variance</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sympy</span><span class="o">.</span><span class="n">ask</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Q</span><span class="o">.</span><span class="n">nonnegative</span><span class="p">(</span><span class="n">sympy_variance</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Variance cannot be </span><span class="si">{</span><span class="n">variance</span><span class="si">}</span><span class="s2">, must be nonnegative&quot;</span><span class="p">)</span>
+
         <span class="n">rv</span> <span class="o">=</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
         <span class="n">rv</span><span class="o">.</span><span class="n">_mean</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">sympify</span><span class="p">(</span><span class="n">mean</span><span class="p">)])</span>
-        <span class="n">rv</span><span class="o">.</span><span class="n">_variance</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">sympify</span><span class="p">(</span><span class="n">variance</span><span class="p">)])</span>
-        <span class="k">if</span> <span class="n">rv</span><span class="o">.</span><span class="n">_variance</span><span class="o">.</span><span class="n">is_positive_semidefinite</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Mean cannot be </span><span class="si">{</span><span class="n">mean</span><span class="si">}</span><span class="s2"> must be positive&quot;</span><span class="p">)</span>
+        <span class="n">rv</span><span class="o">.</span><span class="n">_variance</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">sympy_variance</span><span class="p">])</span>
         <span class="n">rv</span><span class="o">.</span><span class="n">_symengine_variance</span> <span class="o">=</span> <span class="n">symengine</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">_variance</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">rv</span></div>
 
@@ -602,9 +604,9 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variance</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variance</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">is_zero</span><span class="p">:</span>
                 <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">elif</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mean</span><span class="o">.</span><span class="n">rows</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variance</span><span class="p">)</span>
+                <span class="k">return</span> <span class="n">sympy_stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="s1">&#39;X&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variance</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variance</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+                <span class="k">return</span> <span class="n">sympy_stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mean</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_variance</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_sympy_rv</span>
 
@@ -753,7 +755,7 @@
                 <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">sympy_rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">ExponentialDistribution</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">sympy_rv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span><span class="p">,</span> <span class="n">sympy_stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">ExponentialDistribution</span>
             <span class="p">):</span>
                 <span class="k">return</span> <span class="p">(</span>
                     <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">use_unicode</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span><span class="si">}</span><span class="s1"> ~ &#39;</span>
@@ -1309,7 +1311,7 @@
         <span class="n">cov_to_params</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
         <span class="n">selection</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">inds</span><span class="p">]</span>
         <span class="n">selection</span><span class="o">.</span><span class="n">_remove_joint_normal_not_in_self</span><span class="p">()</span>
-        <span class="n">means</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">others</span> <span class="o">=</span> <span class="n">selection</span><span class="o">.</span><span class="n">_calc_covariance_matrix</span><span class="p">()</span>
+        <span class="n">means</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">selection</span><span class="o">.</span><span class="n">_calc_covariance_matrix</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">fill</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">itertools</span><span class="o">.</span><span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">rows</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">cols</span><span class="p">)):</span>
                 <span class="k">if</span> <span class="n">M</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
@@ -1377,7 +1379,7 @@
             <span class="n">symrv</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">sympy_rv</span>
             <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">rv</span><span class="o">.</span><span class="n">_joint_names</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="nb">len</span><span class="p">(</span><span class="n">rv</span><span class="o">.</span><span class="n">_joint_names</span><span class="p">)</span>
             <span class="n">dist</span> <span class="o">=</span> <span class="n">symrv</span><span class="o">.</span><span class="n">pspace</span><span class="o">.</span><span class="n">distribution</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">sympy_stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span><span class="p">):</span>
                 <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
                 <span class="n">distributions</span><span class="o">.</span><span class="n">append</span><span class="p">(([</span><span class="n">rv</span><span class="p">],</span> <span class="n">dist</span><span class="p">))</span>
             <span class="k">else</span><span class="p">:</span>  <span class="c1"># Joint Normal</span>
@@ -1394,7 +1396,7 @@
 <span class="sd">        returns a dict with the valid parameter values</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">nearest</span> <span class="o">=</span> <span class="n">parameter_values</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">symb_sigma</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_variance</span>
                 <span class="n">sigma</span> <span class="o">=</span> <span class="n">symb_sigma</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">parameter_values</span><span class="p">))</span>
@@ -1412,7 +1414,7 @@
 <span class="sd">        Currently checks that all covariance matrices are positive semidefinite</span>
 <span class="sd">        use_cache for using symengine cached matrices</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">rvs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">sigma</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">_symengine_variance</span>
                 <span class="n">replacement</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1449,7 +1451,7 @@
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">mu</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">mean</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
                     <span class="n">sigma</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">std</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
-                <span class="n">new_rv</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">new_name</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
+                <span class="n">new_rv</span> <span class="o">=</span> <span class="n">sympy_stats</span><span class="o">.</span><span class="n">Normal</span><span class="p">(</span><span class="n">new_name</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">sigma</span><span class="p">)</span>
                 <span class="n">sampling_rvs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">names</span><span class="p">,</span> <span class="n">new_rv</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">sampling_rvs</span><span class="p">:</span>
             <span class="c1"># FIXME: Unnecessary to go via DataFrame</span>
@@ -1459,10 +1461,10 @@
                     <span class="n">warnings</span><span class="o">.</span><span class="n">filterwarnings</span><span class="p">(</span><span class="s1">&#39;ignore&#39;</span><span class="p">)</span>
                     <span class="k">if</span> <span class="n">sympy</span><span class="o">.</span><span class="n">__version__</span> <span class="o">==</span> <span class="s1">&#39;1.8&#39;</span><span class="p">:</span>
                         <span class="n">cursample</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span>
-                            <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
+                            <span class="n">sympy_stats</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span><span class="n">new_rv</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">rng</span><span class="p">)</span>
                         <span class="p">)</span>
                     <span class="k">else</span><span class="p">:</span>
-                        <span class="n">cursample</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
+                        <span class="n">cursample</span> <span class="o">=</span> <span class="n">sympy_stats</span><span class="o">.</span><span class="n">sample</span><span class="p">(</span>
                             <span class="n">new_rv</span><span class="p">,</span> <span class="n">library</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">,</span> <span class="n">size</span><span class="o">=</span><span class="n">samples</span><span class="p">,</span> <span class="n">seed</span><span class="o">=</span><span class="n">rng</span>
                         <span class="p">)</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">names</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
@@ -1484,10 +1486,10 @@
         <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
             <span class="n">names</span><span class="o">.</span><span class="n">extend</span><span class="p">([</span><span class="n">rv</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span><span class="p">])</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">sympy_stats</span><span class="o">.</span><span class="n">crv_types</span><span class="o">.</span><span class="n">NormalDistribution</span><span class="p">):</span>
                 <span class="n">means</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
                 <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">dist</span><span class="o">.</span><span class="n">std</span><span class="o">**</span><span class="mi">2</span><span class="p">]))</span>
-            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">joint_rv_types</span><span class="o">.</span><span class="n">MultivariateNormalDistribution</span><span class="p">):</span>
+            <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">sympy_stats</span><span class="o">.</span><span class="n">joint_rv_types</span><span class="o">.</span><span class="n">MultivariateNormalDistribution</span><span class="p">):</span>
                 <span class="n">means</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">mu</span><span class="p">)</span>
                 <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">sigma</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
@@ -1509,13 +1511,13 @@
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">strings</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
             <span class="n">strings</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="nb">repr</span><span class="p">(</span><span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
         <span class="k">return</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">strings</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_repr_latex_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">lines</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
+        <span class="k">for</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">_</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">distributions</span><span class="p">():</span>
             <span class="n">rv</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">latex</span> <span class="o">=</span> <span class="n">rv</span><span class="o">.</span><span class="n">_latex_string</span><span class="p">(</span><span class="n">aligned</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="n">lines</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">latex</span><span class="p">)</span>
