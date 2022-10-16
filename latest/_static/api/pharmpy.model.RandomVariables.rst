@@ -11,12 +11,15 @@ RandomVariables
    .. autosummary::
 
       ~RandomVariables.covariance_matrix
+      ~RandomVariables.epsilon_levels
       ~RandomVariables.epsilons
+      ~RandomVariables.eta_levels
       ~RandomVariables.etas
       ~RandomVariables.free_symbols
       ~RandomVariables.iiv
       ~RandomVariables.iov
       ~RandomVariables.names
+      ~RandomVariables.nrvs
       ~RandomVariables.parameter_names
       ~RandomVariables.variance_parameters
 
@@ -24,11 +27,10 @@ RandomVariables
 
    .. autosummary::
 
-      ~RandomVariables.copy
-      ~RandomVariables.distributions
+      ~RandomVariables.create
+      ~RandomVariables.derive
       ~RandomVariables.get_covariance
-      ~RandomVariables.get_variance
-      ~RandomVariables.insert
+      ~RandomVariables.get_rvs_with_same_dist
       ~RandomVariables.join
       ~RandomVariables.nearest_valid_parameters
       ~RandomVariables.parameters_sdcorr
@@ -40,22 +42,24 @@ RandomVariables
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: covariance_matrix
+   .. autoattribute:: epsilon_levels
    .. autoattribute:: epsilons
+   .. autoattribute:: eta_levels
    .. autoattribute:: etas
    .. autoattribute:: free_symbols
    .. autoattribute:: iiv
    .. autoattribute:: iov
    .. autoattribute:: names
+   .. autoattribute:: nrvs
    .. autoattribute:: parameter_names
    .. autoattribute:: variance_parameters
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: copy
-   .. automethod:: distributions
+   .. automethod:: create
+   .. automethod:: derive
    .. automethod:: get_covariance
-   .. automethod:: get_variance
-   .. automethod:: insert
+   .. automethod:: get_rvs_with_same_dist
    .. automethod:: join
    .. automethod:: nearest_valid_parameters
    .. automethod:: parameters_sdcorr

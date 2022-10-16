@@ -992,7 +992,7 @@ pharmpy model. See :py:func:`pharmpy.modeling.update_inits`.
 
    model = read_model(path / "pheno.mod")
 
-   update_inits(model, force_individual_estimates=True)
+   update_inits(model, model.modelfit_results.parameter_estimates)
 
 
 ~~~~~~~~~~~~~~~
@@ -1030,12 +1030,14 @@ Eta shrinkage can be calculated either on the standard deviation scale or on the
 
     from pharmpy.modeling import calculate_eta_shrinkage
 
-    calculate_eta_shrinkage(model)
+    pe = model.modelfit_results.parameter_estimates
+    ie = model.modelfit_results.individual_estimates
+    calculate_eta_shrinkage(model, pe, ie)
 
 
 .. pharmpy-execute::
 
-    calculate_eta_shrinkage(model, sd=True)
+    calculate_eta_shrinkage(model, pe, ie, sd=True)
 
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 Individual parameter calculations

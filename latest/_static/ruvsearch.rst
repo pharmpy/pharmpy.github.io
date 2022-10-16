@@ -112,8 +112,8 @@ Selection is done using the likelihood ratio test and a default p-value of 0.05.
 The RUVsearch results
 ~~~~~~~~~~~~~~~~~~~~~
 
-The results object contains the candidate models, the start model, and the selected best model (based on the input
-selection criteria). The tool also creates various summary tables which can be accessed in the results object,
+The results object contains the start model, the residual error models based on the conditional weighted residual(CWRES) of the start model,
+the candidate models, and the selected best model (based on the input selection criteria). The tool also creates various summary tables which can be accessed in the results object,
 as well as files in .csv/.json format.
 
 Consider a standard ruvsearch run:
@@ -122,20 +122,27 @@ Consider a standard ruvsearch run:
 
     res = run_ruvsearch(model=start_model)
 
+The ``cwres_models`` table contains information on the residual error models, such as the iteration times, the changes of OFV compared to the base CWRES model and some key parameter estimates.
+
+.. pharmpy-execute::
+    :hide-code:
+
+    from pharmpy.results import read_results
+    res = read_results('tests/testdata/results/ruvsearch_results.json')
+    res.cwres_models
+
 The ``summary_tool`` table contains information such as which feature each model candidate has, the difference to the
 start model, and final ranking:
 
 .. pharmpy-execute::
     :hide-code:
 
-    from pharmpy.results import read_results
-    res = read_results('tests/testdata/results/resmod_results.json')
     res.summary_tool
 
 
 To see information about the actual model runs, such as minimization status, estimation time, and parameter estimates,
 you can look at the ``summary_models`` table. The table is generated with
-:py:func:`pharmpy.modeling.summarize_modelfit_results`.
+:py:func:`pharmpy.tools.summarize_modelfit_results`.
 
 .. pharmpy-execute::
     :hide-code:
@@ -143,7 +150,7 @@ you can look at the ``summary_models`` table. The table is generated with
     res.summary_models
 
 A summary table of predicted influential individuals and outliers can be seen in ``summary_individuals_count``.
-See :py:func:`pharmpy.modeling.summarize_individuals_count_table` for information on the content of this table.
+See :py:func:`pharmpy.tools.summarize_individuals_count_table` for information on the content of this table.
 
 .. pharmpy-execute::
     :hide-code:
@@ -151,7 +158,7 @@ See :py:func:`pharmpy.modeling.summarize_individuals_count_table` for informatio
     res.summary_individuals_count
 
 Finally, you can see different individual statistics ``summary_individuals``.
-See :py:func:`pharmpy.modeling.summarize_individuals` for information on the content of this table.
+See :py:func:`pharmpy.tools.summarize_individuals` for information on the content of this table.
 
 .. pharmpy-execute::
     :hide-code:

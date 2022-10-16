@@ -34,7 +34,6 @@ Model
       ~Model.copy
       ~Model.create_model
       ~Model.has_same_dataset_as
-      ~Model.read_modelfit_results
       ~Model.update_datainfo
 
    .. rubric:: Attributes Documentation
@@ -61,5 +60,4 @@ Model
    .. automethod:: copy
    .. automethod:: create_model
    .. automethod:: has_same_dataset_as
-   .. automethod:: read_modelfit_results
    .. automethod:: update_datainfo
