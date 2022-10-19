@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.79.1 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.80.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -427,9 +427,10 @@
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
-<span class="kn">from</span> <span class="nn">pharmpy.expressions</span> <span class="kn">import</span> <span class="n">subs</span><span class="p">,</span> <span class="n">sympify</span><span class="p">,</span> <span class="n">xreplace_dict</span>
-<span class="kn">from</span> <span class="nn">pharmpy.math</span> <span class="kn">import</span> <span class="n">round_to_n_sigdig</span>
-<span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">CompartmentalSystemBuilder</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.parse</span> <span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_expr</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.subs</span> <span class="kn">import</span> <span class="n">subs</span><span class="p">,</span> <span class="n">xreplace_dict</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.math</span> <span class="kn">import</span> <span class="n">round_to_n_sigdig</span>
+<span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">,</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model.distributions.numeric</span> <span class="kn">import</span> <span class="n">ConstantDistribution</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model.random_variables</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">eval_expr</span><span class="p">,</span>
@@ -920,10 +921,10 @@
         <span class="n">a</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;=&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">expr</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">name</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">strip</span><span class="p">()</span>
-            <span class="n">expr</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
+            <span class="n">expr</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">])</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">lhs</span><span class="o">.</span><span class="n">name</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">rhs</span>
@@ -1055,7 +1056,7 @@
     <span class="k">return</span> <span class="n">likelihood</span> <span class="o">+</span> <span class="n">penalty</span></div>
 
 
-<div class="viewcode-block" id="check_high_correlations"><a class="viewcode-back" href="../../../api/pharmpy.modeling.check_high_correlations.html#pharmpy.modeling.check_high_correlations">[docs]</a><span class="k">def</span> <span class="nf">check_high_correlations</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cor</span><span class="p">,</span> <span class="n">limit</span><span class="o">=</span><span class="mf">0.9</span><span class="p">):</span>
+<div class="viewcode-block" id="check_high_correlations"><a class="viewcode-back" href="../../../api/pharmpy.modeling.check_high_correlations.html#pharmpy.modeling.check_high_correlations">[docs]</a><span class="k">def</span> <span class="nf">check_high_correlations</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">cor</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span> <span class="n">limit</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.9</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Check for highly correlated parameter estimates</span>
 
 <span class="sd">    Parameters</span>
@@ -1083,10 +1084,7 @@
 <span class="sd">              OMEGA(2,2)    0.356662</span>
 <span class="sd">    dtype: float64</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">if</span> <span class="n">cor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">high_and_below_diagonal</span> <span class="o">=</span> <span class="n">cor</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">ge</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">cor</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span>
-            <span class="nb">bool</span>
-        <span class="p">)</span>
+    <span class="n">high_and_below_diagonal</span> <span class="o">=</span> <span class="n">cor</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span><span class="o">.</span><span class="n">ge</span><span class="p">(</span><span class="n">limit</span><span class="p">)</span> <span class="o">&amp;</span> <span class="n">np</span><span class="o">.</span><span class="n">triu</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">ones</span><span class="p">(</span><span class="n">cor</span><span class="o">.</span><span class="n">shape</span><span class="p">),</span> <span class="n">k</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="nb">bool</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cor</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="n">high_and_below_diagonal</span><span class="p">)</span><span class="o">.</span><span class="n">stack</span><span class="p">()</span></div>
 
 
@@ -1218,7 +1216,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

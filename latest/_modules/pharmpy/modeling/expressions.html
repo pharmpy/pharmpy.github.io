@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.79.1 documentation</title>
+    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.80.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -423,10 +423,14 @@
 
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">filterfalse</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">TypeVar</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
-<span class="kn">from</span> <span class="nn">pharmpy.expressions</span> <span class="kn">import</span> <span class="n">subs</span><span class="p">,</span> <span class="n">sympify</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.parse</span> <span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_expr</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.subs</span> <span class="kn">import</span> <span class="n">subs</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.graph.directed.connected_components</span> <span class="kn">import</span> <span class="n">strongly_connected_component_of</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.graph.directed.inverse</span> <span class="kn">import</span> <span class="n">inverse</span> <span class="k">as</span> <span class="n">graph_inverse</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.graph.directed.reachability</span> <span class="kn">import</span> <span class="n">reachable_from</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Assignment</span><span class="p">,</span>
     <span class="n">Compartment</span><span class="p">,</span>
@@ -771,7 +775,7 @@
 <span class="sd">    PTVCL</span>
 <span class="sd">    &gt;&gt;&gt; conf.parameter_names = [&#39;basic&#39;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">expr</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+    <span class="n">expr</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
     <span class="n">d</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">fix</span><span class="p">:</span>
@@ -1259,7 +1263,7 @@
         <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
 
     <span class="c1"># NOTE Could be faster by returning immediately once found</span>
-    <span class="k">return</span> <span class="ow">not</span> <span class="n">_reachable_from</span><span class="p">({</span><span class="n">symbol</span><span class="p">},</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">dependency_graph</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[]))</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
+    <span class="k">return</span> <span class="ow">not</span> <span class="n">reachable_from</span><span class="p">({</span><span class="n">symbol</span><span class="p">},</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">dependency_graph</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[]))</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="has_random_effect"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_random_effect.html#pharmpy.modeling.has_random_effect">[docs]</a><span class="k">def</span> <span class="nf">has_random_effect</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
@@ -1694,7 +1698,7 @@
 
 <span class="k">def</span> <span class="nf">_get_component</span><span class="p">(</span><span class="n">cs</span><span class="p">:</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">compartment</span><span class="p">:</span> <span class="n">Compartment</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Compartment</span><span class="p">]:</span>
 
-    <span class="n">central_component_vertices</span> <span class="o">=</span> <span class="n">_strongly_connected_component_of</span><span class="p">(</span>
+    <span class="n">central_component_vertices</span> <span class="o">=</span> <span class="n">strongly_connected_component_of</span><span class="p">(</span>
         <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span><span class="p">,</span>
         <span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">flow</span><span class="p">:</span> <span class="n">flow</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span>
         <span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">flow</span><span class="p">:</span> <span class="n">flow</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_compartment_inflows</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span>
@@ -1709,7 +1713,7 @@
         <span class="k">else</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_compartment_outflows</span>
     <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">_reachable_from</span><span class="p">(</span>
+    <span class="k">return</span> <span class="n">reachable_from</span><span class="p">(</span>
         <span class="p">{</span><span class="n">compartment</span><span class="p">},</span>
         <span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="n">filterfalse</span><span class="p">(</span>
             <span class="n">central_component_vertices</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">,</span>
@@ -1765,15 +1769,15 @@
     <span class="n">leaves</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Set</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">],</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">]:</span>
 
-    <span class="n">dependents</span> <span class="o">=</span> <span class="n">_graph_inverse</span><span class="p">(</span><span class="n">dependency_graph</span><span class="p">)</span>
+    <span class="n">dependents</span> <span class="o">=</span> <span class="n">graph_inverse</span><span class="p">(</span><span class="n">dependency_graph</span><span class="p">)</span>
 
-    <span class="n">free_symbols</span> <span class="o">=</span> <span class="n">_reachable_from</span><span class="p">(</span><span class="n">roots</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">dependency_graph</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[]))</span>
+    <span class="n">free_symbols</span> <span class="o">=</span> <span class="n">reachable_from</span><span class="p">(</span><span class="n">roots</span><span class="p">,</span> <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">dependency_graph</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[]))</span>
 
     <span class="n">reachable</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">free_symbols</span>
         <span class="k">if</span> <span class="n">leaves</span> <span class="ow">is</span> <span class="kc">None</span>
         <span class="k">else</span> <span class="p">(</span>
-            <span class="n">_reachable_from</span><span class="p">(</span>
+            <span class="n">reachable_from</span><span class="p">(</span>
                 <span class="n">leaves</span><span class="p">,</span>
                 <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">dependents</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="p">[]),</span>
             <span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">free_symbols</span><span class="p">)</span>
@@ -1861,51 +1865,6 @@
                     <span class="n">dependencies</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="p">{</span><span class="n">symbol</span><span class="p">})</span> <span class="o">|</span> <span class="n">previous_def</span>
 
     <span class="k">return</span> <span class="n">dependencies</span>
-
-
-<span class="k">def</span> <span class="nf">_graph_inverse</span><span class="p">(</span><span class="n">g</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">T</span><span class="p">,</span> <span class="n">Set</span><span class="p">[</span><span class="n">U</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Dict</span><span class="p">[</span><span class="n">U</span><span class="p">,</span> <span class="n">Set</span><span class="p">[</span><span class="n">T</span><span class="p">]]:</span>
-
-    <span class="n">h</span> <span class="o">=</span> <span class="p">{}</span>
-
-    <span class="k">for</span> <span class="n">left</span><span class="p">,</span> <span class="n">deps</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">for</span> <span class="n">right</span> <span class="ow">in</span> <span class="n">deps</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">right</span> <span class="ow">in</span> <span class="n">h</span><span class="p">:</span>
-                <span class="n">h</span><span class="p">[</span><span class="n">right</span><span class="p">]</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">left</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">h</span><span class="p">[</span><span class="n">right</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span><span class="n">left</span><span class="p">}</span>
-
-    <span class="k">return</span> <span class="n">h</span>
-
-
-<span class="k">def</span> <span class="nf">_reachable_from</span><span class="p">(</span><span class="n">start_nodes</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">neighbors</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">T</span><span class="p">]:</span>
-    <span class="n">queue</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">start_nodes</span><span class="p">)</span>
-    <span class="n">closure</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">start_nodes</span><span class="p">)</span>
-    <span class="k">while</span> <span class="n">queue</span><span class="p">:</span>
-        <span class="n">u</span> <span class="o">=</span> <span class="n">queue</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-        <span class="n">n</span> <span class="o">=</span> <span class="n">neighbors</span><span class="p">(</span><span class="n">u</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">n</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">closure</span><span class="p">:</span>
-                <span class="n">queue</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-                <span class="n">closure</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">v</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">closure</span>
-
-
-<span class="k">def</span> <span class="nf">_strongly_connected_component_of</span><span class="p">(</span>
-    <span class="n">vertex</span><span class="p">:</span> <span class="n">T</span><span class="p">,</span> <span class="n">successors</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">]],</span> <span class="n">predecessors</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">T</span><span class="p">],</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">T</span><span class="p">]]</span>
-<span class="p">):</span>
-
-    <span class="n">forward_reachable</span> <span class="o">=</span> <span class="n">_reachable_from</span><span class="p">({</span><span class="n">vertex</span><span class="p">},</span> <span class="n">successors</span><span class="p">)</span>
-
-    <span class="c1"># NOTE This searches for backward reachable vertices on the graph induced</span>
-    <span class="c1"># by the forward reachable vertices and is equivalent to (but less wasteful</span>
-    <span class="c1"># than) first computing the backward reachable vertices on the original</span>
-    <span class="c1"># graph and then computing the intersection with the forward reachable</span>
-    <span class="c1"># vertices.</span>
-    <span class="k">return</span> <span class="n">_reachable_from</span><span class="p">(</span>
-        <span class="p">{</span><span class="n">vertex</span><span class="p">},</span>
-        <span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="nb">filter</span><span class="p">(</span><span class="n">forward_reachable</span><span class="o">.</span><span class="fm">__contains__</span><span class="p">,</span> <span class="n">predecessors</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span>
-    <span class="p">)</span>
 </pre></div>
 
             </article>
@@ -1971,7 +1930,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

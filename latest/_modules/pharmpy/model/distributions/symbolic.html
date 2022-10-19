@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.distributions.symbolic &#8212; Pharmpy 0.79.1 documentation</title>
+    <title>pharmpy.model.distributions.symbolic &#8212; Pharmpy 0.80.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -426,10 +426,11 @@
 <span class="kn">from</span> <span class="nn">math</span> <span class="kn">import</span> <span class="n">sqrt</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span>
 
-<span class="kn">import</span> <span class="nn">pharmpy.unicode</span> <span class="k">as</span> <span class="nn">unicode</span>
+<span class="kn">import</span> <span class="nn">pharmpy.internals.unicode</span> <span class="k">as</span> <span class="nn">unicode</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">symengine</span><span class="p">,</span> <span class="n">sympy</span>
-<span class="kn">from</span> <span class="nn">pharmpy.expressions</span> <span class="kn">import</span> <span class="n">subs</span><span class="p">,</span> <span class="n">sympify</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.parse</span> <span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_expr</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.subs</span> <span class="kn">import</span> <span class="n">subs</span>
 
 <span class="kn">from</span> <span class="nn">.numeric</span> <span class="kn">import</span> <span class="n">MultivariateNormalDistribution</span> <span class="k">as</span> <span class="n">NumericMultivariateNormalDistribution</span>
 <span class="kn">from</span> <span class="nn">.numeric</span> <span class="kn">import</span> <span class="n">NormalDistribution</span> <span class="k">as</span> <span class="n">NumericNormalDistribution</span>
@@ -534,8 +535,8 @@
 <div class="viewcode-block" id="NormalDistribution.create"><a class="viewcode-back" href="../../../../api/pharmpy.model.NormalDistribution.html#pharmpy.model.NormalDistribution.create">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">):</span>
         <span class="n">level</span> <span class="o">=</span> <span class="n">level</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-        <span class="n">mean</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
-        <span class="n">variance</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">variance</span><span class="p">)</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
+        <span class="n">variance</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">variance</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">sympy</span><span class="o">.</span><span class="n">ask</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Q</span><span class="o">.</span><span class="n">nonnegative</span><span class="p">(</span><span class="n">variance</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Variance of normal distribution must be non-negative&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">)</span></div>
@@ -550,11 +551,11 @@
         <span class="k">if</span> <span class="n">mean</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mean</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">mean</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
+            <span class="n">mean</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">mean</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">variance</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">variance</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variance</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">variance</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">variance</span><span class="p">)</span>
+            <span class="n">variance</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">variance</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">sympy</span><span class="o">.</span><span class="n">ask</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Q</span><span class="o">.</span><span class="n">nonnegative</span><span class="p">(</span><span class="n">variance</span><span class="p">))</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Variance of normal distribution must be non-negative&quot;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">NormalDistribution</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">mean</span><span class="p">,</span> <span class="n">variance</span><span class="p">)</span></div>
@@ -1054,7 +1055,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.random_variables &#8212; Pharmpy 0.79.1 documentation</title>
+    <title>pharmpy.model.random_variables &#8212; Pharmpy 0.80.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -423,14 +423,15 @@
 
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Container</span> <span class="k">as</span> <span class="n">CollectionsContainer</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span> <span class="k">as</span> <span class="n">CollectionsSequence</span>
-<span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">lru_cache</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">product</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Container</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">import</span> <span class="nn">pharmpy.math</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">symengine</span><span class="p">,</span> <span class="n">sympy</span>
-<span class="kn">from</span> <span class="nn">pharmpy.expressions</span> <span class="kn">import</span> <span class="n">subs</span><span class="p">,</span> <span class="n">sympify</span><span class="p">,</span> <span class="n">xreplace_dict</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.eval</span> <span class="kn">import</span> <span class="n">eval_expr</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.parse</span> <span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_expr</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.subs</span> <span class="kn">import</span> <span class="n">subs</span><span class="p">,</span> <span class="n">xreplace_dict</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.math</span> <span class="kn">import</span> <span class="n">cov2corr</span><span class="p">,</span> <span class="n">is_positive_semidefinite</span><span class="p">,</span> <span class="n">nearest_postive_semidefinite</span>
 
 <span class="kn">from</span> <span class="nn">.distributions.numeric</span> <span class="kn">import</span> <span class="n">NumericDistribution</span>
 <span class="kn">from</span> <span class="nn">.distributions.symbolic</span> <span class="kn">import</span> <span class="n">Distribution</span><span class="p">,</span> <span class="n">JointNormalDistribution</span><span class="p">,</span> <span class="n">NormalDistribution</span>
@@ -1046,7 +1047,7 @@
                 <span class="n">symb_sigma</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">variance</span>
                 <span class="n">sigma</span> <span class="o">=</span> <span class="n">symb_sigma</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">parameter_values</span><span class="p">))</span>
                 <span class="n">A</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-                <span class="n">B</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">nearest_postive_semidefinite</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
+                <span class="n">B</span> <span class="o">=</span> <span class="n">nearest_postive_semidefinite</span><span class="p">(</span><span class="n">A</span><span class="p">)</span>
                 <span class="k">if</span> <span class="n">B</span> <span class="ow">is</span> <span class="ow">not</span> <span class="n">A</span><span class="p">:</span>
                     <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">A</span><span class="p">)):</span>
                         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">row</span> <span class="o">+</span> <span class="mi">1</span><span class="p">):</span>
@@ -1068,7 +1069,7 @@
                 <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">replacement</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">sigma</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>  <span class="c1"># Cannot validate since missing params</span>
                     <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-                    <span class="k">if</span> <span class="ow">not</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">is_positive_semidefinite</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+                    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_positive_semidefinite</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
                         <span class="k">return</span> <span class="kc">False</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Cannot validate parameters since all are not numeric&quot;</span><span class="p">)</span>
@@ -1079,7 +1080,7 @@
 
 <span class="sd">        parameters in the distributions will first be replaced&quot;&quot;&quot;</span>
 
-        <span class="n">sympified_expr</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
+        <span class="n">sympified_expr</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
         <span class="n">xreplace_parameters</span> <span class="o">=</span> <span class="p">{}</span> <span class="k">if</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">xreplace_dict</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="n">_sample_from_distributions</span><span class="p">(</span>
@@ -1139,7 +1140,7 @@
             <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
                 <span class="n">sigma_sym</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">variance</span>
                 <span class="n">sigma</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">sigma_sym</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">values</span><span class="p">))</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
-                <span class="n">corr</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">math</span><span class="o">.</span><span class="n">cov2corr</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+                <span class="n">corr</span> <span class="o">=</span> <span class="n">cov2corr</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
                 <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sigma_sym</span><span class="o">.</span><span class="n">rows</span><span class="p">):</span>
                     <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">sigma_sym</span><span class="o">.</span><span class="n">cols</span><span class="p">):</span>
                         <span class="n">name</span> <span class="o">=</span> <span class="n">sigma_sym</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
@@ -1220,22 +1221,6 @@
     <span class="k">return</span> <span class="n">eval_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">,</span> <span class="n">samples</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">eval_expr</span><span class="p">(</span>
-    <span class="n">expr</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">,</span>
-    <span class="n">nsamples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
-    <span class="n">samples</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">],</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">np</span><span class="o">.</span><span class="n">ndarray</span><span class="p">:</span>
-    <span class="c1"># NOTE We avoid querying for free_symbols if we know none are expected</span>
-    <span class="n">fs</span> <span class="o">=</span> <span class="n">_free_symbols</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="k">if</span> <span class="n">samples</span> <span class="k">else</span> <span class="nb">set</span><span class="p">()</span>
-
-    <span class="k">if</span> <span class="n">fs</span><span class="p">:</span>
-        <span class="n">ordered_symbols</span><span class="p">,</span> <span class="n">fn</span> <span class="o">=</span> <span class="n">_lambdify_canonical</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
-        <span class="n">data</span> <span class="o">=</span> <span class="p">[</span><span class="n">samples</span><span class="p">[</span><span class="n">rv</span><span class="p">]</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">ordered_symbols</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">fn</span><span class="p">(</span><span class="o">*</span><span class="n">data</span><span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">np</span><span class="o">.</span><span class="n">full</span><span class="p">(</span><span class="n">nsamples</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">evalf</span><span class="p">()))</span>
-
-
 <span class="k">def</span> <span class="nf">sample_rvs</span><span class="p">(</span>
     <span class="n">sampling_rvs</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">NumericDistribution</span><span class="p">]],</span>
     <span class="n">nsamples</span><span class="p">:</span> <span class="nb">int</span><span class="p">,</span>
@@ -1253,27 +1238,6 @@
             <span class="n">data</span><span class="p">[</span><span class="n">symbols</span><span class="p">[</span><span class="mi">0</span><span class="p">]]</span> <span class="o">=</span> <span class="n">cursample</span>
 
     <span class="k">return</span> <span class="n">data</span>
-
-
-<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_free_symbols</span><span class="p">(</span><span class="n">expr</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">]:</span>
-    <span class="k">return</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span>
-
-
-<span class="nd">@lru_cache</span><span class="p">(</span><span class="n">maxsize</span><span class="o">=</span><span class="mi">256</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">_lambdify_canonical</span><span class="p">(</span><span class="n">expr</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">):</span>
-    <span class="n">fs</span> <span class="o">=</span> <span class="n">_free_symbols</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
-    <span class="n">ordered_symbols</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">fs</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="nb">str</span><span class="p">)</span>
-    <span class="c1"># NOTE Substitution allows to use cse. Otherwise weird things happen with</span>
-    <span class="c1"># symbols that look like function eval (e.g. ETA(1), THETA(3), OMEGA(1,1)).</span>
-    <span class="n">ordered_substitutes</span> <span class="o">=</span> <span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;__tmp</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">ordered_symbols</span><span class="p">))]</span>
-    <span class="n">substituted_expr</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span>
-        <span class="n">expr</span><span class="p">,</span>
-        <span class="p">{</span><span class="n">key</span><span class="p">:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="n">ordered_symbols</span><span class="p">,</span> <span class="n">ordered_substitutes</span><span class="p">)},</span>
-        <span class="n">simultaneous</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
-    <span class="p">)</span>
-    <span class="n">fn</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">lambdify</span><span class="p">(</span><span class="n">ordered_substitutes</span><span class="p">,</span> <span class="n">substituted_expr</span><span class="p">,</span> <span class="n">modules</span><span class="o">=</span><span class="s1">&#39;numpy&#39;</span><span class="p">,</span> <span class="n">cse</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">ordered_symbols</span><span class="p">,</span> <span class="n">fn</span>
 </pre></div>
 
             </article>
@@ -1339,7 +1303,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.statements &#8212; Pharmpy 0.79.1 documentation</title>
+    <title>pharmpy.model.statements &#8212; Pharmpy 0.80.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -426,17 +426,14 @@
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">overload</span>
 
-<span class="kn">import</span> <span class="nn">pharmpy.unicode</span> <span class="k">as</span> <span class="nn">unicode</span>
+<span class="kn">import</span> <span class="nn">pharmpy.internals.unicode</span> <span class="k">as</span> <span class="nn">unicode</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">networkx</span> <span class="k">as</span> <span class="n">nx</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
-<span class="kn">from</span> <span class="nn">pharmpy.expressions</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">assume_all</span><span class="p">,</span>
-    <span class="n">canonical_ode_rhs</span><span class="p">,</span>
-    <span class="n">free_images</span><span class="p">,</span>
-    <span class="n">free_images_and_symbols</span><span class="p">,</span>
-    <span class="n">subs</span><span class="p">,</span>
-    <span class="n">sympify</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.assumptions</span> <span class="kn">import</span> <span class="n">assume_all</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.leaves</span> <span class="kn">import</span> <span class="n">free_images</span><span class="p">,</span> <span class="n">free_images_and_symbols</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.ode</span> <span class="kn">import</span> <span class="n">canonical_ode_rhs</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.parse</span> <span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_expr</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.expr.subs</span> <span class="kn">import</span> <span class="n">subs</span>
 
 
 <div class="viewcode-block" id="Statement"><a class="viewcode-back" href="../../../api/pharmpy.model.Statement.html#pharmpy.model.Statement">[docs]</a><span class="k">class</span> <span class="nc">Statement</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
@@ -496,7 +493,7 @@
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">symbol</span><span class="o">.</span><span class="n">is_Symbol</span> <span class="ow">or</span> <span class="n">symbol</span><span class="o">.</span><span class="n">is_Derivative</span> <span class="ow">or</span> <span class="n">symbol</span><span class="o">.</span><span class="n">is_Function</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;symbol of Assignment must be a Symbol or str representing a symbol&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">expression</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
@@ -781,7 +778,7 @@
         <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">amounts</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">compartment_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">compartment_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Names of all compartments</span>
 
 <span class="sd">        Examples</span>
@@ -792,8 +789,7 @@
 <span class="sd">        &gt;&gt;&gt; odes.compartment_names</span>
 <span class="sd">        [&#39;CENTRAL&#39;, &#39;OUTPUT&#39;]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">ode</span><span class="o">.</span><span class="n">lhs</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">for</span> <span class="n">ode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">odes</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">names</span>
+        <span class="k">return</span> <span class="p">[</span><span class="n">ode</span><span class="o">.</span><span class="n">lhs</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="k">for</span> <span class="n">ode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">odes</span><span class="p">]</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">a</span> <span class="o">=</span> <span class="p">[]</span>
@@ -943,7 +939,7 @@
 <span class="sd">        &gt;&gt;&gt; cb.add_compartment(&quot;CENTRAL&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; cb.add_flow(depot, central, &quot;KA&quot;)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">sympify</span><span class="p">(</span><span class="n">rate</span><span class="p">))</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">parse_expr</span><span class="p">(</span><span class="n">rate</span><span class="p">))</span></div>
 
 <div class="viewcode-block" id="CompartmentalSystemBuilder.remove_flow"><a class="viewcode-back" href="../../../api/pharmpy.model.CompartmentalSystemBuilder.html#pharmpy.model.CompartmentalSystemBuilder.remove_flow">[docs]</a>    <span class="k">def</span> <span class="nf">remove_flow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove flow between two compartments</span>
@@ -1554,7 +1550,7 @@
         <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">amts</span><span class="p">)</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">compartment_names</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">compartment_names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
         <span class="sd">&quot;&quot;&quot;Names of all compartments</span>
 
 <span class="sd">        Examples</span>
@@ -1805,9 +1801,9 @@
         <span class="k">if</span> <span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dose</span><span class="p">,</span> <span class="n">Dose</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;dose must be of Dose type (or None)&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">lag_time</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">lag_time</span><span class="p">)</span>
+            <span class="n">lag_time</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">lag_time</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">bioavailability</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">bioavailability</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">bioavailability</span><span class="p">)</span>
+            <span class="n">bioavailability</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">bioavailability</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">,</span> <span class="n">bioavailability</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
@@ -1858,6 +1854,7 @@
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">symbs</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">symbs</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lag_time</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">symbs</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bioavailability</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="k">return</span> <span class="n">symbs</span>
 
 <div class="viewcode-block" id="Compartment.subs"><a class="viewcode-back" href="../../../api/pharmpy.model.Compartment.html#pharmpy.model.Compartment.subs">[docs]</a>    <span class="k">def</span> <span class="nf">subs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">):</span>
@@ -1933,7 +1930,7 @@
 
 <div class="viewcode-block" id="Bolus.create"><a class="viewcode-back" href="../../../api/pharmpy.model.Bolus.html#pharmpy.model.Bolus.create">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">sympify</span><span class="p">(</span><span class="n">amount</span><span class="p">))</span></div>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">parse_expr</span><span class="p">(</span><span class="n">amount</span><span class="p">))</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">amount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -2012,10 +2009,10 @@
         <span class="k">if</span> <span class="n">rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">duration</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Cannot have both rate and duration for Infusion&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">rate</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
+            <span class="n">rate</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">rate</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">duration</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">sympify</span><span class="p">(</span><span class="n">amount</span><span class="p">),</span> <span class="n">rate</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span></div>
+            <span class="n">duration</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">parse_expr</span><span class="p">(</span><span class="n">amount</span><span class="p">),</span> <span class="n">rate</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">amount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -2380,7 +2377,7 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">symbol</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">expression</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
 
         <span class="n">last</span> <span class="o">=</span> <span class="kc">True</span>
         <span class="n">new</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_statements</span><span class="p">)</span>
@@ -2558,7 +2555,7 @@
 <span class="sd">        THETA(1)*WGT*exp(ETA(1))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="n">expression</span> <span class="o">=</span> <span class="n">sympify</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">statement</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -2715,7 +2712,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.ruvsearch.tool &#8212; Pharmpy 0.79.1 documentation</title>
+    <title>pharmpy.tools.ruvsearch.tool &#8212; Pharmpy 0.80.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -425,6 +425,8 @@
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps.scipy</span> <span class="kn">import</span> <span class="n">stats</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.fn.signature</span> <span class="kn">import</span> <span class="n">with_same_arguments_as</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.fn.type</span> <span class="kn">import</span> <span class="n">with_runtime_arguments_type_check</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Assignment</span><span class="p">,</span>
     <span class="n">EstimationStep</span><span class="p">,</span>
@@ -455,7 +457,6 @@
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pharmpy.tools.common</span> <span class="kn">import</span> <span class="n">summarize_tool</span><span class="p">,</span> <span class="n">update_initial_estimates</span>
 <span class="kn">from</span> <span class="nn">pharmpy.tools.modelfit</span> <span class="kn">import</span> <span class="n">create_fit_workflow</span>
-<span class="kn">from</span> <span class="nn">pharmpy.utils</span> <span class="kn">import</span> <span class="n">runtime_type_check</span><span class="p">,</span> <span class="n">same_arguments_as</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">call_workflow</span>
 
 <span class="kn">from</span> <span class="nn">.results</span> <span class="kn">import</span> <span class="n">RUVSearchResults</span><span class="p">,</span> <span class="n">calculate_results</span>
@@ -644,9 +645,15 @@
     <span class="k">if</span> <span class="n">best_model_unfitted</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">fit_wf</span> <span class="o">=</span> <span class="n">create_fit_workflow</span><span class="p">(</span><span class="n">models</span><span class="o">=</span><span class="p">[</span><span class="n">best_model_unfitted</span><span class="p">])</span>
         <span class="n">best_model</span> <span class="o">=</span> <span class="n">call_workflow</span><span class="p">(</span><span class="n">fit_wf</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;fit</span><span class="si">{</span><span class="n">current_iteration</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
-        <span class="n">delta_ofv</span> <span class="o">=</span> <span class="n">start_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span> <span class="o">-</span> <span class="n">best_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span>
-        <span class="k">if</span> <span class="n">delta_ofv</span> <span class="o">&gt;</span> <span class="n">cutoff</span><span class="p">:</span>
-            <span class="k">return</span> <span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">best_model</span><span class="p">,</span> <span class="n">selected_model_name</span><span class="p">)</span>
+        <span class="n">best_model_check</span> <span class="o">=</span> <span class="p">[</span>
+            <span class="n">best_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span><span class="p">,</span>
+            <span class="n">best_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">residuals</span><span class="p">,</span>
+            <span class="n">best_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">predictions</span><span class="p">,</span>
+        <span class="p">]</span>
+        <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">check</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">check</span> <span class="ow">in</span> <span class="n">best_model_check</span><span class="p">):</span>
+            <span class="n">delta_ofv</span> <span class="o">=</span> <span class="n">start_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span> <span class="o">-</span> <span class="n">best_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">ofv</span>
+            <span class="k">if</span> <span class="n">delta_ofv</span> <span class="o">&gt;</span> <span class="n">cutoff</span><span class="p">:</span>
+                <span class="k">return</span> <span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">best_model</span><span class="p">,</span> <span class="n">selected_model_name</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">start_model</span><span class="p">,</span> <span class="sa">f</span><span class="s2">&quot;base_</span><span class="si">{</span><span class="n">current_iteration</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -845,8 +852,8 @@
     <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">selected_model_name</span>
 
 
-<span class="nd">@runtime_type_check</span>
-<span class="nd">@same_arguments_as</span><span class="p">(</span><span class="n">create_workflow</span><span class="p">)</span>
+<span class="nd">@with_runtime_arguments_type_check</span>
+<span class="nd">@with_same_arguments_as</span><span class="p">(</span><span class="n">create_workflow</span><span class="p">)</span>
 <span class="k">def</span> <span class="nf">validate_input</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">groups</span><span class="p">,</span> <span class="n">p_value</span><span class="p">,</span> <span class="n">skip</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">groups</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid `groups`: got `</span><span class="si">{</span><span class="n">groups</span><span class="si">}</span><span class="s1">`, must be &gt;= 1.&#39;</span><span class="p">)</span>
@@ -940,7 +947,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.2.3.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
 </p>
 
   </div>
