@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.run &#8212; Pharmpy 0.80.0 documentation</title>
+    <title>pharmpy.tools.run &#8212; Pharmpy 0.81.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -439,6 +439,7 @@
     <span class="n">calculate_bic</span><span class="p">,</span>
     <span class="n">check_high_correlations</span><span class="p">,</span>
     <span class="n">copy_model</span><span class="p">,</span>
+    <span class="n">read_model</span><span class="p">,</span>
     <span class="n">read_model_from_database</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.lrt</span> <span class="kn">import</span> <span class="n">degrees_of_freedom</span> <span class="k">as</span> <span class="n">lrt_df</span>
@@ -566,7 +567,7 @@
     <span class="k">return</span> <span class="n">res</span></div>
 
 
-<div class="viewcode-block" id="run_tool"><a class="viewcode-back" href="../../../api/pharmpy.tools.run_tool.html#pharmpy.tools.run_tool">[docs]</a><span class="k">def</span> <span class="nf">run_tool</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">Results</span><span class="p">]:</span>
+<div class="viewcode-block" id="run_tool"><a class="viewcode-back" href="../../../api/pharmpy.tools.run_tool.html#pharmpy.tools.run_tool">[docs]</a><span class="k">def</span> <span class="nf">run_tool</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">Results</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Run tool workflow</span>
 
 <span class="sd">    Parameters</span>
@@ -591,16 +592,28 @@
 <span class="sd">    &gt;&gt;&gt; res = run_tool(&quot;ruvsearch&quot;, model)   # doctest: +SKIP</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">tool</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;pharmpy.tools.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="c1"># NOTE The implementation of run_tool is split into those two functions to</span>
+    <span class="c1"># allow for individual testing and mocking.</span>
+    <span class="n">tool</span> <span class="o">=</span> <span class="n">import_tool</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">run_tool_with_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tool</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">import_tool</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">return</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;pharmpy.tools.</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">run_tool_with_name</span><span class="p">(</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">_tool</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">Results</span><span class="p">]:</span>
     <span class="n">common_options</span><span class="p">,</span> <span class="n">tool_options</span> <span class="o">=</span> <span class="n">split_common_options</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="n">tool_params</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">tool</span><span class="o">.</span><span class="n">create_workflow</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
+    <span class="n">tool_params</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">_tool</span><span class="o">.</span><span class="n">create_workflow</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
     <span class="n">tool_metadata</span> <span class="o">=</span> <span class="n">_create_metadata_tool</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tool_params</span><span class="p">,</span> <span class="n">tool_options</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">validate_input</span> <span class="o">:=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="s1">&#39;validate_input&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">validate_input</span> <span class="o">:=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">_tool</span><span class="p">,</span> <span class="s1">&#39;validate_input&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">validate_input</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">tool_options</span><span class="p">)</span>
 
-    <span class="n">wf</span> <span class="o">=</span> <span class="n">tool</span><span class="o">.</span><span class="n">create_workflow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">tool_options</span><span class="p">)</span>
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">_tool</span><span class="o">.</span><span class="n">create_workflow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">tool_options</span><span class="p">)</span>
 
     <span class="n">dispatcher</span><span class="p">,</span> <span class="n">database</span> <span class="o">=</span> <span class="n">_get_run_setup</span><span class="p">(</span><span class="n">common_options</span><span class="p">,</span> <span class="n">wf</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="n">setup_metadata</span> <span class="o">=</span> <span class="n">_create_metadata_common</span><span class="p">(</span><span class="n">common_options</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">wf</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -616,7 +629,7 @@
     <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;stats&#39;</span><span class="p">][</span><span class="s1">&#39;end_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_now</span><span class="p">()</span>
     <span class="n">database</span><span class="o">.</span><span class="n">store_metadata</span><span class="p">(</span><span class="n">tool_metadata</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">res</span></div>
+    <span class="k">return</span> <span class="n">res</span>
 
 
 <span class="k">def</span> <span class="nf">_store_input_models</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">database</span><span class="p">):</span>
@@ -681,6 +694,8 @@
                 <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">default</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
             <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># FIXME: better model representation</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ModelfitResults</span><span class="p">):</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;FIXME&quot;</span>
         <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;tool_options&#39;</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="k">return</span> <span class="n">tool_metadata</span>
@@ -1220,6 +1235,25 @@
             <span class="n">summary_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">_RSE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rses</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">summary_dict</span>
+
+
+<div class="viewcode-block" id="read_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.read_modelfit_results.html#pharmpy.tools.read_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">read_modelfit_results</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="sd">&quot;&quot;&quot;Read results from external tool for a model</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    path : Path or str</span>
+<span class="sd">        Path to model file</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    ModelfitResults</span>
+<span class="sd">        Results object</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="c1"># FIXME: Quick and dirty solution</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">read_model</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span></div>
 </pre></div>
 
             </article>

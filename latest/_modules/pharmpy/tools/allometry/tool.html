@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.allometry.tool &#8212; Pharmpy 0.80.0 documentation</title>
+    <title>pharmpy.tools.allometry.tool &#8212; Pharmpy 0.81.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -432,6 +432,7 @@
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fn.type</span> <span class="kn">import</span> <span class="n">with_runtime_arguments_type_check</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Results</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">add_allometry</span><span class="p">,</span> <span class="n">get_pk_parameters</span>
+<span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">ModelfitResults</span>
 <span class="kn">from</span> <span class="nn">pharmpy.tools</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">summarize_errors</span><span class="p">,</span>
     <span class="n">summarize_individuals</span><span class="p">,</span>
@@ -444,6 +445,7 @@
 
 <span class="k">def</span> <span class="nf">create_workflow</span><span class="p">(</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Model</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ModelfitResults</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">allometric_variable</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;WT&#39;</span><span class="p">,</span>
     <span class="n">reference_value</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">]</span> <span class="o">=</span> <span class="mi">70</span><span class="p">,</span>
     <span class="n">parameters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -458,6 +460,8 @@
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model</span>
+<span class="sd">    results : ModelfitResults</span>
+<span class="sd">        Results for model</span>
 <span class="sd">    allometric_variable : str</span>
 <span class="sd">        Name of the variable to use for allometric scaling (default is WT)</span>
 <span class="sd">    reference_value : float</span>
@@ -483,7 +487,7 @@
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.tools import run_allometry # doctest: +SKIP</span>
-<span class="sd">    &gt;&gt;&gt; run_allometry(model=model, allometric_variable=&#39;WGT&#39;)      # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; run_allometry(model=model, results=model.modelfit_results, allometric_variable=&#39;WGT&#39;) # doctest: +SKIP</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
@@ -507,7 +511,7 @@
     <span class="n">wf</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">task_add_allometry</span><span class="p">,</span> <span class="n">predecessors</span><span class="o">=</span><span class="n">start_task</span><span class="p">)</span>
     <span class="n">fit_wf</span> <span class="o">=</span> <span class="n">create_fit_workflow</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
     <span class="n">wf</span><span class="o">.</span><span class="n">insert_workflow</span><span class="p">(</span><span class="n">fit_wf</span><span class="p">,</span> <span class="n">predecessors</span><span class="o">=</span><span class="n">task_add_allometry</span><span class="p">)</span>
-    <span class="n">results_task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;results&#39;</span><span class="p">,</span> <span class="n">results</span><span class="p">)</span>
+    <span class="n">results_task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;results&#39;</span><span class="p">,</span> <span class="nb">globals</span><span class="p">()[</span><span class="s1">&#39;results&#39;</span><span class="p">])</span>
     <span class="n">wf</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">results_task</span><span class="p">,</span> <span class="n">predecessors</span><span class="o">=</span><span class="p">[</span><span class="n">start_task</span><span class="p">]</span> <span class="o">+</span> <span class="n">fit_wf</span><span class="o">.</span><span class="n">output_tasks</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">wf</span>
 

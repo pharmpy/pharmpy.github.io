@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.workflows.execute &#8212; Pharmpy 0.80.0 documentation</title>
+    <title>pharmpy.workflows.execute &#8212; Pharmpy 0.81.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -419,13 +419,12 @@
             <article class="bd-article" role="main">
               
   <h1>Source code for pharmpy.workflows.execute</h1><div class="highlight"><pre>
-<span></span><span class="kn">import</span> <span class="nn">inspect</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypeVar</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TypeVar</span>
 
-<span class="kn">from</span> <span class="nn">pharmpy.internals.fs.path</span> <span class="kn">import</span> <span class="n">normalize_user_given_path</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Results</span>
 
-<span class="kn">from</span> <span class="nn">.workflows</span> <span class="kn">import</span> <span class="n">Workflow</span>
+<span class="kn">from</span> <span class="nn">.context</span> <span class="kn">import</span> <span class="n">insert_context</span>
+<span class="kn">from</span> <span class="nn">.workflow</span> <span class="kn">import</span> <span class="n">Workflow</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
 
@@ -469,21 +468,21 @@
     <span class="n">original_input_models</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="n">input_models</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">workflow</span><span class="o">.</span><span class="n">tasks</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">task</span><span class="o">.</span><span class="n">has_input</span><span class="p">():</span>
-            <span class="n">new_inp</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">new_inp</span> <span class="o">=</span> <span class="p">[]</span>
 
-            <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">task_input</span><span class="p">:</span>
-                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
-                    <span class="n">original_input_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-                    <span class="n">inp</span><span class="o">.</span><span class="n">modelfit_results</span>  <span class="c1"># To read in the results</span>
-                    <span class="n">new_model</span> <span class="o">=</span> <span class="n">inp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-                    <span class="n">new_model</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="n">new_model</span><span class="o">.</span><span class="n">name</span>
-                    <span class="n">new_model</span><span class="o">.</span><span class="n">dataset</span>
-                    <span class="n">new_inp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_model</span><span class="p">)</span>
-                    <span class="n">input_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_model</span><span class="p">)</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">new_inp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
-            <span class="n">task</span><span class="o">.</span><span class="n">task_input</span> <span class="o">=</span> <span class="n">new_inp</span>
+        <span class="k">for</span> <span class="n">inp</span> <span class="ow">in</span> <span class="n">task</span><span class="o">.</span><span class="n">task_input</span><span class="p">:</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">inp</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
+                <span class="n">original_input_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+                <span class="n">inp</span><span class="o">.</span><span class="n">modelfit_results</span>  <span class="c1"># To read in the results</span>
+                <span class="n">new_model</span> <span class="o">=</span> <span class="n">inp</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+                <span class="n">new_model</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="n">new_model</span><span class="o">.</span><span class="n">name</span>
+                <span class="n">new_model</span><span class="o">.</span><span class="n">dataset</span>
+                <span class="n">new_inp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_model</span><span class="p">)</span>
+                <span class="n">input_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new_model</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">new_inp</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">inp</span><span class="p">)</span>
+
+        <span class="n">task</span><span class="o">.</span><span class="n">task_input</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">new_inp</span><span class="p">)</span>
 
     <span class="n">insert_context</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">database</span><span class="p">)</span>
 
@@ -506,78 +505,6 @@
                     <span class="n">original_model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
                     <span class="k">break</span>
 
-    <span class="k">return</span> <span class="n">res</span></div>
-
-
-<div class="viewcode-block" id="split_common_options"><a class="viewcode-back" href="../../../api/pharmpy.workflows.split_common_options.html#pharmpy.workflows.split_common_options">[docs]</a><span class="k">def</span> <span class="nf">split_common_options</span><span class="p">(</span><span class="n">d</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Split the dict into common options and other options</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    d : dict</span>
-<span class="sd">        Dictionary of all options</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Tuple of common options and other option dictionaries</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">execute_options</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="s1">&#39;resume&#39;</span><span class="p">]</span>
-    <span class="n">common_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="n">other_options</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
-    <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">d</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="n">execute_options</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;path&#39;</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">value</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">value</span> <span class="o">=</span> <span class="n">normalize_user_given_path</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>
-            <span class="n">common_options</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">other_options</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
-    <span class="k">return</span> <span class="n">common_options</span><span class="p">,</span> <span class="n">other_options</span></div>
-
-
-<span class="k">def</span> <span class="nf">insert_context</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">context</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Insert tool context (database) for all tasks in a workflow needing it</span>
-
-<span class="sd">    having context as first argument of function</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="k">for</span> <span class="n">task</span> <span class="ow">in</span> <span class="n">workflow</span><span class="o">.</span><span class="n">tasks</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">function</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;context&#39;</span><span class="p">:</span>
-            <span class="n">task</span><span class="o">.</span><span class="n">task_input</span> <span class="o">=</span> <span class="p">[</span><span class="n">context</span><span class="p">]</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">task</span><span class="o">.</span><span class="n">task_input</span><span class="p">)</span>
-
-
-<div class="viewcode-block" id="call_workflow"><a class="viewcode-back" href="../../../api/pharmpy.workflows.call_workflow.html#pharmpy.workflows.call_workflow">[docs]</a><span class="k">def</span> <span class="nf">call_workflow</span><span class="p">(</span><span class="n">wf</span><span class="p">:</span> <span class="n">Workflow</span><span class="p">[</span><span class="n">T</span><span class="p">],</span> <span class="n">unique_name</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">T</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Dynamically call a workflow from another workflow.</span>
-
-<span class="sd">    Currently only supports dask distributed</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    wf : Workflow</span>
-<span class="sd">        A workflow object</span>
-<span class="sd">    unique_name : str</span>
-<span class="sd">        A name of the results node that is unique between parent and dynamically created workflows</span>
-<span class="sd">    db : ToolDatabase</span>
-<span class="sd">        ToolDatabase to pass to new workflow</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Any</span>
-<span class="sd">        Whatever the dynamic workflow returns</span>
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="kn">from</span> <span class="nn">dask.distributed</span> <span class="kn">import</span> <span class="n">get_client</span><span class="p">,</span> <span class="n">rejoin</span><span class="p">,</span> <span class="n">secede</span>
-
-    <span class="kn">from</span> <span class="nn">.optimize</span> <span class="kn">import</span> <span class="n">optimize_task_graph_for_dask_distributed</span>
-
-    <span class="n">insert_context</span><span class="p">(</span><span class="n">wf</span><span class="p">,</span> <span class="n">db</span><span class="p">)</span>
-
-    <span class="n">client</span> <span class="o">=</span> <span class="n">get_client</span><span class="p">()</span>
-    <span class="n">dsk</span> <span class="o">=</span> <span class="n">wf</span><span class="o">.</span><span class="n">as_dask_dict</span><span class="p">()</span>
-    <span class="n">dsk</span><span class="p">[</span><span class="n">unique_name</span><span class="p">]</span> <span class="o">=</span> <span class="n">dsk</span><span class="o">.</span><span class="n">pop</span><span class="p">(</span><span class="s1">&#39;results&#39;</span><span class="p">)</span>
-    <span class="n">dsk_optimized</span> <span class="o">=</span> <span class="n">optimize_task_graph_for_dask_distributed</span><span class="p">(</span><span class="n">client</span><span class="p">,</span> <span class="n">dsk</span><span class="p">)</span>
-    <span class="n">futures</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">dsk_optimized</span><span class="p">,</span> <span class="n">unique_name</span><span class="p">,</span> <span class="n">sync</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">secede</span><span class="p">()</span>
-    <span class="n">res</span><span class="p">:</span> <span class="n">T</span> <span class="o">=</span> <span class="n">client</span><span class="o">.</span><span class="n">gather</span><span class="p">(</span><span class="n">futures</span><span class="p">)</span>  <span class="c1"># pyright: ignore [reportGeneralTypeIssues]</span>
-    <span class="n">rejoin</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>
 
