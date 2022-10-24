@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.run &#8212; Pharmpy 0.81.1 documentation</title>
+    <title>pharmpy.tools.run &#8212; Pharmpy 0.82.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -1099,7 +1099,7 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown rank_type: must be ofv, lrt, aic, or bic&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="summarize_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.summarize_modelfit_results.html#pharmpy.tools.summarize_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">summarize_modelfit_results</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="summarize_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.summarize_modelfit_results.html#pharmpy.tools.summarize_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">summarize_modelfit_results</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Summarize results of model runs</span>
 
 <span class="sd">    Summarize different results after fitting a model, includes runtime, ofv,</span>
@@ -1111,8 +1111,8 @@
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    models : list, Model</span>
-<span class="sd">        List of models or single model</span>
+<span class="sd">    results : list, ModelfitResults</span>
+<span class="sd">        List of ModelfitResults or single ModelfitResults</span>
 <span class="sd">    include_all_estimation_steps : bool</span>
 <span class="sd">        Whether to include all estimation steps, default is False</span>
 
@@ -1126,65 +1126,48 @@
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.tools import summarize_modelfit_results</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; summarize_modelfit_results(model) # doctest: +ELLIPSIS</span>
+<span class="sd">    &gt;&gt;&gt; summarize_modelfit_results(model.modelfit_results) # doctest: +SKIP</span>
 <span class="sd">                     description  minimization_successful ...        ofv  ... runtime_total  ...</span>
 <span class="sd">    pheno PHENOBARB SIMPLE MODEL                     True ... 586.276056  ...           4.0  ...</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="c1"># FIXME: add option for bic type?</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
-        <span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">models</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">ModelfitResults</span><span class="p">):</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">results</span><span class="p">]</span>
 
     <span class="n">summaries</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">summary</span> <span class="o">=</span> <span class="n">_get_model_result_summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="p">)</span>
-            <span class="n">summary</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">summary</span> <span class="o">=</span> <span class="n">_get_model_result_summary</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="p">)</span>
+            <span class="n">summary</span><span class="o">.</span><span class="n">insert</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
             <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">include_all_estimation_steps</span><span class="p">:</span>
-                <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">est</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">):</span>
-                    <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span>
-                        <span class="p">[(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="s1">&#39;step&#39;</span><span class="p">]</span>
-                    <span class="p">)</span>
-                    <span class="k">if</span> <span class="n">est</span><span class="o">.</span><span class="n">evaluation</span><span class="p">:</span>
-                        <span class="n">run_type</span> <span class="o">=</span> <span class="s1">&#39;evaluation&#39;</span>
-                    <span class="k">else</span><span class="p">:</span>
-                        <span class="n">run_type</span> <span class="o">=</span> <span class="s1">&#39;estimation&#39;</span>
-                    <span class="n">empty_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">({</span><span class="s1">&#39;run_type&#39;</span><span class="p">:</span> <span class="n">run_type</span><span class="p">},</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
-                    <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">empty_df</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">)</span>
-                <span class="n">empty_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
-                <span class="n">summaries</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">empty_df</span><span class="p">)</span>
 
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">(</span><span class="n">summaries</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">df</span></div>
 
 
-<span class="k">def</span> <span class="nf">_get_model_result_summary</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_get_model_result_summary</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">include_all_estimation_steps</span><span class="p">:</span>
-        <span class="n">summary_dict</span> <span class="o">=</span> <span class="n">_summarize_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
-        <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">)</span>
+        <span class="n">summary_dict</span> <span class="o">=</span> <span class="n">_summarize_step</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span>
+        <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">([</span><span class="n">res</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">)</span>
         <span class="n">summary_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">summary_dicts</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">tuples</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">)):</span>
-            <span class="n">summary_dict</span> <span class="o">=</span> <span class="n">_summarize_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
-            <span class="n">is_evaluation</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">evaluation</span>
+        <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">evaluation</span><span class="p">)):</span>
+            <span class="n">summary_dict</span> <span class="o">=</span> <span class="n">_summarize_step</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="n">is_evaluation</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">evaluation</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
             <span class="k">if</span> <span class="n">is_evaluation</span><span class="p">:</span>
                 <span class="n">run_type</span> <span class="o">=</span> <span class="s1">&#39;evaluation&#39;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">run_type</span> <span class="o">=</span> <span class="s1">&#39;estimation&#39;</span>
             <span class="n">summary_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;run_type&#39;</span><span class="p">:</span> <span class="n">run_type</span><span class="p">,</span> <span class="o">**</span><span class="n">summary_dict</span><span class="p">}</span>
             <span class="n">summary_dicts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">summary_dict</span><span class="p">)</span>
-            <span class="n">tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
+            <span class="n">tuples</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">res</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
         <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">MultiIndex</span><span class="o">.</span><span class="n">from_tuples</span><span class="p">(</span><span class="n">tuples</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="s1">&#39;step&#39;</span><span class="p">])</span>
         <span class="n">summary_df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">summary_dicts</span><span class="p">,</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">)</span>
 
-    <span class="n">log_df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+    <span class="n">log_df</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
 
     <span class="n">no_of_errors</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">log_df</span><span class="p">[</span><span class="n">log_df</span><span class="p">[</span><span class="s1">&#39;category&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;ERROR&#39;</span><span class="p">])</span>
     <span class="n">no_of_warnings</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">log_df</span><span class="p">[</span><span class="n">log_df</span><span class="p">[</span><span class="s1">&#39;category&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;WARNING&#39;</span><span class="p">])</span>
@@ -1196,8 +1179,7 @@
     <span class="k">return</span> <span class="n">summary_df</span>
 
 
-<span class="k">def</span> <span class="nf">_summarize_step</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
-    <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
+<span class="k">def</span> <span class="nf">_summarize_step</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
     <span class="n">summary_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
 
     <span class="k">if</span> <span class="n">i</span> <span class="o">&gt;=</span> <span class="mi">0</span><span class="p">:</span>
@@ -1216,8 +1198,6 @@
         <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
     <span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;ofv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ofv</span>
-    <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;aic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculate_aic</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">ofv</span><span class="p">)</span>
-    <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;bic&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">calculate_bic</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">res</span><span class="o">.</span><span class="n">ofv</span><span class="p">)</span>
     <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;runtime_total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">runtime_total</span>
     <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;estimation_runtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">estimation_runtime_iterations</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
