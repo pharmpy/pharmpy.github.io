@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.covariate_effect &#8212; Pharmpy 0.82.0 documentation</title>
+    <title>pharmpy.modeling.covariate_effect &#8212; Pharmpy 0.83.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -657,7 +657,7 @@
         <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Covariate effect of </span><span class="si">{</span><span class="n">covariate</span><span class="si">}</span><span class="s1"> on </span><span class="si">{</span><span class="n">parameter</span><span class="si">}</span><span class="s1"> already exists&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">model</span>
 
-    <span class="n">statistics</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">statistics</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">statistics</span><span class="p">[</span><span class="s1">&#39;mean&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_calculate_mean</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
     <span class="n">statistics</span><span class="p">[</span><span class="s1">&#39;median&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_calculate_median</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
     <span class="n">statistics</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_calculate_std</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
@@ -722,15 +722,14 @@
 
     <span class="n">pset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
 
-    <span class="n">theta_names</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">theta_names</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="k">if</span> <span class="n">no_of_thetas</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="n">inits</span> <span class="o">=</span> <span class="n">_choose_param_inits</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
 
         <span class="n">theta_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;POP_</span><span class="si">{</span><span class="n">parameter</span><span class="si">}{</span><span class="n">covariate</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="n">pset</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pset</span><span class="p">]</span>
-            <span class="o">+</span> <span class="p">[</span><span class="n">Parameter</span><span class="p">(</span><span class="n">theta_name</span><span class="p">,</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;init&#39;</span><span class="p">],</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;lower&#39;</span><span class="p">],</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">])]</span>
+            <span class="nb">list</span><span class="p">(</span><span class="n">pset</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">Parameter</span><span class="p">(</span><span class="n">theta_name</span><span class="p">,</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;init&#39;</span><span class="p">],</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;lower&#39;</span><span class="p">],</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">])]</span>
         <span class="p">)</span>
         <span class="n">theta_names</span><span class="p">[</span><span class="s1">&#39;theta&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">theta_name</span>
     <span class="k">else</span><span class="p">:</span>
@@ -739,8 +738,7 @@
 
             <span class="n">theta_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;POP_</span><span class="si">{</span><span class="n">parameter</span><span class="si">}{</span><span class="n">covariate</span><span class="si">}</span><span class="s1">_</span><span class="si">{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="n">pset</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span>
-                <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">pset</span><span class="p">]</span>
-                <span class="o">+</span> <span class="p">[</span><span class="n">Parameter</span><span class="p">(</span><span class="n">theta_name</span><span class="p">,</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;init&#39;</span><span class="p">],</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;lower&#39;</span><span class="p">],</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">])]</span>
+                <span class="nb">list</span><span class="p">(</span><span class="n">pset</span><span class="p">)</span> <span class="o">+</span> <span class="p">[</span><span class="n">Parameter</span><span class="p">(</span><span class="n">theta_name</span><span class="p">,</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;init&#39;</span><span class="p">],</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;lower&#39;</span><span class="p">],</span> <span class="n">inits</span><span class="p">[</span><span class="s1">&#39;upper&#39;</span><span class="p">])]</span>
             <span class="p">)</span>
             <span class="n">theta_names</span><span class="p">[</span><span class="n">new_theta</span><span class="p">]</span> <span class="o">=</span> <span class="n">theta_name</span>
 
@@ -797,7 +795,7 @@
     <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
     <span class="n">init_default</span> <span class="o">=</span> <span class="mf">0.001</span>
 
-    <span class="n">inits</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">()</span>
+    <span class="n">inits</span> <span class="o">=</span> <span class="p">{}</span>
 
     <span class="n">cov_median</span> <span class="o">=</span> <span class="n">_calculate_median</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
     <span class="n">cov_min</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">covariate</span><span class="p">)]</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
