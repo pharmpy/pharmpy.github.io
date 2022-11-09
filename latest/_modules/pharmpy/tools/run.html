@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.run &#8212; Pharmpy 0.83.0 documentation</title>
+    <title>pharmpy.tools.run &#8212; Pharmpy 0.84.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -509,7 +509,7 @@
     <span class="k">return</span> <span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="k">if</span> <span class="n">single</span> <span class="k">else</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="create_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.create_results.html#pharmpy.tools.create_results">[docs]</a><span class="k">def</span> <span class="nf">create_results</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="create_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.create_results.html#pharmpy.tools.create_results">[docs]</a><span class="k">def</span> <span class="nf">create_results</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Results</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Create/recalculate results object given path to run directory</span>
 
 <span class="sd">    Parameters</span>
@@ -539,7 +539,7 @@
     <span class="k">return</span> <span class="n">res</span></div>
 
 
-<div class="viewcode-block" id="read_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.read_results.html#pharmpy.tools.read_results">[docs]</a><span class="k">def</span> <span class="nf">read_results</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="read_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.read_results.html#pharmpy.tools.read_results">[docs]</a><span class="k">def</span> <span class="nf">read_results</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">Results</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Read results object from file</span>
 
 <span class="sd">    Parameters</span>
@@ -743,7 +743,10 @@
     <span class="k">return</span> <span class="n">dispatcher</span><span class="p">,</span> <span class="n">database</span>
 
 
-<div class="viewcode-block" id="retrieve_models"><a class="viewcode-back" href="../../../api/pharmpy.tools.retrieve_models.html#pharmpy.tools.retrieve_models">[docs]</a><span class="k">def</span> <span class="nf">retrieve_models</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="retrieve_models"><a class="viewcode-back" href="../../../api/pharmpy.tools.retrieve_models.html#pharmpy.tools.retrieve_models">[docs]</a><span class="k">def</span> <span class="nf">retrieve_models</span><span class="p">(</span>
+    <span class="n">source</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Results</span><span class="p">,</span> <span class="n">ToolDatabase</span><span class="p">,</span> <span class="n">ModelDatabase</span><span class="p">],</span>
+    <span class="n">names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">]:</span>
     <span class="sd">&quot;&quot;&quot;Retrieve models after a tool run</span>
 
 <span class="sd">    Any models created and run by the tool can be</span>
@@ -778,9 +781,10 @@
         <span class="c1"># FIXME: Should be using metadata to know how to init databases</span>
         <span class="n">db</span> <span class="o">=</span> <span class="n">LocalModelDirectoryDatabase</span><span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;models&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">Results</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s1">&#39;tool_database&#39;</span><span class="p">):</span>
-            <span class="n">db</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">tool_database</span><span class="o">.</span><span class="n">model_database</span>
-        <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">db_tool</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="s1">&#39;tool_database&#39;</span><span class="p">)</span>
+            <span class="n">db</span> <span class="o">=</span> <span class="n">db_tool</span><span class="o">.</span><span class="n">model_database</span>
+        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;Results type </span><span class="se">\&#39;</span><span class="si">{</span><span class="n">source</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="si">}</span><span class="se">\&#39;</span><span class="s1"> does not serialize tool database&#39;</span>
             <span class="p">)</span>
@@ -790,7 +794,7 @@
         <span class="n">db</span> <span class="o">=</span> <span class="n">source</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Not implemented for type </span><span class="se">\&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="si">}</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">names_all</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">list_models</span><span class="p">()</span>
+    <span class="n">names_all</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">list_models</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">names</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">names</span> <span class="o">=</span> <span class="n">names_all</span>
     <span class="n">diff</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">names_all</span><span class="p">)</span>
@@ -800,7 +804,7 @@
     <span class="k">return</span> <span class="n">models</span></div>
 
 
-<div class="viewcode-block" id="retrieve_final_model"><a class="viewcode-back" href="../../../api/pharmpy.tools.retrieve_final_model.html#pharmpy.tools.retrieve_final_model">[docs]</a><span class="k">def</span> <span class="nf">retrieve_final_model</span><span class="p">(</span><span class="n">res</span><span class="p">):</span>
+<div class="viewcode-block" id="retrieve_final_model"><a class="viewcode-back" href="../../../api/pharmpy.tools.retrieve_final_model.html#pharmpy.tools.retrieve_final_model">[docs]</a><span class="k">def</span> <span class="nf">retrieve_final_model</span><span class="p">(</span><span class="n">res</span><span class="p">:</span> <span class="n">Results</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Retrieve final model from a result object</span>
 
 <span class="sd">    Parameters</span>
@@ -829,7 +833,7 @@
     <span class="k">return</span> <span class="n">retrieve_models</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="n">res</span><span class="o">.</span><span class="n">final_model_name</span><span class="p">])[</span><span class="mi">0</span><span class="p">]</span></div>
 
 
-<div class="viewcode-block" id="print_fit_summary"><a class="viewcode-back" href="../../../api/pharmpy.tools.print_fit_summary.html#pharmpy.tools.print_fit_summary">[docs]</a><span class="k">def</span> <span class="nf">print_fit_summary</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<div class="viewcode-block" id="print_fit_summary"><a class="viewcode-back" href="../../../api/pharmpy.tools.print_fit_summary.html#pharmpy.tools.print_fit_summary">[docs]</a><span class="k">def</span> <span class="nf">print_fit_summary</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Print a summary of the model fit</span>
 
 <span class="sd">    Parameters</span>
@@ -885,7 +889,7 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">df</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="write_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.write_results.html#pharmpy.tools.write_results">[docs]</a><span class="k">def</span> <span class="nf">write_results</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">lzma</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">csv</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="write_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.write_results.html#pharmpy.tools.write_results">[docs]</a><span class="k">def</span> <span class="nf">write_results</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="n">Results</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">lzma</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span> <span class="n">csv</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Write results object to json (or csv) file</span>
 
 <span class="sd">    Note that the csv-file cannot be read into a results object again.</span>
@@ -907,7 +911,7 @@
         <span class="n">results</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">lzma</span><span class="o">=</span><span class="n">lzma</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="summarize_errors"><a class="viewcode-back" href="../../../api/pharmpy.tools.summarize_errors.html#pharmpy.tools.summarize_errors">[docs]</a><span class="k">def</span> <span class="nf">summarize_errors</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
+<div class="viewcode-block" id="summarize_errors"><a class="viewcode-back" href="../../../api/pharmpy.tools.summarize_errors.html#pharmpy.tools.summarize_errors">[docs]</a><span class="k">def</span> <span class="nf">summarize_errors</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Dataframe</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Summarize errors and warnings from one or multiple model runs.</span>
 
 <span class="sd">    Summarize the errors and warnings found after running the model/models.</span>
@@ -956,7 +960,12 @@
 
 
 <div class="viewcode-block" id="rank_models"><a class="viewcode-back" href="../../../api/pharmpy.tools.rank_models.html#pharmpy.tools.rank_models">[docs]</a><span class="k">def</span> <span class="nf">rank_models</span><span class="p">(</span>
-    <span class="n">base_model</span><span class="p">,</span> <span class="n">models</span><span class="p">,</span> <span class="n">errors_allowed</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">rank_type</span><span class="o">=</span><span class="s1">&#39;ofv&#39;</span><span class="p">,</span> <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bic_type</span><span class="o">=</span><span class="s1">&#39;mixed&#39;</span>
+    <span class="n">base_model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">models</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span>
+    <span class="n">errors_allowed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">rank_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;ofv&#39;</span><span class="p">,</span>
+    <span class="n">cutoff</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">bic_type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;mixed&#39;</span><span class="p">,</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Ranks a list of models</span>
 
@@ -1099,7 +1108,10 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Unknown rank_type: must be ofv, lrt, aic, or bic&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="summarize_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.summarize_modelfit_results.html#pharmpy.tools.summarize_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">summarize_modelfit_results</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">include_all_estimation_steps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<div class="viewcode-block" id="summarize_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.summarize_modelfit_results.html#pharmpy.tools.summarize_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">summarize_modelfit_results</span><span class="p">(</span>
+    <span class="n">results</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ModelfitResults</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelfitResults</span><span class="p">]],</span>
+    <span class="n">include_all_estimation_steps</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">Dataframe</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Summarize results of model runs</span>
 
 <span class="sd">    Summarize different results after fitting a model, includes runtime, ofv,</span>
@@ -1217,7 +1229,7 @@
     <span class="k">return</span> <span class="n">summary_dict</span>
 
 
-<div class="viewcode-block" id="read_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.read_modelfit_results.html#pharmpy.tools.read_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">read_modelfit_results</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<div class="viewcode-block" id="read_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.read_modelfit_results.html#pharmpy.tools.read_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">read_modelfit_results</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ModelfitResults</span><span class="p">:</span>
     <span class="sd">&quot;&quot;&quot;Read results from external tool for a model</span>
 
 <span class="sd">    Parameters</span>
