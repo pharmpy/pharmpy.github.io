@@ -22,7 +22,7 @@ Parameter
    .. autosummary::
 
       ~Parameter.create
-      ~Parameter.derive
+      ~Parameter.replace
 
    .. rubric:: Attributes Documentation
 
@@ -36,4 +36,4 @@ Parameter
    .. rubric:: Methods Documentation
 
    .. automethod:: create
-   .. automethod:: derive
+   .. automethod:: replace

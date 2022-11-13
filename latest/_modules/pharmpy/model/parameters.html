@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.parameters &#8212; Pharmpy 0.84.0 documentation</title>
+    <title>pharmpy.model.parameters &#8212; Pharmpy 0.84.1 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -436,7 +436,7 @@
 <span class="sd">    -------</span>
 
 <span class="sd">    &gt;&gt;&gt; from pharmpy.model import Parameter</span>
-<span class="sd">    &gt;&gt;&gt; param = Parameter(&quot;TVCL&quot;, 0.005, lower=0)</span>
+<span class="sd">    &gt;&gt;&gt; param = Parameter(&quot;TVCL&quot;, 0.005, lower=0.0)</span>
 <span class="sd">    &gt;&gt;&gt; param.init</span>
 <span class="sd">    0.005</span>
 
@@ -450,31 +450,25 @@
 <span class="sd">        A boolean to indicate whether the parameter is fixed or not. Note that fixing a parameter</span>
 <span class="sd">        will keep its bounds even if a fixed parameter is actually constrained to one single</span>
 <span class="sd">        value. This is so that unfixing will take back the previous bounds.</span>
-<span class="sd">    lower : number</span>
+<span class="sd">    lower : float</span>
 <span class="sd">        The lower bound of the parameter. Default no bound. Must be less than the init.</span>
-<span class="sd">    upper : number</span>
+<span class="sd">    upper : float</span>
 <span class="sd">        The upper bound of the parameter. Default no bound. Must be greater than the init.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-        <span class="n">init</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Float</span><span class="p">],</span>
-        <span class="n">lower</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">upper</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">float</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Float</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">init</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
+        <span class="n">lower</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
+        <span class="n">upper</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span>
         <span class="n">fix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init</span> <span class="o">=</span> <span class="n">init</span>
-        <span class="k">if</span> <span class="n">lower</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lower</span> <span class="o">=</span> <span class="o">-</span><span class="n">sympy</span><span class="o">.</span><span class="n">oo</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lower</span> <span class="o">=</span> <span class="n">lower</span>
-        <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_upper</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">oo</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_upper</span> <span class="o">=</span> <span class="n">upper</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_fix</span> <span class="o">=</span> <span class="nb">bool</span><span class="p">(</span><span class="n">fix</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lower</span> <span class="o">=</span> <span class="n">lower</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_upper</span> <span class="o">=</span> <span class="n">upper</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_fix</span> <span class="o">=</span> <span class="n">fix</span>
 
 <div class="viewcode-block" id="Parameter.create"><a class="viewcode-back" href="../../../api/pharmpy.model.Parameter.html#pharmpy.model.Parameter.create">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
@@ -486,15 +480,33 @@
         <span class="n">fix</span><span class="p">:</span> <span class="n">Any</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Alternative constructor for Parameter with error checking&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">init</span> <span class="ow">is</span> <span class="n">sympy</span><span class="o">.</span><span class="n">nan</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">init</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Initial estimate cannot be NaN&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Name of parameter must be of type string&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">lower</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">init</span> <span class="o">&lt;</span> <span class="n">lower</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">init</span> <span class="ow">is</span> <span class="n">sympy</span><span class="o">.</span><span class="n">nan</span> <span class="ow">or</span> <span class="n">np</span><span class="o">.</span><span class="n">isnan</span><span class="p">(</span><span class="n">init</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Initial estimate cannot be NaN&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">lower</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">lower</span> <span class="o">=</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lower</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">lower</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">upper</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">upper</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">upper</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">init</span> <span class="o">&lt;</span> <span class="n">lower</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Lower bound </span><span class="si">{</span><span class="n">lower</span><span class="si">}</span><span class="s1"> cannot be greater than init </span><span class="si">{</span><span class="n">init</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">init</span> <span class="o">&gt;</span> <span class="n">upper</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">init</span> <span class="o">&gt;</span> <span class="n">upper</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Upper bound </span><span class="si">{</span><span class="n">upper</span><span class="si">}</span><span class="s1"> cannot be less than init </span><span class="si">{</span><span class="n">init</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="nb">bool</span><span class="p">(</span><span class="n">fix</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Parameter.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.Parameter.html#pharmpy.model.Parameter.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Replace properties and create a new Parameter&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+        <span class="n">init</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;init&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init</span><span class="p">)</span>
+        <span class="n">lower</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;lower&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lower</span><span class="p">)</span>
+        <span class="n">upper</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;upper&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upper</span><span class="p">)</span>
+        <span class="n">fix</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;fix&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fix</span><span class="p">)</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="n">upper</span><span class="p">,</span> <span class="n">fix</span><span class="o">=</span><span class="n">fix</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -505,19 +517,6 @@
     <span class="k">def</span> <span class="nf">fix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Should parameter be fixed or not&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_fix</span>
-
-<div class="viewcode-block" id="Parameter.derive"><a class="viewcode-back" href="../../../api/pharmpy.model.Parameter.html#pharmpy.model.Parameter.derive">[docs]</a>    <span class="k">def</span> <span class="nf">derive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">fix</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Derive a new parameter with new properties&quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">init</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">init</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">init</span>
-        <span class="k">if</span> <span class="n">lower</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">lower</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lower</span>
-        <span class="k">if</span> <span class="n">upper</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">upper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">upper</span>
-        <span class="k">if</span> <span class="n">fix</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">fix</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">fix</span>
-        <span class="n">new</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="n">upper</span><span class="p">,</span> <span class="n">fix</span><span class="o">=</span><span class="n">fix</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">new</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -553,13 +552,21 @@
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lower</span> <span class="o">==</span> <span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">):</span>
+            <span class="n">lower</span> <span class="o">=</span> <span class="s2">&quot;-∞&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">lower</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lower</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upper</span> <span class="o">==</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">):</span>
+            <span class="n">upper</span> <span class="o">=</span> <span class="s2">&quot;∞&quot;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">upper</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upper</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;Parameter(&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="si">}</span><span class="s1">&quot;, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_init</span><span class="si">}</span><span class="s1">, lower=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_lower</span><span class="si">}</span><span class="s1">, upper=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_upper</span><span class="si">}</span><span class="s1">, &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;Parameter(&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="si">}</span><span class="s1">&quot;, </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_init</span><span class="si">}</span><span class="s1">, lower=</span><span class="si">{</span><span class="n">lower</span><span class="si">}</span><span class="s1">, upper=</span><span class="si">{</span><span class="n">upper</span><span class="si">}</span><span class="s1">, &#39;</span>
             <span class="sa">f</span><span class="s1">&#39;fix=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_fix</span><span class="si">}</span><span class="s1">)&#39;</span>
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="Parameters"><a class="viewcode-back" href="../../../api/pharmpy.model.Parameters.html#pharmpy.model.Parameters">[docs]</a><span class="k">class</span> <span class="nc">Parameters</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+<div class="viewcode-block" id="Parameters"><a class="viewcode-back" href="../../../api/pharmpy.model.Parameters.html#pharmpy.model.Parameters">[docs]</a><span class="k">class</span> <span class="nc">Parameters</span><span class="p">(</span><span class="n">CollectionsSequence</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;An immutable collection of parameters</span>
 
 <span class="sd">    Class representing a group of parameters. Usually all parameters in a model.</span>
@@ -576,7 +583,7 @@
 <span class="sd">    &gt;&gt;&gt; par2 = Parameter(&quot;y&quot;, 1)</span>
 <span class="sd">    &gt;&gt;&gt; pset = Parameters([par1, par2])</span>
 <span class="sd">    &gt;&gt;&gt; pset[&quot;x&quot;]</span>
-<span class="sd">    Parameter(&quot;x&quot;, 0, lower=-oo, upper=oo, fix=False)</span>
+<span class="sd">    Parameter(&quot;x&quot;, 0, lower=-∞, upper=∞, fix=False)</span>
 
 <span class="sd">    &gt;&gt;&gt; &quot;x&quot; in pset</span>
 <span class="sd">    True</span>
@@ -718,9 +725,7 @@
         <span class="n">new</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">inits</span><span class="p">:</span>
-                <span class="n">newparam</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-                    <span class="n">name</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">inits</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">],</span> <span class="n">lower</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">upper</span><span class="p">,</span> <span class="n">fix</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">fix</span>
-                <span class="p">)</span>
+                <span class="n">newparam</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">init</span><span class="o">=</span><span class="n">inits</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">newparam</span> <span class="o">=</span> <span class="n">p</span>
             <span class="n">new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newparam</span><span class="p">)</span>
@@ -747,9 +752,7 @@
         <span class="n">new</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">fix</span><span class="p">:</span>
-                <span class="n">newparam</span> <span class="o">=</span> <span class="n">Parameter</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-                    <span class="n">name</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">init</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="n">p</span><span class="o">.</span><span class="n">upper</span><span class="p">,</span> <span class="n">fix</span><span class="o">=</span><span class="n">fix</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-                <span class="p">)</span>
+                <span class="n">newparam</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">fix</span><span class="o">=</span><span class="n">fix</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">newparam</span> <span class="o">=</span> <span class="n">p</span>
             <span class="n">new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newparam</span><span class="p">)</span>
@@ -796,13 +799,20 @@
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;Parameters()&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span> <span class="s2">&quot;∞&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span> <span class="s2">&quot;-∞&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to_string</span><span class="p">()</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">_repr_html_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="s2">&quot;Parameters()&quot;</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span><span class="o">.</span><span class="n">to_html</span><span class="p">()</span></div>
+            <span class="k">return</span> <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">to_dataframe</span><span class="p">()</span>
+                <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span> <span class="s2">&quot;∞&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="o">-</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">),</span> <span class="s2">&quot;-∞&quot;</span><span class="p">)</span>
+                <span class="o">.</span><span class="n">to_html</span><span class="p">()</span>
+            <span class="p">)</span></div>
 </pre></div>
 
             </article>

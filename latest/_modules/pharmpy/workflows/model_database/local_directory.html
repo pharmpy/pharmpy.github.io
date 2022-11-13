@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.workflows.model_database.local_directory &#8212; Pharmpy 0.84.0 documentation</title>
+    <title>pharmpy.workflows.model_database.local_directory &#8212; Pharmpy 0.84.1 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -426,7 +426,7 @@
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">pharmpy.internals.df</span> <span class="kn">import</span> <span class="n">hash_df</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.df</span> <span class="kn">import</span> <span class="n">hash_df_fs</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fs.lock</span> <span class="kn">import</span> <span class="n">path_lock</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fs.path</span> <span class="kn">import</span> <span class="n">path_absolute</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">DataInfo</span><span class="p">,</span> <span class="n">Model</span>
@@ -453,14 +453,15 @@
     <span class="c1"># the database. For this to work roundtrip of DataFrames in json is needed.</span>
     <span class="c1"># This is currently broken because of rounding issue in pandas</span>
     <span class="c1"># Also the modelfit_results attribute will soon be removed from model objects.</span>
-    <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;internals&quot;</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">pharmpy.plugins.nonmem</span> <span class="kn">import</span> <span class="n">parse_modelfit_results</span>
+    <span class="kn">import</span> <span class="nn">pharmpy.plugins.nonmem</span> <span class="k">as</span> <span class="nn">nonmem</span>
 
-        <span class="n">res</span> <span class="o">=</span> <span class="n">parse_modelfit_results</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">nonmem</span><span class="o">.</span><span class="n">Model</span><span class="p">):</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">nonmem</span><span class="o">.</span><span class="n">parse_modelfit_results</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">pharmpy.plugins.nlmixr</span> <span class="kn">import</span> <span class="n">parse_modelfit_results</span>
+        <span class="kn">import</span> <span class="nn">pharmpy.plugins.nlmixr</span> <span class="k">as</span> <span class="nn">nlmixr</span>
 
-        <span class="n">res</span> <span class="o">=</span> <span class="n">parse_modelfit_results</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">nlmixr</span><span class="o">.</span><span class="n">Model</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">nlmixr</span><span class="o">.</span><span class="n">parse_modelfit_results</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
 
     <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="o">=</span> <span class="n">res</span>
 
@@ -627,8 +628,8 @@
 
         <span class="c1"># NOTE Get the hash of the dataset and list filenames with contents</span>
         <span class="c1"># matching this hash only</span>
-        <span class="n">h</span> <span class="o">=</span> <span class="n">hash_df</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
-        <span class="n">h_dir</span> <span class="o">=</span> <span class="n">datasets_path</span> <span class="o">/</span> <span class="n">DIRECTORY_INDEX</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="n">hash_df_fs</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
+        <span class="n">h_dir</span> <span class="o">=</span> <span class="n">datasets_path</span> <span class="o">/</span> <span class="n">DIRECTORY_INDEX</span> <span class="o">/</span> <span class="n">h</span>
         <span class="n">h_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">hpath</span> <span class="ow">in</span> <span class="n">h_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
             <span class="c1"># NOTE This variable holds a string similar to &quot;run1.csv&quot;</span>
