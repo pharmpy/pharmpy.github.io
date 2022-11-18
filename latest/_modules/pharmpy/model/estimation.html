@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.estimation &#8212; Pharmpy 0.84.1 documentation</title>
+    <title>pharmpy.model.estimation &#8212; Pharmpy 0.85.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -421,19 +421,20 @@
   <h1>Source code for pharmpy.model.estimation</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">overload</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.immutable</span> <span class="kn">import</span> <span class="n">Immutable</span>
 
 
-<div class="viewcode-block" id="EstimationStep"><a class="viewcode-back" href="../../../api/pharmpy.model.EstimationStep.html#pharmpy.model.EstimationStep">[docs]</a><span class="k">class</span> <span class="nc">EstimationStep</span><span class="p">:</span>
+<div class="viewcode-block" id="EstimationStep"><a class="viewcode-back" href="../../../api/pharmpy.model.EstimationStep.html#pharmpy.model.EstimationStep">[docs]</a><span class="k">class</span> <span class="nc">EstimationStep</span><span class="p">(</span><span class="n">Immutable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Definition of one estimation operation&quot;&quot;&quot;</span>
 
     <span class="sd">&quot;&quot;&quot;Supported estimation methods</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">supported_methods</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;FO&#39;</span><span class="p">,</span> <span class="s1">&#39;FOCE&#39;</span><span class="p">,</span> <span class="s1">&#39;ITS&#39;</span><span class="p">,</span> <span class="s1">&#39;IMPMAP&#39;</span><span class="p">,</span> <span class="s1">&#39;IMP&#39;</span><span class="p">,</span> <span class="s1">&#39;SAEM&#39;</span><span class="p">,</span> <span class="s1">&#39;BAYES&#39;</span><span class="p">]</span>
+    <span class="n">supported_methods</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="s1">&#39;FO&#39;</span><span class="p">,</span> <span class="s1">&#39;FOCE&#39;</span><span class="p">,</span> <span class="s1">&#39;ITS&#39;</span><span class="p">,</span> <span class="s1">&#39;IMPMAP&#39;</span><span class="p">,</span> <span class="s1">&#39;IMP&#39;</span><span class="p">,</span> <span class="s1">&#39;SAEM&#39;</span><span class="p">,</span> <span class="s1">&#39;BAYES&#39;</span><span class="p">))</span>
+    <span class="n">supported_solvers</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="s1">&#39;CVODES&#39;</span><span class="p">,</span> <span class="s1">&#39;DGEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;DVERK&#39;</span><span class="p">,</span> <span class="s1">&#39;IDA&#39;</span><span class="p">,</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">,</span> <span class="s1">&#39;LSODI&#39;</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
@@ -481,11 +482,12 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">_predictions</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">_predictions</span> <span class="o">=</span> <span class="n">predictions</span>
-        <span class="n">supported</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;CVODES&#39;</span><span class="p">,</span> <span class="s1">&#39;DGEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;DVERK&#39;</span><span class="p">,</span> <span class="s1">&#39;IDA&#39;</span><span class="p">,</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">,</span> <span class="s1">&#39;LSODI&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">solver</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">solver</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">solver</span> <span class="ow">in</span> <span class="n">supported</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown solver </span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">. Recognized solvers are </span><span class="si">{</span><span class="n">supported</span><span class="si">}</span><span class="s2">.&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">solver</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">solver</span> <span class="ow">in</span> <span class="n">EstimationStep</span><span class="o">.</span><span class="n">supported_solvers</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown solver </span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">. Recognized solvers are </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">EstimationStep</span><span class="o">.</span><span class="n">supported_solvers</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver</span> <span class="o">=</span> <span class="n">solver</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver_rtol</span> <span class="o">=</span> <span class="n">solver_rtol</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_solver_atol</span> <span class="o">=</span> <span class="n">solver_atol</span>
@@ -502,18 +504,16 @@
 
 <div class="viewcode-block" id="EstimationStep.derive"><a class="viewcode-back" href="../../../api/pharmpy.model.EstimationStep.html#pharmpy.model.EstimationStep.derive">[docs]</a>    <span class="k">def</span> <span class="nf">derive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Derive a new EstimationStep with new properties&quot;&quot;&quot;</span>
-        <span class="n">new</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-            <span class="k">if</span> <span class="n">key</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">,</span> <span class="s1">&#39;solver&#39;</span><span class="p">]:</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-            <span class="n">new</span><span class="o">.</span><span class="vm">__dict__</span><span class="p">[</span><span class="s1">&#39;_&#39;</span> <span class="o">+</span> <span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+        <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="n">key</span><span class="p">[</span><span class="mi">1</span><span class="p">:]:</span> <span class="n">value</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__dict__</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">EstimationStep</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new</span></div>
 
     <span class="k">def</span> <span class="nf">_canonicalize_and_check_method</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
         <span class="n">method</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-        <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">supported_methods</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">EstimationStep</span><span class="o">.</span><span class="n">supported_methods</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;EstimationStep: </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1"> not recognized. Use any of </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">supported_methods</span><span class="si">}</span><span class="s1">.&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;EstimationStep: </span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1"> not recognized. Use any of </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">EstimationStep</span><span class="o">.</span><span class="n">supported_methods</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span>
             <span class="p">)</span>
         <span class="k">return</span> <span class="n">method</span>
 
@@ -655,7 +655,7 @@
         <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="EstimationSteps"><a class="viewcode-back" href="../../../api/pharmpy.model.EstimationSteps.html#pharmpy.model.EstimationSteps">[docs]</a><span class="k">class</span> <span class="nc">EstimationSteps</span><span class="p">(</span><span class="n">Sequence</span><span class="p">):</span>
+<div class="viewcode-block" id="EstimationSteps"><a class="viewcode-back" href="../../../api/pharmpy.model.EstimationSteps.html#pharmpy.model.EstimationSteps">[docs]</a><span class="k">class</span> <span class="nc">EstimationSteps</span><span class="p">(</span><span class="n">Sequence</span><span class="p">,</span> <span class="n">Immutable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;A sequence of estimation steps</span>
 
 <span class="sd">    Parameters</span>

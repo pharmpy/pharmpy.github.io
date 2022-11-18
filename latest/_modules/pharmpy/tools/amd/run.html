@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.amd.run &#8212; Pharmpy 0.84.1 documentation</title>
+    <title>pharmpy.tools.amd.run &#8212; Pharmpy 0.85.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -420,15 +420,26 @@
               
   <h1>Source code for pharmpy.tools.amd.run</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Callable</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
-<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Results</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.common</span> <span class="kn">import</span> <span class="n">convert_model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.data</span> <span class="kn">import</span> <span class="n">remove_loq_data</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.eta_additions</span> <span class="kn">import</span> <span class="n">get_occasion_levels</span>
 <span class="kn">from</span> <span class="nn">pharmpy.tools</span> <span class="kn">import</span> <span class="n">retrieve_final_model</span><span class="p">,</span> <span class="n">summarize_errors</span><span class="p">,</span> <span class="n">write_results</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.mfl.feature.covariate</span> <span class="kn">import</span> <span class="n">spec</span> <span class="k">as</span> <span class="n">covariate_spec</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.mfl.filter</span> <span class="kn">import</span> <span class="n">covsearch_statement_types</span><span class="p">,</span> <span class="n">modelsearch_statement_types</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.mfl.parse</span> <span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">mfl_parse</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.mfl.statement.feature.absorption</span> <span class="kn">import</span> <span class="n">Absorption</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.mfl.statement.feature.covariate</span> <span class="kn">import</span> <span class="n">Covariate</span><span class="p">,</span> <span class="n">Ref</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.mfl.statement.feature.elimination</span> <span class="kn">import</span> <span class="n">Elimination</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.mfl.statement.feature.lagtime</span> <span class="kn">import</span> <span class="n">LagTime</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.mfl.statement.feature.peripherals</span> <span class="kn">import</span> <span class="n">Peripherals</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.mfl.statement.feature.symbols</span> <span class="kn">import</span> <span class="n">Name</span><span class="p">,</span> <span class="n">Wildcard</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.mfl.statement.feature.transits</span> <span class="kn">import</span> <span class="n">Transits</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.mfl.statement.statement</span> <span class="kn">import</span> <span class="n">Statement</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.mfl.stringify</span> <span class="kn">import</span> <span class="n">stringify</span> <span class="k">as</span> <span class="n">mfl_stringify</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">default_tool_database</span>
 
 <span class="kn">from</span> <span class="nn">..run</span> <span class="kn">import</span> <span class="n">run_tool</span>
@@ -445,8 +456,6 @@
     <span class="n">search_space</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">lloq</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">order</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">categorical</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">continuous</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">allometric_variable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">occasion</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -476,10 +485,6 @@
 <span class="sd">        Lower limit of quantification. LOQ data will be removed.</span>
 <span class="sd">    order : list</span>
 <span class="sd">        Runorder of components</span>
-<span class="sd">    categorical : list</span>
-<span class="sd">        List of categorical covariates</span>
-<span class="sd">    continuous : list</span>
-<span class="sd">        List of continuous covariates</span>
 <span class="sd">    allometric_variable: str or Symbol</span>
 <span class="sd">        Variable to use for allometry</span>
 <span class="sd">    occasion : str</span>
@@ -532,23 +537,46 @@
     <span class="k">if</span> <span class="n">order</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">order</span> <span class="o">=</span> <span class="n">default_order</span>
 
-    <span class="k">if</span> <span class="n">search_space</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+    <span class="n">input_search_space_features</span> <span class="o">=</span> <span class="p">[]</span> <span class="k">if</span> <span class="n">search_space</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">mfl_parse</span><span class="p">(</span><span class="n">search_space</span><span class="p">)</span>
+
+    <span class="n">modelsearch_features</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="nb">filter</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">statement</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">modelsearch_statement_types</span><span class="p">),</span>
+            <span class="n">input_search_space_features</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">modelsearch_features</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">modeltype</span> <span class="o">==</span> <span class="s1">&#39;pk_oral&#39;</span><span class="p">:</span>
-            <span class="n">search_space</span> <span class="o">=</span> <span class="p">(</span>
-                <span class="s1">&#39;ABSORPTION([ZO,SEQ-ZO-FO]);&#39;</span>
-                <span class="s1">&#39;ELIMINATION([MM,MIX-FO-MM]);&#39;</span>
-                <span class="s1">&#39;LAGTIME();&#39;</span>
-                <span class="s1">&#39;TRANSITS([1,3,10],*);&#39;</span>
-                <span class="s1">&#39;PERIPHERALS(1)&#39;</span>
+            <span class="n">modelsearch_features</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">Absorption</span><span class="p">((</span><span class="n">Name</span><span class="p">(</span><span class="s1">&#39;ZO&#39;</span><span class="p">),</span> <span class="n">Name</span><span class="p">(</span><span class="s1">&#39;SEQ-ZO-FO&#39;</span><span class="p">))),</span>
+                <span class="n">Elimination</span><span class="p">((</span><span class="n">Name</span><span class="p">(</span><span class="s1">&#39;MM&#39;</span><span class="p">),</span> <span class="n">Name</span><span class="p">(</span><span class="s1">&#39;MIX-FO-MM&#39;</span><span class="p">))),</span>
+                <span class="n">LagTime</span><span class="p">(),</span>
+                <span class="n">Transits</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">Wildcard</span><span class="p">()),</span>
+                <span class="n">Peripherals</span><span class="p">((</span><span class="mi">1</span><span class="p">,)),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">search_space</span> <span class="o">=</span> <span class="s1">&#39;ELIMINATION([MM,MIX-FO-MM]);&#39;</span> <span class="s1">&#39;PERIPHERALS([1,2])&#39;</span>
+            <span class="n">modelsearch_features</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">Elimination</span><span class="p">((</span><span class="n">Name</span><span class="p">(</span><span class="s1">&#39;MM&#39;</span><span class="p">),</span> <span class="n">Name</span><span class="p">(</span><span class="s1">&#39;MIX-FO-MM&#39;</span><span class="p">))),</span>
+                <span class="n">Peripherals</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
+            <span class="p">)</span>
+
+    <span class="n">covsearch_features</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span>
+        <span class="nb">filter</span><span class="p">(</span>
+            <span class="k">lambda</span> <span class="n">statement</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">covsearch_statement_types</span><span class="p">),</span>
+            <span class="n">input_search_space_features</span><span class="p">,</span>
+        <span class="p">)</span>
+    <span class="p">)</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">statement</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">Covariate</span><span class="p">),</span> <span class="n">covsearch_features</span><span class="p">)):</span>
+        <span class="n">covsearch_features</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">Covariate</span><span class="p">(</span><span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;IIV&#39;</span><span class="p">),</span> <span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;CONTINUOUS&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;exp&#39;</span><span class="p">,),</span> <span class="s1">&#39;*&#39;</span><span class="p">),</span>
+            <span class="n">Covariate</span><span class="p">(</span><span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;IIV&#39;</span><span class="p">),</span> <span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cat&#39;</span><span class="p">,),</span> <span class="s1">&#39;*&#39;</span><span class="p">),</span>
+        <span class="p">)</span> <span class="o">+</span> <span class="n">covsearch_features</span>
 
     <span class="n">db</span> <span class="o">=</span> <span class="n">default_tool_database</span><span class="p">(</span><span class="n">toolname</span><span class="o">=</span><span class="s1">&#39;amd&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="n">resume</span><span class="p">)</span>
     <span class="n">run_subfuncs</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">section</span> <span class="ow">in</span> <span class="n">order</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;structural&#39;</span><span class="p">:</span>
-            <span class="n">func</span> <span class="o">=</span> <span class="n">_subfunc_modelsearch</span><span class="p">(</span><span class="n">search_space</span><span class="o">=</span><span class="n">search_space</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">_subfunc_modelsearch</span><span class="p">(</span><span class="n">search_space</span><span class="o">=</span><span class="n">modelsearch_features</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="n">run_subfuncs</span><span class="p">[</span><span class="s1">&#39;modelsearch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
         <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;iivsearch&#39;</span><span class="p">:</span>
             <span class="n">func</span> <span class="o">=</span> <span class="n">_subfunc_iiv</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
@@ -563,7 +591,7 @@
             <span class="n">func</span> <span class="o">=</span> <span class="n">_subfunc_allometry</span><span class="p">(</span><span class="n">allometric_variable</span><span class="o">=</span><span class="n">allometric_variable</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="n">run_subfuncs</span><span class="p">[</span><span class="s1">&#39;allometry&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
         <span class="k">elif</span> <span class="n">section</span> <span class="o">==</span> <span class="s1">&#39;covariates&#39;</span><span class="p">:</span>
-            <span class="n">func</span> <span class="o">=</span> <span class="n">_subfunc_covariates</span><span class="p">(</span><span class="n">continuous</span><span class="o">=</span><span class="n">continuous</span><span class="p">,</span> <span class="n">categorical</span><span class="o">=</span><span class="n">categorical</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+            <span class="n">func</span> <span class="o">=</span> <span class="n">_subfunc_covariates</span><span class="p">(</span><span class="n">search_space</span><span class="o">=</span><span class="n">covsearch_features</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">db</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
             <span class="n">run_subfuncs</span><span class="p">[</span><span class="s1">&#39;covsearch&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">func</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
@@ -623,7 +651,7 @@
 
     <span class="n">summary_errors</span> <span class="o">=</span> <span class="n">summarize_errors</span><span class="p">(</span><span class="n">next_model</span><span class="p">)</span>
     <span class="n">res</span> <span class="o">=</span> <span class="n">AMDResults</span><span class="p">(</span>
-        <span class="n">final_model</span><span class="o">=</span><span class="n">next_model</span><span class="p">,</span>
+        <span class="n">final_model</span><span class="o">=</span><span class="n">next_model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
         <span class="n">summary_tool</span><span class="o">=</span><span class="n">summary_tool</span><span class="p">,</span>
         <span class="n">summary_models</span><span class="o">=</span><span class="n">summary_models</span><span class="p">,</span>
         <span class="n">summary_individuals_count</span><span class="o">=</span><span class="n">summary_individuals_count</span><span class="p">,</span>
@@ -670,11 +698,11 @@
     <span class="k">return</span> <span class="kc">None</span>
 
 
-<span class="k">def</span> <span class="nf">_subfunc_modelsearch</span><span class="p">(</span><span class="n">search_space</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubFunc</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_subfunc_modelsearch</span><span class="p">(</span><span class="n">search_space</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Statement</span><span class="p">],</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubFunc</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">_run_modelsearch</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span>
             <span class="s1">&#39;modelsearch&#39;</span><span class="p">,</span>
-            <span class="n">search_space</span><span class="o">=</span><span class="n">search_space</span><span class="p">,</span>
+            <span class="n">search_space</span><span class="o">=</span><span class="n">mfl_stringify</span><span class="p">(</span><span class="n">search_space</span><span class="p">),</span>
             <span class="n">algorithm</span><span class="o">=</span><span class="s1">&#39;reduced_stepwise&#39;</span><span class="p">,</span>
             <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span>
             <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;modelsearch&#39;</span><span class="p">,</span>
@@ -709,37 +737,21 @@
     <span class="k">return</span> <span class="n">_run_ruvsearch</span>
 
 
-<span class="k">def</span> <span class="nf">_subfunc_covariates</span><span class="p">(</span><span class="n">continuous</span><span class="p">,</span> <span class="n">categorical</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubFunc</span><span class="p">:</span>
+<span class="k">def</span> <span class="nf">_subfunc_covariates</span><span class="p">(</span><span class="n">search_space</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Statement</span><span class="p">],</span> <span class="n">path</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">SubFunc</span><span class="p">:</span>
     <span class="k">def</span> <span class="nf">_run_covariates</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-        <span class="k">nonlocal</span> <span class="n">continuous</span><span class="p">,</span> <span class="n">categorical</span>
-        <span class="k">if</span> <span class="n">continuous</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">continuous</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;covariate&#39;</span> <span class="ow">and</span> <span class="n">col</span><span class="o">.</span><span class="n">continuous</span> <span class="ow">is</span> <span class="kc">True</span><span class="p">:</span>
-                    <span class="n">continuous</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">con_covariates</span> <span class="o">=</span> <span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">continuous</span><span class="p">]</span>
+        <span class="n">effects</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">covariate_spec</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">search_space</span><span class="p">))</span>
 
-        <span class="k">if</span> <span class="n">categorical</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">categorical</span> <span class="o">=</span> <span class="p">[]</span>
-            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">:</span>
-                <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;covariate&#39;</span> <span class="ow">and</span> <span class="n">col</span><span class="o">.</span><span class="n">continuous</span> <span class="ow">is</span> <span class="kc">False</span><span class="p">:</span>
-                    <span class="n">categorical</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">cat_covariates</span> <span class="o">=</span> <span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">categorical</span><span class="p">]</span>
-
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">continuous</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">categorical</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">effects</span><span class="p">:</span>
             <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                <span class="s1">&#39;Skipping COVsearch because continuous and/or categorical are None&#39;</span>
-                <span class="s1">&#39; and could not be inferred through .datainfo via &quot;covariate&quot; type&#39;</span>
-                <span class="s1">&#39; and &quot;continuous&quot; flag.&#39;</span>
+                <span class="s1">&#39;Skipping COVsearch because no effect candidates could be generated.&#39;</span>
+                <span class="s1">&#39; Check search_space definition&#39;</span>
+                <span class="s1">&#39; and .datainfo usage of &quot;covariate&quot; type and &quot;continuous&quot; flag.&#39;</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="kc">None</span>
 
-        <span class="n">covariates_search_space</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;LET(CONTINUOUS, </span><span class="si">{</span><span class="n">con_covariates</span><span class="si">}</span><span class="s1">); LET(CATEGORICAL, </span><span class="si">{</span><span class="n">cat_covariates</span><span class="si">}</span><span class="s1">)</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;COVARIATE(@IIV, @CONTINUOUS, exp, *)</span><span class="se">\n</span><span class="s1">&#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;COVARIATE(@IIV, @CATEGORICAL, cat, *)&#39;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span>
+            <span class="s1">&#39;covsearch&#39;</span><span class="p">,</span> <span class="n">mfl_stringify</span><span class="p">(</span><span class="n">search_space</span><span class="p">),</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;covsearch&#39;</span>
         <span class="p">)</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;covsearch&#39;</span><span class="p">,</span> <span class="n">covariates_search_space</span><span class="p">,</span> <span class="n">model</span><span class="o">=</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;covsearch&#39;</span><span class="p">)</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">Results</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span>
 

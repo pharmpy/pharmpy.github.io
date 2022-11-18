@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.funcs.summarize_individuals &#8212; Pharmpy 0.84.1 documentation</title>
+    <title>pharmpy.tools.funcs.summarize_individuals &#8212; Pharmpy 0.85.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -502,7 +502,9 @@
 
 
 <span class="k">def</span> <span class="nf">parent_model_name</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
-    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">parent_model</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parent_model</span>
+    <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">name</span>
 
 
 <span class="k">def</span> <span class="nf">model_name</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -559,12 +561,14 @@
 <span class="k">def</span> <span class="nf">groupedByIDAddColumnsOneModel</span><span class="p">(</span><span class="n">modelsDict</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Model</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
     <span class="n">id_column_name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_column</span><span class="o">.</span><span class="n">name</span>
     <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">data</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">id_column_name</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="n">id_column_name</span><span class="p">)</span>
+    <span class="n">parent_model_name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parent_model</span>
+    <span class="n">parent_model</span> <span class="o">=</span> <span class="kc">None</span> <span class="k">if</span> <span class="n">parent_model_name</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">modelsDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">parent_model_name</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span>
         <span class="p">{</span>
-            <span class="s1">&#39;parent_model&#39;</span><span class="p">:</span> <span class="n">parent_model_name</span><span class="p">(</span><span class="n">model</span><span class="p">),</span>
+            <span class="s1">&#39;parent_model&#39;</span><span class="p">:</span> <span class="n">parent_model_name</span><span class="p">,</span>
             <span class="s1">&#39;outlier_count&#39;</span><span class="p">:</span> <span class="n">outlier_count</span><span class="p">(</span><span class="n">model</span><span class="p">),</span>
             <span class="s1">&#39;ofv&#39;</span><span class="p">:</span> <span class="n">ofv</span><span class="p">(</span><span class="n">model</span><span class="p">),</span>
-            <span class="s1">&#39;dofv_vs_parent&#39;</span><span class="p">:</span> <span class="n">dofv</span><span class="p">(</span><span class="n">modelsDict</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parent_model</span><span class="p">),</span> <span class="n">model</span><span class="p">),</span>
+            <span class="s1">&#39;dofv_vs_parent&#39;</span><span class="p">:</span> <span class="n">dofv</span><span class="p">(</span><span class="n">parent_model</span><span class="p">,</span> <span class="n">model</span><span class="p">),</span>
             <span class="s1">&#39;predicted_dofv&#39;</span><span class="p">:</span> <span class="n">predicted_dofv</span><span class="p">(</span><span class="n">model</span><span class="p">),</span>
             <span class="s1">&#39;predicted_residual&#39;</span><span class="p">:</span> <span class="n">predicted_residual</span><span class="p">(</span><span class="n">model</span><span class="p">),</span>
         <span class="p">},</span>

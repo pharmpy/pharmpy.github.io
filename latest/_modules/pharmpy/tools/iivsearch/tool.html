@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.iivsearch.tool &#8212; Pharmpy 0.84.1 documentation</title>
+    <title>pharmpy.tools.iivsearch.tool &#8212; Pharmpy 0.85.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -422,21 +422,21 @@
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">replace</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">pharmpy.tools.iivsearch.algorithms</span> <span class="k">as</span> <span class="nn">algorithms</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fn.signature</span> <span class="kn">import</span> <span class="n">with_same_arguments_as</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fn.type</span> <span class="kn">import</span> <span class="n">with_runtime_arguments_type_check</span>
-<span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Results</span>
+<span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">add_pk_iiv</span><span class="p">,</span> <span class="n">calculate_bic</span><span class="p">,</span> <span class="n">copy_model</span><span class="p">,</span> <span class="n">create_joint_distribution</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.results</span> <span class="kn">import</span> <span class="n">RANK_TYPES</span>
 <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">ModelfitResults</span>
 <span class="kn">from</span> <span class="nn">pharmpy.tools</span> <span class="kn">import</span> <span class="n">summarize_modelfit_results</span>
-<span class="kn">from</span> <span class="nn">pharmpy.tools.common</span> <span class="kn">import</span> <span class="n">create_results</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.common</span> <span class="kn">import</span> <span class="n">ToolResults</span><span class="p">,</span> <span class="n">create_results</span>
 <span class="kn">from</span> <span class="nn">pharmpy.tools.modelfit</span> <span class="kn">import</span> <span class="n">create_fit_workflow</span>
-<span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">Task</span><span class="p">,</span> <span class="n">ToolDatabase</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">call_workflow</span>
+<span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">call_workflow</span>
 
 <span class="n">IIV_STRATEGIES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="s1">&#39;no_add&#39;</span><span class="p">,</span> <span class="s1">&#39;add_diagonal&#39;</span><span class="p">,</span> <span class="s1">&#39;fullblock&#39;</span><span class="p">))</span>
 <span class="n">IIV_ALGORITHMS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="s1">&#39;brute_force&#39;</span><span class="p">,)</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">dir</span><span class="p">(</span><span class="n">algorithms</span><span class="p">)))</span>
@@ -585,6 +585,9 @@
 
     <span class="n">res_modelfit_input</span> <span class="o">=</span> <span class="n">input_model</span><span class="o">.</span><span class="n">modelfit_results</span>
     <span class="n">res_modelfit_final</span> <span class="o">=</span> <span class="n">final_model</span><span class="o">.</span><span class="n">modelfit_results</span>
+
+    <span class="c1"># NOTE Compute name of final model</span>
+    <span class="n">final_model_name</span> <span class="o">=</span> <span class="n">last_res</span><span class="o">.</span><span class="n">final_model_name</span>
     <span class="k">if</span> <span class="n">res_modelfit_input</span> <span class="ow">and</span> <span class="n">res_modelfit_final</span><span class="p">:</span>
         <span class="n">bic_input</span> <span class="o">=</span> <span class="n">calculate_bic</span><span class="p">(</span><span class="n">input_model</span><span class="p">,</span> <span class="n">res_modelfit_input</span><span class="o">.</span><span class="n">ofv</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;iiv&#39;</span><span class="p">)</span>
         <span class="n">bic_final</span> <span class="o">=</span> <span class="n">calculate_bic</span><span class="p">(</span><span class="n">final_model</span><span class="p">,</span> <span class="n">res_modelfit_final</span><span class="o">.</span><span class="n">ofv</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;iiv&#39;</span><span class="p">)</span>
@@ -594,22 +597,20 @@
                 <span class="sa">f</span><span class="s1">&#39;(</span><span class="si">{</span><span class="n">bic_final</span><span class="si">}</span><span class="s1">) than </span><span class="si">{</span><span class="n">input_model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> (</span><span class="si">{</span><span class="n">bic_input</span><span class="si">}</span><span class="s1">), selecting &#39;</span>
                 <span class="sa">f</span><span class="s1">&#39;input model&#39;</span>
             <span class="p">)</span>
-            <span class="n">last_res</span><span class="o">.</span><span class="n">final_model_name</span> <span class="o">=</span> <span class="n">input_model</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">final_model_name</span> <span class="o">=</span> <span class="n">input_model</span><span class="o">.</span><span class="n">name</span>
 
     <span class="n">keys</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">list_of_algorithms</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">))</span>
 
-    <span class="n">res</span> <span class="o">=</span> <span class="n">IIVSearchResults</span><span class="p">(</span>
+    <span class="k">return</span> <span class="n">IIVSearchResults</span><span class="p">(</span>
         <span class="n">summary_tool</span><span class="o">=</span><span class="n">_concat_summaries</span><span class="p">(</span><span class="n">sum_tools</span><span class="p">,</span> <span class="n">keys</span><span class="p">),</span>
         <span class="n">summary_models</span><span class="o">=</span><span class="n">_concat_summaries</span><span class="p">(</span><span class="n">sum_models</span><span class="p">,</span> <span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">+</span> <span class="n">keys</span><span class="p">),</span>  <span class="c1"># To include input model</span>
         <span class="n">summary_individuals</span><span class="o">=</span><span class="n">_concat_summaries</span><span class="p">(</span><span class="n">sum_inds</span><span class="p">,</span> <span class="n">keys</span><span class="p">),</span>
         <span class="n">summary_individuals_count</span><span class="o">=</span><span class="n">_concat_summaries</span><span class="p">(</span><span class="n">sum_inds_count</span><span class="p">,</span> <span class="n">keys</span><span class="p">),</span>
         <span class="n">summary_errors</span><span class="o">=</span><span class="n">_concat_summaries</span><span class="p">(</span><span class="n">sum_errs</span><span class="p">,</span> <span class="n">keys</span><span class="p">),</span>
-        <span class="n">final_model_name</span><span class="o">=</span><span class="n">last_res</span><span class="o">.</span><span class="n">final_model_name</span><span class="p">,</span>
+        <span class="n">final_model_name</span><span class="o">=</span><span class="n">final_model_name</span><span class="p">,</span>
         <span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">,</span>
         <span class="n">tool_database</span><span class="o">=</span><span class="n">last_res</span><span class="o">.</span><span class="n">tool_database</span><span class="p">,</span>
     <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">res</span>
 
 
 <span class="k">def</span> <span class="nf">_concat_summaries</span><span class="p">(</span><span class="n">summaries</span><span class="p">,</span> <span class="n">keys</span><span class="p">):</span>
@@ -653,19 +654,19 @@
         <span class="n">IIVSearchResults</span><span class="p">,</span> <span class="n">input_model</span><span class="p">,</span> <span class="n">base_model</span><span class="p">,</span> <span class="n">res_models</span><span class="p">,</span> <span class="n">rank_type</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">bic_type</span><span class="o">=</span><span class="s1">&#39;iiv&#39;</span>
     <span class="p">)</span>
 
-    <span class="n">res</span><span class="o">.</span><span class="n">summary_tool</span><span class="p">[</span><span class="s1">&#39;algorithm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">algorithm</span>
+    <span class="n">summary_tool</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">summary_tool</span>
+    <span class="k">assert</span> <span class="n">summary_tool</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="n">summary_tool</span><span class="p">[</span><span class="s1">&#39;algorithm&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">state</span><span class="o">.</span><span class="n">algorithm</span>
     <span class="c1"># If base model is model from a previous step or is the input model to the full tool,</span>
     <span class="c1"># it should be excluded in this step</span>
     <span class="k">if</span> <span class="n">base_model_name</span> <span class="ow">in</span> <span class="n">state</span><span class="o">.</span><span class="n">model_names_so_far</span> <span class="ow">or</span> <span class="n">base_model_name</span> <span class="o">==</span> <span class="n">state</span><span class="o">.</span><span class="n">input_model_name</span><span class="p">:</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">summary_models</span> <span class="o">=</span> <span class="n">summarize_modelfit_results</span><span class="p">(</span>
+        <span class="n">summary_models</span> <span class="o">=</span> <span class="n">summarize_modelfit_results</span><span class="p">(</span>
             <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">res_models</span><span class="p">]</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">res</span><span class="o">.</span><span class="n">summary_models</span> <span class="o">=</span> <span class="n">summarize_modelfit_results</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">]</span>
-        <span class="p">)</span>
+        <span class="n">summary_models</span> <span class="o">=</span> <span class="n">summarize_modelfit_results</span><span class="p">([</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">])</span>
 
-    <span class="k">return</span> <span class="n">res</span>
+    <span class="k">return</span> <span class="n">replace</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">summary_models</span><span class="o">=</span><span class="n">summary_models</span><span class="p">)</span>
 
 
 <span class="nd">@with_runtime_arguments_type_check</span>
@@ -692,16 +693,9 @@
         <span class="p">)</span>
 
 
-<span class="nd">@dataclass</span>
-<span class="k">class</span> <span class="nc">IIVSearchResults</span><span class="p">(</span><span class="n">Results</span><span class="p">):</span>
-    <span class="n">summary_tool</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
-    <span class="n">summary_individuals</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
-    <span class="n">summary_individuals_count</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
-    <span class="n">summary_errors</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span>
-    <span class="n">final_model_name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">models</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">[</span><span class="n">Model</span><span class="p">]</span> <span class="o">=</span> <span class="p">()</span>
-    <span class="n">summary_models</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># NOTE Not present in Results</span>
-    <span class="n">tool_database</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ToolDatabase</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># NOTE Not present in Results</span>
+<span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+<span class="k">class</span> <span class="nc">IIVSearchResults</span><span class="p">(</span><span class="n">ToolResults</span><span class="p">):</span>
+    <span class="k">pass</span>
 </pre></div>
 
             </article>

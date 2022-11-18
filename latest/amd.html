@@ -6,7 +6,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18: http://docutils.sourceforge.net/" />
 
-    <title>Automatic Model Development (AMD) &#8212; Pharmpy 0.84.1 documentation</title>
+    <title>Automatic Model Development (AMD) &#8212; Pharmpy 0.85.0 documentation</title>
   <script>
     document.documentElement.dataset.mode = localStorage.getItem("mode") || "light";
     document.documentElement.dataset.theme = localStorage.getItem("theme") || "light";
@@ -483,8 +483,7 @@ or a starting model. The tool is a combination of the following tools: <a class=
 <span class="n">res</span> <span class="o">=</span> <span class="n">run_amd</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
               <span class="n">modeltype</span><span class="o">=</span><span class="s1">&#39;pk_oral&#39;</span><span class="p">,</span>
               <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
-              <span class="n">categorical</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;SEX&#39;</span><span class="p">],</span>
-              <span class="n">continuous</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;AGE&#39;</span><span class="p">],</span>
+              <span class="n">search_space</span><span class="o">=</span><span class="s1">&#39;LET(CATEGORICAL, [SEX]); LET(CONTINUOUS, [AGE])&#39;</span>
               <span class="n">allometric_variable</span><span class="o">=</span><span class="s1">&#39;WGT&#39;</span><span class="p">,</span>
               <span class="n">occasion</span><span class="o">=</span><span class="s1">&#39;VISI&#39;</span><span class="p">)</span>
 </pre></div>
@@ -494,8 +493,7 @@ or a starting model. The tool is a combination of the following tools: <a class=
 <span class="n">res</span> <span class="o">&lt;-</span> <span class="nf">run_amd</span><span class="p">(</span><span class="n">input</span><span class="o">=</span><span class="n">dataset_path</span><span class="p">,</span>
               <span class="n">modeltype</span><span class="o">=</span><span class="s">&#39;pk_oral&#39;</span><span class="p">,</span>
               <span class="n">order</span><span class="o">=</span><span class="n">order</span><span class="p">,</span>
-              <span class="n">categorical</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="s">&#39;SEX&#39;</span><span class="p">),</span>
-              <span class="n">continuous</span><span class="o">=</span><span class="nf">c</span><span class="p">(</span><span class="s">&#39;AGE&#39;</span><span class="p">),</span>
+              <span class="n">search_space</span><span class="o">=</span><span class="s">&#39;LET(CATEGORICAL, [SEX]); LET(CONTINUOUS, [AGE])&#39;</span>
               <span class="n">allometric_variable</span><span class="o">=</span><span class="s">&#39;WGT&#39;</span><span class="p">,</span>
               <span class="n">occasion</span><span class="o">=</span><span class="s">&#39;VISI&#39;</span><span class="p">)</span>
 </pre></div>
@@ -535,19 +533,13 @@ as a <code class="docutils literal notranslate"><span class="pre">categorical</s
 <td><p>Initial estimate for the mean absorption time (only for oral models, default is 0.1)</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#search-space-amd"><span class="std std-ref">search_space</span></a></p></td>
-<td><p>MFL for search space for structural model (default is ‘pk_oral’ search space)</p></td>
+<td><p>MFL for search space of structural and covariate models (default depends on <code class="docutils literal notranslate"><span class="pre">modeltype</span></code>)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">lloq</span></code></p></td>
 <td><p>Lower limit of quantification. LOQ data will be removed.</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#order-amd"><span class="std std-ref">order</span></a></p></td>
 <td><p>Run order of tools (default is [‘structural’, ‘iivsearch’, ‘residual’, ‘iovsearch’, ‘allometry’, ‘covariates’])</p></td>
-</tr>
-<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">categorical</span></code></p></td>
-<td><p>List of categorical covariates (default is a list of all categorical covariates found in datainfo)</p></td>
-</tr>
-<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">continuous</span></code></p></td>
-<td><p>List of continuous covariates (default is a list of all continuous covariates found in datainfo)</p></td>
 </tr>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">allometric_variable</span></code></p></td>
 <td><p>Variable to use for allometry (default is name of column described as body weight)</p></td>
@@ -579,20 +571,34 @@ column. This needs to be dropped (either via model or datainfo file) or excluded
 <span id="search-space-amd"></span><h2>Search space<a class="headerlink" href="#search-space" title="Permalink to this heading">#</a></h2>
 <div class="admonition note">
 <p class="admonition-title">Note</p>
-<p>Please see the description of <a class="reference internal" href="tools.html#mfl"><span class="std std-ref">Model feature language (MFL)</span></a> for how to define the search space for the structural model.</p>
+<p>Please see the description of <a class="reference internal" href="tools.html#mfl"><span class="std std-ref">Model feature language (MFL)</span></a> for how to define the search space for the structural and covariate models.</p>
 </div>
-<p>The search space has different defaults depending on which type of data has been inputted. For a PK oral model, the
+<p>The search space has different defaults depending on which type of data has been inputed. For a PK oral model, the
 default is:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ABSORPTION</span><span class="p">([</span><span class="n">ZO</span><span class="p">,</span><span class="n">SEQ</span><span class="o">-</span><span class="n">ZO</span><span class="o">-</span><span class="n">FO</span><span class="p">])</span>
 <span class="n">ELIMINATION</span><span class="p">([</span><span class="n">MM</span><span class="p">,</span><span class="n">MIX</span><span class="o">-</span><span class="n">FO</span><span class="o">-</span><span class="n">MM</span><span class="p">])</span>
 <span class="n">LAGTIME</span><span class="p">()</span>
 <span class="n">TRANSITS</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">10</span><span class="p">],</span><span class="o">*</span><span class="p">)</span>
 <span class="n">PERIPHERALS</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+<span class="n">COVARIATE</span><span class="p">(</span><span class="nd">@IIV</span><span class="p">,</span> <span class="nd">@CONTINUOUS</span><span class="p">,</span> <span class="o">*</span><span class="p">)</span>
+<span class="n">COVARIATE</span><span class="p">(</span><span class="nd">@IIV</span><span class="p">,</span> <span class="nd">@CATEGORICAL</span><span class="p">,</span> <span class="n">CAT</span><span class="p">)</span>
 </pre></div>
 </div>
 <p>For a PK IV model, the default is:</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">ELIMINATION</span><span class="p">([</span><span class="n">MM</span><span class="p">,</span><span class="n">MIX</span><span class="o">-</span><span class="n">FO</span><span class="o">-</span><span class="n">MM</span><span class="p">])</span>
 <span class="n">PERIPHERALS</span><span class="p">([</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">])</span>
+<span class="n">COVARIATE</span><span class="p">(</span><span class="nd">@IIV</span><span class="p">,</span> <span class="nd">@CONTINUOUS</span><span class="p">,</span> <span class="o">*</span><span class="p">)</span>
+<span class="n">COVARIATE</span><span class="p">(</span><span class="nd">@IIV</span><span class="p">,</span> <span class="nd">@CATEGORICAL</span><span class="p">,</span> <span class="n">CAT</span><span class="p">)</span>
+</pre></div>
+</div>
+<p>Note that defaults are overriden selectively: structural model features
+defaults will be ignored as soon as one structural model feature is explicitly
+given, but the covariate model defaults will stay in place, and vice versa. For
+instance, if one defines <code class="docutils literal notranslate"><span class="pre">search_space</span></code> as <code class="docutils literal notranslate"><span class="pre">LAGTIME()</span></code>, the effective
+search space will be as follows:</p>
+<div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">LAGTIME</span><span class="p">()</span>
+<span class="n">COVARIATE</span><span class="p">(</span><span class="nd">@IIV</span><span class="p">,</span> <span class="nd">@CONTINUOUS</span><span class="p">,</span> <span class="o">*</span><span class="p">)</span>
+<span class="n">COVARIATE</span><span class="p">(</span><span class="nd">@IIV</span><span class="p">,</span> <span class="nd">@CATEGORICAL</span><span class="p">,</span> <span class="n">CAT</span><span class="p">)</span>
 </pre></div>
 </div>
 </section>
@@ -890,7 +896,7 @@ settings that the AMD tool uses for this subtool can be seen in the table below.
 </thead>
 <tbody>
 <tr class="row-even"><td><p>effects</p></td>
-<td><p>Given in <a class="reference internal" href="#amd-args"><span class="std std-ref">AMD options</span></a> (<code class="docutils literal notranslate"><span class="pre">categorical</span></code> and <code class="docutils literal notranslate"><span class="pre">continuous</span></code>)</p></td>
+<td><p>Given in <a class="reference internal" href="#amd-args"><span class="std std-ref">AMD options</span></a> (<code class="docutils literal notranslate"><span class="pre">search_space</span></code>)</p></td>
 </tr>
 <tr class="row-odd"><td><p>p_forward</p></td>
 <td><p><code class="docutils literal notranslate"><span class="pre">0.05</span></code></p></td>
