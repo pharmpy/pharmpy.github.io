@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.parameters &#8212; Pharmpy 0.86.0 documentation</title>
+    <title>pharmpy.model.parameters &#8212; Pharmpy 0.87.0 documentation</title>
   
   
   
@@ -557,7 +557,8 @@
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Two parameters are equal if they have the same name, init and constraints&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_init</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_init</span>
+            <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_init</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lower</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_lower</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_upper</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_upper</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_name</span>
@@ -594,7 +595,7 @@
 <span class="sd">    &gt;&gt;&gt; from pharmpy.model import Parameters, Parameter</span>
 <span class="sd">    &gt;&gt;&gt; par1 = Parameter(&quot;x&quot;, 0)</span>
 <span class="sd">    &gt;&gt;&gt; par2 = Parameter(&quot;y&quot;, 1)</span>
-<span class="sd">    &gt;&gt;&gt; pset = Parameters([par1, par2])</span>
+<span class="sd">    &gt;&gt;&gt; pset = Parameters((par1, par2))</span>
 <span class="sd">    &gt;&gt;&gt; pset[&quot;x&quot;]</span>
 <span class="sd">    Parameter(&quot;x&quot;, 0, lower=-∞, upper=∞, fix=False)</span>
 
@@ -603,15 +604,19 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">params</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">_params</span>
-        <span class="k">elif</span> <span class="n">params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="p">()</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="p">()):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="n">parameters</span>
+
+<div class="viewcode-block" id="Parameters.create"><a class="viewcode-back" href="../../../api/pharmpy.model.Parameters.html#pharmpy.model.Parameters.create">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
+            <span class="k">pass</span>
+        <span class="k">elif</span> <span class="n">parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
         <span class="n">names</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Can not add variable of type </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">p</span><span class="p">)</span><span class="si">}</span><span class="s1"> to Parameters&#39;</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">names</span><span class="p">:</span>
@@ -620,6 +625,13 @@
                     <span class="s1">&#39;was added more than once to Parameters&#39;</span>
                 <span class="p">)</span>
             <span class="n">names</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Parameters.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.Parameters.html#pharmpy.model.Parameters.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Replace properties and create a new Parameters object&quot;&quot;&quot;</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parameters&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new</span></div>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span>
@@ -652,9 +664,9 @@
 
     <span class="k">def</span> <span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
+            <span class="k">return</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">[</span><span class="n">ind</span><span class="p">])</span>
         <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">ind</span><span class="p">,</span> <span class="n">CollectionsSequence</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">Parameters</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_lookup_param</span><span class="p">(</span><span class="n">i</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ind</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_lookup_param</span><span class="p">(</span><span class="n">i</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">ind</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">_</span><span class="p">,</span> <span class="n">param</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup_param</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">param</span>
@@ -681,7 +693,7 @@
 <span class="sd">        &gt;&gt;&gt; from pharmpy.model import Parameters, Parameter</span>
 <span class="sd">        &gt;&gt;&gt; par1 = Parameter(&quot;CL&quot;, 1, lower=0, upper=10)</span>
 <span class="sd">        &gt;&gt;&gt; par2 = Parameter(&quot;V&quot;, 10, lower=0, upper=100)</span>
-<span class="sd">        &gt;&gt;&gt; pset = Parameters([par1, par2])</span>
+<span class="sd">        &gt;&gt;&gt; pset = Parameters((par1, par2))</span>
 <span class="sd">        &gt;&gt;&gt; pset.to_dataframe()</span>
 <span class="sd">            value  lower  upper    fix</span>
 <span class="sd">        CL      1      0     10  False</span>
@@ -742,7 +754,7 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">newparam</span> <span class="o">=</span> <span class="n">p</span>
             <span class="n">new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newparam</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">new</span><span class="p">))</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">fix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -769,39 +781,41 @@
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">newparam</span> <span class="o">=</span> <span class="n">p</span>
             <span class="n">new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newparam</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">new</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">new</span><span class="p">))</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">fixed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;All fixed parameters&quot;&quot;&quot;</span>
         <span class="n">fixed</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">fix</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">fixed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">fixed</span><span class="p">))</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">nonfixed</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;All non-fixed parameters&quot;&quot;&quot;</span>
         <span class="n">nonfixed</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">fix</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">nonfixed</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">nonfixed</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">+</span> <span class="p">(</span><span class="n">other</span><span class="p">,))</span>
+            <span class="k">return</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">+</span> <span class="p">(</span><span class="n">other</span><span class="p">,))</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
+            <span class="k">return</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_params</span> <span class="o">+</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">other</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot add </span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2"> to Parameters&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">Parameters</span><span class="p">((</span><span class="n">other</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">((</span><span class="n">other</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">Parameters</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">other</span><span class="p">)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_params</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot add </span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2"> to Parameters&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
+            <span class="k">return</span> <span class="kc">False</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">!=</span> <span class="nb">len</span><span class="p">(</span><span class="n">other</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">for</span> <span class="n">p1</span><span class="p">,</span> <span class="n">p2</span> <span class="ow">in</span> <span class="nb">zip</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>

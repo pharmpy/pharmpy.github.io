@@ -24,10 +24,11 @@ DataInfo
 
    .. autosummary::
 
-      ~DataInfo.derive
+      ~DataInfo.create
       ~DataInfo.from_json
       ~DataInfo.get_dtype_dict
       ~DataInfo.read_json
+      ~DataInfo.replace
       ~DataInfo.set_column
       ~DataInfo.set_dv_column
       ~DataInfo.set_id_column
@@ -49,10 +50,11 @@ DataInfo
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: derive
+   .. automethod:: create
    .. automethod:: from_json
    .. automethod:: get_dtype_dict
    .. automethod:: read_json
+   .. automethod:: replace
    .. automethod:: set_column
    .. automethod:: set_dv_column
    .. automethod:: set_id_column

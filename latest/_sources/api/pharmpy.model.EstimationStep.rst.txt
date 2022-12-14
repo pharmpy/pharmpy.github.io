@@ -35,7 +35,8 @@ EstimationStep
 
    .. autosummary::
 
-      ~EstimationStep.derive
+      ~EstimationStep.create
+      ~EstimationStep.replace
 
    .. rubric:: Attributes Documentation
 
@@ -62,4 +63,5 @@ EstimationStep
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: derive
+   .. automethod:: create
+   .. automethod:: replace

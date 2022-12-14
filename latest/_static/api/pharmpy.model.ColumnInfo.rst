@@ -26,9 +26,10 @@ ColumnInfo
 
       ~ColumnInfo.convert_datatype_to_pd_dtype
       ~ColumnInfo.convert_pd_dtype_to_datatype
-      ~ColumnInfo.derive
+      ~ColumnInfo.create
       ~ColumnInfo.is_categorical
       ~ColumnInfo.is_numerical
+      ~ColumnInfo.replace
 
    .. rubric:: Attributes Documentation
 
@@ -46,6 +47,7 @@ ColumnInfo
 
    .. automethod:: convert_datatype_to_pd_dtype
    .. automethod:: convert_pd_dtype_to_datatype
-   .. automethod:: derive
+   .. automethod:: create
    .. automethod:: is_categorical
    .. automethod:: is_numerical
+   .. automethod:: replace

@@ -23,6 +23,8 @@ Parameters
 
    .. autosummary::
 
+      ~Parameters.create
+      ~Parameters.replace
       ~Parameters.set_fix
       ~Parameters.set_initial_estimates
       ~Parameters.to_dataframe
@@ -40,6 +42,8 @@ Parameters
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: create
+   .. automethod:: replace
    .. automethod:: set_fix
    .. automethod:: set_initial_estimates
    .. automethod:: to_dataframe

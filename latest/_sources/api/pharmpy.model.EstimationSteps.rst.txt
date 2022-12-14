@@ -10,8 +10,12 @@ EstimationSteps
 
    .. autosummary::
 
+      ~EstimationSteps.create
+      ~EstimationSteps.replace
       ~EstimationSteps.to_dataframe
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: create
+   .. automethod:: replace
    .. automethod:: to_dataframe

@@ -21,11 +21,11 @@ NormalDistribution
    .. autosummary::
 
       ~NormalDistribution.create
-      ~NormalDistribution.derive
       ~NormalDistribution.evalf
       ~NormalDistribution.get_covariance
       ~NormalDistribution.get_variance
       ~NormalDistribution.latex_string
+      ~NormalDistribution.replace
       ~NormalDistribution.subs
 
    .. rubric:: Attributes Documentation
@@ -39,9 +39,9 @@ NormalDistribution
    .. rubric:: Methods Documentation
 
    .. automethod:: create
-   .. automethod:: derive
    .. automethod:: evalf
    .. automethod:: get_covariance
    .. automethod:: get_variance
    .. automethod:: latex_string
+   .. automethod:: replace
    .. automethod:: subs

@@ -21,11 +21,11 @@ Distribution
 
    .. autosummary::
 
-      ~Distribution.derive
       ~Distribution.evalf
       ~Distribution.get_covariance
       ~Distribution.get_variance
       ~Distribution.latex_string
+      ~Distribution.replace
       ~Distribution.subs
 
    .. rubric:: Attributes Documentation
@@ -39,9 +39,9 @@ Distribution
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: derive
    .. automethod:: evalf
    .. automethod:: get_covariance
    .. automethod:: get_variance
    .. automethod:: latex_string
+   .. automethod:: replace
    .. automethod:: subs

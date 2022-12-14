@@ -21,11 +21,11 @@ JointNormalDistribution
    .. autosummary::
 
       ~JointNormalDistribution.create
-      ~JointNormalDistribution.derive
       ~JointNormalDistribution.evalf
       ~JointNormalDistribution.get_covariance
       ~JointNormalDistribution.get_variance
       ~JointNormalDistribution.latex_string
+      ~JointNormalDistribution.replace
       ~JointNormalDistribution.subs
 
    .. rubric:: Attributes Documentation
@@ -39,9 +39,9 @@ JointNormalDistribution
    .. rubric:: Methods Documentation
 
    .. automethod:: create
-   .. automethod:: derive
    .. automethod:: evalf
    .. automethod:: get_covariance
    .. automethod:: get_variance
    .. automethod:: latex_string
+   .. automethod:: replace
    .. automethod:: subs

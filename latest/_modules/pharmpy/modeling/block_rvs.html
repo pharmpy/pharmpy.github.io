@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.86.0 documentation</title>
+    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.87.0 documentation</title>
   
   
   
@@ -435,9 +435,10 @@
 <span class="sd">:meta private:</span>
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.math</span> <span class="kn">import</span> <span class="n">corr2cov</span><span class="p">,</span> <span class="n">nearest_postive_semidefinite</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Parameter</span><span class="p">,</span> <span class="n">Parameters</span>
@@ -445,7 +446,9 @@
 
 
 <div class="viewcode-block" id="create_joint_distribution"><a class="viewcode-back" href="../../../api/pharmpy.modeling.create_joint_distribution.html#pharmpy.modeling.create_joint_distribution">[docs]</a><span class="k">def</span> <span class="nf">create_joint_distribution</span><span class="p">(</span>
-    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">rvs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">individual_estimates</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">rvs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">individual_estimates</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Combines some or all etas into a joint distribution.</span>
@@ -524,13 +527,13 @@
         <span class="n">covariance_init</span> <span class="o">=</span> <span class="n">_choose_param_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">individual_estimates</span><span class="p">,</span> <span class="n">all_rvs</span><span class="p">,</span> <span class="n">parent1</span><span class="p">,</span> <span class="n">parent2</span><span class="p">)</span>
         <span class="n">param_new</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">cov_name</span><span class="p">,</span> <span class="n">covariance_init</span><span class="p">)</span>
         <span class="n">pset_new</span> <span class="o">+=</span> <span class="n">param_new</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">pset_new</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pset_new</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">all_rvs</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="split_joint_distribution"><a class="viewcode-back" href="../../../api/pharmpy.modeling.split_joint_distribution.html#pharmpy.modeling.split_joint_distribution">[docs]</a><span class="k">def</span> <span class="nf">split_joint_distribution</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">rvs</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<div class="viewcode-block" id="split_joint_distribution"><a class="viewcode-back" href="../../../api/pharmpy.modeling.split_joint_distribution.html#pharmpy.modeling.split_joint_distribution">[docs]</a><span class="k">def</span> <span class="nf">split_joint_distribution</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">rvs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;</span>
 <span class="sd">    Splits etas following a joint distribution into separate distributions.</span>
 
@@ -577,7 +580,9 @@
 
     <span class="n">removed_parameters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">parameters_before</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">parameters_after</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">new_rvs</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">removed_parameters</span><span class="p">])</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span>
+        <span class="nb">tuple</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">removed_parameters</span><span class="p">])</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 

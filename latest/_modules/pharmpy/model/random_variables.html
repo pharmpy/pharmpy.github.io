@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.random_variables &#8212; Pharmpy 0.86.0 documentation</title>
+    <title>pharmpy.model.random_variables &#8212; Pharmpy 0.87.0 documentation</title>
   
   
   
@@ -494,10 +494,6 @@
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_group</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_group</span>
         <span class="p">)</span>
 
-    <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">VariabilityHierarchy</span><span class="p">):</span>
-            <span class="k">return</span> <span class="n">VariabilityHierarchy</span><span class="p">([</span><span class="bp">self</span><span class="p">]</span> <span class="o">+</span> <span class="n">other</span><span class="o">.</span><span class="n">_levels</span><span class="p">)</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
         <span class="sd">&quot;&quot;&quot;Name of the variability level&quot;&quot;&quot;</span>
@@ -520,11 +516,15 @@
 <div class="viewcode-block" id="VariabilityHierarchy"><a class="viewcode-back" href="../../../api/pharmpy.model.VariabilityHierarchy.html#pharmpy.model.VariabilityHierarchy">[docs]</a><span class="k">class</span> <span class="nc">VariabilityHierarchy</span><span class="p">(</span><span class="n">Immutable</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Description of a variability hierarchy&quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="p">()):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_levels</span> <span class="o">=</span> <span class="n">levels</span>
+
+<div class="viewcode-block" id="VariabilityHierarchy.create"><a class="viewcode-back" href="../../../api/pharmpy.model.VariabilityHierarchy.html#pharmpy.model.VariabilityHierarchy.create">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">levels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_levels</span> <span class="o">=</span> <span class="p">[]</span>
+            <span class="n">levels</span> <span class="o">=</span> <span class="p">()</span>
         <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">levels</span><span class="p">,</span> <span class="n">VariabilityHierarchy</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_levels</span> <span class="o">=</span> <span class="n">levels</span><span class="o">.</span><span class="n">_levels</span>
+            <span class="n">levels</span> <span class="o">=</span> <span class="n">levels</span><span class="o">.</span><span class="n">_levels</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">found_ref</span> <span class="o">=</span> <span class="kc">False</span>
             <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">levels</span><span class="p">:</span>
@@ -537,7 +537,14 @@
                         <span class="n">found_ref</span> <span class="o">=</span> <span class="kc">True</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="n">found_ref</span><span class="p">:</span>
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;A VariabilityHierarchy must have a reference level&quot;</span><span class="p">)</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_levels</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
+            <span class="n">levels</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">VariabilityHierarchy</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="VariabilityHierarchy.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.VariabilityHierarchy.html#pharmpy.model.VariabilityHierarchy.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Replace properties and create a new VariabilityHierarchy object&quot;&quot;&quot;</span>
+        <span class="n">levels</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;levels&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_levels</span><span class="p">)</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">VariabilityHierarchy</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new</span></div>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">VariabilityHierarchy</span><span class="p">):</span>
@@ -584,15 +591,21 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lookup</span><span class="p">(</span><span class="n">ind</span><span class="p">)</span>
         <span class="n">new</span> <span class="o">=</span> <span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_lookup</span><span class="p">(</span><span class="n">level</span><span class="p">)</span> <span class="k">for</span> <span class="n">level</span> <span class="ow">in</span> <span class="n">levels</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">VariabilityHierarchy</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">VariabilityHierarchy</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">VariabilityLevel</span><span class="p">):</span>
-            <span class="n">levels</span> <span class="o">=</span> <span class="p">[</span><span class="n">other</span><span class="p">]</span>
+            <span class="n">levels</span> <span class="o">=</span> <span class="p">(</span><span class="n">other</span><span class="p">,)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot add </span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2"> to VariabilityHierarchy&quot;</span><span class="p">)</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">VariabilityHierarchy</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_levels</span> <span class="o">+</span> <span class="n">levels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new</span>
+
+    <span class="k">def</span> <span class="fm">__radd__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">VariabilityLevel</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">VariabilityHierarchy</span><span class="o">.</span><span class="n">create</span><span class="p">((</span><span class="n">other</span><span class="p">,)</span> <span class="o">+</span> <span class="bp">self</span><span class="o">.</span><span class="n">_levels</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot add </span><span class="si">{</span><span class="n">other</span><span class="si">}</span><span class="s2"> to VariabilityLevel&quot;</span><span class="p">)</span>
-        <span class="n">new</span> <span class="o">=</span> <span class="n">VariabilityHierarchy</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_levels</span> <span class="o">+</span> <span class="n">levels</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">new</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -602,7 +615,9 @@
     <span class="k">def</span> <span class="nf">_find_reference</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="c1"># Find numerical level of first level</span>
         <span class="c1"># No error checking since having a reference level is an invariant</span>
-        <span class="k">return</span> <span class="nb">next</span><span class="p">((</span><span class="o">-</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_levels</span><span class="p">)</span> <span class="k">if</span> <span class="n">level</span><span class="o">.</span><span class="n">reference</span><span class="p">))</span>
+        <span class="k">return</span> <span class="nb">next</span><span class="p">(</span>  <span class="c1"># pragma: no cover</span>
+            <span class="p">(</span><span class="o">-</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">level</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_levels</span><span class="p">)</span> <span class="k">if</span> <span class="n">level</span><span class="o">.</span><span class="n">reference</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">levels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -679,7 +694,7 @@
         <span class="k">if</span> <span class="n">eta_levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">iiv_level</span> <span class="o">=</span> <span class="n">VariabilityLevel</span><span class="p">(</span><span class="s1">&#39;IIV&#39;</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;ID&#39;</span><span class="p">)</span>
             <span class="n">iov_level</span> <span class="o">=</span> <span class="n">VariabilityLevel</span><span class="p">(</span><span class="s1">&#39;IOV&#39;</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">group</span><span class="o">=</span><span class="s1">&#39;OCC&#39;</span><span class="p">)</span>
-            <span class="n">eta_levels</span> <span class="o">=</span> <span class="n">VariabilityHierarchy</span><span class="p">([</span><span class="n">iiv_level</span><span class="p">,</span> <span class="n">iov_level</span><span class="p">])</span>
+            <span class="n">eta_levels</span> <span class="o">=</span> <span class="n">VariabilityHierarchy</span><span class="p">((</span><span class="n">iiv_level</span><span class="p">,</span> <span class="n">iov_level</span><span class="p">))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">eta_levels</span><span class="p">,</span> <span class="n">VariabilityHierarchy</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
@@ -688,7 +703,7 @@
 
         <span class="k">if</span> <span class="n">epsilon_levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ruv_level</span> <span class="o">=</span> <span class="n">VariabilityLevel</span><span class="p">(</span><span class="s1">&#39;RUV&#39;</span><span class="p">,</span> <span class="n">reference</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-            <span class="n">epsilon_levels</span> <span class="o">=</span> <span class="n">VariabilityHierarchy</span><span class="p">([</span><span class="n">ruv_level</span><span class="p">])</span>
+            <span class="n">epsilon_levels</span> <span class="o">=</span> <span class="n">VariabilityHierarchy</span><span class="p">((</span><span class="n">ruv_level</span><span class="p">,))</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">epsilon_levels</span><span class="p">,</span> <span class="n">VariabilityHierarchy</span><span class="p">):</span>
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
@@ -697,14 +712,11 @@
 
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">dists</span><span class="p">,</span> <span class="n">eta_levels</span><span class="p">,</span> <span class="n">epsilon_levels</span><span class="p">)</span></div>
 
-<div class="viewcode-block" id="RandomVariables.derive"><a class="viewcode-back" href="../../../api/pharmpy.model.RandomVariables.html#pharmpy.model.RandomVariables.derive">[docs]</a>    <span class="k">def</span> <span class="nf">derive</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">dists</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eta_levels</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">epsilon_levels</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">dists</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">dists</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dists</span>
-        <span class="k">if</span> <span class="n">eta_levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">eta_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eta_levels</span>
-        <span class="k">if</span> <span class="n">epsilon_levels</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">epsilon_levels</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epsilon_levels</span>
-        <span class="k">return</span> <span class="n">RandomVariables</span><span class="p">(</span><span class="n">dists</span><span class="p">,</span> <span class="n">eta_levels</span><span class="p">,</span> <span class="n">epsilon_levels</span><span class="p">)</span></div>
+<div class="viewcode-block" id="RandomVariables.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.RandomVariables.html#pharmpy.model.RandomVariables.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">dists</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dists&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dists</span><span class="p">)</span>
+        <span class="n">eta_levels</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;eta_levels&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eta_levels</span><span class="p">)</span>
+        <span class="n">epsilon_levels</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;epsilon_levels&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_epsilon_levels</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">RandomVariables</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">dists</span><span class="p">,</span> <span class="n">eta_levels</span><span class="p">,</span> <span class="n">epsilon_levels</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">eta_levels</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -912,7 +924,7 @@
 
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">new_dists</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span> <span class="k">for</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dists</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">derive</span><span class="p">(</span><span class="n">dists</span><span class="o">=</span><span class="n">new_dists</span><span class="p">)</span></div>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dists</span><span class="o">=</span><span class="n">new_dists</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="RandomVariables.unjoin"><a class="viewcode-back" href="../../../api/pharmpy.model.RandomVariables.html#pharmpy.model.RandomVariables.unjoin">[docs]</a>    <span class="k">def</span> <span class="nf">unjoin</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">inds</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Remove all covariances the random variables have with other random variables</span>
@@ -1206,6 +1218,7 @@
 
 <span class="k">def</span> <span class="nf">_sample_from_distributions</span><span class="p">(</span><span class="n">distributions</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">nsamples</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
     <span class="n">random_variable_symbols</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">parameters</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span>
+    <span class="nb">print</span><span class="p">(</span><span class="n">random_variable_symbols</span><span class="p">)</span>
     <span class="n">filtered_distributions</span> <span class="o">=</span> <span class="n">filter_distributions</span><span class="p">(</span><span class="n">distributions</span><span class="p">,</span> <span class="n">random_variable_symbols</span><span class="p">)</span>
     <span class="n">sampling_rvs</span> <span class="o">=</span> <span class="n">subs_distributions</span><span class="p">(</span><span class="n">filtered_distributions</span><span class="p">,</span> <span class="n">parameters</span><span class="p">)</span>
     <span class="n">sampled_expr</span> <span class="o">=</span> <span class="n">subs</span><span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">simultaneous</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>

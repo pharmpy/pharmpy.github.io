@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.eta_additions &#8212; Pharmpy 0.86.0 documentation</title>
+    <title>pharmpy.modeling.eta_additions &#8212; Pharmpy 0.87.0 documentation</title>
   
   
   
@@ -439,7 +439,7 @@
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">reduce</span>
 <span class="kn">from</span> <span class="nn">itertools</span> <span class="kn">import</span> <span class="n">chain</span><span class="p">,</span> <span class="n">combinations</span>
 <span class="kn">from</span> <span class="nn">operator</span> <span class="kn">import</span> <span class="n">add</span><span class="p">,</span> <span class="n">mul</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
@@ -448,6 +448,7 @@
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Assignment</span><span class="p">,</span>
     <span class="n">JointNormalDistribution</span><span class="p">,</span>
+    <span class="n">Model</span><span class="p">,</span>
     <span class="n">NormalDistribution</span><span class="p">,</span>
     <span class="n">Parameter</span><span class="p">,</span>
     <span class="n">Parameters</span><span class="p">,</span>
@@ -458,7 +459,12 @@
 
 
 <div class="viewcode-block" id="add_iiv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_iiv.html#pharmpy.modeling.add_iiv">[docs]</a><span class="k">def</span> <span class="nf">add_iiv</span><span class="p">(</span>
-    <span class="n">model</span><span class="p">,</span> <span class="n">list_of_parameters</span><span class="p">,</span> <span class="n">expression</span><span class="p">,</span> <span class="n">operation</span><span class="o">=</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="n">initial_estimate</span><span class="o">=</span><span class="mf">0.09</span><span class="p">,</span> <span class="n">eta_names</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">list_of_parameters</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">expression</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span>
+    <span class="n">operation</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span>
+    <span class="n">initial_estimate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.09</span><span class="p">,</span>
+    <span class="n">eta_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Adds IIVs to :class:`pharmpy.model`.</span>
 
@@ -556,7 +562,7 @@
         <span class="p">)</span>
 
     <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">rvs</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">pset</span><span class="p">)</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pset</span><span class="p">)</span>
     <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">sset</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
@@ -565,7 +571,13 @@
 <span class="n">ADD_IOV_DISTRIBUTION</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="s1">&#39;disjoint&#39;</span><span class="p">,</span> <span class="s1">&#39;joint&#39;</span><span class="p">,</span> <span class="s1">&#39;explicit&#39;</span><span class="p">,</span> <span class="s1">&#39;same-as-iiv&#39;</span><span class="p">))</span>
 
 
-<div class="viewcode-block" id="add_iov"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_iov.html#pharmpy.modeling.add_iov">[docs]</a><span class="k">def</span> <span class="nf">add_iov</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">occ</span><span class="p">,</span> <span class="n">list_of_parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">eta_names</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">distribution</span><span class="o">=</span><span class="s1">&#39;disjoint&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="add_iov"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_iov.html#pharmpy.modeling.add_iov">[docs]</a><span class="k">def</span> <span class="nf">add_iov</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">occ</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">list_of_parameters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">eta_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">distribution</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;disjoint&#39;</span><span class="p">,</span>
+<span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Adds IOVs to :class:`pharmpy.model`.</span>
 
 <span class="sd">    Initial estimate of new IOVs are 10% of the IIV eta it is based on.</span>
@@ -704,7 +716,7 @@
         <span class="n">model</span><span class="p">,</span> <span class="n">occ</span><span class="p">,</span> <span class="n">etas</span><span class="p">,</span> <span class="n">categories</span><span class="p">,</span> <span class="n">iov_name</span><span class="p">,</span> <span class="n">etai_name</span><span class="p">,</span> <span class="n">eta_name</span><span class="p">,</span> <span class="n">omega_iov_name</span>
     <span class="p">)</span>
 
-    <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">pset</span><span class="p">),</span> <span class="n">iovs</span>
+    <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pset</span><span class="p">),</span> <span class="n">iovs</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
 
@@ -803,7 +815,7 @@
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">j</span> <span class="ow">in</span> <span class="n">combinations</span><span class="p">(</span><span class="n">indices</span><span class="p">,</span> <span class="n">r</span><span class="o">=</span><span class="mi">2</span><span class="p">):</span>
         <span class="n">omega_iov</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">omega_iov_name</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">))</span>
         <span class="n">omega_iiv</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">get_covariance</span><span class="p">(</span><span class="n">etas</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">],</span> <span class="n">etas</span><span class="p">[</span><span class="n">j</span> <span class="o">-</span> <span class="mi">1</span><span class="p">])</span>
-        <span class="n">paramset</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">pset</span><span class="p">)</span>  <span class="c1"># FIXME!</span>
+        <span class="n">paramset</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pset</span><span class="p">)</span>  <span class="c1"># FIXME!</span>
         <span class="n">init</span> <span class="o">=</span> <span class="n">paramset</span><span class="p">[</span><span class="n">omega_iiv</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">*</span> <span class="mf">0.1</span> <span class="k">if</span> <span class="n">omega_iiv</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="n">omega_iiv</span> <span class="ow">in</span> <span class="n">paramset</span> <span class="k">else</span> <span class="mf">0.001</span>
         <span class="n">pset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">omega_iov</span><span class="p">),</span> <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">))</span>
 
@@ -820,12 +832,12 @@
         <span class="n">eta</span> <span class="o">=</span> <span class="n">etas</span><span class="p">[</span><span class="n">i</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span>
         <span class="n">omega_iiv</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="n">eta</span><span class="p">]</span><span class="o">.</span><span class="n">get_variance</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span>
         <span class="n">omega_iov</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">omega_iov_name</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
-        <span class="n">paramset</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span><span class="n">pset</span><span class="p">)</span>  <span class="c1"># FIXME!</span>
+        <span class="n">paramset</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pset</span><span class="p">)</span>  <span class="c1"># FIXME!</span>
         <span class="n">init</span> <span class="o">=</span> <span class="n">paramset</span><span class="p">[</span><span class="n">omega_iiv</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">*</span> <span class="mf">0.1</span> <span class="k">if</span> <span class="n">omega_iiv</span> <span class="ow">in</span> <span class="n">paramset</span> <span class="k">else</span> <span class="mf">0.01</span>
         <span class="n">pset</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">Parameter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">omega_iov</span><span class="p">),</span> <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">))</span>
 
 
-<div class="viewcode-block" id="add_pk_iiv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_pk_iiv.html#pharmpy.modeling.add_pk_iiv">[docs]</a><span class="k">def</span> <span class="nf">add_pk_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">initial_estimate</span><span class="o">=</span><span class="mf">0.09</span><span class="p">):</span>
+<div class="viewcode-block" id="add_pk_iiv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_pk_iiv.html#pharmpy.modeling.add_pk_iiv">[docs]</a><span class="k">def</span> <span class="nf">add_pk_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">initial_estimate</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.09</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Adds IIVs to all PK parameters in :class:`pharmpy.model`.</span>
 
 <span class="sd">    Will add exponential IIVs to all parameters that are included in the ODE.</span>

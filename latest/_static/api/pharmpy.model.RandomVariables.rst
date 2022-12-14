@@ -28,12 +28,12 @@ RandomVariables
    .. autosummary::
 
       ~RandomVariables.create
-      ~RandomVariables.derive
       ~RandomVariables.get_covariance
       ~RandomVariables.get_rvs_with_same_dist
       ~RandomVariables.join
       ~RandomVariables.nearest_valid_parameters
       ~RandomVariables.parameters_sdcorr
+      ~RandomVariables.replace
       ~RandomVariables.sample
       ~RandomVariables.subs
       ~RandomVariables.unjoin
@@ -57,12 +57,12 @@ RandomVariables
    .. rubric:: Methods Documentation
 
    .. automethod:: create
-   .. automethod:: derive
    .. automethod:: get_covariance
    .. automethod:: get_rvs_with_same_dist
    .. automethod:: join
    .. automethod:: nearest_valid_parameters
    .. automethod:: parameters_sdcorr
+   .. automethod:: replace
    .. automethod:: sample
    .. automethod:: subs
    .. automethod:: unjoin
