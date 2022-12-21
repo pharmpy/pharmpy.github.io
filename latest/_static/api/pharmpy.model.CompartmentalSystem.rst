@@ -19,6 +19,7 @@ CompartmentalSystem
       ~CompartmentalSystem.output_compartment
       ~CompartmentalSystem.peripheral_compartments
       ~CompartmentalSystem.rhs_symbols
+      ~CompartmentalSystem.t
       ~CompartmentalSystem.zero_order_inputs
 
    .. rubric:: Methods Summary
@@ -26,6 +27,7 @@ CompartmentalSystem
    .. autosummary::
 
       ~CompartmentalSystem.atoms
+      ~CompartmentalSystem.create
       ~CompartmentalSystem.find_compartment
       ~CompartmentalSystem.find_depot
       ~CompartmentalSystem.find_transit_compartments
@@ -33,6 +35,7 @@ CompartmentalSystem
       ~CompartmentalSystem.get_compartment_outflows
       ~CompartmentalSystem.get_flow
       ~CompartmentalSystem.get_n_connected
+      ~CompartmentalSystem.replace
       ~CompartmentalSystem.subs
       ~CompartmentalSystem.to_compartmental_system
       ~CompartmentalSystem.to_explicit_system
@@ -48,11 +51,13 @@ CompartmentalSystem
    .. autoattribute:: output_compartment
    .. autoattribute:: peripheral_compartments
    .. autoattribute:: rhs_symbols
+   .. autoattribute:: t
    .. autoattribute:: zero_order_inputs
 
    .. rubric:: Methods Documentation
 
    .. automethod:: atoms
+   .. automethod:: create
    .. automethod:: find_compartment
    .. automethod:: find_depot
    .. automethod:: find_transit_compartments
@@ -60,6 +65,7 @@ CompartmentalSystem
    .. automethod:: get_compartment_outflows
    .. automethod:: get_flow
    .. automethod:: get_n_connected
+   .. automethod:: replace
    .. automethod:: subs
    .. automethod:: to_compartmental_system
    .. automethod:: to_explicit_system

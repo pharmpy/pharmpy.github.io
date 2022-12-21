@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.statements &#8212; Pharmpy 0.87.0 documentation</title>
+    <title>pharmpy.model.statements &#8212; Pharmpy 0.88.0 documentation</title>
   
   
   
@@ -433,7 +433,7 @@
   <h1>Source code for pharmpy.model.statements</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">ABCMeta</span><span class="p">,</span> <span class="n">abstractmethod</span>
+<span class="kn">from</span> <span class="nn">abc</span> <span class="kn">import</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">abstractmethod</span>
 <span class="kn">from</span> <span class="nn">collections.abc</span> <span class="kn">import</span> <span class="n">Sequence</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Set</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">overload</span>
 
@@ -507,6 +507,11 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">expression</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">expression</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Assignment.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.Assignment.html#pharmpy.model.Assignment.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">symbol</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;symbol&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_symbol</span><span class="p">)</span>
+        <span class="n">expression</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;expression&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_expression</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Assignment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">expression</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">symbol</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -603,21 +608,8 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;$</span><span class="si">{</span><span class="n">sym</span><span class="si">}</span><span class="s1"> = </span><span class="si">{</span><span class="n">expr</span><span class="si">}</span><span class="s1">$&#39;</span></div>
 
 
-<span class="k">class</span> <span class="nc">ODESystemMetaclass</span><span class="p">(</span><span class="n">ABCMeta</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="c1"># NOTE see https://stackoverflow.com/a/3155493</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
-        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
-
-
-<div class="viewcode-block" id="ODESystem"><a class="viewcode-back" href="../../../api/pharmpy.model.ODESystem.html#pharmpy.model.ODESystem">[docs]</a><span class="k">class</span> <span class="nc">ODESystem</span><span class="p">(</span><span class="n">Statement</span><span class="p">,</span> <span class="n">ABC</span><span class="p">,</span> <span class="n">metaclass</span><span class="o">=</span><span class="n">ODESystemMetaclass</span><span class="p">):</span>
+<div class="viewcode-block" id="ODESystem"><a class="viewcode-back" href="../../../api/pharmpy.model.ODESystem.html#pharmpy.model.ODESystem">[docs]</a><span class="k">class</span> <span class="nc">ODESystem</span><span class="p">(</span><span class="n">Statement</span><span class="p">):</span>
     <span class="sd">&quot;&quot;&quot;Abstract base class for ODE systems of different forms&quot;&quot;&quot;</span>
-
-    <span class="k">def</span> <span class="fm">__getattr__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">key</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">key</span> <span class="o">==</span> <span class="s1">&#39;t&#39;</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">ODESystem</span><span class="o">.</span><span class="n">t</span>
-        <span class="k">raise</span> <span class="ne">AttributeError</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
 
 <div class="viewcode-block" id="ODESystem.to_compartmental_system"><a class="viewcode-back" href="../../../api/pharmpy.model.ODESystem.html#pharmpy.model.ODESystem.to_compartmental_system">[docs]</a>    <span class="nd">@abstractmethod</span>
     <span class="k">def</span> <span class="nf">to_compartmental_system</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">CompartmentalSystem</span><span class="p">:</span>
@@ -664,7 +656,7 @@
 <span class="sd">    &gt;&gt;&gt; import sympy</span>
 <span class="sd">    &gt;&gt;&gt; A_DEPOT = sympy.Function(&#39;A_DEPOT&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; A_CENTRAL = sympy.Function(&#39;A_CENTRAL&#39;)</span>
-<span class="sd">    &gt;&gt;&gt; t = ExplicitODESystem.t</span>
+<span class="sd">    &gt;&gt;&gt; t = sympy.Symbol(&#39;t&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; AMT, KA, K = sympy.symbols(&#39;AMT KA K&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; eq1 = sympy.Eq(sympy.Derivative(A_DEPOT(t), t), -KA * A_DEPOT(t))</span>
 <span class="sd">    &gt;&gt;&gt; eq2 = sympy.Eq(sympy.Derivative(A_CENTRAL(t)), -K*A_CENTRAL(t) + KA*A_DEPOT(t))</span>
@@ -684,6 +676,7 @@
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">odes</span><span class="p">:</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">ics</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">]):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_odes</span> <span class="o">=</span> <span class="n">odes</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_ics</span> <span class="o">=</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">ics</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">odes</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
@@ -862,7 +855,7 @@
             <span class="n">name</span> <span class="o">=</span> <span class="n">convert_name</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
             <span class="c1"># FIXME The following is not true in general!</span>
             <span class="n">dose</span> <span class="o">=</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;AMT&quot;</span><span class="p">))</span> <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="kc">None</span>
-            <span class="n">comp</span> <span class="o">=</span> <span class="n">Compartment</span><span class="p">(</span><span class="n">convert_name</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">dose</span><span class="p">)</span>
+            <span class="n">comp</span> <span class="o">=</span> <span class="n">Compartment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">convert_name</span><span class="p">(</span><span class="n">A</span><span class="o">.</span><span class="n">name</span><span class="p">),</span> <span class="n">dose</span><span class="o">=</span><span class="n">dose</span><span class="p">)</span>
             <span class="n">cb</span><span class="o">.</span><span class="n">add_compartment</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
             <span class="n">compartments</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">comp</span>
 
@@ -983,10 +976,8 @@
 <span class="sd">            Destination compartment</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">new_source</span> <span class="o">=</span> <span class="n">Compartment</span><span class="p">(</span><span class="n">source</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="kc">None</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">lag_time</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">bioavailability</span><span class="p">)</span>
-        <span class="n">new_dest</span> <span class="o">=</span> <span class="n">Compartment</span><span class="p">(</span>
-            <span class="n">destination</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">source</span><span class="o">.</span><span class="n">dose</span><span class="p">,</span> <span class="n">destination</span><span class="o">.</span><span class="n">lag_time</span><span class="p">,</span> <span class="n">destination</span><span class="o">.</span><span class="n">bioavailability</span>
-        <span class="p">)</span>
+        <span class="n">new_source</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dose</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
+        <span class="n">new_dest</span> <span class="o">=</span> <span class="n">destination</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dose</span><span class="o">=</span><span class="n">source</span><span class="o">.</span><span class="n">dose</span><span class="p">)</span>
         <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">source</span><span class="p">:</span> <span class="n">new_source</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">new_dest</span><span class="p">}</span>
         <span class="n">nx</span><span class="o">.</span><span class="n">relabel_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
 
@@ -1005,9 +996,7 @@
 <span class="sd">        Compartment</span>
 <span class="sd">            The new updated compartment</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">new_comp</span> <span class="o">=</span> <span class="n">Compartment</span><span class="p">(</span>
-            <span class="n">compartment</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">compartment</span><span class="o">.</span><span class="n">lag_time</span><span class="p">,</span> <span class="n">compartment</span><span class="o">.</span><span class="n">bioavailability</span>
-        <span class="p">)</span>
+        <span class="n">new_comp</span> <span class="o">=</span> <span class="n">compartment</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dose</span><span class="o">=</span><span class="n">dose</span><span class="p">)</span>
         <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">compartment</span><span class="p">:</span> <span class="n">new_comp</span><span class="p">}</span>
         <span class="n">nx</span><span class="o">.</span><span class="n">relabel_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_comp</span></div>
@@ -1027,9 +1016,7 @@
 <span class="sd">        Compartment</span>
 <span class="sd">            The new updated compartment</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">new_comp</span> <span class="o">=</span> <span class="n">Compartment</span><span class="p">(</span>
-            <span class="n">compartment</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">compartment</span><span class="o">.</span><span class="n">dose</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">,</span> <span class="n">compartment</span><span class="o">.</span><span class="n">bioavailability</span>
-        <span class="p">)</span>
+        <span class="n">new_comp</span> <span class="o">=</span> <span class="n">compartment</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">lag_time</span><span class="o">=</span><span class="n">lag_time</span><span class="p">)</span>
         <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">compartment</span><span class="p">:</span> <span class="n">new_comp</span><span class="p">}</span>
         <span class="n">nx</span><span class="o">.</span><span class="n">relabel_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_comp</span></div></div>
@@ -1071,8 +1058,33 @@
 <span class="sd">    └───────┘      └──────────┘      └──────────┘       └──────┘</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">builder</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_g</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">freeze</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">builder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">builder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_g</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">freeze</span><span class="p">(</span><span class="n">builder</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">copy</span><span class="p">())</span>
+        <span class="k">elif</span> <span class="n">graph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_g</span> <span class="o">=</span> <span class="n">graph</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_t</span> <span class="o">=</span> <span class="n">t</span>
+
+<div class="viewcode-block" id="CompartmentalSystem.create"><a class="viewcode-back" href="../../../api/pharmpy.model.CompartmentalSystem.html#pharmpy.model.CompartmentalSystem.create">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">builder</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">)):</span>
+        <span class="k">if</span> <span class="n">builder</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">graph</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">builder</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">graph</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Need exactly one of builder or graph to create a CompartmentalSystem&quot;</span><span class="p">)</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">t</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">builder</span><span class="o">=</span><span class="n">builder</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">graph</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="CompartmentalSystem.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.CompartmentalSystem.html#pharmpy.model.CompartmentalSystem.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t</span><span class="p">)</span>
+        <span class="n">builder</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;builder&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">builder</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;graph&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">g</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">return</span> <span class="n">CompartmentalSystem</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">builder</span><span class="o">=</span><span class="n">builder</span><span class="p">,</span> <span class="n">graph</span><span class="o">=</span><span class="n">g</span><span class="p">,</span> <span class="n">t</span><span class="o">=</span><span class="n">t</span><span class="p">)</span></div>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">t</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Independent variable of ODESystem&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">free_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1160,6 +1172,7 @@
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">)</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_t</span>
             <span class="ow">and</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_dict_of_dicts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span> <span class="o">==</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_dict_of_dicts</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="o">.</span><span class="n">dose</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="o">.</span><span class="n">dose</span>
         <span class="p">)</span>
@@ -1217,7 +1230,7 @@
 <span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; model.statements.ode_system.get_compartment_outflows(&quot;CENTRAL&quot;)</span>
-<span class="sd">        [(Compartment(OUTPUT), CL/V)]</span>
+<span class="sd">        [(Compartment(OUTPUT, amount=A_OUTPUT), CL/V)]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">compartment</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">compartment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="n">compartment</span><span class="p">)</span>
@@ -1245,7 +1258,7 @@
 <span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; model.statements.ode_system.get_compartment_inflows(&quot;OUTPUT&quot;)</span>
-<span class="sd">        [(Compartment(CENTRAL, dose=Bolus(AMT)), CL/V)]</span>
+<span class="sd">        [(Compartment(CENTRAL, amount=A_CENTRAL, dose=Bolus(AMT)), CL/V)]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">compartment</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">compartment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="n">compartment</span><span class="p">)</span>
@@ -1274,7 +1287,7 @@
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; central = model.statements.ode_system.find_compartment(&quot;CENTRAL&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; central</span>
-<span class="sd">        Compartment(CENTRAL, dose=Bolus(AMT))</span>
+<span class="sd">        Compartment(CENTRAL, amount=A_CENTRAL, dose=Bolus(AMT))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">comp</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
@@ -1323,7 +1336,7 @@
 <span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; model.statements.ode_system.output_compartment</span>
-<span class="sd">        Compartment(OUTPUT)</span>
+<span class="sd">        Compartment(OUTPUT, amount=A_OUTPUT)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">zeroout</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">out_degree</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">out_degree</span><span class="p">()</span> <span class="k">if</span> <span class="n">out_degree</span> <span class="o">==</span> <span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">zeroout</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
@@ -1348,7 +1361,7 @@
 <span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; model.statements.ode_system.dosing_compartment</span>
-<span class="sd">        Compartment(CENTRAL, dose=Bolus(AMT))</span>
+<span class="sd">        Compartment(CENTRAL, amount=A_CENTRAL, dose=Bolus(AMT))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
@@ -1372,7 +1385,7 @@
 <span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; model.statements.ode_system.central_compartment</span>
-<span class="sd">        Compartment(CENTRAL, dose=Bolus(AMT))</span>
+<span class="sd">        Compartment(CENTRAL, amount=A_CENTRAL, dose=Bolus(AMT))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_compartment</span>
         <span class="k">try</span><span class="p">:</span>
@@ -1480,7 +1493,7 @@
 <span class="sd">        &gt;&gt;&gt; set_first_order_absorption(model)       # doctest: +ELLIPSIS</span>
 <span class="sd">        &lt;...&gt;</span>
 <span class="sd">        &gt;&gt;&gt; model.statements.ode_system.find_depot(model.statements)</span>
-<span class="sd">        Compartment(DEPOT, dose=Bolus(AMT))</span>
+<span class="sd">        Compartment(DEPOT, amount=A_DEPOT, dose=Bolus(AMT))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">transits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_transit_compartments</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
         <span class="n">depot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_depot</span><span class="p">()</span>
@@ -1695,10 +1708,19 @@
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;pre&gt;</span><span class="si">{</span><span class="n">s</span><span class="si">}</span><span class="s1">&lt;/pre&gt;&#39;</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">def</span> <span class="nf">lag_string</span><span class="p">(</span><span class="n">comp</span><span class="p">):</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">tlag=</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">lag_time</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">comp</span><span class="o">.</span><span class="n">lag_time</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">f_string</span><span class="p">(</span><span class="n">comp</span><span class="p">):</span>
+            <span class="k">return</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">F=</span><span class="si">{</span><span class="n">comp</span><span class="o">.</span><span class="n">bioavailability</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">if</span> <span class="n">comp</span><span class="o">.</span><span class="n">bioavailability</span> <span class="o">!=</span> <span class="mi">1</span> <span class="k">else</span> <span class="s2">&quot;&quot;</span>
+
+        <span class="k">def</span> <span class="nf">comp_string</span><span class="p">(</span><span class="n">comp</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">comp</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">lag_string</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span> <span class="o">+</span> <span class="n">f_string</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
+
         <span class="n">output</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">output_compartment</span>
         <span class="n">output_box</span> <span class="o">=</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">output</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">central</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">central_compartment</span>
-        <span class="n">central_box</span> <span class="o">=</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">central</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">central_box</span> <span class="o">=</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">comp_string</span><span class="p">(</span><span class="n">central</span><span class="p">))</span>
         <span class="n">depot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_depot</span><span class="p">()</span>
         <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartment</span>
         <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
@@ -1719,14 +1741,14 @@
             <span class="n">main_row</span> <span class="o">=</span> <span class="mi">2</span>
         <span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">transit</span> <span class="ow">in</span> <span class="n">transits</span><span class="p">:</span>
-            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">transit</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">comp_string</span><span class="p">(</span><span class="n">transit</span><span class="p">)))</span>
             <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
                 <span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">transit</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]))</span>
             <span class="p">)</span>
             <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="k">if</span> <span class="n">depot</span><span class="p">:</span>
-            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">depot</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">comp_string</span><span class="p">(</span><span class="n">depot</span><span class="p">)))</span>
             <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Arrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">depot</span><span class="p">)[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">])))</span>
             <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
@@ -1737,7 +1759,7 @@
         <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
         <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="n">main_row</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">output_box</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">periphs</span><span class="p">:</span>
-            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">central_col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">central_col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">comp_string</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">0</span><span class="p">])))</span>
             <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
                 <span class="mi">1</span><span class="p">,</span>
                 <span class="n">central_col</span><span class="p">,</span>
@@ -1746,7 +1768,7 @@
                 <span class="p">),</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">periphs</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">central_col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">))</span>
+            <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="n">central_col</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Box</span><span class="p">(</span><span class="n">comp_string</span><span class="p">(</span><span class="n">periphs</span><span class="p">[</span><span class="mi">1</span><span class="p">])))</span>
             <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span>
                 <span class="mi">3</span><span class="p">,</span>
                 <span class="n">central_col</span><span class="p">,</span>
@@ -1769,6 +1791,8 @@
 <span class="sd">        Compartment name</span>
 <span class="sd">    dose : Dose</span>
 <span class="sd">        Dose object for dose into this compartment. Default None for no dose.</span>
+<span class="sd">    input : Expression</span>
+<span class="sd">        Expression for other inputs to the compartment</span>
 <span class="sd">    lag_time : Expression</span>
 <span class="sd">        Lag time for doses entering this compartment. Default 0</span>
 <span class="sd">    bioavailability : Expression</span>
@@ -1777,41 +1801,79 @@
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.model import Bolus, Compartment</span>
-<span class="sd">    &gt;&gt;&gt; comp = Compartment(&quot;CENTRAL&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; comp = Compartment.create(&quot;CENTRAL&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; comp</span>
-<span class="sd">    Compartment(CENTRAL)</span>
-<span class="sd">    &gt;&gt;&gt; comp = Compartment(&quot;DEPOT&quot;, lag_time=&quot;ALAG&quot;)</span>
+<span class="sd">    Compartment(CENTRAL, amount=A_CENTRAL)</span>
+<span class="sd">    &gt;&gt;&gt; comp = Compartment.create(&quot;DEPOT&quot;, lag_time=&quot;ALAG&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; comp</span>
-<span class="sd">    Compartment(DEPOT, lag_time=ALAG)</span>
+<span class="sd">    Compartment(DEPOT, amount=A_DEPOT, lag_time=ALAG)</span>
 <span class="sd">    &gt;&gt;&gt; dose = Bolus.create(&quot;AMT&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; comp = Compartment(&quot;DEPOT&quot;, dose=dose)</span>
+<span class="sd">    &gt;&gt;&gt; comp = Compartment.create(&quot;DEPOT&quot;, dose=dose)</span>
 <span class="sd">    &gt;&gt;&gt; comp</span>
-<span class="sd">    Compartment(DEPOT, dose=Bolus(AMT))</span>
+<span class="sd">    Compartment(DEPOT, amount=A_DEPOT, dose=Bolus(AMT))</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lag_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bioavailability</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
+        <span class="bp">self</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="n">amount</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="nb">input</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="n">lag_time</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="n">bioavailability</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+    <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_amount</span> <span class="o">=</span> <span class="n">amount</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dose</span> <span class="o">=</span> <span class="n">dose</span>
-        <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span> <span class="o">=</span> <span class="n">lag_time</span>
-        <span class="k">if</span> <span class="n">bioavailability</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span> <span class="o">=</span> <span class="n">bioavailability</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_input</span> <span class="o">=</span> <span class="nb">input</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span> <span class="o">=</span> <span class="n">lag_time</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span> <span class="o">=</span> <span class="n">bioavailability</span>
 
 <div class="viewcode-block" id="Compartment.create"><a class="viewcode-back" href="../../../api/pharmpy.model.Compartment.html#pharmpy.model.Compartment.create">[docs]</a>    <span class="nd">@classmethod</span>
-    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">,</span> <span class="n">dose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">lag_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bioavailability</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="n">amount</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="nb">input</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="n">lag_time</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
+        <span class="n">bioavailability</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
+    <span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Name of a Compartment must be of string type&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">amount</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">amount</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">amount</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;A_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dose</span><span class="p">,</span> <span class="n">Dose</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;dose must be of Dose type (or None)&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">lag_time</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">lag_time</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">bioavailability</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">bioavailability</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">bioavailability</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">,</span> <span class="n">bioavailability</span><span class="p">)</span></div>
+        <span class="nb">input</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
+        <span class="n">lag_time</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">lag_time</span><span class="p">)</span>
+        <span class="n">bioavailability</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">bioavailability</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">amount</span><span class="o">=</span><span class="n">amount</span><span class="p">,</span>
+            <span class="n">dose</span><span class="o">=</span><span class="n">dose</span><span class="p">,</span>
+            <span class="nb">input</span><span class="o">=</span><span class="nb">input</span><span class="p">,</span>
+            <span class="n">lag_time</span><span class="o">=</span><span class="n">lag_time</span><span class="p">,</span>
+            <span class="n">bioavailability</span><span class="o">=</span><span class="n">bioavailability</span><span class="p">,</span>
+        <span class="p">)</span></div>
+
+<div class="viewcode-block" id="Compartment.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.Compartment.html#pharmpy.model.Compartment.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+        <span class="n">amount</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_amount</span><span class="p">)</span>
+        <span class="n">dose</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dose&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dose</span><span class="p">)</span>
+        <span class="nb">input</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;input&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input</span><span class="p">)</span>
+        <span class="n">lag_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lag_time&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span><span class="p">)</span>
+        <span class="n">bioavailability</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bioavailability&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Compartment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">amount</span><span class="o">=</span><span class="n">amount</span><span class="p">,</span>
+            <span class="n">dose</span><span class="o">=</span><span class="n">dose</span><span class="p">,</span>
+            <span class="nb">input</span><span class="o">=</span><span class="nb">input</span><span class="p">,</span>
+            <span class="n">lag_time</span><span class="o">=</span><span class="n">lag_time</span><span class="p">,</span>
+            <span class="n">bioavailability</span><span class="o">=</span><span class="n">bioavailability</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1819,8 +1881,17 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
 
     <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">amount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="sd">&quot;&quot;&quot;Compartment amount symbol&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_amount</span>
+
+    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dose</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">lag_time</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1833,19 +1904,6 @@
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">amount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="sd">&quot;&quot;&quot;Symbol for the amount in the compartment</span>
-
-<span class="sd">        Examples</span>
-<span class="sd">        --------</span>
-<span class="sd">        &gt;&gt;&gt; from pharmpy.model import Compartment</span>
-<span class="sd">        &gt;&gt;&gt; comp = Compartment(&quot;CENTRAL&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; comp.amount</span>
-<span class="sd">        A_CENTRAL</span>
-<span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;A_</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-
-    <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">free_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="sd">&quot;&quot;&quot;Get set of all free symbols in the compartment</span>
 
@@ -1853,13 +1911,14 @@
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from pharmpy.model import Bolus, Compartment</span>
 <span class="sd">        &gt;&gt;&gt; dose = Bolus.create(&quot;AMT&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; comp = Compartment(&quot;CENTRAL&quot;, dose=dose, lag_time=&quot;ALAG&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; comp = Compartment.create(&quot;CENTRAL&quot;, dose=dose, lag_time=&quot;ALAG&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; comp.free_symbols  # doctest: +SKIP</span>
-<span class="sd">        {ALAG, AMT}</span>
+<span class="sd">        {A_CENTRAL, ALAG, AMT}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">symbs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">symbs</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">symbs</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">symbs</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lag_time</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">symbs</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bioavailability</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="k">return</span> <span class="n">symbs</span>
@@ -1871,9 +1930,9 @@
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from pharmpy.model import Bolus, Compartment</span>
 <span class="sd">        &gt;&gt;&gt; dose = Bolus.create(&quot;AMT&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; comp = Compartment(&quot;CENTRAL&quot;, dose=dose)</span>
+<span class="sd">        &gt;&gt;&gt; comp = Compartment.create(&quot;CENTRAL&quot;, dose=dose)</span>
 <span class="sd">        &gt;&gt;&gt; comp.subs({&quot;AMT&quot;: &quot;DOSE&quot;})</span>
-<span class="sd">        Compartment(CENTRAL, dose=Bolus(DOSE))</span>
+<span class="sd">        Compartment(CENTRAL, amount=A_CENTRAL, dose=Bolus(DOSE))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">dose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">)</span>
@@ -1881,16 +1940,20 @@
             <span class="n">dose</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">return</span> <span class="n">Compartment</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
-            <span class="n">dose</span><span class="p">,</span>
-            <span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">lag_time</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">),</span>
-            <span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">bioavailability</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">),</span>
+            <span class="n">amount</span><span class="o">=</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_amount</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">),</span>
+            <span class="n">dose</span><span class="o">=</span><span class="n">dose</span><span class="p">,</span>
+            <span class="nb">input</span><span class="o">=</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">),</span>
+            <span class="n">lag_time</span><span class="o">=</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">),</span>
+            <span class="n">bioavailability</span><span class="o">=</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">),</span>
         <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Compartment</span><span class="p">)</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">name</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">amount</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">amount</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">dose</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">input</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">lag_time</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">lag_time</span>
         <span class="p">)</span>
 
@@ -1898,9 +1961,13 @@
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">lag</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lag_time</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;, lag_time=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">lag_time</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="n">dose</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;, dose=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">dose</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Compartment(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}{</span><span class="n">dose</span><span class="si">}{</span><span class="n">lag</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+        <span class="n">lag</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lag_time</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;, lag_time=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">dose</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;, dose=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dose</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="nb">input</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;, input=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_input</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">bioavailability</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bioavailability</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;, bioavailability=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Compartment(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">, amount=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_amount</span><span class="si">}{</span><span class="n">dose</span><span class="si">}{</span><span class="nb">input</span><span class="si">}{</span><span class="n">lag</span><span class="si">}{</span><span class="n">bioavailability</span><span class="si">}</span><span class="s1">)&#39;</span></div>
 
 
 <span class="k">class</span> <span class="nc">Dose</span><span class="p">(</span><span class="n">ABC</span><span class="p">):</span>
@@ -1938,6 +2005,10 @@
 <div class="viewcode-block" id="Bolus.create"><a class="viewcode-back" href="../../../api/pharmpy.model.Bolus.html#pharmpy.model.Bolus.create">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">amount</span><span class="p">):</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">parse_expr</span><span class="p">(</span><span class="n">amount</span><span class="p">))</span></div>
+
+<div class="viewcode-block" id="Bolus.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.Bolus.html#pharmpy.model.Bolus.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">amount</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_amount</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Bolus</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">amount</span><span class="o">=</span><span class="n">amount</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">amount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -2020,6 +2091,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">duration</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">duration</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">parse_expr</span><span class="p">(</span><span class="n">amount</span><span class="p">),</span> <span class="n">rate</span><span class="p">,</span> <span class="n">duration</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="Infusion.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.Infusion.html#pharmpy.model.Infusion.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">amount</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_amount</span><span class="p">)</span>
+        <span class="n">rate</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;rate&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_rate</span><span class="p">)</span>
+        <span class="n">duration</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;duration&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_duration</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">Infusion</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">amount</span><span class="o">=</span><span class="n">amount</span><span class="p">,</span> <span class="n">rate</span><span class="o">=</span><span class="n">rate</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">duration</span><span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">amount</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

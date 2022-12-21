@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.estmethod.tool &#8212; Pharmpy 0.87.0 documentation</title>
+    <title>pharmpy.tools.estmethod.tool &#8212; Pharmpy 0.88.0 documentation</title>
   
   
   
@@ -436,20 +436,22 @@
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">pharmpy.tools.estmethod.algorithms</span> <span class="k">as</span> <span class="nn">algorithms</span>
+<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fn.signature</span> <span class="kn">import</span> <span class="n">with_same_arguments_as</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fn.type</span> <span class="kn">import</span> <span class="n">with_runtime_arguments_type_check</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">has_first_order_elimination</span>
 <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">ModelfitResults</span>
-<span class="kn">from</span> <span class="nn">pharmpy.tools</span> <span class="kn">import</span> <span class="n">summarize_modelfit_results</span>
-<span class="kn">from</span> <span class="nn">pharmpy.tools.common</span> <span class="kn">import</span> <span class="n">ToolResults</span><span class="p">,</span> <span class="n">summarize_tool</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools</span> <span class="kn">import</span> <span class="n">summarize_errors</span><span class="p">,</span> <span class="n">summarize_modelfit_results</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.common</span> <span class="kn">import</span> <span class="n">ToolResults</span>
 <span class="kn">from</span> <span class="nn">pharmpy.tools.modelfit</span> <span class="kn">import</span> <span class="n">create_fit_workflow</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Workflow</span>
 
 <span class="n">EST_METHODS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;FOCE&#39;</span><span class="p">,</span> <span class="s1">&#39;FO&#39;</span><span class="p">,</span> <span class="s1">&#39;IMP&#39;</span><span class="p">,</span> <span class="s1">&#39;IMPMAP&#39;</span><span class="p">,</span> <span class="s1">&#39;ITS&#39;</span><span class="p">,</span> <span class="s1">&#39;SAEM&#39;</span><span class="p">,</span> <span class="s1">&#39;LAPLACE&#39;</span><span class="p">,</span> <span class="s1">&#39;BAYES&#39;</span><span class="p">)</span>
 <span class="n">SOLVERS</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;CVODES&#39;</span><span class="p">,</span> <span class="s1">&#39;DGEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;DVERK&#39;</span><span class="p">,</span> <span class="s1">&#39;IDA&#39;</span><span class="p">,</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">,</span> <span class="s1">&#39;LSODI&#39;</span><span class="p">)</span>
 
-<span class="n">ALGORITHMS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([</span><span class="s1">&#39;exhaustive&#39;</span><span class="p">,</span> <span class="s1">&#39;reduced&#39;</span><span class="p">])</span>
+<span class="n">ALGORITHMS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([</span><span class="s1">&#39;exhaustive&#39;</span><span class="p">,</span> <span class="s1">&#39;exhaustive_with_update&#39;</span><span class="p">,</span> <span class="s1">&#39;exhaustive_only_eval&#39;</span><span class="p">])</span>
 
 
 <span class="k">def</span> <span class="nf">create_workflow</span><span class="p">(</span>
@@ -464,7 +466,7 @@
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    algorithm : str</span>
-<span class="sd">        The algorithm to use (can be &#39;exhaustive&#39; or &#39;reduced&#39;</span>
+<span class="sd">        The algorithm to use (can be &#39;exhaustive&#39;, &#39;exhaustive_with_update&#39; or &#39;exhaustive_only_eval&#39;)</span>
 <span class="sd">    methods : list or None</span>
 <span class="sd">        List of estimation methods to test. Can be specified as &#39;all&#39;, a list of methods, or</span>
 <span class="sd">        None (to not test any estimation method)</span>
@@ -544,18 +546,12 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">res_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
-    <span class="c1"># FIXME: support other rank_type, allow None as cutoff</span>
-    <span class="n">rank_type</span> <span class="o">=</span> <span class="s1">&#39;ofv&#39;</span>
-    <span class="n">summary_tool</span> <span class="o">=</span> <span class="n">summarize_tool</span><span class="p">(</span>
-        <span class="n">res_models</span><span class="p">,</span>
-        <span class="n">base_model</span><span class="p">,</span>
-        <span class="n">rank_type</span><span class="p">,</span>
-        <span class="o">-</span><span class="mi">1000</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="n">summary_tool</span> <span class="o">=</span> <span class="n">summarize_tool</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
     <span class="n">summary_models</span> <span class="o">=</span> <span class="n">summarize_modelfit_results</span><span class="p">(</span>
         <span class="p">[</span><span class="n">base_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">res_models</span><span class="p">],</span>
         <span class="n">include_all_estimation_steps</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span>
     <span class="p">)</span>
+    <span class="n">summary_errors</span> <span class="o">=</span> <span class="n">summarize_errors</span><span class="p">(</span><span class="n">models</span><span class="p">)</span>
     <span class="n">summary_settings</span> <span class="o">=</span> <span class="n">summarize_estimation_steps</span><span class="p">([</span><span class="n">base_model</span><span class="p">]</span> <span class="o">+</span> <span class="n">res_models</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">base_model</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">input_model</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
@@ -567,7 +563,7 @@
         <span class="n">summary_tool</span><span class="o">=</span><span class="n">summary_tool</span><span class="p">,</span>
         <span class="n">summary_models</span><span class="o">=</span><span class="n">summary_models</span><span class="p">,</span>
         <span class="n">summary_settings</span><span class="o">=</span><span class="n">summary_settings</span><span class="p">,</span>
-        <span class="n">input_model</span><span class="o">=</span><span class="n">input_model</span><span class="p">,</span>
+        <span class="n">summary_errors</span><span class="o">=</span><span class="n">summary_errors</span><span class="p">,</span>
         <span class="n">models</span><span class="o">=</span><span class="n">models</span><span class="p">,</span>
     <span class="p">)</span>
 
@@ -577,8 +573,26 @@
     <span class="n">rst_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;report.rst&#39;</span>
 
     <span class="n">summary_settings</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">best_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
-    <span class="n">input_model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+
+
+<span class="k">def</span> <span class="nf">summarize_tool</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
+    <span class="n">rows</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
+        <span class="n">description</span><span class="p">,</span> <span class="n">parent_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">description</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parent_model</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
+        <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">ofv</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">ofv</span>
+            <span class="n">runtime_est</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">estimation_runtime_iterations</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ofv</span><span class="p">,</span> <span class="n">runtime_est</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span><span class="p">,</span> <span class="n">np</span><span class="o">.</span><span class="n">nan</span>
+        <span class="n">rows</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">description</span><span class="p">,</span> <span class="n">ofv</span><span class="p">,</span> <span class="n">runtime_est</span><span class="p">,</span> <span class="n">parent_model</span><span class="p">)</span>
+
+    <span class="n">colnames</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="s1">&#39;ofv&#39;</span><span class="p">,</span> <span class="s1">&#39;runtime_estimation&#39;</span><span class="p">,</span> <span class="s1">&#39;parent_model&#39;</span><span class="p">]</span>
+    <span class="n">index</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Index</span><span class="p">(</span><span class="n">rows</span><span class="o">.</span><span class="n">keys</span><span class="p">(),</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;model&#39;</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">(</span><span class="n">rows</span><span class="o">.</span><span class="n">values</span><span class="p">(),</span> <span class="n">index</span><span class="o">=</span><span class="n">index</span><span class="p">,</span> <span class="n">columns</span><span class="o">=</span><span class="n">colnames</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">df</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;ofv&#39;</span><span class="p">])</span>
 
 
 <span class="k">def</span> <span class="nf">summarize_estimation_steps</span><span class="p">(</span><span class="n">models</span><span class="p">):</span>
@@ -593,7 +607,12 @@
 
 <span class="nd">@with_runtime_arguments_type_check</span>
 <span class="nd">@with_same_arguments_as</span><span class="p">(</span><span class="n">create_workflow</span><span class="p">)</span>
-<span class="k">def</span> <span class="nf">validate_input</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">methods</span><span class="p">,</span> <span class="n">solvers</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">validate_input</span><span class="p">(</span><span class="n">algorithm</span><span class="p">,</span> <span class="n">methods</span><span class="p">,</span> <span class="n">solvers</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">solvers</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">has_first_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Invalid input `model`: testing non-linear solvers on linear system is not supported&#39;</span>
+        <span class="p">)</span>
+
     <span class="k">if</span> <span class="n">algorithm</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ALGORITHMS</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;Invalid `algorithm`: got `</span><span class="si">{</span><span class="n">algorithm</span><span class="si">}</span><span class="s1">`, must be one of </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">ALGORITHMS</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span>

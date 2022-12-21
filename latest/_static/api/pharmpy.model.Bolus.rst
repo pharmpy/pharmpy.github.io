@@ -18,6 +18,7 @@ Bolus
    .. autosummary::
 
       ~Bolus.create
+      ~Bolus.replace
       ~Bolus.subs
 
    .. rubric:: Attributes Documentation
@@ -28,4 +29,5 @@ Bolus
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: replace
    .. automethod:: subs

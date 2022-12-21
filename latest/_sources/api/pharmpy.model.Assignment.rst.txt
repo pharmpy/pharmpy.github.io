@@ -20,6 +20,7 @@ Assignment
    .. autosummary::
 
       ~Assignment.create
+      ~Assignment.replace
       ~Assignment.subs
 
    .. rubric:: Attributes Documentation
@@ -32,4 +33,5 @@ Assignment
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: replace
    .. automethod:: subs

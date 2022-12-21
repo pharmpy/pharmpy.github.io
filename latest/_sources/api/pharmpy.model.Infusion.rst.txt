@@ -20,6 +20,7 @@ Infusion
    .. autosummary::
 
       ~Infusion.create
+      ~Infusion.replace
       ~Infusion.subs
 
    .. rubric:: Attributes Documentation
@@ -32,4 +33,5 @@ Infusion
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: replace
    .. automethod:: subs
