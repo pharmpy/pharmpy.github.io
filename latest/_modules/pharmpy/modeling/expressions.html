@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.88.0 documentation</title>
+    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.89.0 documentation</title>
   
   
   
@@ -37,9 +37,6 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -47,7 +44,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pharmpy/modeling/expressions';</script>
-    <link rel="shortcut icon" href="../../../_static/Pharmpy_symbol.svg"/>
+    <link rel="icon" href="../../../_static/Pharmpy_symbol.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -443,6 +440,7 @@
 <span class="kn">from</span> <span class="nn">pharmpy.internals.graph.directed.connected_components</span> <span class="kn">import</span> <span class="n">strongly_connected_component_of</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.graph.directed.inverse</span> <span class="kn">import</span> <span class="n">inverse</span> <span class="k">as</span> <span class="n">graph_inverse</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.graph.directed.reachability</span> <span class="kn">import</span> <span class="n">reachable_from</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.unicode</span> <span class="kn">import</span> <span class="n">bracket</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Assignment</span><span class="p">,</span>
     <span class="n">Compartment</span><span class="p">,</span>
@@ -451,6 +449,7 @@
     <span class="n">ODESystem</span><span class="p">,</span>
     <span class="n">Statement</span><span class="p">,</span>
     <span class="n">Statements</span><span class="p">,</span>
+    <span class="n">output</span><span class="p">,</span>
 <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.parameters</span> <span class="kn">import</span> <span class="n">get_thetas</span>
@@ -459,8 +458,8 @@
 <span class="n">U</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;U&#39;</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="get_observation_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_observation_expression.html#pharmpy.modeling.get_observation_expression">[docs]</a><span class="k">def</span> <span class="nf">get_observation_expression</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get the full symbolic expression for the observation according to the model</span>
+<div class="viewcode-block" id="get_observation_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_observation_expression.html#pharmpy.modeling.get_observation_expression">[docs]</a><span class="k">def</span> <span class="nf">get_observation_expression</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the full symbolic expression for the observation according to the model</span>
 
 <span class="sd">    This function currently only support models without ODE systems</span>
 
@@ -481,8 +480,8 @@
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno_linear&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; expr = get_observation_expression(model)</span>
 <span class="sd">    &gt;&gt;&gt; sympy.pprint(expr)</span>
-<span class="sd">    D_EPSETA1_2⋅EPS(1)⋅(ETA(2) - OETA₂) + D_ETA1⋅(ETA(1) - OETA₁) + D_ETA2⋅(ETA(2)</span>
-<span class="sd">     - OETA₂) + EPS(1)⋅(D_EPS1 + D_EPSETA1_1⋅(ETA(1) - OETA₁)) + OPRED</span>
+<span class="sd">    D_EPSETA1_2⋅EPS₁⋅(ETA₂ - OETA₂) + D_ETA1⋅(ETA₁ - OETA₁) + D_ETA2⋅(ETA₂ - OETA₂</span>
+<span class="sd">    ) + EPS₁⋅(D_EPS1 + D_EPSETA1_1⋅(ETA₁ - OETA₁)) + OPRED</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">stats</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
     <span class="n">dv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span>
@@ -499,8 +498,8 @@
     <span class="k">return</span> <span class="n">y</span></div>
 
 
-<div class="viewcode-block" id="get_individual_prediction_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_individual_prediction_expression.html#pharmpy.modeling.get_individual_prediction_expression">[docs]</a><span class="k">def</span> <span class="nf">get_individual_prediction_expression</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get the full symbolic expression for the modelled individual prediction</span>
+<div class="viewcode-block" id="get_individual_prediction_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_individual_prediction_expression.html#pharmpy.modeling.get_individual_prediction_expression">[docs]</a><span class="k">def</span> <span class="nf">get_individual_prediction_expression</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the full symbolic expression for the modelled individual prediction</span>
 
 <span class="sd">    This function currently only support models without ODE systems</span>
 
@@ -519,7 +518,7 @@
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, get_individual_prediction_expression</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno_linear&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; get_individual_prediction_expression(model)</span>
-<span class="sd">    D_ETA1*(ETA(1) - OETA1) + D_ETA2*(ETA(2) - OETA2) + OPRED</span>
+<span class="sd">    D_ETA1*(ETA_1 - OETA1) + D_ETA2*(ETA_2 - OETA2) + OPRED</span>
 
 <span class="sd">    See Also</span>
 <span class="sd">    --------</span>
@@ -532,8 +531,8 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="get_population_prediction_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_population_prediction_expression.html#pharmpy.modeling.get_population_prediction_expression">[docs]</a><span class="k">def</span> <span class="nf">get_population_prediction_expression</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Get the full symbolic expression for the modelled population prediction</span>
+<div class="viewcode-block" id="get_population_prediction_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_population_prediction_expression.html#pharmpy.modeling.get_population_prediction_expression">[docs]</a><span class="k">def</span> <span class="nf">get_population_prediction_expression</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get the full symbolic expression for the modelled population prediction</span>
 
 <span class="sd">    This function currently only support models without ODE systems</span>
 
@@ -566,8 +565,8 @@
     <span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="calculate_eta_gradient_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_eta_gradient_expression.html#pharmpy.modeling.calculate_eta_gradient_expression">[docs]</a><span class="k">def</span> <span class="nf">calculate_eta_gradient_expression</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the symbolic expression for the eta gradient</span>
+<div class="viewcode-block" id="calculate_eta_gradient_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_eta_gradient_expression.html#pharmpy.modeling.calculate_eta_gradient_expression">[docs]</a><span class="k">def</span> <span class="nf">calculate_eta_gradient_expression</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the symbolic expression for the eta gradient</span>
 
 <span class="sd">    This function currently only support models without ODE systems</span>
 
@@ -597,8 +596,8 @@
     <span class="k">return</span> <span class="n">d</span></div>
 
 
-<div class="viewcode-block" id="calculate_epsilon_gradient_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_epsilon_gradient_expression.html#pharmpy.modeling.calculate_epsilon_gradient_expression">[docs]</a><span class="k">def</span> <span class="nf">calculate_epsilon_gradient_expression</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Calculate the symbolic expression for the epsilon gradient</span>
+<div class="viewcode-block" id="calculate_epsilon_gradient_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_epsilon_gradient_expression.html#pharmpy.modeling.calculate_epsilon_gradient_expression">[docs]</a><span class="k">def</span> <span class="nf">calculate_epsilon_gradient_expression</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate the symbolic expression for the epsilon gradient</span>
 
 <span class="sd">    This function currently only support models without ODE systems</span>
 
@@ -617,7 +616,7 @@
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, calculate_epsilon_gradient_expression</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno_linear&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; calculate_epsilon_gradient_expression(model)</span>
-<span class="sd">    [D_EPS1 + D_EPSETA1_1*(ETA(1) - OETA1) + D_EPSETA1_2*(ETA(2) - OETA2)]</span>
+<span class="sd">    [D_EPS1 + D_EPSETA1_1*(ETA_1 - OETA1) + D_EPSETA1_2*(ETA_2 - OETA2)]</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -629,8 +628,8 @@
     <span class="k">return</span> <span class="n">d</span></div>
 
 
-<div class="viewcode-block" id="create_symbol"><a class="viewcode-back" href="../../../api/pharmpy.modeling.create_symbol.html#pharmpy.modeling.create_symbol">[docs]</a><span class="k">def</span> <span class="nf">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">stem</span><span class="p">,</span> <span class="n">force_numbering</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Create a new unique variable symbol given a model</span>
+<div class="viewcode-block" id="create_symbol"><a class="viewcode-back" href="../../../api/pharmpy.modeling.create_symbol.html#pharmpy.modeling.create_symbol">[docs]</a><span class="k">def</span> <span class="nf">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">stem</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">force_numbering</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new unique variable symbol given a model</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -697,8 +696,8 @@
     <span class="k">return</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">leafs</span><span class="p">)</span>
 
 
-<div class="viewcode-block" id="mu_reference_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.mu_reference_model.html#pharmpy.modeling.mu_reference_model">[docs]</a><span class="k">def</span> <span class="nf">mu_reference_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert model to use mu-referencing</span>
+<div class="viewcode-block" id="mu_reference_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.mu_reference_model.html#pharmpy.modeling.mu_reference_model">[docs]</a><span class="k">def</span> <span class="nf">mu_reference_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Convert model to use mu-referencing</span>
 
 <span class="sd">    Mu-referencing an eta is to separately define its actual mu (mean) parameter.</span>
 <span class="sd">    For example: :math:`CL = \theta_1 e^{\eta_1}` with :math:`\eta_1` following a zero-mean</span>
@@ -724,16 +723,16 @@
 <span class="sd">            ⎨</span>
 <span class="sd">    BTIME = ⎩ 0     otherwise</span>
 <span class="sd">    TAD = -BTIME + TIME</span>
-<span class="sd">    TVCL = THETA(1)⋅WGT</span>
-<span class="sd">    TVV = THETA(2)⋅WGT</span>
-<span class="sd">          ⎧TVV⋅(THETA(3) + 1)  for APGR &lt; 5</span>
+<span class="sd">    TVCL = PTVCL⋅WGT</span>
+<span class="sd">    TVV = PTVV⋅WGT</span>
+<span class="sd">          ⎧TVV⋅(THETA₃ + 1)  for APGR &lt; 5</span>
 <span class="sd">          ⎨</span>
 <span class="sd">    TVV = ⎩       TVV           otherwise</span>
 <span class="sd">    μ₁ = log(TVCL)</span>
-<span class="sd">          ETA(1) + μ₁</span>
+<span class="sd">          ETA₁ + μ₁</span>
 <span class="sd">    CL = ℯ</span>
 <span class="sd">    μ₂ = log(TVV)</span>
-<span class="sd">         ETA(2) + μ₂</span>
+<span class="sd">         ETA₂ + μ₂</span>
 <span class="sd">    V = ℯ</span>
 <span class="sd">    S₁ = V</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -762,8 +761,8 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="simplify_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.simplify_expression.html#pharmpy.modeling.simplify_expression">[docs]</a><span class="k">def</span> <span class="nf">simplify_expression</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expr</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Simplify expression given constraints in model</span>
+<div class="viewcode-block" id="simplify_expression"><a class="viewcode-back" href="../../../api/pharmpy.modeling.simplify_expression.html#pharmpy.modeling.simplify_expression">[docs]</a><span class="k">def</span> <span class="nf">simplify_expression</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Simplify expression given constraints in model</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -818,8 +817,8 @@
     <span class="k">return</span> <span class="n">simp</span></div>
 
 
-<div class="viewcode-block" id="solve_ode_system"><a class="viewcode-back" href="../../../api/pharmpy.modeling.solve_ode_system.html#pharmpy.modeling.solve_ode_system">[docs]</a><span class="k">def</span> <span class="nf">solve_ode_system</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Replace ODE system with analytical solution if possible</span>
+<div class="viewcode-block" id="solve_ode_system"><a class="viewcode-back" href="../../../api/pharmpy.modeling.solve_ode_system.html#pharmpy.modeling.solve_ode_system">[docs]</a><span class="k">def</span> <span class="nf">solve_ode_system</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Replace ODE system with analytical solution if possible</span>
 
 <span class="sd">    Warnings</span>
 <span class="sd">    --------</span>
@@ -840,10 +839,10 @@
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
-<span class="sd">    Bolus(AMT)</span>
-<span class="sd">    ┌───────┐       ┌──────┐</span>
-<span class="sd">    │CENTRAL│──CL/V→│OUTPUT│</span>
-<span class="sd">    └───────┘       └──────┘</span>
+<span class="sd">    Bolus(AMT, admid=1)</span>
+<span class="sd">    ┌───────┐</span>
+<span class="sd">    │CENTRAL│──CL/V→</span>
+<span class="sd">    └───────┘</span>
 <span class="sd">    &gt;&gt;&gt; solve_ode_system(model)        # doctest: +ELLIPSIS</span>
 <span class="sd">    &lt;...&gt;</span>
 
@@ -851,13 +850,11 @@
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="k">if</span> <span class="n">odes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">model</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">odes</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">):</span>
-        <span class="n">odes</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">to_explicit_system</span><span class="p">()</span>
     <span class="n">ics</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">odes</span><span class="o">.</span><span class="n">ics</span><span class="p">)</span>
     <span class="n">ics</span><span class="o">.</span><span class="n">popitem</span><span class="p">()</span>
     <span class="c1"># FIXME: Should set assumptions on symbols before solving</span>
     <span class="c1"># FIXME: Need a way to handle systems with no explicit solutions</span>
-    <span class="n">sol</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">dsolve</span><span class="p">(</span><span class="n">odes</span><span class="o">.</span><span class="n">odes</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">],</span> <span class="n">ics</span><span class="o">=</span><span class="n">ics</span><span class="p">)</span>
+    <span class="n">sol</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">dsolve</span><span class="p">(</span><span class="n">odes</span><span class="o">.</span><span class="n">eqs</span><span class="p">,</span> <span class="n">ics</span><span class="o">=</span><span class="n">ics</span><span class="p">)</span>
     <span class="n">new</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">:</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
@@ -870,8 +867,8 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="make_declarative"><a class="viewcode-back" href="../../../api/pharmpy.modeling.make_declarative.html#pharmpy.modeling.make_declarative">[docs]</a><span class="k">def</span> <span class="nf">make_declarative</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Make the model statments declarative</span>
+<div class="viewcode-block" id="make_declarative"><a class="viewcode-back" href="../../../api/pharmpy.modeling.make_declarative.html#pharmpy.modeling.make_declarative">[docs]</a><span class="k">def</span> <span class="nf">make_declarative</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Make the model statments declarative</span>
 
 <span class="sd">    Each symbol will only be declared once.</span>
 
@@ -894,14 +891,14 @@
 <span class="sd">            ⎨</span>
 <span class="sd">    BTIME = ⎩ 0     otherwise</span>
 <span class="sd">    TAD = -BTIME + TIME</span>
-<span class="sd">    TVCL = THETA(1)⋅WGT</span>
-<span class="sd">    TVV = THETA(2)⋅WGT</span>
-<span class="sd">          ⎧TVV⋅(THETA(3) + 1)  for APGR &lt; 5</span>
+<span class="sd">    TVCL = PTVCL⋅WGT</span>
+<span class="sd">    TVV = PTVV⋅WGT</span>
+<span class="sd">          ⎧TVV⋅(THETA₃ + 1)  for APGR &lt; 5</span>
 <span class="sd">          ⎨</span>
 <span class="sd">    TVV = ⎩       TVV           otherwise</span>
-<span class="sd">               ETA(1)</span>
+<span class="sd">               ETA₁</span>
 <span class="sd">    CL = TVCL⋅ℯ</span>
-<span class="sd">             ETA(2)</span>
+<span class="sd">             ETA₂</span>
 <span class="sd">    V = TVV⋅ℯ</span>
 <span class="sd">    S₁ = V</span>
 <span class="sd">    &gt;&gt;&gt; make_declarative(model)     # doctest: +ELLIPSIS</span>
@@ -911,13 +908,13 @@
 <span class="sd">            ⎨</span>
 <span class="sd">    BTIME = ⎩ 0     otherwise</span>
 <span class="sd">    TAD = -BTIME + TIME</span>
-<span class="sd">    TVCL = THETA(1)⋅WGT</span>
-<span class="sd">          ⎧THETA(2)⋅WGT⋅(THETA(3) + 1)  for APGR &lt; 5</span>
+<span class="sd">    TVCL = PTVCL⋅WGT</span>
+<span class="sd">          ⎧PTVV⋅WGT⋅(THETA₃ + 1)  for APGR &lt; 5</span>
 <span class="sd">          ⎨</span>
-<span class="sd">    TVV = ⎩       THETA(2)⋅WGT           otherwise</span>
-<span class="sd">               ETA(1)</span>
+<span class="sd">    TVV = ⎩      PTVV⋅WGT          otherwise</span>
+<span class="sd">               ETA₁</span>
 <span class="sd">    CL = TVCL⋅ℯ</span>
-<span class="sd">             ETA(2)</span>
+<span class="sd">             ETA₂</span>
 <span class="sd">    V = TVV⋅ℯ</span>
 <span class="sd">    S₁ = V</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -959,8 +956,8 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="cleanup_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.cleanup_model.html#pharmpy.modeling.cleanup_model">[docs]</a><span class="k">def</span> <span class="nf">cleanup_model</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Perform various cleanups of a model</span>
+<div class="viewcode-block" id="cleanup_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.cleanup_model.html#pharmpy.modeling.cleanup_model">[docs]</a><span class="k">def</span> <span class="nf">cleanup_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Perform various cleanups of a model</span>
 
 <span class="sd">    This is what is currently done</span>
 
@@ -991,25 +988,25 @@
 <span class="sd">            ⎨</span>
 <span class="sd">    BTIME = ⎩ 0     otherwise</span>
 <span class="sd">    TAD = -BTIME + TIME</span>
-<span class="sd">    TVCL = THETA(1)⋅WGT</span>
-<span class="sd">    TVV = THETA(2)⋅WGT</span>
-<span class="sd">          ⎧TVV⋅(THETA(3) + 1)  for APGR &lt; 5</span>
+<span class="sd">    TVCL = PTVCL⋅WGT</span>
+<span class="sd">    TVV = PTVV⋅WGT</span>
+<span class="sd">          ⎧TVV⋅(THETA₃ + 1)  for APGR &lt; 5</span>
 <span class="sd">          ⎨</span>
 <span class="sd">    TVV = ⎩       TVV           otherwise</span>
-<span class="sd">               ETA(1)</span>
+<span class="sd">               ETA₁</span>
 <span class="sd">    CL = TVCL⋅ℯ</span>
-<span class="sd">             ETA(2)</span>
+<span class="sd">             ETA₂</span>
 <span class="sd">    V = TVV⋅ℯ</span>
 <span class="sd">    S₁ = V</span>
-<span class="sd">    Bolus(AMT)</span>
-<span class="sd">    ┌───────┐       ┌──────┐</span>
-<span class="sd">    │CENTRAL│──CL/V→│OUTPUT│</span>
-<span class="sd">    └───────┘       └──────┘</span>
+<span class="sd">    Bolus(AMT, admid=1)</span>
+<span class="sd">    ┌───────┐</span>
+<span class="sd">    │CENTRAL│──CL/V→</span>
+<span class="sd">    └───────┘</span>
 <span class="sd">        A_CENTRAL</span>
 <span class="sd">        ─────────</span>
 <span class="sd">    F =     S₁</span>
 <span class="sd">    W = F</span>
-<span class="sd">    Y = EPS(1)⋅W + F</span>
+<span class="sd">    Y = EPS₁⋅W + F</span>
 <span class="sd">    IPRED = F</span>
 <span class="sd">    IRES = DV - IPRED</span>
 <span class="sd">            IRES</span>
@@ -1022,22 +1019,22 @@
 <span class="sd">            ⎨</span>
 <span class="sd">    BTIME = ⎩ 0     otherwise</span>
 <span class="sd">    TAD = -BTIME + TIME</span>
-<span class="sd">    TVCL = THETA(1)⋅WGT</span>
-<span class="sd">          ⎧THETA(2)⋅WGT⋅(THETA(3) + 1)  for APGR &lt; 5</span>
+<span class="sd">    TVCL = PTVCL⋅WGT</span>
+<span class="sd">          ⎧PTVV⋅WGT⋅(THETA₃ + 1)  for APGR &lt; 5</span>
 <span class="sd">          ⎨</span>
-<span class="sd">    TVV = ⎩       THETA(2)⋅WGT           otherwise</span>
-<span class="sd">               ETA(1)</span>
+<span class="sd">    TVV = ⎩      PTVV⋅WGT           otherwise</span>
+<span class="sd">               ETA₁</span>
 <span class="sd">    CL = TVCL⋅ℯ</span>
-<span class="sd">             ETA(2)</span>
+<span class="sd">             ETA₂</span>
 <span class="sd">    V = TVV⋅ℯ</span>
-<span class="sd">    Bolus(AMT)</span>
-<span class="sd">    ┌───────┐       ┌──────┐</span>
-<span class="sd">    │CENTRAL│──CL/V→│OUTPUT│</span>
-<span class="sd">    └───────┘       └──────┘</span>
+<span class="sd">    Bolus(AMT, admid=1)</span>
+<span class="sd">    ┌───────┐</span>
+<span class="sd">    │CENTRAL│──CL/V→</span>
+<span class="sd">    └───────┘</span>
 <span class="sd">        A_CENTRAL</span>
 <span class="sd">        ─────────</span>
 <span class="sd">    F =     V</span>
-<span class="sd">    Y = EPS(1)⋅F + F</span>
+<span class="sd">    Y = EPS₁⋅F + F</span>
 <span class="sd">    IRES = DV - F</span>
 <span class="sd">            IRES</span>
 <span class="sd">            ────</span>
@@ -1063,8 +1060,8 @@
     <span class="k">return</span> <span class="n">model</span></div>
 
 
-<div class="viewcode-block" id="greekify_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.greekify_model.html#pharmpy.modeling.greekify_model">[docs]</a><span class="k">def</span> <span class="nf">greekify_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">named_subscripts</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Convert to using greek letters for all population parameters</span>
+<div class="viewcode-block" id="greekify_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.greekify_model.html#pharmpy.modeling.greekify_model">[docs]</a><span class="k">def</span> <span class="nf">greekify_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">named_subscripts</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert to using greek letters for all population parameters</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1087,25 +1084,25 @@
 <span class="sd">            ⎨</span>
 <span class="sd">    BTIME = ⎩ 0     otherwise</span>
 <span class="sd">    TAD = -BTIME + TIME</span>
-<span class="sd">    TVCL = THETA(1)⋅WGT</span>
-<span class="sd">    TVV = THETA(2)⋅WGT</span>
-<span class="sd">          ⎧TVV⋅(THETA(3) + 1)  for APGR &lt; 5</span>
+<span class="sd">    TVCL = PTVCL⋅WGT</span>
+<span class="sd">    TVV = PTVV⋅WGT</span>
+<span class="sd">          ⎧TVV⋅(THETA₃ + 1)  for APGR &lt; 5</span>
 <span class="sd">          ⎨</span>
-<span class="sd">    TVV = ⎩       TVV           otherwise</span>
-<span class="sd">               ETA(1)</span>
+<span class="sd">    TVV = ⎩      TVV           otherwise</span>
+<span class="sd">               ETA₁</span>
 <span class="sd">    CL = TVCL⋅ℯ</span>
-<span class="sd">             ETA(2)</span>
+<span class="sd">             ETA₂</span>
 <span class="sd">    V = TVV⋅ℯ</span>
 <span class="sd">    S₁ = V</span>
-<span class="sd">    Bolus(AMT)</span>
-<span class="sd">    ┌───────┐       ┌──────┐</span>
-<span class="sd">    │CENTRAL│──CL/V→│OUTPUT│</span>
-<span class="sd">    └───────┘       └──────┘</span>
+<span class="sd">    Bolus(AMT, admid=1)</span>
+<span class="sd">    ┌───────┐</span>
+<span class="sd">    │CENTRAL│──CL/V→</span>
+<span class="sd">    └───────┘</span>
 <span class="sd">        A_CENTRAL</span>
 <span class="sd">        ─────────</span>
 <span class="sd">    F =     S₁</span>
 <span class="sd">    W = F</span>
-<span class="sd">    Y = EPS(1)⋅W + F</span>
+<span class="sd">    Y = EPS₁⋅W + F</span>
 <span class="sd">    IPRED = F</span>
 <span class="sd">    IRES = DV - IPRED</span>
 <span class="sd">            IRES</span>
@@ -1127,10 +1124,10 @@
 <span class="sd">    CL = TVCL⋅ℯ</span>
 <span class="sd">             η₂</span>
 <span class="sd">    V = TVV⋅ℯ</span>
-<span class="sd">    Bolus(AMT)</span>
-<span class="sd">    ┌───────┐       ┌──────┐</span>
-<span class="sd">    │CENTRAL│──CL/V→│OUTPUT│</span>
-<span class="sd">    └───────┘       └──────┘</span>
+<span class="sd">    Bolus(AMT, admid=1)</span>
+<span class="sd">    ┌───────┐</span>
+<span class="sd">    │CENTRAL│──CL/V→</span>
+<span class="sd">    └───────┘</span>
 <span class="sd">        A_CENTRAL</span>
 <span class="sd">        ─────────</span>
 <span class="sd">    F =     V</span>
@@ -1194,7 +1191,7 @@
 
 
 <div class="viewcode-block" id="get_individual_parameters"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_individual_parameters.html#pharmpy.modeling.get_individual_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_individual_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Retrieves all parameters with IIV or IOV in :class:`pharmpy.model`.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves all parameters with IIV or IOV in :class:`pharmpy.model`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1278,7 +1275,7 @@
 
 
 <div class="viewcode-block" id="has_random_effect"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_random_effect.html#pharmpy.modeling.has_random_effect">[docs]</a><span class="k">def</span> <span class="nf">has_random_effect</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
-    <span class="sd">&quot;&quot;&quot;Decides whether the given parameter of a :class:`pharmpy.model` has a</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Decides whether the given parameter of a :class:`pharmpy.model` has a</span>
 <span class="sd">    random effect.</span>
 
 <span class="sd">    Parameters</span>
@@ -1319,7 +1316,7 @@
 
 
 <div class="viewcode-block" id="get_rv_parameters"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_rv_parameters.html#pharmpy.modeling.get_rv_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_rv_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">rv</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Retrieves parameters in :class:`pharmpy.model` given a random variable.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves parameters in :class:`pharmpy.model` given a random variable.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1337,7 +1334,7 @@
 <span class="sd">    -------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; get_rv_parameters(model, &#39;ETA(1)&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; get_rv_parameters(model, &#39;ETA_1&#39;)</span>
 <span class="sd">    [&#39;CL&#39;]</span>
 
 <span class="sd">    See also</span>
@@ -1609,7 +1606,7 @@
 
 
 <div class="viewcode-block" id="get_pk_parameters"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_pk_parameters.html#pharmpy.modeling.get_pk_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_pk_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-    <span class="sd">&quot;&quot;&quot;Retrieves PK parameters in :class:`pharmpy.model`.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves PK parameters in :class:`pharmpy.model`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1665,7 +1662,7 @@
 <span class="k">def</span> <span class="nf">_remap_compartmental_system</span><span class="p">(</span><span class="n">sset</span><span class="p">,</span> <span class="n">natural_assignments</span><span class="p">):</span>
     <span class="c1"># Return compartmental system where rates that are synthetic assignments</span>
     <span class="c1"># have been substituted with their full definition (e.g K -&gt; CL/V)</span>
-    <span class="n">cs</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">to_compartmental_system</span><span class="p">()</span>
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">ode_system</span>
 
     <span class="n">assignments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_assignments</span><span class="p">(</span><span class="n">sset</span><span class="o">.</span><span class="n">before_odes</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">assignment</span> <span class="ow">in</span> <span class="nb">reversed</span><span class="p">(</span><span class="n">assignments</span><span class="p">):</span>
@@ -1692,7 +1689,8 @@
         <span class="k">return</span> <span class="n">_pk_free_symbols_from_compartment</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;elimination&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_pk_free_symbols_from_compartment</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">cs</span><span class="o">.</span><span class="n">output_compartment</span><span class="p">)</span>
+        <span class="n">free_symbols</span> <span class="o">=</span> <span class="n">_pk_free_symbols_from_compartment</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">free_symbols</span>
 
     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot handle kind `</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">`&#39;</span><span class="p">)</span>
 
@@ -1707,7 +1705,6 @@
 
 
 <span class="k">def</span> <span class="nf">_get_component</span><span class="p">(</span><span class="n">cs</span><span class="p">:</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">compartment</span><span class="p">:</span> <span class="n">Compartment</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Set</span><span class="p">[</span><span class="n">Compartment</span><span class="p">]:</span>
-
     <span class="n">central_component_vertices</span> <span class="o">=</span> <span class="n">strongly_connected_component_of</span><span class="p">(</span>
         <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span><span class="p">,</span>
         <span class="k">lambda</span> <span class="n">u</span><span class="p">:</span> <span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">flow</span><span class="p">:</span> <span class="n">flow</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">u</span><span class="p">)),</span>
@@ -1717,11 +1714,7 @@
     <span class="k">if</span> <span class="n">compartment</span> <span class="o">==</span> <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">central_component_vertices</span>
 
-    <span class="n">flows</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">cs</span><span class="o">.</span><span class="n">get_compartment_inflows</span>
-        <span class="k">if</span> <span class="n">compartment</span> <span class="o">==</span> <span class="n">cs</span><span class="o">.</span><span class="n">output_compartment</span>
-        <span class="k">else</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_compartment_outflows</span>
-    <span class="p">)</span>
+    <span class="n">flows</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_compartment_inflows</span> <span class="k">if</span> <span class="n">compartment</span> <span class="o">==</span> <span class="n">output</span> <span class="k">else</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_compartment_outflows</span>
 
     <span class="k">return</span> <span class="n">reachable_from</span><span class="p">(</span>
         <span class="p">{</span><span class="n">compartment</span><span class="p">},</span>
@@ -1735,7 +1728,7 @@
 <span class="k">def</span> <span class="nf">_get_component_edges</span><span class="p">(</span><span class="n">cs</span><span class="p">:</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">vertices</span><span class="p">:</span> <span class="n">Set</span><span class="p">[</span><span class="n">Compartment</span><span class="p">]):</span>
     <span class="k">return</span> <span class="p">(</span>
         <span class="p">((</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span> <span class="k">for</span> <span class="n">v</span> <span class="ow">in</span> <span class="n">vertices</span> <span class="k">for</span> <span class="n">u</span><span class="p">,</span> <span class="n">rate</span> <span class="ow">in</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_compartment_inflows</span><span class="p">(</span><span class="n">v</span><span class="p">))</span>
-        <span class="k">if</span> <span class="n">cs</span><span class="o">.</span><span class="n">output_compartment</span> <span class="ow">in</span> <span class="n">vertices</span>
+        <span class="k">if</span> <span class="n">output</span> <span class="ow">in</span> <span class="n">vertices</span>
         <span class="k">else</span> <span class="p">((</span><span class="n">u</span><span class="p">,</span> <span class="n">v</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span> <span class="k">for</span> <span class="n">u</span> <span class="ow">in</span> <span class="n">vertices</span> <span class="k">for</span> <span class="n">v</span><span class="p">,</span> <span class="n">rate</span> <span class="ow">in</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">u</span><span class="p">))</span>
     <span class="p">)</span>
 
@@ -1766,7 +1759,10 @@
             <span class="k">yield from</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span>
 
     <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">vertices</span><span class="p">:</span>
-        <span class="k">yield from</span> <span class="n">node</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="k">if</span> <span class="n">node</span> <span class="o">==</span> <span class="n">output</span><span class="p">:</span>
+            <span class="k">yield from</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">yield from</span> <span class="n">node</span><span class="o">.</span><span class="n">free_symbols</span>
 
 
 <span class="k">def</span> <span class="nf">_assignments</span><span class="p">(</span><span class="n">sset</span><span class="p">:</span> <span class="n">Statements</span><span class="p">):</span>
@@ -1875,6 +1871,73 @@
                     <span class="n">dependencies</span><span class="p">[</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">(</span><span class="n">value</span> <span class="o">-</span> <span class="p">{</span><span class="n">symbol</span><span class="p">})</span> <span class="o">|</span> <span class="n">previous_def</span>
 
     <span class="k">return</span> <span class="n">dependencies</span>
+
+
+<span class="k">class</span> <span class="nc">ODEDisplayer</span><span class="p">:</span>
+    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">eqs</span><span class="p">,</span> <span class="n">ics</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_eqs</span> <span class="o">=</span> <span class="n">eqs</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_ics</span> <span class="o">=</span> <span class="n">ics</span>
+
+    <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eqs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eqs</span><span class="p">:</span>
+            <span class="n">ode_str</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="n">ode</span><span class="p">)</span>
+            <span class="n">a</span> <span class="o">+=</span> <span class="n">ode_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ics_str</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">pretty</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">key</span><span class="p">,</span> <span class="n">value</span><span class="p">))</span>
+            <span class="n">a</span> <span class="o">+=</span> <span class="n">ics_str</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">bracket</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+
+    <span class="k">def</span> <span class="nf">_repr_latex_</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eqs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="s2">&quot;&quot;</span>
+        <span class="n">rows</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">ode</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_eqs</span><span class="p">:</span>
+            <span class="n">ode_repr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="n">ode</span><span class="p">,</span> <span class="n">mul_symbol</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">)</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ode_repr</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">k</span><span class="p">,</span> <span class="n">v</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_ics</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">ics_eq</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="p">)</span>
+            <span class="n">ics_repr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">latex</span><span class="p">(</span><span class="n">ics_eq</span><span class="p">,</span> <span class="n">mul_symbol</span><span class="o">=</span><span class="s1">&#39;dot&#39;</span><span class="p">)</span>
+            <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">ics_repr</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">r</span><span class="s1">&#39;\begin</span><span class="si">{cases}</span><span class="s1"> &#39;</span> <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39; </span><span class="se">\\</span><span class="s1"> &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">rows</span><span class="p">)</span> <span class="o">+</span> <span class="sa">r</span><span class="s1">&#39; \end</span><span class="si">{cases}</span><span class="s1">&#39;</span>
+
+
+<div class="viewcode-block" id="display_odes"><a class="viewcode-back" href="../../../api/pharmpy.modeling.display_odes.html#pharmpy.modeling.display_odes">[docs]</a><span class="k">def</span> <span class="nf">display_odes</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Displays the ordinary differential equation system</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    ODEDisplayer</span>
+<span class="sd">        A displayable object</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; display_odes(model)</span>
+<span class="sd">    ⎧d                  -CL⋅A_CENTRAL(t)</span>
+<span class="sd">    ⎨──(A_CENTRAL(t)) = ─────────────────</span>
+<span class="sd">    ⎪dt                         V</span>
+<span class="sd">    ⎩A_CENTRAL(0) = AMT</span>
+<span class="sd">    &lt;BLANKLINE&gt;</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="k">if</span> <span class="n">odes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">eqs</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">eqs</span>
+        <span class="n">ics</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">ics</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">eqs</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="n">ics</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">return</span> <span class="n">ODEDisplayer</span><span class="p">(</span><span class="n">eqs</span><span class="p">,</span> <span class="n">ics</span><span class="p">)</span></div>
 </pre></div>
 
             </article>
@@ -1932,7 +1995,7 @@
     
 <p class="copyright">
 
-    &copy; Copyright 2018-2022; the Pharmpy development team.<br>
+    &copy; Copyright 2018-2023; the Pharmpy development team.<br>
 
 </p>
 
@@ -1951,7 +2014,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br>
 </p>
 
   </div>

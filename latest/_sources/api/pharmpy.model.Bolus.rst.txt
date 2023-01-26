@@ -10,6 +10,7 @@ Bolus
 
    .. autosummary::
 
+      ~Bolus.admid
       ~Bolus.amount
       ~Bolus.free_symbols
 
@@ -23,6 +24,7 @@ Bolus
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: admid
    .. autoattribute:: amount
    .. autoattribute:: free_symbols
 

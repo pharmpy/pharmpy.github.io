@@ -15,8 +15,9 @@ CompartmentalSystem
       ~CompartmentalSystem.compartment_names
       ~CompartmentalSystem.compartmental_matrix
       ~CompartmentalSystem.dosing_compartment
+      ~CompartmentalSystem.eqs
       ~CompartmentalSystem.free_symbols
-      ~CompartmentalSystem.output_compartment
+      ~CompartmentalSystem.ics
       ~CompartmentalSystem.peripheral_compartments
       ~CompartmentalSystem.rhs_symbols
       ~CompartmentalSystem.t
@@ -37,8 +38,6 @@ CompartmentalSystem
       ~CompartmentalSystem.get_n_connected
       ~CompartmentalSystem.replace
       ~CompartmentalSystem.subs
-      ~CompartmentalSystem.to_compartmental_system
-      ~CompartmentalSystem.to_explicit_system
 
    .. rubric:: Attributes Documentation
 
@@ -47,8 +46,9 @@ CompartmentalSystem
    .. autoattribute:: compartment_names
    .. autoattribute:: compartmental_matrix
    .. autoattribute:: dosing_compartment
+   .. autoattribute:: eqs
    .. autoattribute:: free_symbols
-   .. autoattribute:: output_compartment
+   .. autoattribute:: ics
    .. autoattribute:: peripheral_compartments
    .. autoattribute:: rhs_symbols
    .. autoattribute:: t
@@ -67,5 +67,3 @@ CompartmentalSystem
    .. automethod:: get_n_connected
    .. automethod:: replace
    .. automethod:: subs
-   .. automethod:: to_compartmental_system
-   .. automethod:: to_explicit_system

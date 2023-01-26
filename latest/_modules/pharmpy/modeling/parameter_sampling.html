@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.parameter_sampling &#8212; Pharmpy 0.88.0 documentation</title>
+    <title>pharmpy.modeling.parameter_sampling &#8212; Pharmpy 0.89.0 documentation</title>
   
   
   
@@ -37,9 +37,6 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=796348d33e8b1d947c94">
 
     <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/jquery.js"></script>
-    <script src="../../../_static/underscore.js"></script>
-    <script src="../../../_static/_sphinx_javascript_frameworks_compat.js"></script>
     <script src="../../../_static/doctools.js"></script>
     <script src="../../../_static/sphinx_highlight.js"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -47,7 +44,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pharmpy/modeling/parameter_sampling';</script>
-    <link rel="shortcut icon" href="../../../_static/Pharmpy_symbol.svg"/>
+    <link rel="icon" href="../../../_static/Pharmpy_symbol.svg"/>
     <link rel="index" title="Index" href="../../../genindex.html" />
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -433,14 +430,16 @@
   <h1>Source code for pharmpy.modeling.parameter_sampling</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">functools</span> <span class="kn">import</span> <span class="n">partial</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.math</span> <span class="kn">import</span> <span class="n">is_posdef</span><span class="p">,</span> <span class="n">nearest_postive_semidefinite</span>
+<span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
 
 
-<div class="viewcode-block" id="create_rng"><a class="viewcode-back" href="../../../api/pharmpy.modeling.create_rng.html#pharmpy.modeling.create_rng">[docs]</a><span class="k">def</span> <span class="nf">create_rng</span><span class="p">(</span><span class="n">seed</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Create a new random number generator</span>
+<div class="viewcode-block" id="create_rng"><a class="viewcode-back" href="../../../api/pharmpy.modeling.create_rng.html#pharmpy.modeling.create_rng">[docs]</a><span class="k">def</span> <span class="nf">create_rng</span><span class="p">(</span><span class="n">seed</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new random number generator</span>
 
 <span class="sd">    Pharmpy functions that use random sampling take a random number generator or seed as input.</span>
 <span class="sd">    This function can be used to create a default new random number generator.</span>
@@ -475,7 +474,7 @@
 
 
 <span class="k">def</span> <span class="nf">_sample_truncated_joint_normal</span><span class="p">(</span><span class="n">sigma</span><span class="p">,</span> <span class="n">mu</span><span class="p">,</span> <span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">n</span><span class="p">,</span> <span class="n">rng</span><span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Give an array of samples from the truncated joint normal distributon using sample rejection</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Give an array of samples from the truncated joint normal distributon using sample rejection</span>
 <span class="sd">    - mu, sigma - parameters for the normal distribution</span>
 <span class="sd">    - a, b - vectors of lower and upper limits for each random variable</span>
 <span class="sd">    - n - number of samples</span>
@@ -500,7 +499,7 @@
     <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
     <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Sample parameter vectors using a general function</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sample parameter vectors using a general function</span>
 
 <span class="sd">    The sampling function will be given three arguments:</span>
 
@@ -546,9 +545,14 @@
 
 
 <div class="viewcode-block" id="sample_parameters_uniformly"><a class="viewcode-back" href="../../../api/pharmpy.modeling.sample_parameters_uniformly.html#pharmpy.modeling.sample_parameters_uniformly">[docs]</a><span class="k">def</span> <span class="nf">sample_parameters_uniformly</span><span class="p">(</span>
-    <span class="n">model</span><span class="p">,</span> <span class="n">parameter_estimates</span><span class="p">,</span> <span class="n">fraction</span><span class="o">=</span><span class="mf">0.1</span><span class="p">,</span> <span class="n">force_posdef_samples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">rng</span><span class="o">=</span><span class="kc">None</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">parameter_estimates</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">fraction</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">,</span>
+    <span class="n">force_posdef_samples</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Sample parameter vectors using uniform sampling</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sample parameter vectors using uniform sampling</span>
 
 <span class="sd">    Each parameter value will be randomly sampled from a uniform distribution</span>
 <span class="sd">    with the bounds being estimate ± estimate * fraction.</span>
@@ -581,10 +585,10 @@
 <span class="sd">    &gt;&gt;&gt; rng = create_rng(23)</span>
 <span class="sd">    &gt;&gt;&gt; pe = model.modelfit_results.parameter_estimates</span>
 <span class="sd">    &gt;&gt;&gt; sample_parameters_uniformly(model, pe, n=3, rng=rng)</span>
-<span class="sd">       THETA(1)  THETA(2)  THETA(3)  OMEGA(1,1)  OMEGA(2,2)  SIGMA(1,1)</span>
-<span class="sd">    0  0.004878  0.908216  0.149441    0.029179    0.025472    0.012947</span>
-<span class="sd">    1  0.004828  1.014444  0.149958    0.028853    0.027653    0.013348</span>
-<span class="sd">    2  0.004347  1.053837  0.165804    0.028465    0.026798    0.013727</span>
+<span class="sd">          PTVCL      PTVV   THETA_3      IVCL       IVV  SIGMA_1_1</span>
+<span class="sd">    0  0.004878  0.908216  0.149441  0.029179  0.025472   0.012947</span>
+<span class="sd">    1  0.004828  1.014444  0.149958  0.028853  0.027653   0.013348</span>
+<span class="sd">    2  0.004347  1.053837  0.165804  0.028465  0.026798   0.013727</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -609,15 +613,15 @@
 
 
 <div class="viewcode-block" id="sample_parameters_from_covariance_matrix"><a class="viewcode-back" href="../../../api/pharmpy.modeling.sample_parameters_from_covariance_matrix.html#pharmpy.modeling.sample_parameters_from_covariance_matrix">[docs]</a><span class="k">def</span> <span class="nf">sample_parameters_from_covariance_matrix</span><span class="p">(</span>
-    <span class="n">model</span><span class="p">,</span>
-    <span class="n">parameter_estimates</span><span class="p">,</span>
-    <span class="n">covariance_matrix</span><span class="p">,</span>
-    <span class="n">force_posdef_samples</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">force_posdef_covmatrix</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-    <span class="n">n</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-    <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">parameter_estimates</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">,</span>
+    <span class="n">covariance_matrix</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">force_posdef_samples</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">force_posdef_covmatrix</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
+    <span class="n">n</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Sample parameter vectors using the covariance matrix</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sample parameter vectors using the covariance matrix</span>
 
 <span class="sd">    If parameters is not provided all estimated parameters will be used</span>
 
@@ -652,10 +656,10 @@
 <span class="sd">    &gt;&gt;&gt; cov = model.modelfit_results.covariance_matrix</span>
 <span class="sd">    &gt;&gt;&gt; pe = model.modelfit_results.parameter_estimates</span>
 <span class="sd">    &gt;&gt;&gt; sample_parameters_from_covariance_matrix(model, pe, cov, n=3, rng=rng)</span>
-<span class="sd">       THETA(1)  THETA(2)  THETA(3)  OMEGA(1,1)  OMEGA(2,2)  SIGMA(1,1)</span>
-<span class="sd">    0  0.005069  0.974989  0.204629    0.024756    0.012088    0.012943</span>
-<span class="sd">    1  0.004690  0.958431  0.233231    0.038866    0.029000    0.012516</span>
-<span class="sd">    2  0.004902  0.950778  0.128388    0.019020    0.023866    0.013413</span>
+<span class="sd">          PTVCL      PTVV   THETA_3      IVCL       IVV  SIGMA_1_1</span>
+<span class="sd">    0  0.005069  0.974989  0.204629  0.024756  0.012088   0.012943</span>
+<span class="sd">    1  0.004690  0.958431  0.233231  0.038866  0.029000   0.012516</span>
+<span class="sd">    2  0.004902  0.950778  0.128388  0.019020  0.023866   0.013413</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -686,14 +690,14 @@
 
 
 <div class="viewcode-block" id="sample_individual_estimates"><a class="viewcode-back" href="../../../api/pharmpy.modeling.sample_individual_estimates.html#pharmpy.modeling.sample_individual_estimates">[docs]</a><span class="k">def</span> <span class="nf">sample_individual_estimates</span><span class="p">(</span>
-    <span class="n">model</span><span class="p">,</span>
-    <span class="n">individual_estimates</span><span class="p">,</span>
-    <span class="n">individual_estimates_covariance</span><span class="p">,</span>
-    <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-    <span class="n">samples_per_id</span><span class="o">=</span><span class="mi">100</span><span class="p">,</span>
-    <span class="n">rng</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">individual_estimates</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">individual_estimates_covariance</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">,</span>
+    <span class="n">parameters</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">samples_per_id</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">100</span><span class="p">,</span>
+    <span class="n">rng</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">np</span><span class="o">.</span><span class="n">random</span><span class="o">.</span><span class="n">Generator</span><span class="p">,</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
-    <span class="sd">&quot;&quot;&quot;Sample individual estimates given their covariance.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Sample individual estimates given their covariance.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -723,7 +727,7 @@
 <span class="sd">    &gt;&gt;&gt; ie = model.modelfit_results.individual_estimates</span>
 <span class="sd">    &gt;&gt;&gt; iec = model.modelfit_results.individual_estimates_covariance</span>
 <span class="sd">    &gt;&gt;&gt; sample_individual_estimates(model, ie, iec, samples_per_id=2, rng=rng)</span>
-<span class="sd">                 ETA(1)    ETA(2)</span>
+<span class="sd">                  ETA_1     ETA_2</span>
 <span class="sd">    ID sample</span>
 <span class="sd">    1  0      -0.127941  0.037273</span>
 <span class="sd">       1      -0.065492 -0.182851</span>
@@ -821,7 +825,7 @@
     
 <p class="copyright">
 
-    &copy; Copyright 2018-2022; the Pharmpy development team.<br>
+    &copy; Copyright 2018-2023; the Pharmpy development team.<br>
 
 </p>
 
@@ -840,7 +844,7 @@
   <div class="footer-item">
     
 <p class="sphinx-version">
-Created using <a href="http://sphinx-doc.org/">Sphinx</a> 5.3.0.<br>
+Created using <a href="http://sphinx-doc.org/">Sphinx</a> 6.1.3.<br>
 </p>
 
   </div>

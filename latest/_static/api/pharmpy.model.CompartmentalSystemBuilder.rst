@@ -15,6 +15,7 @@ CompartmentalSystemBuilder
       ~CompartmentalSystemBuilder.move_dose
       ~CompartmentalSystemBuilder.remove_compartment
       ~CompartmentalSystemBuilder.remove_flow
+      ~CompartmentalSystemBuilder.set_bioavailability
       ~CompartmentalSystemBuilder.set_dose
       ~CompartmentalSystemBuilder.set_lag_time
 
@@ -25,5 +26,6 @@ CompartmentalSystemBuilder
    .. automethod:: move_dose
    .. automethod:: remove_compartment
    .. automethod:: remove_flow
+   .. automethod:: set_bioavailability
    .. automethod:: set_dose
    .. automethod:: set_lag_time
