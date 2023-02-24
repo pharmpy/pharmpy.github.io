@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.data &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.modeling.data &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -439,6 +439,7 @@
 <span class="kn">from</span> <span class="nn">pharmpy.deps.rich</span> <span class="kn">import</span> <span class="n">console</span> <span class="k">as</span> <span class="n">rich_console</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps.rich</span> <span class="kn">import</span> <span class="n">table</span> <span class="k">as</span> <span class="n">rich_table</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">DataInfo</span><span class="p">,</span> <span class="n">DatasetError</span><span class="p">,</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">pharmpy.model.model</span> <span class="kn">import</span> <span class="n">update_datainfo</span>
 
 <span class="kn">from</span> <span class="nn">.iterators</span> <span class="kn">import</span> <span class="n">resample_data</span>
 
@@ -681,15 +682,18 @@
             <span class="k">try</span><span class="p">:</span>
                 <span class="n">label</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;dose&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
             <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="n">DatasetError</span><span class="p">(</span><span class="s1">&#39;Could not identify observation rows in dataset&#39;</span><span class="p">)</span>
+                <span class="n">label</span> <span class="o">=</span> <span class="kc">None</span>  <span class="c1"># All data records are observations</span>
 
     <span class="n">idcol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_column</span><span class="o">.</span><span class="n">name</span>
     <span class="n">idvcol</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">idv_column</span><span class="o">.</span><span class="n">name</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> == 0&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">label</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">})</span>
-        <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> == 0&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">label</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> == 0&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">astype</span><span class="p">({</span><span class="n">label</span><span class="p">:</span> <span class="s1">&#39;float&#39;</span><span class="p">})</span>
+            <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">label</span><span class="si">}</span><span class="s1"> == 0&#39;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
 
     <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[[</span><span class="n">idcol</span><span class="p">,</span> <span class="n">idvcol</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">dv_column</span><span class="o">.</span><span class="n">name</span><span class="p">]]</span>
     <span class="k">try</span><span class="p">:</span>
@@ -802,7 +806,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same Pharmpy model object</span>
+<span class="sd">        Pharmpy model object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">di</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span>
     <span class="n">newcols</span> <span class="o">=</span> <span class="p">[]</span>
@@ -812,8 +816,8 @@
             <span class="n">newcols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newcol</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">newcols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">newcols</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">datainfo</span><span class="o">=</span><span class="n">di</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">newcols</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="get_covariate_baselines"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_covariate_baselines.html#pharmpy.modeling.get_covariate_baselines">[docs]</a><span class="k">def</span> <span class="nf">get_covariate_baselines</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
@@ -1017,7 +1021,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">addl</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;additional&#39;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
@@ -1062,8 +1066,8 @@
         <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;_EXPANDED&#39;</span><span class="p">:</span> <span class="s1">&#39;EXPANDED&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="n">addl</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="s1">&#39;_EXPANDED&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="get_doseid"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_doseid.html#pharmpy.modeling.get_doseid">[docs]</a><span class="k">def</span> <span class="nf">get_doseid</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
@@ -1257,14 +1261,13 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, add_time_after_dose</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; add_time_after_dose(model)  # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = add_time_after_dose(model)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1274,8 +1277,7 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># Already have time after dose</span>
         <span class="k">return</span> <span class="n">model</span>
-    <span class="n">temp</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">translate_nmtran_time</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
+    <span class="n">temp</span> <span class="o">=</span> <span class="n">translate_nmtran_time</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">idv</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">idv_column</span><span class="o">.</span><span class="n">name</span>
     <span class="n">idlab</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">id_column</span><span class="o">.</span><span class="n">name</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -1286,13 +1288,13 @@
     <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
         <span class="n">addl</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">temp</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span>
-        <span class="n">di</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">datainfo</span>
+        <span class="c1"># FIXME: temp workaround, should be canonicalized in Model.replace</span>
+        <span class="n">di</span> <span class="o">=</span> <span class="n">update_datainfo</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">datainfo</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
         <span class="n">new_idvcol</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">idv_column</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
         <span class="n">new_timecol</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="s1">&#39;_NEWTIME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;idv&#39;</span><span class="p">)</span>
         <span class="n">di</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="n">new_idvcol</span><span class="p">)</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="n">new_timecol</span><span class="p">)</span>
-        <span class="n">temp</span><span class="o">.</span><span class="n">datainfo</span> <span class="o">=</span> <span class="n">di</span>
-        <span class="n">expand_additional_doses</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">datainfo</span><span class="o">=</span><span class="n">di</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+        <span class="n">temp</span> <span class="o">=</span> <span class="n">expand_additional_doses</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">dataset</span>
 
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;_DOSEID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_doseid</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
@@ -1336,11 +1338,11 @@
 
     <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;_NEWTIME&#39;</span><span class="p">,</span> <span class="s1">&#39;_DOSEID&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-    <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span>  <span class="c1"># TAD in datainfo is automatically added here</span>
-    <span class="n">di</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span>
+    <span class="c1"># FIXME: temp workaround, should be canonicalized in Model.replace</span>
+    <span class="n">di</span> <span class="o">=</span> <span class="n">update_datainfo</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
     <span class="n">colinfo</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="s1">&#39;TAD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">descriptor</span><span class="o">=</span><span class="s1">&#39;time after dose&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">di</span><span class="p">[</span><span class="n">idv</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="n">colinfo</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">datainfo</span><span class="o">=</span><span class="n">di</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="n">colinfo</span><span class="p">),</span> <span class="n">dataset</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="get_concentration_parameters_from_data"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_concentration_parameters_from_data.html#pharmpy.modeling.get_concentration_parameters_from_data">[docs]</a><span class="k">def</span> <span class="nf">get_concentration_parameters_from_data</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
@@ -1379,8 +1381,7 @@
 <span class="sd">    &lt;BLANKLINE&gt;</span>
 <span class="sd">    [589 rows x 4 columns]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">add_time_after_dose</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">add_time_after_dose</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">doseid</span> <span class="o">=</span> <span class="n">get_doseid</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;DOSEID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">doseid</span>
@@ -1424,14 +1425,13 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; drop_dropped_columns(model)    # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = drop_dropped_columns(model)</span>
 <span class="sd">    &gt;&gt;&gt; list(model.dataset.columns)</span>
 <span class="sd">    [&#39;ID&#39;, &#39;TIME&#39;, &#39;AMT&#39;, &#39;WGT&#39;, &#39;APGR&#39;, &#39;DV&#39;, &#39;FA1&#39;, &#39;FA2&#39;]</span>
 
@@ -1447,7 +1447,7 @@
     <span class="p">]</span>
     <span class="n">todrop</span> <span class="o">+=</span> <span class="nb">list</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">datainfo</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">drop_columns</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">todrop</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="drop_columns"><a class="viewcode-back" href="../../../api/pharmpy.modeling.drop_columns.html#pharmpy.modeling.drop_columns">[docs]</a><span class="k">def</span> <span class="nf">drop_columns</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">column_names</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">],</span> <span class="n">mark</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">):</span>
@@ -1465,14 +1465,13 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; drop_columns(model, [&#39;WGT&#39;, &#39;APGR&#39;])    # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = drop_columns(model, [&#39;WGT&#39;, &#39;APGR&#39;])</span>
 <span class="sd">    &gt;&gt;&gt; list(model.dataset.columns)</span>
 <span class="sd">    [&#39;ID&#39;, &#39;TIME&#39;, &#39;AMT&#39;, &#39;DV&#39;, &#39;FA1&#39;, &#39;FA2&#39;]</span>
 
@@ -1484,18 +1483,22 @@
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">column_names</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
         <span class="n">column_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">column_names</span><span class="p">]</span>
     <span class="n">di</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span>
-    <span class="n">newcols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">newcols</span><span class="p">,</span> <span class="n">to_drop</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">di</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">column_names</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">mark</span><span class="p">:</span>
                 <span class="n">newcol</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
                 <span class="n">newcols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newcol</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+                <span class="n">to_drop</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">newcols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">newcols</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">replace_dict</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;datainfo&#39;</span><span class="p">:</span> <span class="n">di</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">newcols</span><span class="p">)}</span>
+    <span class="k">if</span> <span class="n">to_drop</span><span class="p">:</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">replace_dict</span><span class="p">[</span><span class="s1">&#39;dataset&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">to_drop</span><span class="p">,</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="o">**</span><span class="n">replace_dict</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="undrop_columns"><a class="viewcode-back" href="../../../api/pharmpy.modeling.undrop_columns.html#pharmpy.modeling.undrop_columns">[docs]</a><span class="k">def</span> <span class="nf">undrop_columns</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">column_names</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]):</span>
@@ -1511,16 +1514,14 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; drop_columns(model, [&#39;WGT&#39;, &#39;APGR&#39;], mark=True)    # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
-<span class="sd">    &gt;&gt;&gt; undrop_columns(model, &#39;WGT&#39;)    # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = drop_columns(model, [&#39;WGT&#39;, &#39;APGR&#39;], mark=True)</span>
+<span class="sd">    &gt;&gt;&gt; model = undrop_columns(model, &#39;WGT&#39;)</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -1537,8 +1538,8 @@
             <span class="n">newcols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newcol</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">newcols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">newcols</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">datainfo</span><span class="o">=</span><span class="n">di</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">newcols</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <span class="k">def</span> <span class="nf">_translate_nonmem_time_value</span><span class="p">(</span><span class="n">time</span><span class="p">):</span>
@@ -1669,7 +1670,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">timecol</span><span class="p">,</span> <span class="n">datecol</span> <span class="o">=</span> <span class="n">_find_time_and_date_columns</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
@@ -1687,9 +1688,8 @@
         <span class="n">timecol</span> <span class="o">=</span> <span class="n">timecol</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">unit</span><span class="o">=</span><span class="s1">&#39;h&#39;</span><span class="p">)</span>
     <span class="n">timecol</span> <span class="o">=</span> <span class="n">timecol</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;float64&#39;</span><span class="p">)</span>
     <span class="n">di</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="n">timecol</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span> <span class="o">=</span> <span class="n">di</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">datainfo</span><span class="o">=</span><span class="n">di</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="remove_loq_data"><a class="viewcode-back" href="../../../api/pharmpy.modeling.remove_loq_data.html#pharmpy.modeling.remove_loq_data">[docs]</a><span class="k">def</span> <span class="nf">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">lloq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="n">uloq</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
@@ -1709,14 +1709,13 @@
 <span class="sd">    Results</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; remove_loq_data(model, lloq=10, uloq=40)        # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = remove_loq_data(model, lloq=10, uloq=40)</span>
 <span class="sd">    &gt;&gt;&gt; len(model.dataset)</span>
 <span class="sd">    736</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -1728,8 +1727,8 @@
         <span class="n">keep</span> <span class="o">&amp;=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span> <span class="o">&gt;=</span> <span class="n">lloq</span><span class="p">)</span> <span class="o">|</span> <span class="n">mdv</span>
     <span class="k">if</span> <span class="n">uloq</span><span class="p">:</span>
         <span class="n">keep</span> <span class="o">&amp;=</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">dv</span><span class="p">]</span> <span class="o">&lt;=</span> <span class="n">uloq</span><span class="p">)</span> <span class="o">|</span> <span class="n">mdv</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">df</span><span class="p">[</span><span class="n">keep</span><span class="p">])</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <span class="k">class</span> <span class="nc">Checker</span><span class="p">:</span>

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.random_variables &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.model.random_variables &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -1037,7 +1037,7 @@
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="s2">&quot;Cannot join non-existing random variable&quot;</span><span class="p">)</span>
         <span class="n">joined_rvs</span> <span class="o">=</span> <span class="bp">self</span><span class="p">[</span><span class="n">inds</span><span class="p">]</span>
         <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">joined_rvs</span><span class="p">,</span> <span class="n">RandomVariables</span><span class="p">)</span>
-        <span class="n">means</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">joined_rvs</span><span class="o">.</span><span class="n">_calc_covariance_matrix</span><span class="p">()</span>
+        <span class="n">means</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">names</span> <span class="o">=</span> <span class="n">joined_rvs</span><span class="o">.</span><span class="n">_calc_covariance_matrix</span><span class="p">()</span>
         <span class="n">cov_to_params</span> <span class="o">=</span> <span class="p">{}</span>
         <span class="k">if</span> <span class="n">fill</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">row</span><span class="p">,</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">product</span><span class="p">(</span><span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">rows</span><span class="p">),</span> <span class="nb">range</span><span class="p">(</span><span class="n">M</span><span class="o">.</span><span class="n">cols</span><span class="p">)):</span>
@@ -1127,29 +1127,40 @@
         <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_calc_covariance_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">non_altered</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">means</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">blocks</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="n">names</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="n">n</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">for</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dists</span><span class="p">:</span>
             <span class="n">names</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+            <span class="n">n</span> <span class="o">+=</span> <span class="nb">len</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
+
+        <span class="n">M</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">zeros</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">names</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">means</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">names</span>
+
+        <span class="n">row</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">for</span> <span class="n">dist</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dists</span><span class="p">:</span>
             <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dist</span><span class="p">,</span> <span class="n">NormalDistribution</span><span class="p">):</span>
                 <span class="n">means</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
-                <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">([</span><span class="n">dist</span><span class="o">.</span><span class="n">variance</span><span class="p">]))</span>
+                <span class="n">M</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">variance</span>
+                <span class="n">row</span> <span class="o">+=</span> <span class="mi">1</span>
+                <span class="n">col</span> <span class="o">+=</span> <span class="mi">1</span>
             <span class="k">else</span><span class="p">:</span>  <span class="c1"># isinstance(dist, JointNormalDistribution):</span>
                 <span class="n">means</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">mean</span><span class="p">)</span>
-                <span class="n">blocks</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">variance</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">names</span><span class="p">:</span>
-            <span class="n">M</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">BlockDiagMatrix</span><span class="p">(</span><span class="o">*</span><span class="n">blocks</span><span class="p">)</span>
-            <span class="n">M</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">M</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">M</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">()</span>
-        <span class="k">return</span> <span class="n">means</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">names</span><span class="p">,</span> <span class="n">non_altered</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">variance</span>
+                <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">rows</span><span class="p">):</span>
+                    <span class="k">for</span> <span class="n">j</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">var</span><span class="o">.</span><span class="n">cols</span><span class="p">):</span>
+                        <span class="n">M</span><span class="p">[</span><span class="n">row</span> <span class="o">+</span> <span class="n">i</span><span class="p">,</span> <span class="n">col</span> <span class="o">+</span> <span class="n">j</span><span class="p">]</span> <span class="o">=</span> <span class="n">var</span><span class="p">[</span><span class="n">i</span><span class="p">,</span> <span class="n">j</span><span class="p">]</span>
+                <span class="n">row</span> <span class="o">+=</span> <span class="n">var</span><span class="o">.</span><span class="n">rows</span>
+                <span class="n">col</span> <span class="o">+=</span> <span class="n">var</span><span class="o">.</span><span class="n">cols</span>
+        <span class="k">return</span> <span class="n">means</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">names</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">covariance_matrix</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Covariance matrix of all random variables&quot;&quot;&quot;</span>
-        <span class="n">_</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_covariance_matrix</span><span class="p">()</span>
+        <span class="n">_</span><span class="p">,</span> <span class="n">M</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_calc_covariance_matrix</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">M</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1240,7 +1251,6 @@
 <span class="k">def</span> <span class="nf">subs_distributions</span><span class="p">(</span>
     <span class="n">distributions</span><span class="p">:</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Distribution</span><span class="p">],</span> <span class="n">parameters</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">,</span> <span class="nb">float</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">Tuple</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="n">NumericDistribution</span><span class="p">]]:</span>
-
     <span class="k">for</span> <span class="n">dist</span> <span class="ow">in</span> <span class="n">distributions</span><span class="p">:</span>
         <span class="n">rvs_symbols</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">,</span> <span class="n">dist</span><span class="o">.</span><span class="n">names</span><span class="p">))</span>
         <span class="n">numeric_distribution</span> <span class="o">=</span> <span class="n">dist</span><span class="o">.</span><span class="n">evalf</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>

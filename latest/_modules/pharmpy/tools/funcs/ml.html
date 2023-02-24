@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.funcs.ml &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.tools.funcs.ml &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -428,7 +428,10 @@
             <article class="bd-article" role="main">
               
   <h1>Source code for pharmpy.tools.funcs.ml</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span></span><span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
+
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
@@ -443,15 +446,17 @@
 <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">ModelfitResults</span>
 
 
-<span class="k">def</span> <span class="nf">_all_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_all_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">ModelfitResults</span><span class="p">):</span>
     <span class="c1"># All parameter estimates including fixed</span>
     <span class="c1"># This might warrant a function in modeling</span>
     <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">p</span><span class="o">.</span><span class="n">init</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">}</span>
-    <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="p">))</span>
+    <span class="n">parameter_estimates</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates</span>
+    <span class="k">assert</span> <span class="n">parameter_estimates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="n">d</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">parameter_estimates</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_create_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_create_dataset</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">ModelfitResults</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="n">ModelfitResultsError</span><span class="p">(</span><span class="s2">&quot;Need ModelfitResults for model&quot;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">residuals</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -466,14 +471,17 @@
     <span class="n">iofv</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_estimates</span>
     <span class="n">npar</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
     <span class="n">ofv</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">ofv</span>
+    <span class="k">assert</span> <span class="n">ofv</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
 
     <span class="c1"># Max ratio of abs(ETAi) and omegai</span>
     <span class="n">variance_omegas</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">[</span><span class="n">rv</span><span class="p">]</span><span class="o">.</span><span class="n">get_variance</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">names</span>
     <span class="p">]</span>
-    <span class="n">all_paramvals</span> <span class="o">=</span> <span class="n">_all_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">all_paramvals</span> <span class="o">=</span> <span class="n">_all_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
     <span class="n">omega_estimates</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">all_paramvals</span><span class="p">[</span><span class="n">variance_omegas</span><span class="p">])</span>
-    <span class="n">abs_ebes</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_estimates</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
+    <span class="n">individual_estimates</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_estimates</span>
+    <span class="k">assert</span> <span class="n">individual_estimates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+    <span class="n">abs_ebes</span> <span class="o">=</span> <span class="n">individual_estimates</span><span class="o">.</span><span class="n">abs</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">omega_estimates</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>  <span class="c1"># No etas in model</span>
         <span class="n">max_ebe_ratio</span> <span class="o">=</span> <span class="mf">1.0</span>
     <span class="k">else</span><span class="p">:</span>
@@ -483,10 +491,11 @@
 
     <span class="c1"># exp(OFVi / nobsi) / exp(OFV / nobs)</span>
     <span class="n">iofv</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_ofv</span>
-    <span class="n">ofv_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">iofv</span> <span class="o">/</span> <span class="n">nobsi</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">ofv</span> <span class="o">/</span> <span class="n">nobs</span><span class="p">)</span>
+    <span class="n">ofv_ratio</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">iofv</span> <span class="o">/</span> <span class="n">nobsi</span><span class="p">)</span> <span class="o">/</span> <span class="n">np</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">ofv</span> <span class="o">/</span> <span class="n">nobs</span><span class="p">)</span>
 
     <span class="c1"># mean(ETA / OMEGA)</span>
     <span class="n">cov</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">individual_estimates_covariance</span>
+    <span class="k">assert</span> <span class="n">cov</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="n">etc_diag</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">([</span><span class="n">np</span><span class="o">.</span><span class="n">diag</span><span class="p">(</span><span class="n">y</span><span class="p">)</span> <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">cov</span><span class="p">],</span> <span class="n">columns</span><span class="o">=</span><span class="n">cov</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">columns</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">omega_estimates</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
         <span class="n">mean_etc_ratio</span> <span class="o">=</span> <span class="mf">1.0</span>
@@ -701,7 +710,7 @@
     <span class="k">return</span> <span class="n">df</span></div>
 
 
-<span class="k">def</span> <span class="nf">_predict_with_tflite</span><span class="p">(</span><span class="n">model_path</span><span class="p">,</span> <span class="n">data</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_predict_with_tflite</span><span class="p">(</span><span class="n">model_path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">],</span> <span class="n">data</span><span class="p">:</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">):</span>
     <span class="kn">import</span> <span class="nn">tflite_runtime.interpreter</span> <span class="k">as</span> <span class="nn">tflite</span>
 
     <span class="n">interpreter</span> <span class="o">=</span> <span class="n">tflite</span><span class="o">.</span><span class="n">Interpreter</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">model_path</span><span class="p">))</span>

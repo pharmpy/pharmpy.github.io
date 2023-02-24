@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.modeling.block_rvs &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -468,7 +468,7 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -477,8 +477,7 @@
 <span class="sd">    &gt;&gt;&gt; model.random_variables.etas</span>
 <span class="sd">    ETA₁ ~ N(0, IVCL)</span>
 <span class="sd">    ETA₂ ~ N(0, IVV)</span>
-<span class="sd">    &gt;&gt;&gt; create_joint_distribution(model, [&#39;ETA_1&#39;, &#39;ETA_2&#39;])      # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = create_joint_distribution(model, [&#39;ETA_1&#39;, &#39;ETA_2&#39;])</span>
 <span class="sd">    &gt;&gt;&gt; model.random_variables.etas</span>
 <span class="sd">    ⎡ETA₁⎤    ⎧⎡0⎤  ⎡    IVCL      IIV_CL_IIV_V⎤⎫</span>
 <span class="sd">    ⎢    ⎥ ~ N⎪⎢ ⎥, ⎢                          ⎥⎪</span>
@@ -524,10 +523,9 @@
         <span class="n">covariance_init</span> <span class="o">=</span> <span class="n">_choose_param_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">individual_estimates</span><span class="p">,</span> <span class="n">all_rvs</span><span class="p">,</span> <span class="n">parent1</span><span class="p">,</span> <span class="n">parent2</span><span class="p">)</span>
         <span class="n">param_new</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="n">cov_name</span><span class="p">,</span> <span class="n">covariance_init</span><span class="p">)</span>
         <span class="n">pset_new</span> <span class="o">+=</span> <span class="n">param_new</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pset_new</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">all_rvs</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pset_new</span><span class="p">),</span> <span class="n">random_variables</span><span class="o">=</span><span class="n">all_rvs</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="split_joint_distribution"><a class="viewcode-back" href="../../../api/pharmpy.modeling.split_joint_distribution.html#pharmpy.modeling.split_joint_distribution">[docs]</a><span class="k">def</span> <span class="nf">split_joint_distribution</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">rvs</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
@@ -545,20 +543,18 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; create_joint_distribution(model, [&#39;ETA_1&#39;, &#39;ETA_2&#39;])      # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = create_joint_distribution(model, [&#39;ETA_1&#39;, &#39;ETA_2&#39;])</span>
 <span class="sd">    &gt;&gt;&gt; model.random_variables.etas</span>
 <span class="sd">    ⎡ETA₁⎤    ⎧⎡0⎤  ⎡    IVCL      IIV_CL_IIV_V⎤⎫</span>
 <span class="sd">    ⎢    ⎥ ~ N⎪⎢ ⎥, ⎢                          ⎥⎪</span>
 <span class="sd">    ⎣ETA₂⎦    ⎩⎣0⎦  ⎣IIV_CL_IIV_V      IVV     ⎦⎭</span>
-<span class="sd">    &gt;&gt;&gt; split_joint_distribution(model, [&#39;ETA_1&#39;, &#39;ETA_2&#39;])       # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = split_joint_distribution(model, [&#39;ETA_1&#39;, &#39;ETA_2&#39;])</span>
 <span class="sd">    &gt;&gt;&gt; model.random_variables.etas</span>
 <span class="sd">    ETA₁ ~ N(0, IVCL)</span>
 <span class="sd">    ETA₂ ~ N(0, IVV)</span>
@@ -576,10 +572,10 @@
     <span class="n">parameters_after</span> <span class="o">=</span> <span class="n">new_rvs</span><span class="o">.</span><span class="n">parameter_names</span>
 
     <span class="n">removed_parameters</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">parameters_before</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">parameters_after</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">new_rvs</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span>
+    <span class="n">new_params</span> <span class="o">=</span> <span class="n">Parameters</span><span class="p">(</span>
         <span class="nb">tuple</span><span class="p">([</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">removed_parameters</span><span class="p">])</span>
     <span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">random_variables</span><span class="o">=</span><span class="n">new_rvs</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">new_params</span><span class="p">)</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 

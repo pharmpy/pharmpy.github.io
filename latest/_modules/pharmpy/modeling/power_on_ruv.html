@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.power_on_ruv &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.modeling.power_on_ruv &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -474,14 +474,13 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_power_on_ruv(model)   # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_power_on_ruv(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;Y&quot;)</span>
 <span class="sd">              power₁</span>
 <span class="sd">    Y = EPS₁⋅F       + F</span>
@@ -535,12 +534,11 @@
         <span class="k">if</span> <span class="n">alternative</span><span class="p">:</span>  <span class="c1"># To avoid getting W*EPS*F**THETA</span>
             <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span> <span class="n">alternative</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="p">)})</span>
         <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="p">):</span> <span class="n">ipred</span> <span class="o">**</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">theta</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">*</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="p">)})</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">sset</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">sset</span><span class="p">)</span>
 
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pset</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">sset</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pset</span><span class="p">),</span> <span class="n">statements</span><span class="o">=</span><span class="n">sset</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <span class="k">def</span> <span class="nf">get_ipred</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>

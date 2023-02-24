@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.run &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.tools.run &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -434,7 +434,7 @@
 <span class="kn">import</span> <span class="nn">inspect</span>
 <span class="kn">from</span> <span class="nn">datetime</span> <span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">List</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Mapping</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">get_type_hints</span>
 
 <span class="kn">import</span> <span class="nn">pharmpy</span>
 <span class="kn">import</span> <span class="nn">pharmpy.results</span>
@@ -443,18 +443,12 @@
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fs.path</span> <span class="kn">import</span> <span class="n">normalize_user_given_path</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span><span class="p">,</span> <span class="n">Results</span>
-<span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="p">(</span>
-    <span class="n">calculate_aic</span><span class="p">,</span>
-    <span class="n">calculate_bic</span><span class="p">,</span>
-    <span class="n">check_high_correlations</span><span class="p">,</span>
-    <span class="n">copy_model</span><span class="p">,</span>
-    <span class="n">read_model</span><span class="p">,</span>
-<span class="p">)</span>
+<span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">calculate_aic</span><span class="p">,</span> <span class="n">calculate_bic</span><span class="p">,</span> <span class="n">check_high_correlations</span><span class="p">,</span> <span class="n">read_model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.lrt</span> <span class="kn">import</span> <span class="n">degrees_of_freedom</span> <span class="k">as</span> <span class="n">lrt_df</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.lrt</span> <span class="kn">import</span> <span class="n">test</span> <span class="k">as</span> <span class="n">lrt_test</span>
 <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">ModelfitResults</span><span class="p">,</span> <span class="n">mfr</span>
 <span class="kn">from</span> <span class="nn">pharmpy.tools.psn_helpers</span> <span class="kn">import</span> <span class="n">create_results</span> <span class="k">as</span> <span class="n">psn_create_results</span>
-<span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">execute_workflow</span><span class="p">,</span> <span class="n">split_common_options</span>
+<span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">execute_workflow</span><span class="p">,</span> <span class="n">split_common_options</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows.model_database</span> <span class="kn">import</span> <span class="n">LocalModelDirectoryDatabase</span><span class="p">,</span> <span class="n">ModelDatabase</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows.tool_database</span> <span class="kn">import</span> <span class="n">ToolDatabase</span>
 
@@ -508,12 +502,12 @@
             <span class="ow">and</span> <span class="n">db_model</span> <span class="o">==</span> <span class="n">model</span>
             <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">has_same_dataset_as</span><span class="p">(</span><span class="n">db_model</span><span class="p">)</span>
         <span class="p">):</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="o">=</span> <span class="n">db_model</span><span class="o">.</span><span class="n">modelfit_results</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">modelfit_results</span><span class="o">=</span><span class="n">db_model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">kept</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">kept</span><span class="p">:</span>
-        <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;modelfit&#39;</span><span class="p">,</span> <span class="n">kept</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="n">tool</span><span class="p">)</span>
+        <span class="n">models</span> <span class="o">=</span> <span class="n">run_tool</span><span class="p">(</span><span class="s1">&#39;modelfit&#39;</span><span class="p">,</span> <span class="n">kept</span><span class="p">,</span> <span class="n">tool</span><span class="o">=</span><span class="n">tool</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">mfr</span><span class="p">(</span><span class="n">models</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span> <span class="k">if</span> <span class="n">single</span> <span class="k">else</span> <span class="nb">list</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="n">mfr</span><span class="p">,</span> <span class="n">models</span><span class="p">))</span></div>
 
@@ -604,7 +598,7 @@
     <span class="c1"># NOTE The implementation of run_tool is split into those two functions to</span>
     <span class="c1"># allow for individual testing and mocking.</span>
     <span class="n">tool</span> <span class="o">=</span> <span class="n">import_tool</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">run_tool_with_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tool</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span></div>
+    <span class="k">return</span> <span class="n">run_tool_with_name</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tool</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">)</span></div>
 
 
 <span class="k">def</span> <span class="nf">import_tool</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -612,71 +606,188 @@
 
 
 <span class="k">def</span> <span class="nf">run_tool_with_name</span><span class="p">(</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">_tool</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span>
+    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">tool</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">Results</span><span class="p">]:</span>
     <span class="n">common_options</span><span class="p">,</span> <span class="n">tool_options</span> <span class="o">=</span> <span class="n">split_common_options</span><span class="p">(</span><span class="n">kwargs</span><span class="p">)</span>
 
-    <span class="n">tool_params</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">_tool</span><span class="o">.</span><span class="n">create_workflow</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
-    <span class="n">tool_metadata</span> <span class="o">=</span> <span class="n">_create_metadata_tool</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">tool_params</span><span class="p">,</span> <span class="n">tool_options</span><span class="p">,</span> <span class="n">args</span><span class="p">)</span>
+    <span class="n">create_workflow</span> <span class="o">=</span> <span class="n">tool</span><span class="o">.</span><span class="n">create_workflow</span>
 
-    <span class="k">if</span> <span class="n">validate_input</span> <span class="o">:=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">_tool</span><span class="p">,</span> <span class="s1">&#39;validate_input&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+    <span class="n">dispatcher</span><span class="p">,</span> <span class="n">tool_database</span> <span class="o">=</span> <span class="n">_get_run_setup</span><span class="p">(</span><span class="n">common_options</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+
+    <span class="n">tool_params</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">create_workflow</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
+    <span class="n">tool_param_types</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">create_workflow</span><span class="p">)</span>
+
+    <span class="n">tool_metadata</span> <span class="o">=</span> <span class="n">_create_metadata</span><span class="p">(</span>
+        <span class="n">database</span><span class="o">=</span><span class="n">tool_database</span><span class="p">,</span>
+        <span class="n">dispatcher</span><span class="o">=</span><span class="n">dispatcher</span><span class="p">,</span>
+        <span class="n">tool_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+        <span class="n">tool_params</span><span class="o">=</span><span class="n">tool_params</span><span class="p">,</span>
+        <span class="n">tool_param_types</span><span class="o">=</span><span class="n">tool_param_types</span><span class="p">,</span>
+        <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
+        <span class="n">tool_options</span><span class="o">=</span><span class="n">tool_options</span><span class="p">,</span>
+        <span class="n">common_options</span><span class="o">=</span><span class="n">common_options</span><span class="p">,</span>
+    <span class="p">)</span>
+
+    <span class="n">tool_database</span><span class="o">.</span><span class="n">store_metadata</span><span class="p">(</span><span class="n">tool_metadata</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">validate_input</span> <span class="o">:=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="s1">&#39;validate_input&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
         <span class="n">validate_input</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">tool_options</span><span class="p">)</span>
 
-    <span class="n">wf</span> <span class="o">=</span> <span class="n">_tool</span><span class="o">.</span><span class="n">create_workflow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">tool_options</span><span class="p">)</span>
+    <span class="n">wf</span><span class="p">:</span> <span class="n">Workflow</span> <span class="o">=</span> <span class="n">create_workflow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">tool_options</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">wf</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span>
 
-    <span class="n">dispatcher</span><span class="p">,</span> <span class="n">database</span> <span class="o">=</span> <span class="n">_get_run_setup</span><span class="p">(</span><span class="n">common_options</span><span class="p">,</span> <span class="n">wf</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">setup_metadata</span> <span class="o">=</span> <span class="n">_create_metadata_common</span><span class="p">(</span><span class="n">common_options</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">wf</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;common_options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">setup_metadata</span>
-    <span class="n">database</span><span class="o">.</span><span class="n">store_metadata</span><span class="p">(</span><span class="n">tool_metadata</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="s1">&#39;modelfit&#39;</span><span class="p">:</span>
-        <span class="n">_store_input_models</span><span class="p">(</span><span class="nb">list</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="o">+</span> <span class="nb">list</span><span class="p">(</span><span class="n">kwargs</span><span class="o">.</span><span class="n">items</span><span class="p">()),</span> <span class="n">database</span><span class="p">)</span>
-
-    <span class="n">res</span> <span class="o">=</span> <span class="n">execute_workflow</span><span class="p">(</span><span class="n">wf</span><span class="p">,</span> <span class="n">dispatcher</span><span class="o">=</span><span class="n">dispatcher</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">database</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">execute_workflow</span><span class="p">(</span><span class="n">wf</span><span class="p">,</span> <span class="n">dispatcher</span><span class="o">=</span><span class="n">dispatcher</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">tool_database</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;modelfit&#39;</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">Results</span><span class="p">)</span>
 
-    <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;stats&#39;</span><span class="p">][</span><span class="s1">&#39;end_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_now</span><span class="p">()</span>
-    <span class="n">database</span><span class="o">.</span><span class="n">store_metadata</span><span class="p">(</span><span class="n">tool_metadata</span><span class="p">)</span>
+    <span class="n">tool_metadata</span> <span class="o">=</span> <span class="n">_update_metadata</span><span class="p">(</span><span class="n">tool_metadata</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+    <span class="n">tool_database</span><span class="o">.</span><span class="n">store_metadata</span><span class="p">(</span><span class="n">tool_metadata</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">res</span>
 
 
-<span class="k">def</span> <span class="nf">_store_input_models</span><span class="p">(</span><span class="n">args</span><span class="p">,</span> <span class="n">database</span><span class="p">):</span>
-    <span class="n">input_models</span> <span class="o">=</span> <span class="n">_get_input_models</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_create_metadata</span><span class="p">(</span>
+    <span class="n">database</span><span class="p">:</span> <span class="n">ToolDatabase</span><span class="p">,</span>
+    <span class="n">dispatcher</span><span class="p">,</span>
+    <span class="n">tool_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">tool_params</span><span class="p">,</span>
+    <span class="n">tool_param_types</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+    <span class="n">tool_options</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">common_options</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+<span class="p">):</span>
+    <span class="n">tool_metadata</span> <span class="o">=</span> <span class="n">_create_metadata_tool</span><span class="p">(</span>
+        <span class="n">database</span><span class="p">,</span> <span class="n">tool_name</span><span class="p">,</span> <span class="n">tool_params</span><span class="p">,</span> <span class="n">tool_param_types</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">tool_options</span>
+    <span class="p">)</span>
+    <span class="n">setup_metadata</span> <span class="o">=</span> <span class="n">_create_metadata_common</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">,</span> <span class="n">tool_name</span><span class="p">,</span> <span class="n">common_options</span><span class="p">)</span>
+    <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;common_options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">setup_metadata</span>
 
-    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">input_models</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">_create_input_model</span><span class="p">(</span><span class="n">input_models</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">database</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">input_models</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
-            <span class="n">_create_input_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">tool_metadata</span>
 
 
-<span class="k">def</span> <span class="nf">_get_input_models</span><span class="p">(</span><span class="n">args</span><span class="p">):</span>
-    <span class="n">input_models</span> <span class="o">=</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">arg</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
-            <span class="n">input_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">arg</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_update_metadata</span><span class="p">(</span><span class="n">tool_metadata</span><span class="p">,</span> <span class="n">res</span><span class="p">):</span>
+    <span class="c1"># FIXME Make metadata immutable</span>
+    <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;stats&#39;</span><span class="p">][</span><span class="s1">&#39;end_time&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_now</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">tool_metadata</span>
+
+
+<div class="viewcode-block" id="resume_tool"><a class="viewcode-back" href="../../../api/pharmpy.tools.resume_tool.html#pharmpy.tools.resume_tool">[docs]</a><span class="k">def</span> <span class="nf">resume_tool</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Resume tool workflow from tool database path</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    path : str</span>
+<span class="sd">        The path to the tool database</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    Results</span>
+<span class="sd">        Results object for tool</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import * # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; res = resume_tool(&quot;resmod_dir1&quot;) # doctest: +SKIP</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">dispatcher</span><span class="p">,</span> <span class="n">tool_database</span> <span class="o">=</span> <span class="n">_get_run_setup_from_metadata</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+
+    <span class="n">tool_metadata</span> <span class="o">=</span> <span class="n">tool_database</span><span class="o">.</span><span class="n">read_metadata</span><span class="p">()</span>
+    <span class="n">tool_name</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;tool_name&#39;</span><span class="p">]</span>
+
+    <span class="n">tool</span> <span class="o">=</span> <span class="n">importlib</span><span class="o">.</span><span class="n">import_module</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;pharmpy.tools.</span><span class="si">{</span><span class="n">tool_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="n">create_workflow</span> <span class="o">=</span> <span class="n">tool</span><span class="o">.</span><span class="n">create_workflow</span>
+
+    <span class="n">tool_params</span> <span class="o">=</span> <span class="n">inspect</span><span class="o">.</span><span class="n">signature</span><span class="p">(</span><span class="n">create_workflow</span><span class="p">)</span><span class="o">.</span><span class="n">parameters</span>
+    <span class="n">tool_param_types</span> <span class="o">=</span> <span class="n">get_type_hints</span><span class="p">(</span><span class="n">create_workflow</span><span class="p">)</span>
+
+    <span class="n">tool_options</span> <span class="o">=</span> <span class="n">_parse_tool_options_from_json_metadata</span><span class="p">(</span>
+        <span class="n">tool_metadata</span><span class="p">,</span> <span class="n">tool_params</span><span class="p">,</span> <span class="n">tool_param_types</span><span class="p">,</span> <span class="n">tool_database</span>
+    <span class="p">)</span>
+
+    <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span> <span class="o">=</span> <span class="n">_parse_args_kwargs_from_tool_options</span><span class="p">(</span><span class="n">tool_params</span><span class="p">,</span> <span class="n">tool_options</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">validate_input</span> <span class="o">:=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">tool</span><span class="p">,</span> <span class="s1">&#39;validate_input&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">):</span>
+        <span class="n">validate_input</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+
+    <span class="n">wf</span><span class="p">:</span> <span class="n">Workflow</span> <span class="o">=</span> <span class="n">create_workflow</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">wf</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">tool_name</span>
+
+    <span class="n">res</span> <span class="o">=</span> <span class="n">execute_workflow</span><span class="p">(</span><span class="n">wf</span><span class="p">,</span> <span class="n">dispatcher</span><span class="o">=</span><span class="n">dispatcher</span><span class="p">,</span> <span class="n">database</span><span class="o">=</span><span class="n">tool_database</span><span class="p">)</span>
+    <span class="k">assert</span> <span class="n">tool_name</span> <span class="o">==</span> <span class="s1">&#39;modelfit&#39;</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">Results</span><span class="p">)</span>
+
+    <span class="n">tool_metadata</span> <span class="o">=</span> <span class="n">_update_metadata</span><span class="p">(</span><span class="n">tool_metadata</span><span class="p">,</span> <span class="n">res</span><span class="p">)</span>
+    <span class="n">tool_database</span><span class="o">.</span><span class="n">store_metadata</span><span class="p">(</span><span class="n">tool_metadata</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">res</span></div>
+
+
+<span class="k">def</span> <span class="nf">_parse_tool_options_from_json_metadata</span><span class="p">(</span>
+    <span class="n">tool_metadata</span><span class="p">,</span>
+    <span class="n">tool_params</span><span class="p">,</span>
+    <span class="n">tool_param_types</span><span class="p">,</span>
+    <span class="n">tool_database</span><span class="p">,</span>
+<span class="p">):</span>
+    <span class="n">tool_options</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;tool_options&#39;</span><span class="p">]</span>
+    <span class="c1"># NOTE Load models to memory</span>
+    <span class="k">for</span> <span class="n">model_key</span> <span class="ow">in</span> <span class="n">_input_model_param_keys</span><span class="p">(</span><span class="n">tool_params</span><span class="p">,</span> <span class="n">tool_param_types</span><span class="p">):</span>
+        <span class="n">model_metadata</span> <span class="o">=</span> <span class="n">tool_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">model_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">model_metadata</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Cannot resume run because model argument &quot;</span><span class="si">{</span><span class="n">model_key</span><span class="si">}</span><span class="s1">&quot; cannot be restored.&#39;</span>
+            <span class="p">)</span>
+
+        <span class="k">assert</span> <span class="n">model_metadata</span><span class="p">[</span><span class="s1">&#39;__class__&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Model&#39;</span>
+        <span class="n">model_name</span> <span class="o">=</span> <span class="n">model_metadata</span><span class="p">[</span><span class="s1">&#39;arg_name&#39;</span><span class="p">]</span>
+        <span class="n">db_name</span> <span class="o">=</span> <span class="n">model_metadata</span><span class="p">[</span><span class="s1">&#39;db_name&#39;</span><span class="p">]</span>
+
+        <span class="n">db</span><span class="p">:</span> <span class="n">ModelDatabase</span> <span class="o">=</span> <span class="n">tool_database</span><span class="o">.</span><span class="n">model_database</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">retrieve_model</span><span class="p">(</span><span class="n">db_name</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">model_name</span><span class="p">)</span>
+            <span class="n">res</span> <span class="o">=</span> <span class="n">db</span><span class="o">.</span><span class="n">retrieve_modelfit_results</span><span class="p">(</span><span class="n">db_name</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">modelfit_results</span><span class="o">=</span><span class="n">res</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s1">&#39;Cannot resume run because model argument &quot;</span><span class="si">{</span><span class="n">model_key</span><span class="si">}</span><span class="s1">&quot; (</span><span class="si">{</span><span class="n">model_name</span><span class="si">}</span><span class="s1">) cannot be restored.&#39;</span>
+            <span class="p">)</span>
+        <span class="n">tool_options</span> <span class="o">=</span> <span class="n">tool_options</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+        <span class="n">tool_options</span><span class="p">[</span><span class="n">model_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">model</span>
+
+    <span class="c1"># NOTE Load results to memory</span>
+    <span class="k">for</span> <span class="n">results_key</span> <span class="ow">in</span> <span class="n">_results_param_keys</span><span class="p">(</span><span class="n">tool_params</span><span class="p">,</span> <span class="n">tool_param_types</span><span class="p">):</span>
+        <span class="n">results_json</span> <span class="o">=</span> <span class="n">tool_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">results_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">results_json</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">tool_options</span> <span class="o">=</span> <span class="n">tool_options</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+            <span class="n">tool_options</span><span class="p">[</span><span class="n">results_key</span><span class="p">]</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">results</span><span class="o">.</span><span class="n">read_results</span><span class="p">(</span><span class="n">results_json</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">tool_options</span>
+
+
+<span class="k">def</span> <span class="nf">_parse_args_kwargs_from_tool_options</span><span class="p">(</span><span class="n">tool_params</span><span class="p">,</span> <span class="n">tool_options</span><span class="p">):</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">kwargs</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">tool_params</span><span class="o">.</span><span class="n">values</span><span class="p">():</span>
+        <span class="c1"># Positional args</span>
+        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">default</span> <span class="o">==</span> <span class="n">p</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+            <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">tool_options</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">])</span>
+        <span class="c1"># Named args</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">arg_as_list</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">arg</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">Model</span><span class="p">)]</span>
-            <span class="n">input_models</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">arg_as_list</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">input_models</span>
+            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">tool_options</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">tool_options</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+
+    <span class="k">return</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span>
 
 
-<span class="k">def</span> <span class="nf">_create_input_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">tool_db</span><span class="p">,</span> <span class="n">number</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
-    <span class="n">input_name</span> <span class="o">=</span> <span class="s1">&#39;input_model&#39;</span>
-    <span class="k">if</span> <span class="n">number</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">input_name</span> <span class="o">+=</span> <span class="nb">str</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
-    <span class="n">model_copy</span> <span class="o">=</span> <span class="n">copy_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">input_name</span><span class="p">)</span>
-    <span class="k">with</span> <span class="n">tool_db</span><span class="o">.</span><span class="n">model_database</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="n">model_copy</span><span class="p">)</span> <span class="k">as</span> <span class="n">txn</span><span class="p">:</span>
-        <span class="n">txn</span><span class="o">.</span><span class="n">store_model</span><span class="p">()</span>
-        <span class="n">txn</span><span class="o">.</span><span class="n">store_modelfit_results</span><span class="p">()</span>
-
-
-<span class="k">def</span> <span class="nf">_now</span><span class="p">():</span>
-    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">astimezone</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
-
-
-<span class="k">def</span> <span class="nf">_create_metadata_tool</span><span class="p">(</span><span class="n">tool_name</span><span class="p">,</span> <span class="n">tool_params</span><span class="p">,</span> <span class="n">tool_options</span><span class="p">,</span> <span class="n">args</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_create_metadata_tool</span><span class="p">(</span>
+    <span class="n">database</span><span class="p">:</span> <span class="n">ToolDatabase</span><span class="p">,</span>
+    <span class="n">tool_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">tool_params</span><span class="p">,</span>
+    <span class="n">tool_param_types</span><span class="p">,</span>
+    <span class="n">args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
+    <span class="n">kwargs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+<span class="p">):</span>
     <span class="c1"># FIXME: add config file dump, estimation tool etc.</span>
     <span class="n">tool_metadata</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;pharmpy_version&#39;</span><span class="p">:</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">__version__</span><span class="p">,</span>
@@ -686,31 +797,38 @@
     <span class="p">}</span>
 
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">p</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">tool_params</span><span class="o">.</span><span class="n">values</span><span class="p">()):</span>
-        <span class="c1"># Positional args</span>
-        <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">default</span> <span class="o">==</span> <span class="n">p</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
             <span class="k">try</span><span class="p">:</span>
-                <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
-            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-                <span class="k">try</span><span class="p">:</span>
-                    <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">tool_options</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-                <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">default</span> <span class="o">==</span> <span class="n">p</span><span class="o">.</span><span class="n">empty</span><span class="p">:</span>
+                    <span class="c1"># Positional args</span>
                     <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">tool_name</span><span class="si">}</span><span class="s1">: </span><span class="se">\&#39;</span><span class="si">{</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="se">\&#39;</span><span class="s1"> was not set&#39;</span><span class="p">)</span>
-        <span class="c1"># Named args</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">tool_options</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-                <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">tool_options</span><span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">]</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">default</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">value</span><span class="p">)</span>  <span class="c1"># FIXME: better model representation</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">ModelfitResults</span><span class="p">):</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="s2">&quot;FIXME&quot;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="c1"># Named args</span>
+                    <span class="n">name</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">p</span><span class="o">.</span><span class="n">default</span>
+
         <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;tool_options&#39;</span><span class="p">][</span><span class="n">name</span><span class="p">]</span> <span class="o">=</span> <span class="n">value</span>
+
+    <span class="k">if</span> <span class="n">tool_name</span> <span class="o">!=</span> <span class="s1">&#39;modelfit&#39;</span><span class="p">:</span>
+        <span class="n">db</span> <span class="o">=</span> <span class="n">database</span><span class="o">.</span><span class="n">model_database</span>
+        <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">arg_name</span><span class="p">,</span> <span class="n">db_name</span> <span class="ow">in</span> <span class="n">_store_input_models</span><span class="p">(</span>
+            <span class="n">db</span><span class="p">,</span> <span class="n">tool_params</span><span class="p">,</span> <span class="n">tool_param_types</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span>
+        <span class="p">):</span>
+            <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;tool_options&#39;</span><span class="p">][</span><span class="n">key</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
+                <span class="s1">&#39;__class__&#39;</span><span class="p">:</span> <span class="s1">&#39;Model&#39;</span><span class="p">,</span>
+                <span class="s1">&#39;arg_name&#39;</span><span class="p">:</span> <span class="n">arg_name</span><span class="p">,</span>
+                <span class="s1">&#39;db_name&#39;</span><span class="p">:</span> <span class="n">db_name</span><span class="p">,</span>
+            <span class="p">}</span>
 
     <span class="k">return</span> <span class="n">tool_metadata</span>
 
 
-<span class="k">def</span> <span class="nf">_create_metadata_common</span><span class="p">(</span><span class="n">common_options</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">,</span> <span class="n">database</span><span class="p">,</span> <span class="n">toolname</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_create_metadata_common</span><span class="p">(</span>
+    <span class="n">database</span><span class="p">:</span> <span class="n">ToolDatabase</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">,</span> <span class="n">toolname</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">common_options</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+<span class="p">):</span>
     <span class="n">setup_metadata</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="n">setup_metadata</span><span class="p">[</span><span class="s1">&#39;dispatcher&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dispatcher</span><span class="o">.</span><span class="vm">__name__</span>
     <span class="c1"># FIXME: naming of workflows/tools should be consistent (db and input name of tool)</span>
@@ -728,7 +846,56 @@
     <span class="k">return</span> <span class="n">setup_metadata</span>
 
 
-<span class="k">def</span> <span class="nf">_get_run_setup</span><span class="p">(</span><span class="n">common_options</span><span class="p">,</span> <span class="n">toolname</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_store_input_models</span><span class="p">(</span>
+    <span class="n">db</span><span class="p">:</span> <span class="n">ModelDatabase</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+<span class="p">):</span>
+    <span class="k">for</span> <span class="n">param_key</span><span class="p">,</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">_input_models</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">input_model_name</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;input_</span><span class="si">{</span><span class="n">param_key</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">_store_input_model</span><span class="p">(</span><span class="n">db</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">input_model_name</span><span class="p">)</span>
+        <span class="k">yield</span> <span class="n">param_key</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">input_model_name</span>
+
+
+<span class="k">def</span> <span class="nf">_filter_params</span><span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">param_key</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+        <span class="n">param</span> <span class="o">=</span> <span class="n">params</span><span class="p">[</span><span class="n">param_key</span><span class="p">]</span>
+        <span class="n">param_type</span> <span class="o">=</span> <span class="n">types</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_key</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">param_type</span> <span class="ow">in</span> <span class="p">(</span><span class="n">kind</span><span class="p">,</span> <span class="n">Optional</span><span class="p">[</span><span class="n">kind</span><span class="p">]):</span>
+            <span class="c1"># NOTE We do not handle *{param_key}, or **{param_key}</span>
+            <span class="k">assert</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">!=</span> <span class="n">param</span><span class="o">.</span><span class="n">VAR_POSITIONAL</span>
+            <span class="k">assert</span> <span class="n">param</span><span class="o">.</span><span class="n">kind</span> <span class="o">!=</span> <span class="n">param</span><span class="o">.</span><span class="n">VAR_KEYWORD</span>
+            <span class="k">yield</span> <span class="n">i</span><span class="p">,</span> <span class="n">param_key</span>
+
+
+<span class="k">def</span> <span class="nf">_input_model_param_keys</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">param_key</span> <span class="ow">in</span> <span class="n">_filter_params</span><span class="p">(</span><span class="n">Model</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">param_key</span>
+
+
+<span class="k">def</span> <span class="nf">_results_param_keys</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">param_key</span> <span class="ow">in</span> <span class="n">_filter_params</span><span class="p">(</span><span class="n">ModelfitResults</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+        <span class="k">yield</span> <span class="n">param_key</span>
+
+
+<span class="k">def</span> <span class="nf">_input_models</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">types</span><span class="p">,</span> <span class="n">args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span> <span class="n">kwargs</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">param_key</span> <span class="ow">in</span> <span class="n">_filter_params</span><span class="p">(</span><span class="n">Model</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">types</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">args</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="k">if</span> <span class="n">i</span> <span class="o">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="k">else</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">param_key</span><span class="p">)</span>
+        <span class="c1"># NOTE We do not handle missing optional models</span>
+        <span class="k">assert</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="k">yield</span> <span class="n">param_key</span><span class="p">,</span> <span class="n">model</span>
+
+
+<span class="k">def</span> <span class="nf">_store_input_model</span><span class="p">(</span><span class="n">db</span><span class="p">:</span> <span class="n">ModelDatabase</span><span class="p">,</span> <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">model_copy</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">)</span>
+    <span class="k">with</span> <span class="n">db</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="n">model_copy</span><span class="p">)</span> <span class="k">as</span> <span class="n">txn</span><span class="p">:</span>
+        <span class="n">txn</span><span class="o">.</span><span class="n">store_model</span><span class="p">()</span>
+        <span class="n">txn</span><span class="o">.</span><span class="n">store_modelfit_results</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_now</span><span class="p">():</span>
+    <span class="k">return</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span><span class="o">.</span><span class="n">astimezone</span><span class="p">()</span><span class="o">.</span><span class="n">isoformat</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_get_run_setup</span><span class="p">(</span><span class="n">common_options</span><span class="p">,</span> <span class="n">toolname</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">ToolDatabase</span><span class="p">]:</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">dispatcher</span> <span class="o">=</span> <span class="n">common_options</span><span class="p">[</span><span class="s1">&#39;dispatcher&#39;</span><span class="p">]</span>
     <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
@@ -1224,16 +1391,12 @@
 
     <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
         <span class="n">i</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">ofv_iterations</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="n">ofv</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">ofv_iterations</span><span class="p">[</span>
-        <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">ofv</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">ofv_iterations</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;ofv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ofv</span>
     <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;runtime_total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">runtime_total</span>
     <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;estimation_runtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">estimation_runtime_iterations</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-    <span class="n">pe</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates_iterations</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span>
-        <span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span>
-    <span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates_iterations</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
     <span class="n">ses</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">standard_errors</span>
     <span class="n">rses</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">relative_standard_errors</span>
 
@@ -1264,6 +1427,25 @@
     <span class="c1"># FIXME: Quick and dirty solution</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">read_model</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">mfr</span><span class="p">(</span><span class="n">model</span><span class="p">)</span></div>
+
+
+<span class="k">def</span> <span class="nf">_get_run_setup_from_metadata</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+    <span class="kn">import</span> <span class="nn">pharmpy.workflows</span> <span class="k">as</span> <span class="nn">workflows</span>
+
+    <span class="n">tool_database</span> <span class="o">=</span> <span class="n">workflows</span><span class="o">.</span><span class="n">default_tool_database</span><span class="p">(</span><span class="n">toolname</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+
+    <span class="n">tool_metadata</span> <span class="o">=</span> <span class="n">tool_database</span><span class="o">.</span><span class="n">read_metadata</span><span class="p">()</span>
+    <span class="n">tool_name</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;tool_name&#39;</span><span class="p">]</span>
+    <span class="n">common_options</span> <span class="o">=</span> <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;common_options&#39;</span><span class="p">]</span>
+
+    <span class="c1"># TODO be more general</span>
+    <span class="n">dispatcher</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">workflows</span><span class="p">,</span> <span class="n">common_options</span><span class="p">[</span><span class="s1">&#39;dispatcher&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)[</span><span class="o">-</span><span class="mi">1</span><span class="p">])</span>
+
+    <span class="c1"># TODO be more general</span>
+    <span class="k">assert</span> <span class="n">common_options</span><span class="p">[</span><span class="s1">&#39;database&#39;</span><span class="p">][</span><span class="s1">&#39;class&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;LocalDirectoryToolDatabase&#39;</span>
+    <span class="k">assert</span> <span class="n">common_options</span><span class="p">[</span><span class="s1">&#39;database&#39;</span><span class="p">][</span><span class="s1">&#39;toolname&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">tool_name</span>
+
+    <span class="k">return</span> <span class="n">dispatcher</span><span class="p">,</span> <span class="n">tool_database</span>
 </pre></div>
 
             </article>

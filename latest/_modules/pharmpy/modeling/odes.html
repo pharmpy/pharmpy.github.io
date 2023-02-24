@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -454,7 +454,7 @@
 
 <span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">,</span> <span class="n">rename_symbols</span>
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">get_observations</span>
-<span class="kn">from</span> <span class="nn">.expressions</span> <span class="kn">import</span> <span class="n">create_symbol</span>
+<span class="kn">from</span> <span class="nn">.expressions</span> <span class="kn">import</span> <span class="n">create_symbol</span><span class="p">,</span> <span class="n">is_real</span>
 <span class="kn">from</span> <span class="nn">.parameters</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">add_population_parameter</span><span class="p">,</span>
     <span class="n">fix_parameters</span><span class="p">,</span>
@@ -489,29 +489,29 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; add_individual_parameter(model, &quot;KA&quot;)   # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = add_individual_parameter(model, &quot;KA&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;KA&quot;)</span>
 <span class="sd">    KA = POP_KA</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
 <span class="k">def</span> <span class="nf">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">init</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.1</span><span class="p">):</span>
     <span class="n">pops</span> <span class="o">=</span> <span class="n">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;POP_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">add_population_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">pops</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">add_population_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">pops</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">init</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">symb</span> <span class="o">=</span> <span class="n">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
     <span class="n">ass</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symb</span><span class="p">,</span> <span class="n">pops</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">ass</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
-    <span class="k">return</span> <span class="n">symb</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">ass</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">symb</span>
 
 
 <div class="viewcode-block" id="set_first_order_elimination"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_first_order_elimination.html#pharmpy.modeling.set_first_order_elimination">[docs]</a><span class="k">def</span> <span class="nf">set_first_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
@@ -525,14 +525,13 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_first_order_elimination(model)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_first_order_elimination(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
 <span class="sd">    Bolus(AMT, admid=1)</span>
 <span class="sd">    ┌───────┐</span>
@@ -548,7 +547,7 @@
     <span class="k">if</span> <span class="n">has_first_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="k">pass</span>
     <span class="k">elif</span> <span class="n">has_zero_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="ow">or</span> <span class="n">has_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-        <span class="n">rename_symbols</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;POP_CLMM&#39;</span><span class="p">:</span> <span class="s1">&#39;POP_CL&#39;</span><span class="p">,</span> <span class="s1">&#39;IIV_CLMM&#39;</span><span class="p">:</span> <span class="s1">&#39;IIV_CL&#39;</span><span class="p">})</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">rename_symbols</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;POP_CLMM&#39;</span><span class="p">:</span> <span class="s1">&#39;POP_CL&#39;</span><span class="p">,</span> <span class="s1">&#39;IIV_CLMM&#39;</span><span class="p">:</span> <span class="s1">&#39;IIV_CL&#39;</span><span class="p">})</span>
         <span class="n">ind</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="s1">&#39;CLMM&#39;</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">ind</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">clmm_assignment</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="n">ind</span><span class="p">]</span>
@@ -566,10 +565,11 @@
         <span class="n">cb</span><span class="o">.</span><span class="n">remove_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">v</span><span class="p">)</span>
         <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
             <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;KM&#39;</span><span class="p">)},</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
         <span class="p">)</span>
-        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">has_mixed_mm_fo_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
         <span class="k">assert</span> <span class="n">odes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -581,13 +581,14 @@
         <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">remove_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">v</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
         <span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
-            <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;KM&#39;</span><span class="p">),</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CLMM&#39;</span><span class="p">)},</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;KM&#39;</span><span class="p">),</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CLMM&#39;</span><span class="p">)},</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
         <span class="p">)</span>
-        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -604,14 +605,13 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_zero_order_elimination(model)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_zero_order_elimination(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
 <span class="sd">    Bolus(AMT, admid=1)</span>
 <span class="sd">    ┌───────┐</span>
@@ -627,9 +627,9 @@
     <span class="k">if</span> <span class="n">has_zero_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="k">pass</span>
     <span class="k">elif</span> <span class="n">has_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-        <span class="n">fix_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;POP_KM&#39;</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">fix_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;POP_KM&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">has_mixed_mm_fo_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-        <span class="n">fix_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;POP_KM&#39;</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">fix_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;POP_KM&#39;</span><span class="p">)</span>
         <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
         <span class="k">assert</span> <span class="n">odes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
@@ -638,18 +638,19 @@
         <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">remove_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
         <span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
-            <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)},</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
+            <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)},</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
         <span class="p">)</span>
-        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="n">obs</span> <span class="o">=</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="n">init</span> <span class="o">=</span> <span class="n">obs</span><span class="o">.</span><span class="n">min</span><span class="p">()</span> <span class="o">/</span> <span class="mi">100</span>  <span class="c1"># 1% of smallest observation</span>
-        <span class="n">fix_parameters_to</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">:</span> <span class="n">init</span><span class="p">})</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">fix_parameters_to</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">:</span> <span class="n">init</span><span class="p">})</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -675,8 +676,7 @@
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; has_michaelis_menten_elimination(model)</span>
 <span class="sd">    False</span>
-<span class="sd">    &gt;&gt;&gt; set_michaelis_menten_elimination(model)   # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_michaelis_menten_elimination(model)</span>
 <span class="sd">    &gt;&gt;&gt; has_michaelis_menten_elimination(model)</span>
 <span class="sd">    True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -713,8 +713,7 @@
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; has_zero_order_elimination(model)</span>
 <span class="sd">    False</span>
-<span class="sd">    &gt;&gt;&gt; set_zero_order_elimination(model)   # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_zero_order_elimination(model)</span>
 <span class="sd">    &gt;&gt;&gt; has_zero_order_elimination(model)</span>
 <span class="sd">    True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -751,8 +750,7 @@
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; has_mixed_mm_fo_elimination(model)</span>
 <span class="sd">    False</span>
-<span class="sd">    &gt;&gt;&gt; set_mixed_mm_fo_elimination(model)   # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_mixed_mm_fo_elimination(model)</span>
 <span class="sd">    &gt;&gt;&gt; has_mixed_mm_fo_elimination(model)</span>
 <span class="sd">    True</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -813,14 +811,13 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_michaelis_menten_elimination(model)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_michaelis_menten_elimination(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
 <span class="sd">    Bolus(AMT, admid=1)</span>
 <span class="sd">    ┌───────┐</span>
@@ -836,7 +833,7 @@
     <span class="k">if</span> <span class="n">has_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="k">pass</span>
     <span class="k">elif</span> <span class="n">has_zero_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-        <span class="n">unfix_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;POP_KM&#39;</span><span class="p">)</span>  <span class="c1"># model.parameters[&#39;POP_KM&#39;].fix = False</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">unfix_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;POP_KM&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">has_mixed_mm_fo_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
         <span class="k">assert</span> <span class="n">odes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -849,12 +846,13 @@
         <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
         <span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
             <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)},</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
         <span class="p">)</span>
-        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -871,14 +869,13 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_mixed_mm_fo_elimination(model)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_mixed_mm_fo_elimination(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
 <span class="sd">    Bolus(AMT, admid=1)</span>
 <span class="sd">    ┌───────┐</span>
@@ -895,11 +892,11 @@
     <span class="k">if</span> <span class="n">has_mixed_mm_fo_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="k">pass</span>
     <span class="k">elif</span> <span class="n">has_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="ow">or</span> <span class="n">has_zero_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-        <span class="n">unfix_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;POP_KM&#39;</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">unfix_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;POP_KM&#39;</span><span class="p">)</span>
         <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
         <span class="k">assert</span> <span class="n">odes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
-        <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">)</span>
         <span class="n">rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
@@ -908,11 +905,13 @@
         <span class="k">if</span> <span class="n">v</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
             <span class="n">v</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;VC&#39;</span><span class="p">)</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">)</span> <span class="o">/</span> <span class="n">v</span> <span class="o">+</span> <span class="n">rate</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
         <span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_do_michaelis_menten_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">combined</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -927,15 +926,15 @@
 
     <span class="n">km_init</span><span class="p">,</span> <span class="n">clmm_init</span> <span class="o">=</span> <span class="n">_get_mm_inits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">numer</span><span class="p">,</span> <span class="n">combined</span><span class="p">)</span>
 
-    <span class="n">km</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;KM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">km_init</span><span class="p">)</span>
-    <span class="n">set_upper_bounds</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">:</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()})</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">km</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;KM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">km_init</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">set_upper_bounds</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;POP_KM&#39;</span><span class="p">:</span> <span class="mi">20</span> <span class="o">*</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">max</span><span class="p">()})</span>
 
     <span class="k">if</span> <span class="n">denom</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">combined</span><span class="p">:</span>
             <span class="n">cl</span> <span class="o">=</span> <span class="n">numer</span>
-            <span class="n">clmm</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">clmm_init</span><span class="p">)</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">clmm</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">clmm_init</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">_rename_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">_rename_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">)</span>
             <span class="n">clmm</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CLMM&#39;</span><span class="p">)</span>
             <span class="n">cl</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">vc</span> <span class="o">=</span> <span class="n">denom</span>
@@ -946,7 +945,7 @@
                 <span class="k">assert</span> <span class="n">assignment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
                 <span class="n">cl</span> <span class="o">=</span> <span class="n">assignment</span><span class="o">.</span><span class="n">symbol</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">cl</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="n">clmm_init</span><span class="p">)</span>
+                <span class="n">model</span><span class="p">,</span> <span class="n">cl</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="n">clmm_init</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cl</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;VC&#39;</span><span class="p">):</span>
@@ -954,31 +953,32 @@
             <span class="k">assert</span> <span class="n">assignment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="n">vc</span> <span class="o">=</span> <span class="n">assignment</span><span class="o">.</span><span class="n">symbol</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">vc</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;VC&#39;</span><span class="p">)</span>  <span class="c1"># FIXME: decide better initial estimate</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">vc</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;VC&#39;</span><span class="p">)</span>  <span class="c1"># FIXME: decide better initial estimate</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">combined</span> <span class="ow">and</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;CL&#39;</span><span class="p">):</span>
-            <span class="n">_rename_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">_rename_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CL&#39;</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">)</span>
             <span class="n">assignment</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;CLMM&#39;</span><span class="p">)</span>
             <span class="k">assert</span> <span class="n">assignment</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="n">clmm</span> <span class="o">=</span> <span class="n">assignment</span><span class="o">.</span><span class="n">symbol</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">clmm</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">clmm_init</span><span class="p">)</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">clmm</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CLMM&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">clmm_init</span><span class="p">)</span>
 
     <span class="n">amount</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">(</span><span class="n">central</span><span class="o">.</span><span class="n">amount</span><span class="o">.</span><span class="n">name</span><span class="p">)(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;t&#39;</span><span class="p">))</span>
     <span class="n">rate</span> <span class="o">=</span> <span class="p">(</span><span class="n">clmm</span> <span class="o">*</span> <span class="n">km</span> <span class="o">/</span> <span class="p">(</span><span class="n">km</span> <span class="o">+</span> <span class="n">amount</span> <span class="o">/</span> <span class="n">vc</span><span class="p">)</span> <span class="o">+</span> <span class="n">cl</span><span class="p">)</span> <span class="o">/</span> <span class="n">vc</span>
     <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
     <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
         <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
     <span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
-        <span class="n">numer</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="p">)</span>
-    <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">numer</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">,</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span>
 
 
 <span class="k">def</span> <span class="nf">_rename_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">old_name</span><span class="p">,</span> <span class="n">new_name</span><span class="p">):</span>
-    <span class="n">a</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">old_name</span><span class="p">)</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">old_name</span><span class="p">)</span>
     <span class="k">assert</span> <span class="n">a</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
     <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="p">:</span>
@@ -986,10 +986,10 @@
             <span class="n">old_par</span> <span class="o">=</span> <span class="n">s</span>
             <span class="n">d</span><span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">s</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span><span class="p">]</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;POP_</span><span class="si">{</span><span class="n">new_name</span><span class="si">}</span><span class="s1">&#39;</span>
             <span class="n">new_par</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;POP_</span><span class="si">{</span><span class="n">new_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">old_par</span><span class="p">:</span> <span class="n">new_par</span><span class="p">})</span>
+            <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">old_par</span><span class="p">:</span> <span class="n">new_par</span><span class="p">})</span>
             <span class="k">break</span>
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="p">:</span>
-        <span class="n">iivs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv</span>
+        <span class="n">iivs</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">iiv</span>
         <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">iivs</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
             <span class="n">cov</span> <span class="o">=</span> <span class="n">iivs</span><span class="o">.</span><span class="n">covariance_matrix</span>
             <span class="n">ind</span> <span class="o">=</span> <span class="n">iivs</span><span class="o">.</span><span class="n">names</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
@@ -1006,7 +1006,7 @@
                         <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
                             <span class="n">symb</span> <span class="o">=</span> <span class="n">p</span>
                         <span class="n">d</span><span class="p">[</span><span class="n">symb</span><span class="p">]</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;IIV_</span><span class="si">{</span><span class="n">old_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;IIV_</span><span class="si">{</span><span class="n">new_name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+            <span class="n">rvs</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
             <span class="k">break</span>
     <span class="n">new</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
@@ -1017,8 +1017,10 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">newparam</span> <span class="o">=</span> <span class="n">p</span>
         <span class="n">new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newparam</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">old_name</span><span class="p">:</span> <span class="n">new_name</span><span class="p">})</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">old_name</span><span class="p">:</span> <span class="n">new_name</span><span class="p">})</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span> <span class="n">random_variables</span><span class="o">=</span><span class="n">rvs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
 
 
 <span class="k">def</span> <span class="nf">_get_mm_inits</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">rate_numer</span><span class="p">,</span> <span class="n">combined</span><span class="p">):</span>
@@ -1058,19 +1060,18 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_transit_compartments(model, 3)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_transit_compartments(model, 3)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
 <span class="sd">    Bolus(AMT, admid=1)</span>
-<span class="sd">    ┌────────┐        ┌────────┐        ┌────────┐        ┌───────┐</span>
-<span class="sd">    │TRANSIT1│──3/MDT→│TRANSIT2│──3/MDT→│TRANSIT3│──3/MDT→│CENTRAL│──CL/V→</span>
-<span class="sd">    └────────┘        └────────┘        └────────┘        └───────┘</span>
+<span class="sd">    ┌────────┐      ┌────────┐      ┌────────┐      ┌───────┐</span>
+<span class="sd">    │TRANSIT1│──K12→│TRANSIT2│──K23→│TRANSIT3│──K34→│CENTRAL│──K40→</span>
+<span class="sd">    └────────┘      └────────┘      └────────┘      └───────┘</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -1113,7 +1114,7 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">cb</span><span class="o">.</span><span class="n">set_dose</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">depot</span><span class="o">.</span><span class="n">dose</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;MAT&#39;</span><span class="p">):</span>
-            <span class="n">_rename_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">_rename_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
             <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
             <span class="n">mdt_assign</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">depot</span><span class="p">)</span>
@@ -1121,11 +1122,13 @@
         <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">,</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">mdt_assign</span><span class="p">:</span>
             <span class="n">statements</span> <span class="o">=</span> <span class="n">mdt_assign</span> <span class="o">+</span> <span class="n">statements</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span>
-        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
         <span class="k">assert</span> <span class="n">odes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="n">cs</span> <span class="o">=</span> <span class="n">odes</span>
+        <span class="c1"># Since update_source() is used after removing the depot and statements are immutable, we need to</span>
+        <span class="c1"># reset to get the correct rate names</span>
+        <span class="n">cs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
 
     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">transits</span><span class="p">)</span> <span class="o">==</span> <span class="n">n</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">model</span>
@@ -1137,7 +1140,7 @@
                 <span class="n">init</span> <span class="o">=</span> <span class="n">mdt_init</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">init</span> <span class="o">=</span> <span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
-            <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">)</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">)</span>
         <span class="n">rate</span> <span class="o">=</span> <span class="n">n</span> <span class="o">/</span> <span class="n">mdt_symb</span>
         <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span>
         <span class="n">comp</span> <span class="o">=</span> <span class="n">dosing_comp</span>
@@ -1149,9 +1152,11 @@
             <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">new_comp</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span>
             <span class="n">comp</span> <span class="o">=</span> <span class="n">new_comp</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">move_dose</span><span class="p">(</span><span class="n">dosing_comp</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
         <span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">transits</span><span class="p">)</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
         <span class="n">nremove</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">transits</span><span class="p">)</span> <span class="o">-</span> <span class="n">n</span>
         <span class="n">removed_symbols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
@@ -1174,14 +1179,16 @@
             <span class="n">dose</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="o">.</span><span class="n">dose</span>
             <span class="n">cb</span><span class="o">.</span><span class="n">set_dose</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">dose</span><span class="p">)</span>
 
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
         <span class="p">)</span>
-        <span class="n">_update_numerators</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_update_numerators</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
             <span class="n">removed_symbols</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
         <span class="p">)</span>
-        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">nadd</span> <span class="o">=</span> <span class="n">n</span> <span class="o">-</span> <span class="nb">len</span><span class="p">(</span><span class="n">transits</span><span class="p">)</span>
         <span class="n">last</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">rate</span> <span class="o">=</span> <span class="n">_find_last_transit</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">transits</span><span class="p">))</span>
@@ -1198,10 +1205,12 @@
             <span class="n">last</span> <span class="o">=</span> <span class="n">new_comp</span>
             <span class="n">nadd</span> <span class="o">-=</span> <span class="mi">1</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">last</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
         <span class="p">)</span>
-        <span class="n">_update_numerators</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_update_numerators</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -1235,7 +1244,10 @@
                 <span class="k">if</span> <span class="n">ass_numer</span><span class="o">.</span><span class="n">is_Integer</span> <span class="ow">and</span> <span class="n">ass_numer</span> <span class="o">!=</span> <span class="n">new_numerator</span><span class="p">:</span>
                     <span class="n">new_rate</span> <span class="o">=</span> <span class="n">new_numerator</span> <span class="o">/</span> <span class="n">ass_denom</span>
                     <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">numer</span><span class="p">,</span> <span class="n">new_rate</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
 
 
 <div class="viewcode-block" id="add_lag_time"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_lag_time.html#pharmpy.modeling.add_lag_time">[docs]</a><span class="k">def</span> <span class="nf">add_lag_time</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
@@ -1252,14 +1264,13 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; add_lag_time(model)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = add_lag_time(model)</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -1272,17 +1283,21 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Model </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has no ODE system&#39;</span><span class="p">)</span>
     <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="n">old_lag_time</span> <span class="o">=</span> <span class="n">dosing_comp</span><span class="o">.</span><span class="n">lag_time</span>
-    <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">))</span>
+    <span class="n">model</span><span class="p">,</span> <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">))</span>
     <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
     <span class="n">cb</span><span class="o">.</span><span class="n">set_lag_time</span><span class="p">(</span><span class="n">dosing_comp</span><span class="p">,</span> <span class="n">mdt_symb</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="n">statements</span><span class="o">=</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+        <span class="p">)</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="n">old_lag_time</span><span class="p">:</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
-            <span class="n">old_lag_time</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">,</span> <span class="n">odes</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">old_lag_time</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -1297,14 +1312,13 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; remove_lag_time(model)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = remove_lag_time(model)</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -1322,13 +1336,12 @@
         <span class="n">symbols</span> <span class="o">=</span> <span class="n">lag_time</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">set_lag_time</span><span class="p">(</span><span class="n">dosing_comp</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
         <span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
-            <span class="n">symbols</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-        <span class="p">)</span>
-        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -1346,16 +1359,15 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_zero_order_absorption(model)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_zero_order_absorption(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
-<span class="sd">    Infusion(AMT, admid=1, duration=2*MAT)</span>
+<span class="sd">    Infusion(AMT, admid=1, duration=D1)</span>
 <span class="sd">    ┌───────┐</span>
 <span class="sd">    │CENTRAL│──CL/V→</span>
 <span class="sd">    └───────┘</span>
@@ -1387,7 +1399,7 @@
         <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
         <span class="n">symbols</span> <span class="o">=</span> <span class="n">ka</span><span class="o">.</span><span class="n">free_symbols</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">to_comp</span> <span class="o">=</span> <span class="n">dose_comp</span>
+        <span class="n">to_comp</span> <span class="o">=</span> <span class="n">dose_comp</span>  <span class="c1">#</span>
 
     <span class="n">new_statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">)</span>
     <span class="n">mat_idx</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="s1">&#39;MAT&#39;</span><span class="p">)</span>
@@ -1395,13 +1407,16 @@
         <span class="n">mat_assign</span> <span class="o">=</span> <span class="n">statements</span><span class="p">[</span><span class="n">mat_idx</span><span class="p">]</span>
         <span class="n">new_statements</span> <span class="o">=</span> <span class="n">new_statements</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">mat_idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">mat_assign</span> <span class="o">+</span> <span class="n">new_statements</span><span class="p">[</span><span class="n">mat_idx</span><span class="p">:]</span>
 
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">new_statements</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">new_statements</span><span class="p">)</span>
 
-    <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">has_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
         <span class="k">assert</span> <span class="n">odes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
-        <span class="n">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_add_zero_order_absorption</span><span class="p">(</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">lag_time</span>
+        <span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -1419,19 +1434,18 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_first_order_absorption(model)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_first_order_absorption(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
 <span class="sd">    Bolus(AMT, admid=1)</span>
-<span class="sd">    ┌─────┐        ┌───────┐</span>
-<span class="sd">    │DEPOT│──1/MAT→│CENTRAL│──CL/V→</span>
-<span class="sd">    └─────┘        └───────┘</span>
+<span class="sd">    ┌─────┐     ┌───────┐</span>
+<span class="sd">    │DEPOT│──KA→│CENTRAL│──CL/V→</span>
+<span class="sd">    └─────┘     └───────┘</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -1463,11 +1477,12 @@
         <span class="n">mat_assign</span> <span class="o">=</span> <span class="n">statements</span><span class="p">[</span><span class="n">mat_idx</span><span class="p">]</span>
         <span class="n">new_statements</span> <span class="o">=</span> <span class="n">new_statements</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">mat_idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">mat_assign</span> <span class="o">+</span> <span class="n">new_statements</span><span class="p">[</span><span class="n">mat_idx</span><span class="p">:]</span>
 
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">new_statements</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">new_statements</span><span class="p">)</span>
 
-    <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">depot</span><span class="p">:</span>
-        <span class="n">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">amount</span><span class="p">),</span> <span class="n">dose_comp</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">)</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">amount</span><span class="p">),</span> <span class="n">dose_comp</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -1484,14 +1499,13 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_bolus_absorption(model)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_bolus_absorption(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
 <span class="sd">    Bolus(AMT, admid=1)</span>
 <span class="sd">    ┌───────┐</span>
@@ -1517,8 +1531,10 @@
         <span class="n">cb</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">depot</span><span class="p">)</span>
         <span class="n">symbols</span> <span class="o">=</span> <span class="n">ka</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">)</span>
-        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">)</span>
+        <span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">has_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span>
         <span class="n">old_symbols</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">free_symbols</span>
@@ -1527,10 +1543,10 @@
         <span class="n">cb</span><span class="o">.</span><span class="n">set_dose</span><span class="p">(</span><span class="n">dose_comp</span><span class="p">,</span> <span class="n">new_dose</span><span class="p">)</span>
         <span class="n">unneeded_symbols</span> <span class="o">=</span> <span class="n">old_symbols</span> <span class="o">-</span> <span class="n">new_dose</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
-            <span class="n">unneeded_symbols</span><span class="p">,</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">unneeded_symbols</span><span class="p">,</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -1552,19 +1568,18 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_seq_zo_fo_absorption(model)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_seq_zo_fo_absorption(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
-<span class="sd">    Infusion(AMT, admid=1, duration=2*MDT)</span>
-<span class="sd">    ┌─────┐        ┌───────┐</span>
-<span class="sd">    │DEPOT│──1/MAT→│CENTRAL│──CL/V→</span>
-<span class="sd">    └─────┘        └───────┘</span>
+<span class="sd">    Infusion(AMT, admid=1, duration=D1)</span>
+<span class="sd">    ┌─────┐     ┌───────┐</span>
+<span class="sd">    │DEPOT│──KA→│CENTRAL│──CL/V→</span>
+<span class="sd">    └─────┘     └───────┘</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -1583,13 +1598,14 @@
     <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span>
     <span class="n">have_ZO</span> <span class="o">=</span> <span class="n">has_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">depot</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">have_ZO</span><span class="p">:</span>
-        <span class="n">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="n">depot</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="n">depot</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">depot</span> <span class="ow">and</span> <span class="n">have_ZO</span><span class="p">:</span>
-        <span class="n">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="p">,</span> <span class="n">dose_comp</span><span class="p">)</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="p">,</span> <span class="n">dose_comp</span><span class="p">)</span>
     <span class="k">elif</span> <span class="ow">not</span> <span class="n">depot</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">have_ZO</span><span class="p">:</span>
         <span class="n">amount</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span>
-        <span class="n">depot</span> <span class="o">=</span> <span class="n">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">amount</span><span class="p">),</span> <span class="n">dose_comp</span><span class="p">)</span>
-        <span class="n">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">depot</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">depot</span> <span class="o">=</span> <span class="n">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">amount</span><span class="p">),</span> <span class="n">dose_comp</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">amount</span><span class="p">,</span> <span class="n">depot</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -1661,7 +1677,7 @@
     <span class="k">if</span> <span class="n">mat_assign</span><span class="p">:</span>
         <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">mat_assign</span><span class="o">.</span><span class="n">symbol</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span>
             <span class="n">model</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter_name</span><span class="p">)</span>
         <span class="p">)</span>
     <span class="n">new_dose</span> <span class="o">=</span> <span class="n">Infusion</span><span class="p">(</span><span class="n">amount</span><span class="p">,</span> <span class="n">duration</span><span class="o">=</span><span class="n">mat_symb</span> <span class="o">*</span> <span class="mi">2</span><span class="p">)</span>
@@ -1669,9 +1685,12 @@
     <span class="n">cb</span><span class="o">.</span><span class="n">set_dose</span><span class="p">(</span><span class="n">to_comp</span><span class="p">,</span> <span class="n">new_dose</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lag_time</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">set_lag_time</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span>
+        <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
     <span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
 
 
 <span class="k">def</span> <span class="nf">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="n">lag_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
@@ -1691,12 +1710,14 @@
     <span class="k">if</span> <span class="n">mat_assign</span><span class="p">:</span>
         <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">mat_assign</span><span class="o">.</span><span class="n">symbol</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">))</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">mat_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">))</span>
     <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">depot</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">mat_symb</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span>
+        <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span>
+        <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
     <span class="p">)</span>
-    <span class="k">return</span> <span class="n">depot</span>
+    <span class="k">return</span> <span class="n">model</span><span class="p">,</span> <span class="n">depot</span>
 
 
 <span class="k">def</span> <span class="nf">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">param_name</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
@@ -1735,27 +1756,26 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_peripheral_compartments(model, 2)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_peripheral_compartments(model, 2)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
 <span class="sd">    Bolus(AMT, admid=1)</span>
 <span class="sd">    ┌───────────┐</span>
 <span class="sd">    │PERIPHERAL1│</span>
 <span class="sd">    └───────────┘</span>
 <span class="sd">      ↑      │</span>
-<span class="sd">    QP1/V QP1/VP1</span>
+<span class="sd">    Q2/V1  Q2/V2</span>
 <span class="sd">      │      ↓</span>
 <span class="sd">    ┌───────────┐</span>
-<span class="sd">    │  CENTRAL  │──CL/V→</span>
+<span class="sd">    │  CENTRAL  │──CL/V1→</span>
 <span class="sd">    └───────────┘</span>
 <span class="sd">       ↑      │</span>
-<span class="sd">    QP2/VP2 QP2/V</span>
+<span class="sd">     Q3/V3  Q3/V1</span>
 <span class="sd">       │      ↓</span>
 <span class="sd">    ┌───────────┐</span>
 <span class="sd">    │PERIPHERAL2│</span>
@@ -1777,10 +1797,10 @@
     <span class="n">per</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">odes</span><span class="o">.</span><span class="n">peripheral_compartments</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">per</span> <span class="o">&lt;</span> <span class="n">n</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">n</span> <span class="o">-</span> <span class="n">per</span><span class="p">):</span>
-            <span class="n">add_peripheral_compartment</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">add_peripheral_compartment</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">per</span> <span class="o">&gt;</span> <span class="n">n</span><span class="p">:</span>
         <span class="k">for</span> <span class="n">_</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="n">per</span> <span class="o">-</span> <span class="n">n</span><span class="p">):</span>
-            <span class="n">remove_peripheral_compartment</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">remove_peripheral_compartment</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -1812,24 +1832,23 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; add_peripheral_compartment(model)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = add_peripheral_compartment(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
 <span class="sd">    Bolus(AMT, admid=1)</span>
 <span class="sd">    ┌───────────┐</span>
 <span class="sd">    │PERIPHERAL1│</span>
 <span class="sd">    └───────────┘</span>
 <span class="sd">      ↑      │</span>
-<span class="sd">    QP1/V QP1/VP1</span>
+<span class="sd">     Q/V1   Q/V2</span>
 <span class="sd">      │      ↓</span>
 <span class="sd">    ┌───────────┐</span>
-<span class="sd">    │  CENTRAL  │──CL/V→</span>
+<span class="sd">    │  CENTRAL  │──CL/V1→</span>
 <span class="sd">    └───────────┘</span>
 
 <span class="sd">    See also</span>
@@ -1866,9 +1885,10 @@
 
     <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">vc</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="n">kpc</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;KPC</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
-            <span class="n">kcp</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;KCP</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">kpc</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;KPC</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">kcp</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;KCP</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
             <span class="n">peripheral</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">add_compartment</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PERIPHERAL</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+            <span class="n">central</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">central_compartment</span>
             <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">peripheral</span><span class="p">,</span> <span class="n">kcp</span><span class="p">)</span>
             <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">,</span> <span class="n">kpc</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
@@ -1902,23 +1922,26 @@
         <span class="n">pop_vp1</span> <span class="o">=</span> <span class="n">pop_vp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
         <span class="n">pop_qp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_qp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
         <span class="n">pop_vp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
-        <span class="n">set_initial_estimates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="n">pop_qp1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">pop_qp1_init</span> <span class="o">*</span> <span class="mf">0.10</span><span class="p">})</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">set_initial_estimates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="n">pop_qp1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">pop_qp1_init</span> <span class="o">*</span> <span class="mf">0.10</span><span class="p">})</span>
         <span class="n">qp_init</span> <span class="o">=</span> <span class="n">pop_qp1_init</span> <span class="o">*</span> <span class="mf">0.90</span>
         <span class="n">vp_init</span> <span class="o">=</span> <span class="n">pop_vp1_init</span>
 
     <span class="k">if</span> <span class="n">vc</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
-        <span class="n">qp</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;QP</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">qp_init</span><span class="p">)</span>
-        <span class="n">vp</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;VP</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">vp_init</span><span class="p">)</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">qp</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;QP</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">qp_init</span><span class="p">)</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">vp</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;VP</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">vp_init</span><span class="p">)</span>
         <span class="n">peripheral</span> <span class="o">=</span> <span class="n">Compartment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;PERIPHERAL</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">add_compartment</span><span class="p">(</span><span class="n">peripheral</span><span class="p">)</span>
+        <span class="n">central</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">central_compartment</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">peripheral</span><span class="p">,</span> <span class="n">qp</span> <span class="o">/</span> <span class="n">vc</span><span class="p">)</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">,</span> <span class="n">qp</span> <span class="o">/</span> <span class="n">vp</span><span class="p">)</span>
 
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">Statements</span><span class="p">(</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="n">statements</span><span class="o">=</span><span class="n">Statements</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+        <span class="p">)</span>
     <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="remove_peripheral_compartment"><a class="viewcode-back" href="../../../api/pharmpy.modeling.remove_peripheral_compartment.html#pharmpy.modeling.remove_peripheral_compartment">[docs]</a><span class="k">def</span> <span class="nf">remove_peripheral_compartment</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
@@ -1943,26 +1966,24 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_peripheral_compartments(model, 2)     # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
-<span class="sd">    &gt;&gt;&gt; remove_peripheral_compartment(model)      # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_peripheral_compartments(model, 2)</span>
+<span class="sd">    &gt;&gt;&gt; model = remove_peripheral_compartment(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.ode_system</span>
 <span class="sd">    Bolus(AMT, admid=1)</span>
 <span class="sd">    ┌───────────┐</span>
 <span class="sd">    │PERIPHERAL1│</span>
 <span class="sd">    └───────────┘</span>
-<span class="sd">      ↑      │</span>
-<span class="sd">    QP1/V QP1/VP1</span>
-<span class="sd">      │      ↓</span>
+<span class="sd">      ↑       │</span>
+<span class="sd">    Q/V1     Q/V2</span>
+<span class="sd">      │       ↓</span>
 <span class="sd">    ┌───────────┐</span>
-<span class="sd">    │  CENTRAL  │──CL/V→</span>
+<span class="sd">    │  CENTRAL  │──CL/V1→</span>
 <span class="sd">    └───────────┘</span>
 
 <span class="sd">    See also</span>
@@ -2003,7 +2024,7 @@
             <span class="n">pop_qp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_qp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
             <span class="n">pop_vp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
             <span class="n">new_vc_init</span> <span class="o">=</span> <span class="n">pop_vc_init</span> <span class="o">+</span> <span class="n">pop_qp1_init</span> <span class="o">/</span> <span class="n">pop_cl_init</span> <span class="o">*</span> <span class="n">pop_vp1_init</span>
-            <span class="n">set_initial_estimates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="n">pop_vc</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">new_vc_init</span><span class="p">})</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">set_initial_estimates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="n">pop_vc</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">new_vc_init</span><span class="p">})</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">peripherals</span><span class="p">)</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">first_peripheral</span> <span class="o">=</span> <span class="n">peripherals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">from1_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">first_peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>
@@ -2030,7 +2051,9 @@
             <span class="n">pop_vp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
             <span class="n">new_qp1_init</span> <span class="o">=</span> <span class="p">(</span><span class="n">pop_qp1_init</span> <span class="o">+</span> <span class="n">pop_qp2_init</span><span class="p">)</span> <span class="o">/</span> <span class="mi">2</span>
             <span class="n">new_vp1_init</span> <span class="o">=</span> <span class="n">pop_vp1_init</span> <span class="o">+</span> <span class="n">pop_vp2_init</span>
-            <span class="n">set_initial_estimates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="n">pop_qp1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">new_qp1_init</span><span class="p">,</span> <span class="n">pop_vp1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">new_vp1_init</span><span class="p">})</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">set_initial_estimates</span><span class="p">(</span>
+                <span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="n">pop_qp1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">new_qp1_init</span><span class="p">,</span> <span class="n">pop_vp1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">new_vp1_init</span><span class="p">}</span>
+            <span class="p">)</span>
 
         <span class="n">rate1</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">last_peripheral</span><span class="p">)</span>
         <span class="k">assert</span> <span class="n">rate1</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
@@ -2039,13 +2062,17 @@
         <span class="n">symbols</span> <span class="o">=</span> <span class="n">rate1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">|</span> <span class="n">rate2</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">remove_compartment</span><span class="p">(</span><span class="n">last_peripheral</span><span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">statements</span><span class="o">=</span><span class="p">(</span>
+                <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+            <span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
-            <span class="n">symbols</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span>
+                <span class="n">symbols</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+            <span class="p">)</span>
         <span class="p">)</span>
-        <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -2080,21 +2107,21 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_ode_solver(model, &#39;LSODA&#39;)    # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_ode_solver(model, &#39;LSODA&#39;)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">new_steps</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">step</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">:</span>
         <span class="n">new</span> <span class="o">=</span> <span class="n">step</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">solver</span><span class="o">=</span><span class="n">solver</span><span class="p">)</span>
         <span class="n">new_steps</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">EstimationSteps</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">new_steps</span><span class="p">)</span>
+    <span class="n">newsteps</span> <span class="o">=</span> <span class="n">EstimationSteps</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">new_steps</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -2113,10 +2140,10 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">     &gt;&gt;&gt; from pharmpy.modeling import *</span>
-<span class="sd">     &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">     &gt;&gt;&gt; find_clearance_parameters(model)</span>
-<span class="sd">     [CL]</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; find_clearance_parameters(model)</span>
+<span class="sd">    [CL]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="bp">cls</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
@@ -2154,10 +2181,10 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">     &gt;&gt;&gt; from pharmpy.modeling import *</span>
-<span class="sd">     &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">     &gt;&gt;&gt; find_volume_parameters(model)</span>
-<span class="sd">     [V]</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; find_volume_parameters(model)</span>
+<span class="sd">    [V]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">vcs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
@@ -2212,6 +2239,110 @@
             <span class="p">(</span><span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">symb</span><span class="p">)</span> <span class="k">for</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">assignment</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">),</span>
         <span class="p">)</span>
     <span class="p">)</span>
+
+
+<div class="viewcode-block" id="has_odes"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_odes.html#pharmpy.modeling.has_odes">[docs]</a><span class="k">def</span> <span class="nf">has_odes</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if model has an ODE system</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if model has an ODE system</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    has_linear_odes</span>
+<span class="sd">        has_linear_odes_with_real_eigenvalues</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import has_odes, load_example_model</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; has_odes(model)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="k">return</span> <span class="nb">bool</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="has_linear_odes"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_linear_odes.html#pharmpy.modeling.has_linear_odes">[docs]</a><span class="k">def</span> <span class="nf">has_linear_odes</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if model has a linear ODE system</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if model has an ODE system that is linear</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    has_odes</span>
+<span class="sd">        has_linear_odes_with_real_eigenvalues</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import has_linear_odes, load_example_model</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; has_linear_odes(model)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_odes</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">compartmental_matrix</span>
+    <span class="k">return</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">M</span><span class="o">.</span><span class="n">free_symbols</span></div>
+
+
+<div class="viewcode-block" id="has_linear_odes_with_real_eigenvalues"><a class="viewcode-back" href="../../../api/pharmpy.modeling.has_linear_odes_with_real_eigenvalues.html#pharmpy.modeling.has_linear_odes_with_real_eigenvalues">[docs]</a><span class="k">def</span> <span class="nf">has_linear_odes_with_real_eigenvalues</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if model has a linear ode system with real eigenvalues</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if model has an ODE system that is linear</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    has_odes</span>
+<span class="sd">        has_linear_odes</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import has_linear_odes_with_real_eigenvalues, load_example_model</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; has_linear_odes_with_real_eigenvalues(model)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_odes</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">has_linear_odes</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+        <span class="k">return</span> <span class="kc">False</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="n">M</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">compartmental_matrix</span>
+    <span class="n">eigs</span> <span class="o">=</span> <span class="n">M</span><span class="o">.</span><span class="n">eigenvals</span><span class="p">()</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">eig</span> <span class="ow">in</span> <span class="n">eigs</span><span class="p">:</span>
+        <span class="n">real</span> <span class="o">=</span> <span class="n">is_real</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">eig</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">real</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">real</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">real</span>
+    <span class="k">return</span> <span class="kc">True</span></div>
 </pre></div>
 
             </article>

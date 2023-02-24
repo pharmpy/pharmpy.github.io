@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.iovsearch.tool &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.tools.iovsearch.tool &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -440,7 +440,7 @@
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fn.type</span> <span class="kn">import</span> <span class="n">with_runtime_arguments_type_check</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.set.subsets</span> <span class="kn">import</span> <span class="n">non_empty_proper_subsets</span><span class="p">,</span> <span class="n">non_empty_subsets</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">add_iov</span><span class="p">,</span> <span class="n">copy_model</span><span class="p">,</span> <span class="n">get_pk_parameters</span><span class="p">,</span> <span class="n">remove_iiv</span><span class="p">,</span> <span class="n">remove_iov</span>
+<span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">add_iov</span><span class="p">,</span> <span class="n">get_pk_parameters</span><span class="p">,</span> <span class="n">remove_iiv</span><span class="p">,</span> <span class="n">remove_iov</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.eta_additions</span> <span class="kn">import</span> <span class="n">ADD_IOV_DISTRIBUTION</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.results</span> <span class="kn">import</span> <span class="n">RANK_TYPES</span>
 <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">ModelfitResults</span>
@@ -552,7 +552,6 @@
     <span class="n">distribution</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
 <span class="p">):</span>
-
     <span class="c1"># NOTE Default is to try all IIV ETAs.</span>
     <span class="k">if</span> <span class="n">list_of_parameters</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">iiv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv</span>
@@ -567,12 +566,12 @@
         <span class="k">return</span> <span class="n">step_mapping</span><span class="p">,</span> <span class="p">[</span><span class="n">model</span><span class="p">]</span>
 
     <span class="c1"># NOTE Add IOVs on given parameters or all parameters with IIVs.</span>
-    <span class="n">model_with_iov</span> <span class="o">=</span> <span class="n">copy_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="s1">&#39;iovsearch_run1&#39;</span><span class="p">)</span>
-    <span class="n">model_with_iov</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
-    <span class="n">update_initial_estimates</span><span class="p">(</span><span class="n">model_with_iov</span><span class="p">)</span>
+    <span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;iovsearch_run1&#39;</span>
+    <span class="n">model_with_iov</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">parent_model</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">model_with_iov</span> <span class="o">=</span> <span class="n">update_initial_estimates</span><span class="p">(</span><span class="n">model_with_iov</span><span class="p">)</span>
     <span class="c1"># TODO should we exclude already present IOVs?</span>
-    <span class="n">add_iov</span><span class="p">(</span><span class="n">model_with_iov</span><span class="p">,</span> <span class="n">occ</span><span class="p">,</span> <span class="n">list_of_parameters</span><span class="p">,</span> <span class="n">distribution</span><span class="o">=</span><span class="n">distribution</span><span class="p">)</span>
-    <span class="n">model_with_iov</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">_create_description</span><span class="p">(</span><span class="n">model_with_iov</span><span class="p">)</span>
+    <span class="n">model_with_iov</span> <span class="o">=</span> <span class="n">add_iov</span><span class="p">(</span><span class="n">model_with_iov</span><span class="p">,</span> <span class="n">occ</span><span class="p">,</span> <span class="n">list_of_parameters</span><span class="p">,</span> <span class="n">distribution</span><span class="o">=</span><span class="n">distribution</span><span class="p">)</span>
+    <span class="n">model_with_iov</span> <span class="o">=</span> <span class="n">model_with_iov</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">description</span><span class="o">=</span><span class="n">_create_description</span><span class="p">(</span><span class="n">model_with_iov</span><span class="p">))</span>
     <span class="c1"># NOTE Fit the new model.</span>
     <span class="n">wf</span> <span class="o">=</span> <span class="n">create_fit_workflow</span><span class="p">(</span><span class="n">models</span><span class="o">=</span><span class="p">[</span><span class="n">model_with_iov</span><span class="p">])</span>
     <span class="n">model_with_iov</span> <span class="o">=</span> <span class="n">call_workflow</span><span class="p">(</span><span class="n">wf</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">NAME_WF</span><span class="si">}</span><span class="s1">-fit-with-matching-IOVs&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
@@ -636,11 +635,12 @@
 <span class="k">def</span> <span class="nf">task_remove_etas_subset</span><span class="p">(</span>
     <span class="n">remove</span><span class="p">:</span> <span class="n">Callable</span><span class="p">[[</span><span class="n">Model</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]],</span> <span class="kc">None</span><span class="p">],</span> <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">subset</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">n</span><span class="p">:</span> <span class="nb">int</span>
 <span class="p">):</span>
-    <span class="n">model_with_some_etas_removed</span> <span class="o">=</span> <span class="n">copy_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;iovsearch_run</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="n">model_with_some_etas_removed</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
-    <span class="n">update_initial_estimates</span><span class="p">(</span><span class="n">model_with_some_etas_removed</span><span class="p">)</span>
-    <span class="n">remove</span><span class="p">(</span><span class="n">model_with_some_etas_removed</span><span class="p">,</span> <span class="n">subset</span><span class="p">)</span>
-    <span class="n">model_with_some_etas_removed</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">_create_description</span><span class="p">(</span><span class="n">model_with_some_etas_removed</span><span class="p">)</span>
+    <span class="n">model_with_some_etas_removed</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;iovsearch_run</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">,</span> <span class="n">parent_model</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">model_with_some_etas_removed</span> <span class="o">=</span> <span class="n">update_initial_estimates</span><span class="p">(</span><span class="n">model_with_some_etas_removed</span><span class="p">)</span>
+    <span class="n">model_with_some_etas_removed</span> <span class="o">=</span> <span class="n">remove</span><span class="p">(</span><span class="n">model_with_some_etas_removed</span><span class="p">,</span> <span class="n">subset</span><span class="p">)</span>
+    <span class="n">model_with_some_etas_removed</span> <span class="o">=</span> <span class="n">model_with_some_etas_removed</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="n">description</span><span class="o">=</span><span class="n">_create_description</span><span class="p">(</span><span class="n">model_with_some_etas_removed</span><span class="p">)</span>
+    <span class="p">)</span>
     <span class="k">return</span> <span class="n">model_with_some_etas_removed</span>
 
 
@@ -732,7 +732,6 @@
     <span class="n">rank_type</span><span class="p">,</span>
     <span class="n">distribution</span><span class="p">,</span>
 <span class="p">):</span>
-
     <span class="k">if</span> <span class="n">rank_type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">RANK_TYPES</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
             <span class="sa">f</span><span class="s1">&#39;Invalid `rank_type`: got `</span><span class="si">{</span><span class="n">rank_type</span><span class="si">}</span><span class="s1">`, must be one of </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">RANK_TYPES</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span>
@@ -745,7 +744,6 @@
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-
         <span class="k">if</span> <span class="n">column</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="sa">f</span><span class="s1">&#39;Invalid `column`: got `</span><span class="si">{</span><span class="n">column</span><span class="si">}</span><span class="s1">`,&#39;</span>

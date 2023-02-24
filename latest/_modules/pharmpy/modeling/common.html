@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.common &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.modeling.common &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -436,7 +436,7 @@
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">StringIO</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
+<span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">import</span> <span class="nn">pharmpy.config</span> <span class="k">as</span> <span class="nn">config</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
@@ -535,7 +535,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
@@ -561,8 +561,8 @@
     <span class="k">if</span> <span class="ow">not</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;File </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1"> already exists.&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">new_name</span><span class="p">:</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">new_name</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">write_files</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="n">force</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">force</span> <span class="ow">and</span> <span class="n">path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
         <span class="k">raise</span> <span class="ne">FileExistsError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot overwrite model at </span><span class="si">{</span><span class="n">path</span><span class="si">}</span><span class="s1"> with &quot;force&quot; not set&#39;</span><span class="p">)</span>
     <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;latin-1&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
@@ -600,30 +600,21 @@
     <span class="c1"># FIXME: Use code that can discover plugins below</span>
     <span class="k">if</span> <span class="n">to_format</span> <span class="o">==</span> <span class="s1">&#39;generic&#39;</span><span class="p">:</span>
         <span class="n">new</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">create_model</span><span class="p">()</span>
-        <span class="n">new</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
-        <span class="n">new</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
-        <span class="n">new</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
-        <span class="n">new</span><span class="o">.</span><span class="n">dataset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
-        <span class="n">new</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
-        <span class="n">new</span><span class="o">.</span><span class="n">datainfo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span>
-        <span class="n">new</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
-        <span class="n">new</span><span class="o">.</span><span class="n">description</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">description</span>
-        <span class="n">new</span><span class="o">.</span><span class="n">dependent_variable</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span>
-        <span class="n">new</span><span class="o">.</span><span class="n">observation_transformation</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">observation_transformation</span>
-        <span class="n">new</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">new</span><span class="o">.</span><span class="n">filename_extension</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">filename_extension</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">pass</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">initial_individual_estimates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">new</span><span class="o">.</span><span class="n">initial_individual_estimates</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">initial_individual_estimates</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">pass</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">new</span><span class="o">.</span><span class="n">database</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">database</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="k">pass</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">new</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">,</span>
+            <span class="n">datainfo</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">,</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+            <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">,</span>
+            <span class="n">random_variables</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span>
+            <span class="n">estimation_steps</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">,</span>
+            <span class="n">dependent_variable</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">,</span>
+            <span class="n">observation_transformation</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">observation_transformation</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">parent_model</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">filename_extension</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">filename_extension</span><span class="p">,</span>
+            <span class="n">initial_individual_estimates</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">initial_individual_estimates</span><span class="p">,</span>
+        <span class="p">)</span>
         <span class="k">return</span> <span class="n">new</span>
     <span class="k">elif</span> <span class="n">to_format</span> <span class="o">==</span> <span class="s1">&#39;nlmixr&#39;</span><span class="p">:</span>
         <span class="kn">import</span> <span class="nn">pharmpy.plugins.nlmixr.model</span> <span class="k">as</span> <span class="nn">nlmixr</span>
@@ -710,34 +701,6 @@
     <span class="nb">print</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">model_code</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="copy_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.copy_model.html#pharmpy.modeling.copy_model">[docs]</a><span class="k">def</span> <span class="nf">copy_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Copies model to a new model object</span>
-
-<span class="sd">    Parameters</span>
-<span class="sd">    ----------</span>
-<span class="sd">    model : Model</span>
-<span class="sd">        Pharmpy model</span>
-<span class="sd">    name : str</span>
-<span class="sd">        Optional new name of model</span>
-
-<span class="sd">    Returns</span>
-<span class="sd">    -------</span>
-<span class="sd">    Model</span>
-<span class="sd">        A copy of the input model</span>
-
-<span class="sd">    Example</span>
-<span class="sd">    -------</span>
-<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import copy_model, load_example_model</span>
-<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; model_copy = copy_model(model, &quot;pheno2&quot;)</span>
-
-<span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">new</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">new</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">name</span>
-    <span class="k">return</span> <span class="n">new</span></div>
-
-
 <div class="viewcode-block" id="set_name"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_name.html#pharmpy.modeling.set_name">[docs]</a><span class="k">def</span> <span class="nf">set_name</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">new_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set name of model object</span>
 
@@ -751,7 +714,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
@@ -759,13 +722,12 @@
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; model.name</span>
 <span class="sd">    &#39;pheno&#39;</span>
-<span class="sd">    &gt;&gt;&gt; set_name(model, &quot;run2&quot;)  # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_name(model, &quot;run2&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; model.name</span>
 <span class="sd">    &#39;run2&#39;</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">new_name</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -786,15 +748,14 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import bump_model_number, load_example_model</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; model.name = &quot;run2&quot;</span>
-<span class="sd">    &gt;&gt;&gt; bump_model_number(model)    # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = model.replace(name=&quot;run2&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model = bump_model_number(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.name</span>
 <span class="sd">    &#39;run3&#39;</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -813,7 +774,7 @@
                 <span class="n">new_path</span> <span class="o">=</span> <span class="p">(</span><span class="n">path</span> <span class="o">/</span> <span class="n">new_name</span><span class="p">)</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">filename_extension</span><span class="p">)</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">new_path</span><span class="o">.</span><span class="n">exists</span><span class="p">():</span>
                     <span class="k">break</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">new_name</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">new_name</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 
@@ -1019,7 +980,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model object</span>
+<span class="sd">        Pharmpy model object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">symbols</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">free_symbols</span>
 
@@ -1045,15 +1006,15 @@
             <span class="n">new_dists</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">dist</span><span class="p">)</span>
 
     <span class="n">new_rvs</span> <span class="o">=</span> <span class="n">RandomVariables</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">new_dists</span><span class="p">),</span> <span class="n">rvs</span><span class="o">.</span><span class="n">_eta_levels</span><span class="p">,</span> <span class="n">rvs</span><span class="o">.</span><span class="n">_epsilon_levels</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">new_rvs</span>
 
     <span class="n">new_params</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">:</span>
         <span class="n">symb</span> <span class="o">=</span> <span class="n">p</span><span class="o">.</span><span class="n">symbol</span>
         <span class="k">if</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">symbols</span> <span class="ow">or</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">new_rvs</span><span class="o">.</span><span class="n">free_symbols</span> <span class="ow">or</span> <span class="p">(</span><span class="n">p</span><span class="o">.</span><span class="n">fix</span> <span class="ow">and</span> <span class="n">p</span><span class="o">.</span><span class="n">init</span> <span class="o">==</span> <span class="mi">0</span><span class="p">):</span>
             <span class="n">new_params</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">p</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">new_params</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">random_variables</span><span class="o">=</span><span class="n">new_rvs</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">new_params</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="rename_symbols"><a class="viewcode-back" href="../../../api/pharmpy.modeling.rename_symbols.html#pharmpy.modeling.rename_symbols">[docs]</a><span class="k">def</span> <span class="nf">rename_symbols</span><span class="p">(</span>
@@ -1073,7 +1034,7 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to same model object</span>
+<span class="sd">        Pharmpy model object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">key</span><span class="p">):</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">val</span><span class="p">)</span> <span class="k">for</span> <span class="n">key</span><span class="p">,</span> <span class="n">val</span> <span class="ow">in</span> <span class="n">new_names</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
 
@@ -1086,11 +1047,13 @@
         <span class="k">else</span><span class="p">:</span>
             <span class="n">newparam</span> <span class="o">=</span> <span class="n">p</span>
         <span class="n">new</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newparam</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">new</span><span class="p">)</span>
 
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">new</span><span class="p">),</span>
+        <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">),</span>
+        <span class="n">random_variables</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">),</span>
+    <span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
     <span class="c1"># FIXME: Only handles parameters, statements and random_variables and no clashes and circular renaming</span>
 </pre></div>
 

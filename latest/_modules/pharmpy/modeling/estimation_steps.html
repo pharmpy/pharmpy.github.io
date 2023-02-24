@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.estimation_steps &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.modeling.estimation_steps &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -454,15 +454,14 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; opts = {&#39;NITER&#39;: 1000, &#39;ISAMPLE&#39;: 100}</span>
-<span class="sd">    &gt;&gt;&gt; set_estimation_step(model, &quot;IMP&quot;, evaluation=True, tool_options=opts)   # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_estimation_step(model, &quot;IMP&quot;, evaluation=True, tool_options=opts)</span>
 <span class="sd">    &gt;&gt;&gt; model.estimation_steps[0]   # doctest: +ELLIPSIS</span>
 <span class="sd">    EstimationStep(&quot;IMP&quot;, interaction=True, cov=True, evaluation=True, ..., tool_options=...</span>
 
@@ -485,8 +484,9 @@
     <span class="n">d</span><span class="p">[</span><span class="s1">&#39;method&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">method</span>
     <span class="n">steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
     <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span> <span class="o">+</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span> <span class="o">+</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="add_estimation_step"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_estimation_step.html#pharmpy.modeling.add_estimation_step">[docs]</a><span class="k">def</span> <span class="nf">add_estimation_step</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">method</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">int</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -509,15 +509,14 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; opts = {&#39;NITER&#39;: 1000, &#39;ISAMPLE&#39;: 100}</span>
-<span class="sd">    &gt;&gt;&gt; add_estimation_step(model, &quot;IMP&quot;, tool_options=opts)   # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = add_estimation_step(model, &quot;IMP&quot;, tool_options=opts)</span>
 <span class="sd">    &gt;&gt;&gt; ests = model.estimation_steps</span>
 <span class="sd">    &gt;&gt;&gt; len(ests)</span>
 <span class="sd">    2</span>
@@ -542,11 +541,12 @@
         <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Index must be integer: </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
         <span class="n">steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">meth</span> <span class="o">+</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span><span class="p">:]</span>
+        <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">meth</span> <span class="o">+</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span><span class="p">:]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">+</span> <span class="n">meth</span>
+        <span class="n">newsteps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">+</span> <span class="n">meth</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="remove_estimation_step"><a class="viewcode-back" href="../../../api/pharmpy.modeling.remove_estimation_step.html#pharmpy.modeling.remove_estimation_step">[docs]</a><span class="k">def</span> <span class="nf">remove_estimation_step</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
@@ -562,14 +562,13 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; remove_estimation_step(model, 0)      # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = remove_estimation_step(model, 0)</span>
 <span class="sd">    &gt;&gt;&gt; ests = model.estimation_steps</span>
 <span class="sd">    &gt;&gt;&gt; len(ests)</span>
 <span class="sd">    0</span>
@@ -590,8 +589,9 @@
         <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Index must be integer: </span><span class="si">{</span><span class="n">idx</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
     <span class="n">steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="append_estimation_step_options"><a class="viewcode-back" href="../../../api/pharmpy.modeling.append_estimation_step_options.html#pharmpy.modeling.append_estimation_step_options">[docs]</a><span class="k">def</span> <span class="nf">append_estimation_step_options</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">tool_options</span><span class="p">:</span> <span class="n">Dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
@@ -611,15 +611,14 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; opts = {&#39;NITER&#39;: 1000, &#39;ISAMPLE&#39;: 100}</span>
-<span class="sd">    &gt;&gt;&gt; append_estimation_step_options(model, tool_options=opts, idx=0)   # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = append_estimation_step_options(model, tool_options=opts, idx=0)</span>
 <span class="sd">    &gt;&gt;&gt; est = model.estimation_steps[0]</span>
 <span class="sd">    &gt;&gt;&gt; len(est.tool_options)</span>
 <span class="sd">    2</span>
@@ -643,8 +642,9 @@
     <span class="n">toolopts</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="n">steps</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">tool_options</span><span class="p">)</span>
     <span class="n">toolopts</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">tool_options</span><span class="p">)</span>
     <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">tool_options</span><span class="o">=</span><span class="n">toolopts</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span> <span class="o">+</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span> <span class="o">+</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="add_covariance_step"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_covariance_step.html#pharmpy.modeling.add_covariance_step">[docs]</a><span class="k">def</span> <span class="nf">add_covariance_step</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
@@ -658,16 +658,14 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_estimation_step(model, &#39;FOCE&#39;, cov=False)      # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
-<span class="sd">    &gt;&gt;&gt; add_covariance_step(model)      # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_estimation_step(model, &#39;FOCE&#39;, cov=False)</span>
+<span class="sd">    &gt;&gt;&gt; model = add_covariance_step(model)</span>
 <span class="sd">    &gt;&gt;&gt; ests = model.estimation_steps</span>
 <span class="sd">    &gt;&gt;&gt; ests[0]   # doctest: +ELLIPSIS</span>
 <span class="sd">    EstimationStep(&quot;FOCE&quot;, interaction=True, cov=True, ...)</span>
@@ -684,8 +682,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
     <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">cov</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="remove_covariance_step"><a class="viewcode-back" href="../../../api/pharmpy.modeling.remove_covariance_step.html#pharmpy.modeling.remove_covariance_step">[docs]</a><span class="k">def</span> <span class="nf">remove_covariance_step</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
@@ -699,14 +698,13 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; remove_covariance_step(model)      # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = remove_covariance_step(model)</span>
 <span class="sd">    &gt;&gt;&gt; ests = model.estimation_steps</span>
 <span class="sd">    &gt;&gt;&gt; ests[0]   # doctest: +ELLIPSIS</span>
 <span class="sd">    EstimationStep(&quot;FOCE&quot;, interaction=True, cov=False, ...)</span>
@@ -723,8 +721,9 @@
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
     <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">cov</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="set_evaluation_step"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_evaluation_step.html#pharmpy.modeling.set_evaluation_step">[docs]</a><span class="k">def</span> <span class="nf">set_evaluation_step</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">idx</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="o">-</span><span class="mi">1</span><span class="p">):</span>
@@ -743,14 +742,13 @@
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model object</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; set_evaluation_step(model)   # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = set_evaluation_step(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.estimation_steps[0]   # doctest: +ELLIPSIS</span>
 <span class="sd">    EstimationStep(&quot;FOCE&quot;, interaction=True, cov=True, evaluation=True, ...</span>
 
@@ -772,10 +770,11 @@
     <span class="n">steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
     <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">evaluation</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">idx</span> <span class="o">!=</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span> <span class="o">+</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+        <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">idx</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span> <span class="o">+</span> <span class="n">steps</span><span class="p">[</span><span class="n">idx</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+        <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 </pre></div>
 
             </article>

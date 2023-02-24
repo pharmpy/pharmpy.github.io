@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.model &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.model.model &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -442,13 +442,13 @@
 <span class="sd">&quot;&quot;&quot;</span>
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
-<span class="kn">import</span> <span class="nn">copy</span>
 <span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">IOBase</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.immutable</span> <span class="kn">import</span> <span class="n">Immutable</span>
 <span class="kn">from</span> <span class="nn">pharmpy.plugins.utils</span> <span class="kn">import</span> <span class="n">detect_model</span>
 
 <span class="kn">from</span> <span class="nn">.datainfo</span> <span class="kn">import</span> <span class="n">ColumnInfo</span><span class="p">,</span> <span class="n">DataInfo</span>
@@ -477,49 +477,165 @@
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">:</span>
+<div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">Immutable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The Pharmpy model class&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">name</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">name</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="n">parameters</span><span class="o">=</span><span class="n">Parameters</span><span class="p">(),</span>
         <span class="n">random_variables</span><span class="o">=</span><span class="n">RandomVariables</span><span class="o">.</span><span class="n">create</span><span class="p">(()),</span>
         <span class="n">statements</span><span class="o">=</span><span class="n">Statements</span><span class="p">(),</span>
         <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">datainfo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">datainfo</span><span class="o">=</span><span class="n">DataInfo</span><span class="p">(),</span>
         <span class="n">dependent_variable</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">estimation_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">observation_transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">estimation_steps</span><span class="o">=</span><span class="n">EstimationSteps</span><span class="p">(),</span>
         <span class="n">modelfit_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">parent_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">initial_individual_estimates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">filename_extension</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">filename_extension</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="n">value_type</span><span class="o">=</span><span class="s1">&#39;PREDICTION&#39;</span><span class="p">,</span>
         <span class="n">description</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">internals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="n">actual_dependent_variable</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">dependent_variable</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dependent_variable</span>
         <span class="p">)</span>
-        <span class="k">if</span> <span class="n">name</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># FIXME This conditional should not be necessary</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="k">if</span> <span class="n">datainfo</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># FIXME This conditional should not be necessary</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_datainfo</span> <span class="o">=</span> <span class="n">datainfo</span>
-        <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># FIXME This conditional should not be necessary</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span> <span class="o">=</span> <span class="n">dataset</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_datainfo</span> <span class="o">=</span> <span class="n">datainfo</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span> <span class="o">=</span> <span class="n">dataset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_random_variables</span> <span class="o">=</span> <span class="n">random_variables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="n">parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_statements</span> <span class="o">=</span> <span class="n">statements</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variable</span> <span class="o">=</span> <span class="n">actual_dependent_variable</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span> <span class="o">=</span> <span class="n">actual_dependent_variable</span>
-        <span class="k">if</span> <span class="n">estimation_steps</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># FIXME This conditional should not be necessary</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_estimation_steps</span> <span class="o">=</span> <span class="n">estimation_steps</span>
+        <span class="k">if</span> <span class="n">observation_transformation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span> <span class="o">=</span> <span class="n">actual_dependent_variable</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span> <span class="o">=</span> <span class="n">observation_transformation</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_estimation_steps</span> <span class="o">=</span> <span class="n">estimation_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_modelfit_results</span> <span class="o">=</span> <span class="n">modelfit_results</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent_model</span> <span class="o">=</span> <span class="n">parent_model</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_initial_individual_estimates</span> <span class="o">=</span> <span class="n">initial_individual_estimates</span>
-        <span class="k">if</span> <span class="n">filename_extension</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>  <span class="c1"># FIXME This conditional should not be necessary</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_filename_extension</span> <span class="o">=</span> <span class="n">filename_extension</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_filename_extension</span> <span class="o">=</span> <span class="n">filename_extension</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span> <span class="o">=</span> <span class="n">value_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="n">description</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_internals</span> <span class="o">=</span> <span class="n">internals</span>
+
+    <span class="k">def</span> <span class="nf">_canonicalize_value_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+        <span class="n">allowed_strings</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;PREDICTION&#39;</span><span class="p">,</span> <span class="s1">&#39;LIKELIHOOD&#39;</span><span class="p">,</span> <span class="s1">&#39;-2LL&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_strings</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="sa">f</span><span class="s2">&quot;Cannot set value_type to </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">. Must be one of </span><span class="si">{</span><span class="n">allowed_strings</span><span class="si">}</span><span class="s2"> &quot;</span>
+                    <span class="sa">f</span><span class="s2">&quot;or a symbol&quot;</span>
+                <span class="p">)</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Can only set value_type to one of </span><span class="si">{allowed_strings}</span><span class="s2"> or a symbol&quot;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">value</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_canonicalize_parameter_estimates</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">rvs</span><span class="p">):</span>
+        <span class="n">inits</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">inits</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">rvs</span><span class="o">.</span><span class="n">validate_parameters</span><span class="p">(</span><span class="n">inits</span><span class="p">):</span>
+            <span class="n">nearest</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">nearest_valid_parameters</span><span class="p">(</span><span class="n">inits</span><span class="p">)</span>
+            <span class="n">before</span><span class="p">,</span> <span class="n">after</span> <span class="o">=</span> <span class="n">compare_before_after_params</span><span class="p">(</span><span class="n">inits</span><span class="p">,</span> <span class="n">nearest</span><span class="p">)</span>
+            <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Adjusting initial estimates to create positive semidefinite &quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;omega/sigma matrices.</span><span class="se">\n</span><span class="s2">Before adjusting:  </span><span class="si">{</span><span class="n">before</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
+                <span class="sa">f</span><span class="s2">&quot;After adjusting: </span><span class="si">{</span><span class="n">after</span><span class="si">}</span><span class="s2">&quot;</span>
+            <span class="p">)</span>
+            <span class="n">params</span> <span class="o">=</span> <span class="n">params</span><span class="o">.</span><span class="n">set_initial_estimates</span><span class="p">(</span><span class="n">nearest</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">params</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_canonicalize_random_variables</span><span class="p">(</span><span class="n">rvs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rvs</span><span class="p">,</span> <span class="n">RandomVariables</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.random_variables must be of RandomVariables type&quot;</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_canonicalize_statements</span><span class="p">(</span><span class="n">statements</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statements</span><span class="p">,</span> <span class="n">Statements</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.statements must be of Statements type&quot;</span><span class="p">)</span>
+
+<div class="viewcode-block" id="Model.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Name of a model has to be of string type&quot;</span><span class="p">)</span>
+
+        <span class="n">dependent_variable</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dependent_variable&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependent_variable</span><span class="p">)</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parameters&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;random_variables&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">random_variables</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;random_variables&#39;</span><span class="p">]</span>
+            <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_random_variables</span><span class="p">(</span><span class="n">random_variables</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">random_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span>
+
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_parameter_estimates</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">random_variables</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="s1">&#39;statements&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">statements</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;statements&#39;</span><span class="p">]</span>
+            <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_statements</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">statements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">statements</span>
+
+        <span class="k">if</span> <span class="s1">&#39;dataset&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;dataset&#39;</span><span class="p">]</span>
+            <span class="n">new_dataset</span> <span class="o">=</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dataset</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span>
+            <span class="n">new_dataset</span> <span class="o">=</span> <span class="kc">False</span>
+
+        <span class="k">if</span> <span class="s1">&#39;datainfo&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">datainfo</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;datainfo&#39;</span><span class="p">]</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datainfo</span><span class="p">,</span> <span class="n">DataInfo</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.datainfo must be of DataInfo type&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">datainfo</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datainfo</span>
+
+        <span class="k">if</span> <span class="n">new_dataset</span><span class="p">:</span>
+            <span class="n">datainfo</span> <span class="o">=</span> <span class="n">update_datainfo</span><span class="p">(</span><span class="n">datainfo</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+
+        <span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;estimation_steps&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimation_steps</span><span class="p">,</span> <span class="n">EstimationSteps</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.estimation_steps must be of EstimationSteps type&quot;</span><span class="p">)</span>
+        <span class="n">modelfit_results</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;modelfit_results&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span><span class="p">)</span>
+        <span class="n">parent_model</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parent_model&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_model</span><span class="p">)</span>
+        <span class="n">initial_individual_estimates</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s1">&#39;initial_individual_estimates&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">initial_individual_estimates</span>
+        <span class="p">)</span>
+        <span class="n">filename_extension</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;filename_extension&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">filename_extension</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename_extension</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Filename extension has to be of string type&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;value_type&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">value_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicalize_value_type</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;value_type&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">value_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_type</span>
+        <span class="n">description</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
+        <span class="n">observation_transformation</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
+            <span class="s1">&#39;observation_transformation&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_transformation</span>
+        <span class="p">)</span>
+        <span class="n">internals</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;internals&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internals</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">dependent_variable</span><span class="o">=</span><span class="n">dependent_variable</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+            <span class="n">random_variables</span><span class="o">=</span><span class="n">random_variables</span><span class="p">,</span>
+            <span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">,</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+            <span class="n">datainfo</span><span class="o">=</span><span class="n">datainfo</span><span class="p">,</span>
+            <span class="n">estimation_steps</span><span class="o">=</span><span class="n">estimation_steps</span><span class="p">,</span>
+            <span class="n">modelfit_results</span><span class="o">=</span><span class="n">modelfit_results</span><span class="p">,</span>
+            <span class="n">parent_model</span><span class="o">=</span><span class="n">parent_model</span><span class="p">,</span>
+            <span class="n">initial_individual_estimates</span><span class="o">=</span><span class="n">initial_individual_estimates</span><span class="p">,</span>
+            <span class="n">filename_extension</span><span class="o">=</span><span class="n">filename_extension</span><span class="p">,</span>
+            <span class="n">value_type</span><span class="o">=</span><span class="n">value_type</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">internals</span><span class="o">=</span><span class="n">internals</span><span class="p">,</span>
+            <span class="n">observation_transformation</span><span class="o">=</span><span class="n">observation_transformation</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compare two models for equality</span>
@@ -551,8 +667,8 @@
 <span class="sd">        &gt;&gt;&gt; b = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; b == a</span>
 <span class="sd">        True</span>
-<span class="sd">        &gt;&gt;&gt; a.name = &#39;a&#39;</span>
-<span class="sd">        &gt;&gt;&gt; b.name = &#39;b&#39;</span>
+<span class="sd">        &gt;&gt;&gt; a = a.replace(name=&#39;a&#39;)</span>
+<span class="sd">        &gt;&gt;&gt; b = b.replace(name=&#39;b&#39;)</span>
 <span class="sd">        &gt;&gt;&gt; a == b</span>
 <span class="sd">        True</span>
 <span class="sd">        &quot;&quot;&quot;</span>
@@ -595,31 +711,15 @@
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of the model&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span>
 
-    <span class="nd">@name</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Name of a model has to be of string type&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">value</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">filename_extension</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Filename extension of model file&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_filename_extension</span>
 
-    <span class="nd">@filename_extension</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">filename_extension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Filename extension has to be of string type&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_filename_extension</span> <span class="o">=</span> <span class="n">value</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dependent_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;The model dependent variable, i.e. y&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variable</span>
-
-    <span class="nd">@dependent_variable</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dependent_variable</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variable</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">value_type</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -633,28 +733,10 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span>
 
-    <span class="nd">@value_type</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">value_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="n">allowed_strings</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;PREDICTION&#39;</span><span class="p">,</span> <span class="s1">&#39;LIKELIHOOD&#39;</span><span class="p">,</span> <span class="s1">&#39;-2LL&#39;</span><span class="p">]</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_strings</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Cannot set value_type to </span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2">. Must be one of </span><span class="si">{</span><span class="n">allowed_strings</span><span class="si">}</span><span class="s2"> &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;or a symbol&quot;</span>
-                <span class="p">)</span>
-            <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Can only set value_type to one of </span><span class="si">{allowed_strings}</span><span class="s2"> or a symbol&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span> <span class="o">=</span> <span class="n">value</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">observation_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Transformation to be applied to the observation data&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span>
-
-    <span class="nd">@observation_transformation</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">observation_transformation</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -664,24 +746,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span>
 
-    <span class="nd">@parameters</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">parameters</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="n">inits</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">inits</span>
-        <span class="k">if</span> <span class="n">inits</span> <span class="ow">and</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">validate_parameters</span><span class="p">(</span><span class="n">inits</span><span class="p">):</span>
-            <span class="n">nearest</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">nearest_valid_parameters</span><span class="p">(</span><span class="n">inits</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">nearest</span> <span class="o">!=</span> <span class="n">inits</span><span class="p">:</span>
-                <span class="n">before</span><span class="p">,</span> <span class="n">after</span> <span class="o">=</span> <span class="n">compare_before_after_params</span><span class="p">(</span><span class="n">inits</span><span class="p">,</span> <span class="n">nearest</span><span class="p">)</span>
-                <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
-                    <span class="sa">f</span><span class="s2">&quot;Adjusting initial estimates to create positive semidefinite &quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;omega/sigma matrices.</span><span class="se">\n</span><span class="s2">Before adjusting:  </span><span class="si">{</span><span class="n">before</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
-                    <span class="sa">f</span><span class="s2">&quot;After adjusting: </span><span class="si">{</span><span class="n">after</span><span class="si">}</span><span class="s2">&quot;</span>
-                <span class="p">)</span>
-                <span class="n">value</span> <span class="o">=</span> <span class="n">value</span><span class="o">.</span><span class="n">set_initial_estimates</span><span class="p">(</span><span class="n">nearest</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;New parameter inits are not valid&quot;</span><span class="p">)</span>
-
-        <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="n">value</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">random_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Definitions of random variables</span>
@@ -689,12 +753,6 @@
 <span class="sd">        See :class:`pharmpy.RandomVariables`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_random_variables</span>
-
-    <span class="nd">@random_variables</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">random_variables</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">RandomVariables</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.random_variables must be of RandomVariables type&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_random_variables</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">statements</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -704,12 +762,6 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_statements</span>
 
-    <span class="nd">@statements</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">statements</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">Statements</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.statements must be of Statements type&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_statements</span> <span class="o">=</span> <span class="n">value</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">estimation_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Definitions of estimation steps</span>
@@ -717,12 +769,6 @@
 <span class="sd">        See :class:`pharmpy.EstimationSteps`</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_estimation_steps</span>
-
-    <span class="nd">@estimation_steps</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">estimation_steps</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">EstimationSteps</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.estimation_steps must be of EstimationSteps type&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_estimation_steps</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">datainfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -732,39 +778,25 @@
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datainfo</span>
 
-    <span class="nd">@datainfo</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">datainfo</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="n">DataInfo</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.datainfo must be of DataInfo type&quot;</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_datainfo</span> <span class="o">=</span> <span class="n">value</span>
-
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Dataset connected to model&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span>
-
-    <span class="nd">@dataset</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">dataset</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span> <span class="o">=</span> <span class="n">value</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">update_datainfo</span><span class="p">()</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">initial_individual_estimates</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Initial estimates for individual parameters&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_individual_estimates</span>
 
-    <span class="nd">@initial_individual_estimates</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">initial_individual_estimates</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_initial_individual_estimates</span> <span class="o">=</span> <span class="n">value</span>
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">internals</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Internal data for tool specific part of model&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internals</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">modelfit_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Modelfit results for this model&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_modelfit_results</span>
-
-    <span class="nd">@modelfit_results</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">modelfit_results</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_modelfit_results</span> <span class="o">=</span> <span class="n">value</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">model_code</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -775,10 +807,6 @@
     <span class="k">def</span> <span class="nf">parent_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of parent model&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent_model</span>
-
-    <span class="nd">@parent_model</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">parent_model</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_parent_model</span> <span class="o">=</span> <span class="n">value</span>
 
 <div class="viewcode-block" id="Model.has_same_dataset_as"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.has_same_dataset_as">[docs]</a>    <span class="k">def</span> <span class="nf">has_same_dataset_as</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if this model has the same dataset as another model</span>
@@ -809,28 +837,6 @@
     <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A free text discription of the model&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_description</span>
-
-    <span class="nd">@description</span><span class="o">.</span><span class="n">setter</span>
-    <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="n">value</span>
-
-<div class="viewcode-block" id="Model.update_datainfo"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.update_datainfo">[docs]</a>    <span class="k">def</span> <span class="nf">update_datainfo</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update model.datainfo for a new dataset&quot;&quot;&quot;</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">curdi</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">datainfo</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="n">curdi</span> <span class="o">=</span> <span class="n">DataInfo</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">datainfo</span> <span class="o">=</span> <span class="n">update_datainfo</span><span class="p">(</span><span class="n">curdi</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span></div>
-
-<div class="viewcode-block" id="Model.copy"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.copy">[docs]</a>    <span class="k">def</span> <span class="nf">copy</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a deepcopy of the model object&quot;&quot;&quot;</span>
-        <span class="n">model_copy</span> <span class="o">=</span> <span class="n">copy</span><span class="o">.</span><span class="n">deepcopy</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span>
-        <span class="k">try</span><span class="p">:</span>
-            <span class="n">model_copy</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">except</span> <span class="ne">AttributeError</span><span class="p">:</span>
-            <span class="c1"># NOTE Name could be absent.</span>
-            <span class="k">pass</span>
-        <span class="k">return</span> <span class="n">model_copy</span></div>
 
 <div class="viewcode-block" id="Model.create_model"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.create_model">[docs]</a>    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
@@ -866,7 +872,18 @@
         <span class="c1"># Setup model database here</span>
         <span class="c1"># Read in model results here?</span>
         <span class="c1"># Set filename extension?</span>
-        <span class="k">return</span> <span class="n">model</span></div></div>
+        <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="Model.update_source"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.update_source">[docs]</a>    <span class="k">def</span> <span class="nf">update_source</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Update source code of the model. If any paths need to be changed or added (e.g. for a</span>
+<span class="sd">        NONMEM model with an updated dataset) they will be replaced with DUMMYPATH&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span></div>
+
+<div class="viewcode-block" id="Model.write_files"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.write_files">[docs]</a>    <span class="k">def</span> <span class="nf">write_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Write necessary files of the model. If any paths need to be changed or added (e.g. for a</span>
+<span class="sd">        NONMEM model with an updated dataset) they will be replaced with the correct path. update_source()</span>
+<span class="sd">        will be called first.&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span></div></div>
 
 
 <span class="k">def</span> <span class="nf">compare_before_after_params</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>

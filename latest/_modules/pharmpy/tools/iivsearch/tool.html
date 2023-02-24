@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.iivsearch.tool &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.tools.iivsearch.tool &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -439,7 +439,7 @@
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fn.signature</span> <span class="kn">import</span> <span class="n">with_same_arguments_as</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fn.type</span> <span class="kn">import</span> <span class="n">with_runtime_arguments_type_check</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">add_pk_iiv</span><span class="p">,</span> <span class="n">calculate_bic</span><span class="p">,</span> <span class="n">copy_model</span><span class="p">,</span> <span class="n">create_joint_distribution</span>
+<span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">add_pk_iiv</span><span class="p">,</span> <span class="n">calculate_bic</span><span class="p">,</span> <span class="n">create_joint_distribution</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.results</span> <span class="kn">import</span> <span class="n">RANK_TYPES</span>
 <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">ModelfitResults</span>
 <span class="kn">from</span> <span class="nn">pharmpy.tools</span> <span class="kn">import</span> <span class="n">summarize_modelfit_results</span>
@@ -539,10 +539,10 @@
 
 <span class="k">def</span> <span class="nf">start</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">input_model</span><span class="p">,</span> <span class="n">algorithm</span><span class="p">,</span> <span class="n">iiv_strategy</span><span class="p">,</span> <span class="n">rank_type</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">iiv_strategy</span> <span class="o">!=</span> <span class="s1">&#39;no_add&#39;</span><span class="p">:</span>
-        <span class="n">model_iiv</span> <span class="o">=</span> <span class="n">copy_model</span><span class="p">(</span><span class="n">input_model</span><span class="p">,</span> <span class="s1">&#39;base_model&#39;</span><span class="p">)</span>
-        <span class="n">update_initial_estimates</span><span class="p">(</span><span class="n">model_iiv</span><span class="p">)</span>
-        <span class="n">_add_iiv</span><span class="p">(</span><span class="n">iiv_strategy</span><span class="p">,</span> <span class="n">model_iiv</span><span class="p">)</span>
-        <span class="n">base_model</span> <span class="o">=</span> <span class="n">model_iiv</span>
+        <span class="n">model_iiv</span> <span class="o">=</span> <span class="n">input_model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s1">&#39;base_model&#39;</span><span class="p">)</span>
+        <span class="n">model_iiv</span> <span class="o">=</span> <span class="n">update_initial_estimates</span><span class="p">(</span><span class="n">model_iiv</span><span class="p">)</span>
+        <span class="n">base_model</span> <span class="o">=</span> <span class="n">_add_iiv</span><span class="p">(</span><span class="n">iiv_strategy</span><span class="p">,</span> <span class="n">model_iiv</span><span class="p">)</span>
+        <span class="n">base_model</span> <span class="o">=</span> <span class="n">algorithms</span><span class="o">.</span><span class="n">update_description</span><span class="p">(</span><span class="n">base_model</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">base_model</span> <span class="o">=</span> <span class="n">input_model</span>
 
@@ -633,15 +633,15 @@
 
 
 <span class="k">def</span> <span class="nf">_start_algorithm</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">parent_model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">parent_model</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span>
 
 
 <span class="k">def</span> <span class="nf">_add_iiv</span><span class="p">(</span><span class="n">iiv_strategy</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
     <span class="k">assert</span> <span class="n">iiv_strategy</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;add_diagonal&#39;</span><span class="p">,</span> <span class="s1">&#39;fullblock&#39;</span><span class="p">]</span>
-    <span class="n">add_pk_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">add_pk_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">iiv_strategy</span> <span class="o">==</span> <span class="s1">&#39;fullblock&#39;</span><span class="p">:</span>
-        <span class="n">create_joint_distribution</span><span class="p">(</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">create_joint_distribution</span><span class="p">(</span>
             <span class="n">model</span><span class="p">,</span> <span class="n">individual_estimates</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">individual_estimates</span>
         <span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span>
@@ -660,6 +660,11 @@
 
     <span class="k">if</span> <span class="ow">not</span> <span class="n">base_model</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Error in workflow: No base model&#39;</span><span class="p">)</span>
+
+    <span class="c1"># In order to have the IIV structure of the input model in the description column</span>
+    <span class="c1"># in the result summaries</span>
+    <span class="k">if</span> <span class="n">input_model</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">base_model</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+        <span class="n">base_model</span> <span class="o">=</span> <span class="n">algorithms</span><span class="o">.</span><span class="n">update_description</span><span class="p">(</span><span class="n">base_model</span><span class="p">)</span>
 
     <span class="n">res</span> <span class="o">=</span> <span class="n">create_results</span><span class="p">(</span>
         <span class="n">IIVSearchResults</span><span class="p">,</span> <span class="n">input_model</span><span class="p">,</span> <span class="n">base_model</span><span class="p">,</span> <span class="n">res_models</span><span class="p">,</span> <span class="n">rank_type</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">,</span> <span class="n">bic_type</span><span class="o">=</span><span class="s1">&#39;iiv&#39;</span>

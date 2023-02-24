@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.covariate_effect &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.modeling.covariate_effect &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -496,7 +496,7 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
@@ -504,8 +504,7 @@
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; has_covariate_effect(model, &quot;CL&quot;, &quot;WGT&quot;)</span>
 <span class="sd">    True</span>
-<span class="sd">    &gt;&gt;&gt; remove_covariate_effect(model, &quot;CL&quot;, &quot;WGT&quot;) # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = remove_covariate_effect(model, &quot;CL&quot;, &quot;WGT&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; has_covariate_effect(model, &quot;CL&quot;, &quot;WGT&quot;)</span>
 <span class="sd">    False</span>
 
@@ -521,15 +520,14 @@
         <span class="p">[]</span> <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">]</span>
     <span class="p">)</span>
     <span class="n">after_odes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">Statements</span><span class="p">(</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">ode_system</span> <span class="o">+</span> <span class="n">after_odes</span><span class="p">)</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="n">Statements</span><span class="p">(</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">ode_system</span> <span class="o">+</span> <span class="n">after_odes</span><span class="p">)</span>
     <span class="n">kept_parameters</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">free_symbols</span><span class="o">.</span><span class="n">union</span><span class="p">(</span>
         <span class="n">kept_thetas</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span><span class="o">.</span><span class="n">free_symbols</span>
     <span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-        <span class="p">(</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">kept_parameters</span><span class="p">)</span>
-    <span class="p">)</span>
+    <span class="n">parameters</span> <span class="o">=</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">((</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">kept_parameters</span><span class="p">))</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="add_covariate_effect"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_covariate_effect.html#pharmpy.modeling.add_covariate_effect">[docs]</a><span class="k">def</span> <span class="nf">add_covariate_effect</span><span class="p">(</span>
@@ -657,14 +655,13 @@
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; add_covariate_effect(model, &quot;CL&quot;, &quot;APGR&quot;, &quot;exp&quot;)    # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = add_covariate_effect(model, &quot;CL&quot;, &quot;APGR&quot;, &quot;exp&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.before_odes.full_expression(&quot;CL&quot;)</span>
 <span class="sd">    PTVCL*WGT*exp(ETA_1)*exp(POP_CLAPGR*(APGR - 7.0))</span>
 
@@ -681,7 +678,7 @@
     <span class="n">statistics</span><span class="p">[</span><span class="s1">&#39;std&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_calculate_std</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
 
     <span class="n">covariate_effect</span> <span class="o">=</span> <span class="n">_create_template</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">)</span>
-    <span class="n">thetas</span> <span class="o">=</span> <span class="n">_create_thetas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">covariate_effect</span><span class="o">.</span><span class="n">template</span><span class="p">)</span>
+    <span class="n">pset</span><span class="p">,</span> <span class="n">thetas</span> <span class="o">=</span> <span class="n">_create_thetas</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">,</span> <span class="n">effect</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">covariate_effect</span><span class="o">.</span><span class="n">template</span><span class="p">)</span>
     <span class="n">covariate_effect</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="n">parameter</span><span class="p">,</span> <span class="n">covariate</span><span class="p">,</span> <span class="n">thetas</span><span class="p">,</span> <span class="n">statistics</span><span class="p">)</span>
     <span class="c1"># NOTE We hoist the statistic statements to avoid referencing variables</span>
     <span class="c1"># before declaring them. We also avoid duplicate statements.</span>
@@ -722,8 +719,9 @@
         <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="p">[</span><span class="mi">0</span> <span class="p">:</span> <span class="n">insertion_index</span> <span class="o">-</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">sset</span><span class="p">[</span><span class="n">insertion_index</span><span class="p">:]</span>
         <span class="n">insertion_index</span> <span class="o">-=</span> <span class="mi">1</span>
 
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">sset</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">insertion_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">statements</span> <span class="o">+</span> <span class="n">sset</span><span class="p">[</span><span class="n">insertion_index</span><span class="p">:]</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">insertion_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">statements</span> <span class="o">+</span> <span class="n">sset</span><span class="p">[</span><span class="n">insertion_index</span><span class="p">:]</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">pset</span><span class="p">,</span> <span class="n">statements</span><span class="o">=</span><span class="n">sset</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <span class="k">def</span> <span class="nf">natural_order</span><span class="p">(</span><span class="n">string</span><span class="p">,</span> <span class="n">_nsre</span><span class="o">=</span><span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;([0-9]+)&#39;</span><span class="p">)):</span>
@@ -760,9 +758,7 @@
             <span class="p">)</span>
             <span class="n">theta_names</span><span class="p">[</span><span class="n">new_theta</span><span class="p">]</span> <span class="o">=</span> <span class="n">theta_name</span>
 
-    <span class="n">model</span><span class="o">.</span><span class="n">parameters</span> <span class="o">=</span> <span class="n">pset</span>
-
-    <span class="k">return</span> <span class="n">theta_names</span>
+    <span class="k">return</span> <span class="n">pset</span><span class="p">,</span> <span class="n">theta_names</span>
 
 
 <span class="k">def</span> <span class="nf">_count_categorical</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">covariate</span><span class="p">):</span>

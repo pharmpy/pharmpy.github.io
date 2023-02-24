@@ -17,6 +17,7 @@ Model
       ~Model.estimation_steps
       ~Model.filename_extension
       ~Model.initial_individual_estimates
+      ~Model.internals
       ~Model.model_code
       ~Model.modelfit_results
       ~Model.name
@@ -31,10 +32,11 @@ Model
 
    .. autosummary::
 
-      ~Model.copy
       ~Model.create_model
       ~Model.has_same_dataset_as
-      ~Model.update_datainfo
+      ~Model.replace
+      ~Model.update_source
+      ~Model.write_files
 
    .. rubric:: Attributes Documentation
 
@@ -45,6 +47,7 @@ Model
    .. autoattribute:: estimation_steps
    .. autoattribute:: filename_extension
    .. autoattribute:: initial_individual_estimates
+   .. autoattribute:: internals
    .. autoattribute:: model_code
    .. autoattribute:: modelfit_results
    .. autoattribute:: name
@@ -57,7 +60,8 @@ Model
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: copy
    .. automethod:: create_model
    .. automethod:: has_same_dataset_as
-   .. automethod:: update_datainfo
+   .. automethod:: replace
+   .. automethod:: update_source
+   .. automethod:: write_files

@@ -5,7 +5,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.remove_iov &#8212; Pharmpy 0.89.0 documentation</title>
+    <title>pharmpy.modeling.remove_iov &#8212; Pharmpy 0.90.0 documentation</title>
   
   
   
@@ -452,17 +452,17 @@
 <span class="sd">    to_remove : str, list</span>
 <span class="sd">        Name/names of IOV etas to remove, e.g. &#39;ETA_IOV_1_1&#39;.</span>
 <span class="sd">        If None, all etas that are IOVs will be removed. None is default.</span>
+
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
 <span class="sd">    Model</span>
-<span class="sd">        Reference to the same model</span>
+<span class="sd">        Pharmpy model object</span>
 
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; remove_iov(model)       # doctest: +ELLIPSIS</span>
-<span class="sd">    &lt;...&gt;</span>
+<span class="sd">    &gt;&gt;&gt; model = remove_iov(model)</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -479,14 +479,11 @@
         <span class="k">return</span> <span class="n">model</span>
 
     <span class="n">keep</span> <span class="o">=</span> <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">rvs</span><span class="o">.</span><span class="n">names</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">etas</span><span class="p">]</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="n">keep</span><span class="p">]</span>
-
     <span class="n">d</span> <span class="o">=</span> <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">name</span><span class="p">):</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">etas</span><span class="p">}</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
-    <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
-    <span class="k">return</span> <span class="n">model</span></div>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">sset</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">),</span> <span class="n">random_variables</span><span class="o">=</span><span class="n">rvs</span><span class="p">[</span><span class="n">keep</span><span class="p">])</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
 <span class="k">def</span> <span class="nf">_get_iov_etas</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">list_of_etas</span><span class="p">):</span>
