@@ -12,7 +12,7 @@ Model
 
       ~Model.datainfo
       ~Model.dataset
-      ~Model.dependent_variable
+      ~Model.dependent_variables
       ~Model.description
       ~Model.estimation_steps
       ~Model.filename_extension
@@ -42,7 +42,7 @@ Model
 
    .. autoattribute:: datainfo
    .. autoattribute:: dataset
-   .. autoattribute:: dependent_variable
+   .. autoattribute:: dependent_variables
    .. autoattribute:: description
    .. autoattribute:: estimation_steps
    .. autoattribute:: filename_extension

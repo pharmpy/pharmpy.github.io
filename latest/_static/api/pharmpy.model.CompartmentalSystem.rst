@@ -32,6 +32,7 @@ CompartmentalSystem
       ~CompartmentalSystem.find_compartment
       ~CompartmentalSystem.find_depot
       ~CompartmentalSystem.find_transit_compartments
+      ~CompartmentalSystem.get_bidirectionals
       ~CompartmentalSystem.get_compartment_inflows
       ~CompartmentalSystem.get_compartment_outflows
       ~CompartmentalSystem.get_flow
@@ -61,6 +62,7 @@ CompartmentalSystem
    .. automethod:: find_compartment
    .. automethod:: find_depot
    .. automethod:: find_transit_compartments
+   .. automethod:: get_bidirectionals
    .. automethod:: get_compartment_inflows
    .. automethod:: get_compartment_outflows
    .. automethod:: get_flow

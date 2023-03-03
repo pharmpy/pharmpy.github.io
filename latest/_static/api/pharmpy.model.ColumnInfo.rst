@@ -28,6 +28,7 @@ ColumnInfo
       ~ColumnInfo.convert_pd_dtype_to_datatype
       ~ColumnInfo.create
       ~ColumnInfo.is_categorical
+      ~ColumnInfo.is_integer
       ~ColumnInfo.is_numerical
       ~ColumnInfo.replace
 
@@ -49,5 +50,6 @@ ColumnInfo
    .. automethod:: convert_pd_dtype_to_datatype
    .. automethod:: create
    .. automethod:: is_categorical
+   .. automethod:: is_integer
    .. automethod:: is_numerical
    .. automethod:: replace
