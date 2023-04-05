@@ -17,7 +17,6 @@ CompartmentalSystem
       ~CompartmentalSystem.dosing_compartment
       ~CompartmentalSystem.eqs
       ~CompartmentalSystem.free_symbols
-      ~CompartmentalSystem.ics
       ~CompartmentalSystem.peripheral_compartments
       ~CompartmentalSystem.rhs_symbols
       ~CompartmentalSystem.t
@@ -49,7 +48,6 @@ CompartmentalSystem
    .. autoattribute:: dosing_compartment
    .. autoattribute:: eqs
    .. autoattribute:: free_symbols
-   .. autoattribute:: ics
    .. autoattribute:: peripheral_compartments
    .. autoattribute:: rhs_symbols
    .. autoattribute:: t
