@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.92.0 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.93.0 documentation</title>
   
   
   
@@ -2513,6 +2513,76 @@ document.write(`
             <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">assignment</span> <span class="o">+</span> <span class="n">odes</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
             <span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="get_zero_order_inputs"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_zero_order_inputs.html#pharmpy.modeling.get_zero_order_inputs">[docs]</a><span class="k">def</span> <span class="nf">get_zero_order_inputs</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Get zero order inputs for all compartments</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    sympy.Matrix</span>
+<span class="sd">        Vector of inputs</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import get_zero_order_inputs, load_example_model</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; get_zero_order_inputs(model)</span>
+<span class="sd">    Matrix([[0]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="k">if</span> <span class="n">odes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">odes</span><span class="o">.</span><span class="n">zero_order_inputs</span></div>
+
+
+<div class="viewcode-block" id="set_zero_order_input"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_zero_order_input.html#pharmpy.modeling.set_zero_order_input">[docs]</a><span class="k">def</span> <span class="nf">set_zero_order_input</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">compartment</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">expression</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="nb">float</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Expr</span><span class="p">]</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Set a zero order input for the ode system</span>
+
+<span class="sd">    If the zero order input is already set it will be updated.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    compartment : str</span>
+<span class="sd">        Name of the compartment</span>
+<span class="sd">    expression : Union[str, sympy.Expr]</span>
+<span class="sd">        The expression of the zero order input</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model = set_zero_order_input(model, &quot;CENTRAL&quot;, 10)</span>
+<span class="sd">    &gt;&gt;&gt; get_zero_order_inputs(model)</span>
+<span class="sd">    Matrix([[10]])</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="k">if</span> <span class="n">odes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Model has no system of ODEs&quot;</span><span class="p">)</span>
+    <span class="n">comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="n">compartment</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">comp</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Model has no compartment named </span><span class="si">{</span><span class="n">compartment</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="n">expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">expression</span><span class="p">)</span>
+    <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
+    <span class="n">cb</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">cs</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 

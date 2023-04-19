@@ -17,6 +17,7 @@ CompartmentalSystemBuilder
       ~CompartmentalSystemBuilder.remove_flow
       ~CompartmentalSystemBuilder.set_bioavailability
       ~CompartmentalSystemBuilder.set_dose
+      ~CompartmentalSystemBuilder.set_input
       ~CompartmentalSystemBuilder.set_lag_time
 
    .. rubric:: Methods Documentation
@@ -28,4 +29,5 @@ CompartmentalSystemBuilder
    .. automethod:: remove_flow
    .. automethod:: set_bioavailability
    .. automethod:: set_dose
+   .. automethod:: set_input
    .. automethod:: set_lag_time

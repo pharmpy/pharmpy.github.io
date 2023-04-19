@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.statements &#8212; Pharmpy 0.92.0 documentation</title>
+    <title>pharmpy.model.statements &#8212; Pharmpy 0.93.0 documentation</title>
   
   
   
@@ -852,6 +852,26 @@ document.write(`
         <span class="n">new_comp</span> <span class="o">=</span> <span class="n">compartment</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">bioavailability</span><span class="o">=</span><span class="n">bioavailability</span><span class="p">)</span>
         <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">compartment</span><span class="p">:</span> <span class="n">new_comp</span><span class="p">}</span>
         <span class="n">nx</span><span class="o">.</span><span class="n">relabel_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_comp</span></div>
+
+<div class="viewcode-block" id="CompartmentalSystemBuilder.set_input"><a class="viewcode-back" href="../../../api/pharmpy.model.CompartmentalSystemBuilder.html#pharmpy.model.CompartmentalSystemBuilder.set_input">[docs]</a>    <span class="k">def</span> <span class="nf">set_input</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compartment</span><span class="p">,</span> <span class="nb">input</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set zero order input of compartment</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        compartment : Compartment</span>
+<span class="sd">            Compartment for which to change zero order input</span>
+<span class="sd">        input : expr</span>
+<span class="sd">            New input</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Compartment</span>
+<span class="sd">            The new updated compartment</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">new_comp</span> <span class="o">=</span> <span class="n">compartment</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">input</span><span class="o">=</span><span class="nb">input</span><span class="p">)</span>
+        <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">compartment</span><span class="p">:</span> <span class="n">new_comp</span><span class="p">}</span>
+        <span class="n">nx</span><span class="o">.</span><span class="n">relabel_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_comp</span></div></div>
 
 
@@ -1493,6 +1513,15 @@ document.write(`
             <span class="k">return</span> <span class="nb">iter</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
         <span class="n">nodes</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">bfs_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">,</span> <span class="n">dosecmt</span><span class="p">,</span> <span class="n">sort_neighbors</span><span class="o">=</span><span class="n">sortfunc</span><span class="p">))</span>
+
+        <span class="n">remaining</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="n">output</span><span class="p">}</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">nodes</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">remaining</span><span class="p">:</span>  <span class="c1"># Disjoint graph</span>
+            <span class="c1"># Start with the one compartment having a zero order input (target for TMDD)</span>
+            <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">remaining</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">comp</span><span class="o">.</span><span class="n">input</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="k">break</span>
+            <span class="n">ordered_remaining</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">bfs_tree</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">sort_neighbors</span><span class="o">=</span><span class="n">sortfunc</span><span class="p">))</span>
+            <span class="n">nodes</span> <span class="o">+=</span> <span class="n">ordered_remaining</span>
         <span class="k">return</span> <span class="n">nodes</span>
 
     <span class="nd">@property</span>
@@ -1506,28 +1535,9 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; sympy.pprint(model.statements.ode_system.zero_order_inputs)</span>
 <span class="sd">        [0]</span>
-<span class="sd">        &gt;&gt;&gt; model = set_zero_order_absorption(model)    # doctest: +ELLIPSIS</span>
-<span class="sd">        &gt;&gt;&gt; sympy.pprint(model.statements.ode_system.zero_order_inputs)</span>
-<span class="sd">                ⎡⎧AMT            ⎤</span>
-<span class="sd">                ⎢⎪───  for D₁ &gt; t⎥</span>
-<span class="sd">                ⎢⎨ D₁            ⎥</span>
-<span class="sd">                ⎢⎪               ⎥</span>
-<span class="sd">                ⎣⎩ 0   otherwise ⎦</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_order_compartments</span><span class="p">():</span>  <span class="c1"># self._g.nodes:</span>
-            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="p">,</span> <span class="n">Infusion</span><span class="p">):</span>
-                <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                    <span class="n">expr</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">rate</span>
-                    <span class="n">cond</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span> <span class="o">/</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">rate</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">expr</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span> <span class="o">/</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">duration</span>
-                    <span class="n">cond</span> <span class="o">=</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">duration</span>
-                <span class="n">infusion_func</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Piecewise</span><span class="p">((</span><span class="n">expr</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">t</span> <span class="o">&lt;</span> <span class="n">cond</span><span class="p">),</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
-                <span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">infusion_func</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">inputs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="n">inputs</span> <span class="o">=</span> <span class="p">[</span><span class="n">node</span><span class="o">.</span><span class="n">input</span> <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_order_compartments</span><span class="p">()]</span>
         <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Matrix</span><span class="p">(</span><span class="n">inputs</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

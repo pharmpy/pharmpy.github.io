@@ -8,7 +8,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.run &#8212; Pharmpy 0.92.0 documentation</title>
+    <title>pharmpy.tools.run &#8212; Pharmpy 0.93.0 documentation</title>
   
   
   
@@ -1442,14 +1442,14 @@ document.write(`
     <span class="k">else</span><span class="p">:</span>
         <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;minimization_successful&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">i</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span> <span class="ow">and</span> <span class="n">res</span><span class="o">.</span><span class="n">ofv_iterations</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">i</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">ofv_iterations</span><span class="o">.</span><span class="n">index</span><span class="o">.</span><span class="n">get_level_values</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span> <span class="o">-</span> <span class="mi">1</span>
-    <span class="n">ofv</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">ofv_iterations</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-    <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;ofv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">ofv</span>
-    <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;runtime_total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">runtime_total</span>
-    <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;estimation_runtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">estimation_runtime_iterations</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
-    <span class="n">pe</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates_iterations</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;ofv&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_ofv</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+    <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;runtime_total&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">runtime_total</span>
+    <span class="n">summary_dict</span><span class="p">[</span><span class="s1">&#39;estimation_runtime&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">_get_estimation_runtime</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+
+    <span class="n">pe</span> <span class="o">=</span> <span class="n">_get_parameter_estimates</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
     <span class="n">ses</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">standard_errors</span>
     <span class="n">rses</span> <span class="o">=</span> <span class="n">res</span><span class="o">.</span><span class="n">relative_standard_errors</span>
 
@@ -1461,6 +1461,24 @@ document.write(`
             <span class="n">summary_dict</span><span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">param</span><span class="si">}</span><span class="s1">_RSE&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">rses</span><span class="p">[</span><span class="n">param</span><span class="p">]</span>
 
     <span class="k">return</span> <span class="n">summary_dict</span>
+
+
+<span class="k">def</span> <span class="nf">_get_ofv</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">ofv_iterations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">ofv</span>
+    <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">ofv_iterations</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_get_parameter_estimates</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates_iterations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates</span>
+    <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">parameter_estimates_iterations</span><span class="o">.</span><span class="n">loc</span><span class="p">[</span><span class="n">i</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_get_estimation_runtime</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">i</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">res</span><span class="o">.</span><span class="n">estimation_runtime_iterations</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">runtime_total</span>
+    <span class="k">return</span> <span class="n">res</span><span class="o">.</span><span class="n">estimation_runtime_iterations</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
 
 
 <div class="viewcode-block" id="read_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.read_modelfit_results.html#pharmpy.tools.read_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">read_modelfit_results</span><span class="p">(</span><span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">ModelfitResults</span><span class="p">:</span>

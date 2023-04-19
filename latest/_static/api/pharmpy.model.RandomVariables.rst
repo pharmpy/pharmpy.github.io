@@ -34,6 +34,7 @@ RandomVariables
       ~RandomVariables.nearest_valid_parameters
       ~RandomVariables.parameters_sdcorr
       ~RandomVariables.replace
+      ~RandomVariables.replace_with_sympy_rvs
       ~RandomVariables.sample
       ~RandomVariables.subs
       ~RandomVariables.unjoin
@@ -63,6 +64,7 @@ RandomVariables
    .. automethod:: nearest_valid_parameters
    .. automethod:: parameters_sdcorr
    .. automethod:: replace
+   .. automethod:: replace_with_sympy_rvs
    .. automethod:: sample
    .. automethod:: subs
    .. automethod:: unjoin
