@@ -21,8 +21,10 @@ Infusion
    .. autosummary::
 
       ~Infusion.create
+      ~Infusion.from_dict
       ~Infusion.replace
       ~Infusion.subs
+      ~Infusion.to_dict
 
    .. rubric:: Attributes Documentation
 
@@ -35,5 +37,7 @@ Infusion
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: from_dict
    .. automethod:: replace
    .. automethod:: subs
+   .. automethod:: to_dict

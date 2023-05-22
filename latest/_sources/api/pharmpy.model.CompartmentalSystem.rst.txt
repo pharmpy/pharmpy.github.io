@@ -31,6 +31,7 @@ CompartmentalSystem
       ~CompartmentalSystem.find_compartment
       ~CompartmentalSystem.find_depot
       ~CompartmentalSystem.find_transit_compartments
+      ~CompartmentalSystem.from_dict
       ~CompartmentalSystem.get_bidirectionals
       ~CompartmentalSystem.get_compartment_inflows
       ~CompartmentalSystem.get_compartment_outflows
@@ -38,6 +39,7 @@ CompartmentalSystem
       ~CompartmentalSystem.get_n_connected
       ~CompartmentalSystem.replace
       ~CompartmentalSystem.subs
+      ~CompartmentalSystem.to_dict
 
    .. rubric:: Attributes Documentation
 
@@ -60,6 +62,7 @@ CompartmentalSystem
    .. automethod:: find_compartment
    .. automethod:: find_depot
    .. automethod:: find_transit_compartments
+   .. automethod:: from_dict
    .. automethod:: get_bidirectionals
    .. automethod:: get_compartment_inflows
    .. automethod:: get_compartment_outflows
@@ -67,3 +70,4 @@ CompartmentalSystem
    .. automethod:: get_n_connected
    .. automethod:: replace
    .. automethod:: subs
+   .. automethod:: to_dict

@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.metabolite &#8212; Pharmpy 0.94.0 documentation</title>
+    <title>pharmpy.modeling.metabolite &#8212; Pharmpy 0.95.0 documentation</title>
   
   
   
@@ -494,7 +493,9 @@ document.write(`
     <span class="n">output</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">.odes</span> <span class="kn">import</span> <span class="n">add_individual_parameter</span>
+<span class="kn">from</span> <span class="nn">.error</span> <span class="kn">import</span> <span class="n">set_proportional_error_model</span>
+<span class="kn">from</span> <span class="nn">.odes</span> <span class="kn">import</span> <span class="n">_find_noncov_theta</span><span class="p">,</span> <span class="n">add_individual_parameter</span>
+<span class="kn">from</span> <span class="nn">.parameters</span> <span class="kn">import</span> <span class="n">set_initial_estimates</span>
 
 
 <div class="viewcode-block" id="add_metabolite"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_metabolite.html#pharmpy.modeling.add_metabolite">[docs]</a><span class="k">def</span> <span class="nf">add_metabolite</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">drug_dvid</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">):</span>
@@ -522,41 +523,48 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; model = add_metabolite(model)</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">qm1</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;QM1&#39;</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">qm1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">clm1</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CLM1&#39;</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">clm1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-    <span class="n">vm1</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;VM1&#39;</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">vm1</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">clm</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CLM&#39;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">clm</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">vm</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;VM&#39;</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">vm</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
 
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
     <span class="n">ke</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
     <span class="n">cl</span><span class="p">,</span> <span class="n">vc</span> <span class="o">=</span> <span class="n">ke</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
+
+    <span class="k">if</span> <span class="n">vc</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="n">pop_cl</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cl</span><span class="p">)</span>
+        <span class="n">pop_vc</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">vc</span><span class="p">)</span>
+        <span class="n">pop_clm_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_cl</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">*</span> <span class="mf">2.0</span>
+        <span class="n">pop_vm_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vc</span><span class="p">]</span><span class="o">.</span><span class="n">init</span> <span class="o">*</span> <span class="mf">0.5</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">set_initial_estimates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;POP_CLM&#39;</span><span class="p">:</span> <span class="n">pop_clm_init</span><span class="p">,</span> <span class="s1">&#39;POP_VM&#39;</span><span class="p">:</span> <span class="n">pop_vm_init</span><span class="p">})</span>
+
     <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
     <span class="n">metacomp</span> <span class="o">=</span> <span class="n">Compartment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="s2">&quot;METABOLITE&quot;</span><span class="p">)</span>
     <span class="n">cb</span><span class="o">.</span><span class="n">add_compartment</span><span class="p">(</span><span class="n">metacomp</span><span class="p">)</span>
-    <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">metacomp</span><span class="p">,</span> <span class="n">qm1</span> <span class="o">/</span> <span class="n">vc</span><span class="p">)</span>
-    <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">metacomp</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">clm1</span> <span class="o">/</span> <span class="n">vm1</span><span class="p">)</span>
+    <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">metacomp</span><span class="p">,</span> <span class="n">ke</span><span class="p">)</span>
+    <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">metacomp</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">clm</span> <span class="o">/</span> <span class="n">vm</span><span class="p">)</span>
+    <span class="n">cb</span><span class="o">.</span><span class="n">remove_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
     <span class="n">cs</span> <span class="o">=</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span>
 
     <span class="c1"># dvid_col = model.datainfo.typeix[&#39;dvid&#39;][0]</span>
     <span class="c1"># dvids = dvid_col.categories</span>
 
-    <span class="n">conc</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CONC_M1&#39;</span><span class="p">),</span> <span class="n">metacomp</span><span class="o">.</span><span class="n">amount</span> <span class="o">/</span> <span class="n">vm1</span><span class="p">)</span>
-    <span class="n">y_m1</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;Y_M1&#39;</span><span class="p">)</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">y_m1</span><span class="p">,</span> <span class="n">conc</span><span class="o">.</span><span class="n">symbol</span> <span class="o">+</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">epsilons</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+    <span class="n">conc</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;CONC_M&#39;</span><span class="p">),</span> <span class="n">metacomp</span><span class="o">.</span><span class="n">amount</span> <span class="o">/</span> <span class="n">vm</span><span class="p">)</span>
+    <span class="n">y_m</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;Y_M&#39;</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">y_m</span><span class="p">,</span> <span class="n">conc</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
     <span class="n">original_y</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">))</span>
     <span class="n">ind</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="n">original_y</span><span class="p">)</span>
     <span class="n">old_after</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
     <span class="n">new_after</span> <span class="o">=</span> <span class="n">old_after</span><span class="p">[:</span> <span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">y</span> <span class="o">+</span> <span class="n">old_after</span><span class="p">[</span><span class="n">ind</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
     <span class="n">error</span> <span class="o">=</span> <span class="n">conc</span> <span class="o">+</span> <span class="n">new_after</span>
 
-    <span class="n">dvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
-    <span class="n">dvs</span><span class="p">[</span><span class="n">y_m1</span><span class="p">]</span> <span class="o">=</span> <span class="mi">2</span>  <span class="c1"># FIXME: Should be next DVID in categories</span>
+    <span class="n">dvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">y_m</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>  <span class="c1"># FIXME: Should be next DVID in categories</span>
     <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">cs</span> <span class="o">+</span> <span class="n">error</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">,</span> <span class="n">dependent_variables</span><span class="o">=</span><span class="n">dvs</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">set_proportional_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zero_protection</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
 </pre></div>
 
                 </article>
@@ -609,7 +617,7 @@ document.write(`
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
     <br/>
   </p>
 </div>

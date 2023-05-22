@@ -12,6 +12,7 @@ CompartmentalSystemBuilder
 
       ~CompartmentalSystemBuilder.add_compartment
       ~CompartmentalSystemBuilder.add_flow
+      ~CompartmentalSystemBuilder.find_compartment
       ~CompartmentalSystemBuilder.move_dose
       ~CompartmentalSystemBuilder.remove_compartment
       ~CompartmentalSystemBuilder.remove_flow
@@ -24,6 +25,7 @@ CompartmentalSystemBuilder
 
    .. automethod:: add_compartment
    .. automethod:: add_flow
+   .. automethod:: find_compartment
    .. automethod:: move_dose
    .. automethod:: remove_compartment
    .. automethod:: remove_flow

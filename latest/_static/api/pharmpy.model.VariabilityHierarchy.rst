@@ -18,7 +18,9 @@ VariabilityHierarchy
    .. autosummary::
 
       ~VariabilityHierarchy.create
+      ~VariabilityHierarchy.from_dict
       ~VariabilityHierarchy.replace
+      ~VariabilityHierarchy.to_dict
 
    .. rubric:: Attributes Documentation
 
@@ -28,4 +30,6 @@ VariabilityHierarchy
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: from_dict
    .. automethod:: replace
+   .. automethod:: to_dict

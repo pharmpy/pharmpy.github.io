@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.datainfo &#8212; Pharmpy 0.94.0 documentation</title>
+    <title>pharmpy.model.datainfo &#8212; Pharmpy 0.95.0 documentation</title>
   
   
   
@@ -494,7 +493,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.expr.units</span> <span class="kn">import</span> <span class="n">parse</span> <span class="k">as</span> <span class="n">parse_units</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fs.path</span> <span class="kn">import</span> <span class="n">path_absolute</span><span class="p">,</span> <span class="n">path_relative_to</span>
-<span class="kn">from</span> <span class="nn">pharmpy.internals.immutable</span> <span class="kn">import</span> <span class="n">Immutable</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.immutable</span> <span class="kn">import</span> <span class="n">Immutable</span><span class="p">,</span> <span class="n">frozenmapping</span>
 
 
 <div class="viewcode-block" id="ColumnInfo"><a class="viewcode-back" href="../../../api/pharmpy.model.ColumnInfo.html#pharmpy.model.ColumnInfo">[docs]</a><span class="k">class</span> <span class="nc">ColumnInfo</span><span class="p">(</span><span class="n">Immutable</span><span class="p">):</span>
@@ -512,8 +511,8 @@ document.write(`
 <span class="sd">        Scale of measurement (see the &quot;scale&quot; attribute)</span>
 <span class="sd">    continuous : bool</span>
 <span class="sd">        True if continuous or False if discrete</span>
-<span class="sd">    categories : list</span>
-<span class="sd">        List of all possible categories</span>
+<span class="sd">    categories : Optional[Union[Tuple, Dict]]</span>
+<span class="sd">        Tuple of all possible categories or dict from value to label for each category</span>
 <span class="sd">    drop : bool</span>
 <span class="sd">        Should column be dropped (i.e. barred from being used)</span>
 <span class="sd">    datatype : str</span>
@@ -569,6 +568,8 @@ document.write(`
         <span class="s1">&#39;plasma concentration&#39;</span><span class="p">,</span>
         <span class="s1">&#39;subject identifier&#39;</span><span class="p">,</span>
         <span class="s1">&#39;observation identifier&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;pk measurement&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;pd measurement&#39;</span><span class="p">,</span>
     <span class="p">)</span>
 
 <div class="viewcode-block" id="ColumnInfo.convert_pd_dtype_to_datatype"><a class="viewcode-back" href="../../../api/pharmpy.model.ColumnInfo.html#pharmpy.model.ColumnInfo.convert_pd_dtype_to_datatype">[docs]</a>    <span class="nd">@staticmethod</span>
@@ -642,6 +643,21 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span> <span class="o">=</span> <span class="n">datatype</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor</span> <span class="o">=</span> <span class="n">descriptor</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_canonicalize_categories</span><span class="p">(</span><span class="n">categories</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">categories</span><span class="p">,</span> <span class="nb">dict</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">categories</span><span class="p">,</span> <span class="n">frozenmapping</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">categories</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">categories</span><span class="p">,</span> <span class="nb">list</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">categories</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">return</span> <span class="n">categories</span>
+        <span class="k">elif</span> <span class="n">categories</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">categories</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;categories must be None, list-like or dict-like&quot;</span><span class="p">)</span>
+
 <div class="viewcode-block" id="ColumnInfo.create"><a class="viewcode-back" href="../../../api/pharmpy.model.ColumnInfo.html#pharmpy.model.ColumnInfo.create">[docs]</a>    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
@@ -677,6 +693,8 @@ document.write(`
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">descriptor</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">_all_descriptors</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown column descriptor </span><span class="si">{</span><span class="n">descriptor</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+        <span class="n">categories</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">_canonicalize_categories</span><span class="p">(</span><span class="n">categories</span><span class="p">)</span>
+
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="nb">type</span><span class="o">=</span><span class="nb">type</span><span class="p">,</span>
@@ -708,6 +726,49 @@ document.write(`
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drop</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_drop</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_datatype</span>
         <span class="p">)</span>
+
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_continuous</span><span class="p">,</span>
+                <span class="c1"># FIXME: What are categories really?</span>
+                <span class="c1"># self._categories,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_drop</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
+
+<div class="viewcode-block" id="ColumnInfo.to_dict"><a class="viewcode-back" href="../../../api/pharmpy.model.ColumnInfo.html#pharmpy.model.ColumnInfo.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+            <span class="s1">&#39;type&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_type</span><span class="p">,</span>
+            <span class="s1">&#39;unit&#39;</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">srepr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_unit</span><span class="p">),</span>
+            <span class="s1">&#39;scale&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_scale</span><span class="p">,</span>
+            <span class="s1">&#39;continuous&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_continuous</span><span class="p">,</span>
+            <span class="s1">&#39;categories&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_categories</span><span class="p">,</span>
+            <span class="s1">&#39;drop&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_drop</span><span class="p">,</span>
+            <span class="s1">&#39;datatype&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_datatype</span><span class="p">,</span>
+            <span class="s1">&#39;descriptor&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+<div class="viewcode-block" id="ColumnInfo.from_dict"><a class="viewcode-back" href="../../../api/pharmpy.model.ColumnInfo.html#pharmpy.model.ColumnInfo.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+            <span class="nb">type</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">parse_expr</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]),</span>
+            <span class="n">scale</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;scale&#39;</span><span class="p">],</span>
+            <span class="n">continuous</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;continuous&#39;</span><span class="p">],</span>
+            <span class="n">categories</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;categories&#39;</span><span class="p">],</span>
+            <span class="n">drop</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;drop&#39;</span><span class="p">],</span>
+            <span class="n">datatype</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;datatype&#39;</span><span class="p">],</span>
+            <span class="n">descriptor</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;descriptor&#39;</span><span class="p">],</span>
+        <span class="p">)</span></div>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">name</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -758,6 +819,8 @@ document.write(`
 <span class="sd">        plasma concentration   Concentration of substance in blood plasma</span>
 <span class="sd">        subject identifier     Unique integer identifier for a subject</span>
 <span class="sd">        observation identifier Unique integer identifier for an observation</span>
+<span class="sd">        pk measurement         Any kind of PK measurement</span>
+<span class="sd">        pd measurement         Any kind of PD measurement</span>
 <span class="sd">        ====================== ============================================</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_descriptor</span>
@@ -791,7 +854,7 @@ document.write(`
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">categories</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;List of allowed categories&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;List or dict of allowed categories&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_categories</span>
 
     <span class="nd">@property</span>
@@ -908,6 +971,13 @@ document.write(`
             <span class="s1">&#39;uint64&#39;</span><span class="p">,</span>
         <span class="p">]</span></div>
 
+<div class="viewcode-block" id="ColumnInfo.get_all_categories"><a class="viewcode-back" href="../../../api/pharmpy.model.ColumnInfo.html#pharmpy.model.ColumnInfo.get_all_categories">[docs]</a>    <span class="k">def</span> <span class="nf">get_all_categories</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Get a list of all categories&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_categories</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_categories</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_categories</span><span class="o">.</span><span class="n">keys</span><span class="p">())</span></div>
+
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">ser</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">Series</span><span class="p">(</span>
             <span class="p">[</span>
@@ -952,8 +1022,8 @@ document.write(`
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
-        <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">ColumnInfo</span><span class="p">],</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="p">(),</span>
-        <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+        <span class="n">columns</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ColumnInfo</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
+        <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span>
         <span class="n">force_absolute_path</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="p">):</span>
@@ -982,8 +1052,17 @@ document.write(`
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">separator</span><span class="p">)</span></div>
 
 <div class="viewcode-block" id="DataInfo.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.DataInfo.html#pharmpy.model.DataInfo.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">columns</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;columns&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">)</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;columns&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;columns&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">columns</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span>
+        <span class="k">if</span> <span class="s1">&#39;path&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">])</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">path</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
         <span class="n">separator</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;separator&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_separator</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">DataInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">separator</span><span class="p">)</span></div>
 
@@ -1020,6 +1099,9 @@ document.write(`
             <span class="k">if</span> <span class="n">col1</span> <span class="o">!=</span> <span class="n">col2</span><span class="p">:</span>
                 <span class="k">return</span> <span class="kc">False</span>
         <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">)</span>
@@ -1463,7 +1545,7 @@ document.write(`
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
     <br/>
   </p>
 </div>

@@ -36,7 +36,9 @@ EstimationStep
    .. autosummary::
 
       ~EstimationStep.create
+      ~EstimationStep.from_dict
       ~EstimationStep.replace
+      ~EstimationStep.to_dict
 
    .. rubric:: Attributes Documentation
 
@@ -64,4 +66,6 @@ EstimationStep
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: from_dict
    .. automethod:: replace
+   .. automethod:: to_dict

@@ -19,7 +19,9 @@ VariabilityLevel
    .. autosummary::
 
       ~VariabilityLevel.create
+      ~VariabilityLevel.from_dict
       ~VariabilityLevel.replace
+      ~VariabilityLevel.to_dict
 
    .. rubric:: Attributes Documentation
 
@@ -30,4 +32,6 @@ VariabilityLevel
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: from_dict
    .. automethod:: replace
+   .. automethod:: to_dict

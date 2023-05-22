@@ -22,11 +22,13 @@ JointNormalDistribution
 
       ~JointNormalDistribution.create
       ~JointNormalDistribution.evalf
+      ~JointNormalDistribution.from_dict
       ~JointNormalDistribution.get_covariance
       ~JointNormalDistribution.get_variance
       ~JointNormalDistribution.latex_string
       ~JointNormalDistribution.replace
       ~JointNormalDistribution.subs
+      ~JointNormalDistribution.to_dict
 
    .. rubric:: Attributes Documentation
 
@@ -40,8 +42,10 @@ JointNormalDistribution
 
    .. automethod:: create
    .. automethod:: evalf
+   .. automethod:: from_dict
    .. automethod:: get_covariance
    .. automethod:: get_variance
    .. automethod:: latex_string
    .. automethod:: replace
    .. automethod:: subs
+   .. automethod:: to_dict

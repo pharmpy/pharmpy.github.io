@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.94.0 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.95.0 documentation</title>
   
   
   
@@ -529,6 +528,48 @@ document.write(`
     <span class="p">}</span>
     <span class="n">theta_name</span> <span class="o">=</span> <span class="n">terms</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">pset</span><span class="o">.</span><span class="n">names</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">pset</span><span class="p">[</span><span class="n">theta_name</span><span class="p">]</span>
+
+
+<span class="k">def</span> <span class="nf">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">paramsymb</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="c1"># Deterministic function to find the main theta in the expression for parasymb</span>
+    <span class="c1"># Set full to True if already providing a full expression</span>
+    <span class="c1"># Find subexpression with as few thetas and covariates as possible</span>
+    <span class="c1"># Stop if one theta found with no covs.</span>
+    <span class="k">if</span> <span class="n">full</span><span class="p">:</span>
+        <span class="n">start_expr</span> <span class="o">=</span> <span class="n">paramsymb</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">start_expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">paramsymb</span><span class="p">)</span>
+
+    <span class="n">exprs</span> <span class="o">=</span> <span class="p">[</span><span class="n">start_expr</span><span class="p">]</span>
+    <span class="n">all_popparams</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+    <span class="n">all_covs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">name</span><span class="p">)</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">names</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="n">exprs</span><span class="p">:</span>
+        <span class="n">nthetas</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;Inf&quot;</span><span class="p">)</span>
+        <span class="n">ncovs</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;Inf&quot;</span><span class="p">)</span>
+        <span class="n">next_expr</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">exprs</span><span class="p">:</span>
+            <span class="n">symbs</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span>
+            <span class="n">curthetas</span> <span class="o">=</span> <span class="n">symbs</span> <span class="o">&amp;</span> <span class="n">all_popparams</span>
+            <span class="n">ncurthetas</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">curthetas</span><span class="p">)</span>
+            <span class="n">curcovs</span> <span class="o">=</span> <span class="n">symbs</span> <span class="o">&amp;</span> <span class="n">all_covs</span>
+            <span class="n">ncurcovs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">curcovs</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">ncurthetas</span> <span class="o">!=</span> <span class="mi">0</span> <span class="ow">and</span> <span class="p">(</span>
+                <span class="n">ncurthetas</span> <span class="o">&lt;</span> <span class="n">nthetas</span> <span class="ow">or</span> <span class="p">(</span><span class="n">ncurthetas</span> <span class="o">==</span> <span class="n">nthetas</span> <span class="ow">and</span> <span class="n">ncurcovs</span> <span class="o">&lt;</span> <span class="n">ncovs</span><span class="p">)</span>
+            <span class="p">):</span>
+                <span class="n">next_expr</span> <span class="o">=</span> <span class="n">expr</span>
+                <span class="n">thetas</span> <span class="o">=</span> <span class="n">curthetas</span>
+                <span class="n">nthetas</span> <span class="o">=</span> <span class="n">ncurthetas</span>
+                <span class="n">ncovs</span> <span class="o">=</span> <span class="n">ncurcovs</span>
+
+        <span class="k">if</span> <span class="n">next_expr</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">break</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">nthetas</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="n">ncovs</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="k">return</span> <span class="nb">next</span><span class="p">(</span><span class="nb">iter</span><span class="p">(</span><span class="n">thetas</span><span class="p">))</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">exprs</span> <span class="o">=</span> <span class="n">next_expr</span><span class="o">.</span><span class="n">args</span>
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Could not find theta connected to </span><span class="si">{</span><span class="n">paramsymb</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="add_individual_parameter"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_individual_parameter.html#pharmpy.modeling.add_individual_parameter">[docs]</a><span class="k">def</span> <span class="nf">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -1956,12 +1997,8 @@ document.write(`
                 <span class="n">cl1</span> <span class="o">=</span> <span class="n">cl</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
                 <span class="k">if</span> <span class="n">cl1</span><span class="o">.</span><span class="n">is_Mul</span><span class="p">:</span>
                     <span class="n">cl</span> <span class="o">=</span> <span class="n">cl1</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-            <span class="n">full_cl</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
-            <span class="n">full_vc</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">vc</span><span class="p">)</span>
-            <span class="n">pop_cl_candidates</span> <span class="o">=</span> <span class="n">full_cl</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
-            <span class="n">pop_cl</span> <span class="o">=</span> <span class="n">pop_cl_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-            <span class="n">pop_vc_candidates</span> <span class="o">=</span> <span class="n">full_vc</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
-            <span class="n">pop_vc</span> <span class="o">=</span> <span class="n">pop_vc_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">pop_cl</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cl</span><span class="p">)</span>
+            <span class="n">pop_vc</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">vc</span><span class="p">)</span>
             <span class="n">pop_cl_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_cl</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
             <span class="n">pop_vc_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vc</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
             <span class="n">qp_init</span> <span class="o">=</span> <span class="n">pop_cl_init</span>
@@ -1975,10 +2012,8 @@ document.write(`
         <span class="n">full_vp1</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">vp1</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">full_vp1</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
             <span class="n">full_qp1</span><span class="p">,</span> <span class="n">full_vp1</span> <span class="o">=</span> <span class="n">full_qp1</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
-        <span class="n">pop_qp1_candidates</span> <span class="o">=</span> <span class="n">full_qp1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
-        <span class="n">pop_qp1</span> <span class="o">=</span> <span class="n">pop_qp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-        <span class="n">pop_vp1_candidates</span> <span class="o">=</span> <span class="n">full_vp1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
-        <span class="n">pop_vp1</span> <span class="o">=</span> <span class="n">pop_vp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">pop_qp1</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">full_qp1</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">pop_vp1</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">full_vp1</span><span class="p">,</span> <span class="n">full</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">pop_qp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_qp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
         <span class="n">pop_vp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">set_initial_estimates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="n">pop_qp1</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">pop_qp1_init</span> <span class="o">*</span> <span class="mf">0.10</span><span class="p">})</span>
@@ -2066,18 +2101,10 @@ document.write(`
             <span class="n">from_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">last_peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>
             <span class="k">assert</span> <span class="n">from_rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="n">qp1</span><span class="p">,</span> <span class="n">vp1</span> <span class="o">=</span> <span class="n">from_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
-            <span class="n">full_cl</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
-            <span class="n">full_vc</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">vc</span><span class="p">)</span>
-            <span class="n">full_qp1</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">qp1</span><span class="p">)</span>
-            <span class="n">full_vp1</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">vp1</span><span class="p">)</span>
-            <span class="n">pop_cl_candidates</span> <span class="o">=</span> <span class="n">full_cl</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
-            <span class="n">pop_cl</span> <span class="o">=</span> <span class="n">pop_cl_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-            <span class="n">pop_vc_candidates</span> <span class="o">=</span> <span class="n">full_vc</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
-            <span class="n">pop_vc</span> <span class="o">=</span> <span class="n">pop_vc_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-            <span class="n">pop_qp1_candidates</span> <span class="o">=</span> <span class="n">full_qp1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
-            <span class="n">pop_qp1</span> <span class="o">=</span> <span class="n">pop_qp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-            <span class="n">pop_vp1_candidates</span> <span class="o">=</span> <span class="n">full_vp1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
-            <span class="n">pop_vp1</span> <span class="o">=</span> <span class="n">pop_vp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">pop_cl</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cl</span><span class="p">)</span>
+            <span class="n">pop_vc</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">vc</span><span class="p">)</span>
+            <span class="n">pop_qp1</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">qp1</span><span class="p">)</span>
+            <span class="n">pop_vp1</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">vp1</span><span class="p">)</span>
             <span class="n">pop_vc_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vc</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
             <span class="n">pop_cl_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_cl</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
             <span class="n">pop_qp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_qp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
@@ -2092,18 +2119,10 @@ document.write(`
             <span class="n">from2_rate</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">last_peripheral</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span>
             <span class="k">assert</span> <span class="n">from2_rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
             <span class="n">qp2</span><span class="p">,</span> <span class="n">vp2</span> <span class="o">=</span> <span class="n">from2_rate</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
-            <span class="n">full_qp2</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">qp2</span><span class="p">)</span>
-            <span class="n">full_vp2</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">vp2</span><span class="p">)</span>
-            <span class="n">full_qp1</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">qp1</span><span class="p">)</span>
-            <span class="n">full_vp1</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">vp1</span><span class="p">)</span>
-            <span class="n">pop_qp2_candidates</span> <span class="o">=</span> <span class="n">full_qp2</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
-            <span class="n">pop_qp2</span> <span class="o">=</span> <span class="n">pop_qp2_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-            <span class="n">pop_vp2_candidates</span> <span class="o">=</span> <span class="n">full_vp2</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
-            <span class="n">pop_vp2</span> <span class="o">=</span> <span class="n">pop_vp2_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-            <span class="n">pop_qp1_candidates</span> <span class="o">=</span> <span class="n">full_qp1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
-            <span class="n">pop_qp1</span> <span class="o">=</span> <span class="n">pop_qp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
-            <span class="n">pop_vp1_candidates</span> <span class="o">=</span> <span class="n">full_vp1</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">&amp;</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
-            <span class="n">pop_vp1</span> <span class="o">=</span> <span class="n">pop_vp1_candidates</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+            <span class="n">pop_qp2</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">qp2</span><span class="p">)</span>
+            <span class="n">pop_vp2</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">vp2</span><span class="p">)</span>
+            <span class="n">pop_qp1</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">qp1</span><span class="p">)</span>
+            <span class="n">pop_vp1</span> <span class="o">=</span> <span class="n">_find_noncov_theta</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">vp1</span><span class="p">)</span>
             <span class="n">pop_qp2_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_qp2</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
             <span class="n">pop_vp2_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_vp2</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
             <span class="n">pop_qp1_init</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">[</span><span class="n">pop_qp1</span><span class="p">]</span><span class="o">.</span><span class="n">init</span>
@@ -2751,7 +2770,7 @@ document.write(`
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
     <br/>
   </p>
 </div>

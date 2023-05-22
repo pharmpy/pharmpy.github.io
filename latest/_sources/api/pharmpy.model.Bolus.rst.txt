@@ -19,8 +19,10 @@ Bolus
    .. autosummary::
 
       ~Bolus.create
+      ~Bolus.from_dict
       ~Bolus.replace
       ~Bolus.subs
+      ~Bolus.to_dict
 
    .. rubric:: Attributes Documentation
 
@@ -31,5 +33,7 @@ Bolus
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: from_dict
    .. automethod:: replace
    .. automethod:: subs
+   .. automethod:: to_dict

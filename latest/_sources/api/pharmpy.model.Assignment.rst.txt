@@ -20,8 +20,10 @@ Assignment
    .. autosummary::
 
       ~Assignment.create
+      ~Assignment.from_dict
       ~Assignment.replace
       ~Assignment.subs
+      ~Assignment.to_dict
 
    .. rubric:: Attributes Documentation
 
@@ -33,5 +35,7 @@ Assignment
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: from_dict
    .. automethod:: replace
    .. automethod:: subs
+   .. automethod:: to_dict

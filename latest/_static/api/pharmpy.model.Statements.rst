@@ -24,10 +24,12 @@ Statements
       ~Statements.direct_dependencies
       ~Statements.find_assignment
       ~Statements.find_assignment_index
+      ~Statements.from_dict
       ~Statements.full_expression
       ~Statements.reassign
       ~Statements.remove_symbol_definitions
       ~Statements.subs
+      ~Statements.to_dict
 
    .. rubric:: Attributes Documentation
 
@@ -43,7 +45,9 @@ Statements
    .. automethod:: direct_dependencies
    .. automethod:: find_assignment
    .. automethod:: find_assignment_index
+   .. automethod:: from_dict
    .. automethod:: full_expression
    .. automethod:: reassign
    .. automethod:: remove_symbol_definitions
    .. automethod:: subs
+   .. automethod:: to_dict

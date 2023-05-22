@@ -22,7 +22,9 @@ Parameter
    .. autosummary::
 
       ~Parameter.create
+      ~Parameter.from_dict
       ~Parameter.replace
+      ~Parameter.to_dict
 
    .. rubric:: Attributes Documentation
 
@@ -36,4 +38,6 @@ Parameter
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: from_dict
    .. automethod:: replace
+   .. automethod:: to_dict

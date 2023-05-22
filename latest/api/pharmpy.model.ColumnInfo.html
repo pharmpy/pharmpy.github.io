@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -9,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>ColumnInfo &#8212; Pharmpy 0.94.0 documentation</title>
+    <title>ColumnInfo &#8212; Pharmpy 0.95.0 documentation</title>
   
   
   
@@ -512,7 +511,6 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.create_basic_pk_model.html">create_basic_pk_model</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.create_config_template.html">create_config_template</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.create_joint_distribution.html">create_joint_distribution</a></li>
-<li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.create_report.html">create_report</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.create_rng.html">create_rng</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.create_symbol.html">create_symbol</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.deidentify_data.html">deidentify_data</a></li>
@@ -657,6 +655,7 @@ document.write(`
 </ul>
 </li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="../api_tools.html">pharmpy.tools Package</a><input class="toctree-checkbox" id="toctree-checkbox-3" name="toctree-checkbox-3" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-3"><i class="fa-solid fa-chevron-down"></i></label><ul>
+<li class="toctree-l2"><a class="reference internal" href="pharmpy.tools.create_report.html">create_report</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.tools.create_results.html">create_results</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.tools.fit.html">fit</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.tools.predict_influential_individuals.html">predict_influential_individuals</a></li>
@@ -780,7 +779,7 @@ document.write(`
 <li><p><strong>unit</strong> (<em>str</em>) – Unit (see the “unit” attribute)</p></li>
 <li><p><strong>scale</strong> (<em>str</em>) – Scale of measurement (see the “scale” attribute)</p></li>
 <li><p><strong>continuous</strong> (<em>bool</em>) – True if continuous or False if discrete</p></li>
-<li><p><strong>categories</strong> (<em>list</em>) – List of all possible categories</p></li>
+<li><p><strong>categories</strong> (<em>Optional[Union[Tuple, Dict]]</em>) – Tuple of all possible categories or dict from value to label for each category</p></li>
 <li><p><strong>drop</strong> (<em>bool</em>) – Should column be dropped (i.e. barred from being used)</p></li>
 <li><p><strong>datatype</strong> (<em>str</em>) – Pandas datatype or special Pharmpy datatype (see the “dtype” attribute)</p></li>
 <li><p><strong>descriptor</strong> (<em>str</em>) – Descriptor (kind) of data</p></li>
@@ -791,7 +790,7 @@ document.write(`
 <table class="autosummary longtable table autosummary">
 <tbody>
 <tr class="row-odd"><td><p><a class="reference internal" href="#pharmpy.model.ColumnInfo.categories" title="pharmpy.model.ColumnInfo.categories"><code class="xref py py-obj docutils literal notranslate"><span class="pre">categories</span></code></a></p></td>
-<td><p>List of allowed categories</p></td>
+<td><p>List or dict of allowed categories</p></td>
 </tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pharmpy.model.ColumnInfo.continuous" title="pharmpy.model.ColumnInfo.continuous"><code class="xref py py-obj docutils literal notranslate"><span class="pre">continuous</span></code></a></p></td>
 <td><p>Is the column data continuous</p></td>
@@ -831,6 +830,12 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#pharmpy.model.ColumnInfo.create" title="pharmpy.model.ColumnInfo.create"><code class="xref py py-obj docutils literal notranslate"><span class="pre">create</span></code></a>(name[, type, unit, scale, ...])</p></td>
 <td><p></p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pharmpy.model.ColumnInfo.from_dict" title="pharmpy.model.ColumnInfo.from_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">from_dict</span></code></a>(d)</p></td>
+<td><p></p></td>
+</tr>
+<tr class="row-odd"><td><p><a class="reference internal" href="#pharmpy.model.ColumnInfo.get_all_categories" title="pharmpy.model.ColumnInfo.get_all_categories"><code class="xref py py-obj docutils literal notranslate"><span class="pre">get_all_categories</span></code></a>()</p></td>
+<td><p>Get a list of all categories</p></td>
+</tr>
 <tr class="row-even"><td><p><a class="reference internal" href="#pharmpy.model.ColumnInfo.is_categorical" title="pharmpy.model.ColumnInfo.is_categorical"><code class="xref py py-obj docutils literal notranslate"><span class="pre">is_categorical</span></code></a>()</p></td>
 <td><p>Check if the column data is categorical</p></td>
 </tr>
@@ -843,13 +848,16 @@ document.write(`
 <tr class="row-odd"><td><p><a class="reference internal" href="#pharmpy.model.ColumnInfo.replace" title="pharmpy.model.ColumnInfo.replace"><code class="xref py py-obj docutils literal notranslate"><span class="pre">replace</span></code></a>(**kwargs)</p></td>
 <td><p>Replace properties and create a new ColumnInfo</p></td>
 </tr>
+<tr class="row-even"><td><p><a class="reference internal" href="#pharmpy.model.ColumnInfo.to_dict" title="pharmpy.model.ColumnInfo.to_dict"><code class="xref py py-obj docutils literal notranslate"><span class="pre">to_dict</span></code></a>()</p></td>
+<td><p></p></td>
+</tr>
 </tbody>
 </table>
 <p class="rubric">Attributes Documentation</p>
 <dl class="py attribute">
 <dt class="sig sig-object py" id="pharmpy.model.ColumnInfo.categories">
 <span class="sig-name descname"><span class="pre">categories</span></span><a class="headerlink" href="#pharmpy.model.ColumnInfo.categories" title="Permalink to this definition">#</a></dt>
-<dd><p>List of allowed categories</p>
+<dd><p>List or dict of allowed categories</p>
 </dd></dl>
 
 <dl class="py attribute">
@@ -1004,6 +1012,12 @@ be discrete.</p>
 <tr class="row-odd"><td><p>observation identifier</p></td>
 <td><p>Unique integer identifier for an observation</p></td>
 </tr>
+<tr class="row-even"><td><p>pk measurement</p></td>
+<td><p>Any kind of PK measurement</p></td>
+</tr>
+<tr class="row-odd"><td><p>pd measurement</p></td>
+<td><p>Any kind of PD measurement</p></td>
+</tr>
 </tbody>
 </table>
 </dd></dl>
@@ -1152,6 +1166,17 @@ recognized. The default unit is 1, i.e. without unit.</p>
 <dd></dd></dl>
 
 <dl class="py method">
+<dt class="sig sig-object py" id="pharmpy.model.ColumnInfo.from_dict">
+<em class="property"><span class="pre">classmethod</span><span class="w"> </span></em><span class="sig-name descname"><span class="pre">from_dict</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">d</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/model/datainfo.html#ColumnInfo.from_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pharmpy.model.ColumnInfo.from_dict" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
+<dl class="py method">
+<dt class="sig sig-object py" id="pharmpy.model.ColumnInfo.get_all_categories">
+<span class="sig-name descname"><span class="pre">get_all_categories</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/model/datainfo.html#ColumnInfo.get_all_categories"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pharmpy.model.ColumnInfo.get_all_categories" title="Permalink to this definition">#</a></dt>
+<dd><p>Get a list of all categories</p>
+</dd></dl>
+
+<dl class="py method">
 <dt class="sig sig-object py" id="pharmpy.model.ColumnInfo.is_categorical">
 <span class="sig-name descname"><span class="pre">is_categorical</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/model/datainfo.html#ColumnInfo.is_categorical"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pharmpy.model.ColumnInfo.is_categorical" title="Permalink to this definition">#</a></dt>
 <dd><p>Check if the column data is categorical</p>
@@ -1238,6 +1263,11 @@ recognized. The default unit is 1, i.e. without unit.</p>
 <dd><p>Replace properties and create a new ColumnInfo</p>
 </dd></dl>
 
+<dl class="py method">
+<dt class="sig sig-object py" id="pharmpy.model.ColumnInfo.to_dict">
+<span class="sig-name descname"><span class="pre">to_dict</span></span><span class="sig-paren">(</span><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/model/datainfo.html#ColumnInfo.to_dict"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pharmpy.model.ColumnInfo.to_dict" title="Permalink to this definition">#</a></dt>
+<dd></dd></dl>
+
 </dd></dl>
 
 </section>
@@ -1302,10 +1332,13 @@ recognized. The default unit is 1, i.e. without unit.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pharmpy.model.ColumnInfo.convert_datatype_to_pd_dtype"><code class="docutils literal notranslate"><span class="pre">ColumnInfo.convert_datatype_to_pd_dtype()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pharmpy.model.ColumnInfo.convert_pd_dtype_to_datatype"><code class="docutils literal notranslate"><span class="pre">ColumnInfo.convert_pd_dtype_to_datatype()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pharmpy.model.ColumnInfo.create"><code class="docutils literal notranslate"><span class="pre">ColumnInfo.create()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pharmpy.model.ColumnInfo.from_dict"><code class="docutils literal notranslate"><span class="pre">ColumnInfo.from_dict()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pharmpy.model.ColumnInfo.get_all_categories"><code class="docutils literal notranslate"><span class="pre">ColumnInfo.get_all_categories()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pharmpy.model.ColumnInfo.is_categorical"><code class="docutils literal notranslate"><span class="pre">ColumnInfo.is_categorical()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pharmpy.model.ColumnInfo.is_integer"><code class="docutils literal notranslate"><span class="pre">ColumnInfo.is_integer()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pharmpy.model.ColumnInfo.is_numerical"><code class="docutils literal notranslate"><span class="pre">ColumnInfo.is_numerical()</span></code></a></li>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pharmpy.model.ColumnInfo.replace"><code class="docutils literal notranslate"><span class="pre">ColumnInfo.replace()</span></code></a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#pharmpy.model.ColumnInfo.to_dict"><code class="docutils literal notranslate"><span class="pre">ColumnInfo.to_dict()</span></code></a></li>
 </ul>
 </li>
 </ul>
@@ -1343,7 +1376,7 @@ recognized. The default unit is 1, i.e. without unit.</p>
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
     <br/>
   </p>
 </div>

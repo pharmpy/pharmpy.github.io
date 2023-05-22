@@ -28,6 +28,7 @@ RandomVariables
    .. autosummary::
 
       ~RandomVariables.create
+      ~RandomVariables.from_dict
       ~RandomVariables.get_covariance
       ~RandomVariables.get_rvs_with_same_dist
       ~RandomVariables.join
@@ -37,6 +38,7 @@ RandomVariables
       ~RandomVariables.replace_with_sympy_rvs
       ~RandomVariables.sample
       ~RandomVariables.subs
+      ~RandomVariables.to_dict
       ~RandomVariables.unjoin
       ~RandomVariables.validate_parameters
 
@@ -58,6 +60,7 @@ RandomVariables
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: from_dict
    .. automethod:: get_covariance
    .. automethod:: get_rvs_with_same_dist
    .. automethod:: join
@@ -67,5 +70,6 @@ RandomVariables
    .. automethod:: replace_with_sympy_rvs
    .. automethod:: sample
    .. automethod:: subs
+   .. automethod:: to_dict
    .. automethod:: unjoin
    .. automethod:: validate_parameters

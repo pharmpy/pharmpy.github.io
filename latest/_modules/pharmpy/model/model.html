@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.model &#8212; Pharmpy 0.94.0 documentation</title>
+    <title>pharmpy.model.model &#8212; Pharmpy 0.95.0 documentation</title>
   
   
   
@@ -501,14 +500,14 @@ document.write(`
 
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
-<span class="kn">from</span> <span class="nn">pharmpy.internals.immutable</span> <span class="kn">import</span> <span class="n">Immutable</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.immutable</span> <span class="kn">import</span> <span class="n">Immutable</span><span class="p">,</span> <span class="n">frozenmapping</span>
 <span class="kn">from</span> <span class="nn">pharmpy.plugins.utils</span> <span class="kn">import</span> <span class="n">detect_model</span>
 
 <span class="kn">from</span> <span class="nn">.datainfo</span> <span class="kn">import</span> <span class="n">ColumnInfo</span><span class="p">,</span> <span class="n">DataInfo</span>
 <span class="kn">from</span> <span class="nn">.estimation</span> <span class="kn">import</span> <span class="n">EstimationSteps</span>
 <span class="kn">from</span> <span class="nn">.parameters</span> <span class="kn">import</span> <span class="n">Parameters</span>
 <span class="kn">from</span> <span class="nn">.random_variables</span> <span class="kn">import</span> <span class="n">RandomVariables</span>
-<span class="kn">from</span> <span class="nn">.statements</span> <span class="kn">import</span> <span class="n">Statements</span>
+<span class="kn">from</span> <span class="nn">.statements</span> <span class="kn">import</span> <span class="n">ODESystem</span><span class="p">,</span> <span class="n">Statements</span>
 
 
 <div class="viewcode-block" id="ModelError"><a class="viewcode-back" href="../../../api/pharmpy.model.ModelError.html#pharmpy.model.ModelError">[docs]</a><span class="k">class</span> <span class="nc">ModelError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
@@ -561,11 +560,15 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_random_variables</span> <span class="o">=</span> <span class="n">random_variables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="n">parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_statements</span> <span class="o">=</span> <span class="n">statements</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span> <span class="o">=</span> <span class="n">actual_dependent_variables</span>
+        <span class="c1"># FIXME: Only do this conversion in the future Model.create</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span> <span class="o">=</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">actual_dependent_variables</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">observation_transformation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span> <span class="o">=</span> <span class="p">{</span><span class="n">dv</span><span class="p">:</span> <span class="n">dv</span> <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">actual_dependent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span> <span class="o">=</span> <span class="n">frozenmapping</span><span class="p">(</span>
+                <span class="p">{</span><span class="n">dv</span><span class="p">:</span> <span class="n">dv</span> <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">actual_dependent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span> <span class="o">=</span> <span class="n">observation_transformation</span>
+            <span class="c1"># FIXME: Only do this conversion in the future Model.create</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span> <span class="o">=</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">observation_transformation</span><span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_estimation_steps</span> <span class="o">=</span> <span class="n">estimation_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_modelfit_results</span> <span class="o">=</span> <span class="n">modelfit_results</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent_model</span> <span class="o">=</span> <span class="n">parent_model</span>
@@ -608,16 +611,52 @@ document.write(`
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.random_variables must be of RandomVariables type&quot;</span><span class="p">)</span>
 
     <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">_canonicalize_statements</span><span class="p">(</span><span class="n">statements</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">_canonicalize_statements</span><span class="p">(</span><span class="n">statements</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">datainfo</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statements</span><span class="p">,</span> <span class="n">Statements</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.statements must be of Statements type&quot;</span><span class="p">)</span>
+        <span class="n">colnames</span> <span class="o">=</span> <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">colname</span><span class="p">)</span> <span class="k">for</span> <span class="n">colname</span> <span class="ow">in</span> <span class="n">datainfo</span><span class="o">.</span><span class="n">names</span><span class="p">}</span>
+        <span class="n">symbs_all</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">free_symbols</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">params</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">colnames</span><span class="p">)</span>
+        <span class="n">sset_prev</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">statement</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">statements</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">ODESystem</span><span class="p">):</span>
+                <span class="k">continue</span>
+
+            <span class="n">symbs</span> <span class="o">=</span> <span class="n">statement</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">free_symbols</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">symbs</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">symbs_all</span><span class="p">):</span>
+                <span class="c1"># E.g. after solve_ode_system</span>
+                <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statement</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Function</span><span class="p">):</span>
+                    <span class="n">symbs_all</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">statement</span><span class="o">.</span><span class="n">symbol</span><span class="o">.</span><span class="n">func</span><span class="o">.</span><span class="vm">__name__</span><span class="p">))</span>
+                    <span class="k">continue</span>
+
+                <span class="k">for</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">symbs</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">symbs_all</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">symb</span><span class="p">)</span> <span class="o">==</span> <span class="s1">&#39;NaN&#39;</span><span class="p">:</span>
+                        <span class="k">continue</span>
+                    <span class="k">if</span> <span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">symb</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span> <span class="ow">and</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">amounts</span><span class="p">:</span>
+                            <span class="k">continue</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Symbol </span><span class="si">{</span><span class="n">symb</span><span class="si">}</span><span class="s1"> is not defined&#39;</span><span class="p">)</span>
+                    <span class="k">if</span> <span class="n">Statements</span><span class="p">(</span><span class="n">sset_prev</span><span class="p">)</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="n">symb</span><span class="p">)</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+                        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Symbol </span><span class="si">{</span><span class="n">symb</span><span class="si">}</span><span class="s1"> defined after being used&#39;</span><span class="p">)</span>
+
+            <span class="n">sset_prev</span> <span class="o">+=</span> <span class="n">statement</span>
 
 <div class="viewcode-block" id="Model.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Name of a model has to be of string type&quot;</span><span class="p">)</span>
 
-        <span class="n">dependent_variables</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;dependent_variables&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;dependent_variables&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">dependent_variables</span> <span class="o">=</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;dependent_variables&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">dependent_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependent_variables</span>
+
+        <span class="k">if</span> <span class="s1">&#39;observation_transformation&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">observation_transformation</span> <span class="o">=</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;observation_transformation&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">observation_transformation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_transformation</span>
+
         <span class="n">parameters</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parameters&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
 
         <span class="k">if</span> <span class="s1">&#39;random_variables&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
@@ -627,12 +666,6 @@ document.write(`
             <span class="n">random_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span>
 
         <span class="n">parameters</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_parameter_estimates</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">random_variables</span><span class="p">)</span>
-
-        <span class="k">if</span> <span class="s1">&#39;statements&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">statements</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;statements&#39;</span><span class="p">]</span>
-            <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_statements</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">statements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">statements</span>
 
         <span class="k">if</span> <span class="s1">&#39;dataset&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
             <span class="n">dataset</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;dataset&#39;</span><span class="p">]</span>
@@ -651,6 +684,13 @@ document.write(`
         <span class="k">if</span> <span class="n">new_dataset</span><span class="p">:</span>
             <span class="n">datainfo</span> <span class="o">=</span> <span class="n">update_datainfo</span><span class="p">(</span><span class="n">datainfo</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
 
+        <span class="c1"># Has to be checked after datainfo is updated since it looks for symbols in datainfo as well</span>
+        <span class="k">if</span> <span class="s1">&#39;statements&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">statements</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;statements&#39;</span><span class="p">]</span>
+            <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_statements</span><span class="p">(</span><span class="n">statements</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">random_variables</span><span class="p">,</span> <span class="n">datainfo</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">statements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">statements</span>
+
         <span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;estimation_steps&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimation_steps</span><span class="p">,</span> <span class="n">EstimationSteps</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.estimation_steps must be of EstimationSteps type&quot;</span><span class="p">)</span>
@@ -667,9 +707,6 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="n">value_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_type</span>
         <span class="n">description</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
-        <span class="n">observation_transformation</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
-            <span class="s1">&#39;observation_transformation&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_transformation</span>
-        <span class="p">)</span>
         <span class="n">internals</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;internals&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_internals</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
@@ -750,6 +787,21 @@ document.write(`
             <span class="k">return</span> <span class="kc">False</span>
 
         <span class="k">return</span> <span class="kc">True</span>
+
+    <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span>
+            <span class="p">(</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_random_variables</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_statements</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_estimation_steps</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_initial_individual_estimates</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_datainfo</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span><span class="p">,</span>
+            <span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;Pharmpy model object </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&gt;&#39;</span>
@@ -1016,7 +1068,7 @@ document.write(`
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
     <br/>
   </p>
 </div>

@@ -1,5 +1,4 @@
 
-
 <!DOCTYPE html>
 
 
@@ -8,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.94.0 documentation</title>
+    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.95.0 documentation</title>
   
   
   
@@ -712,15 +711,23 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; create_symbol(model, &quot;CL&quot;)</span>
 <span class="sd">    CL1</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">]</span>
-    <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">]</span>
-    <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">names</span>
-    <span class="n">dataset_col</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">names</span>
-    <span class="c1"># FIXME: handle other DVs</span>
-    <span class="n">dv</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">misc</span> <span class="o">=</span> <span class="p">[</span><span class="n">dv</span><span class="p">]</span>
+    <span class="k">return</span> <span class="n">_create_symbol</span><span class="p">(</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">,</span>
+        <span class="n">stem</span><span class="p">,</span>
+        <span class="n">force_numbering</span><span class="p">,</span>
+    <span class="p">)</span></div>
 
-    <span class="n">all_names</span> <span class="o">=</span> <span class="n">symbols</span> <span class="o">+</span> <span class="n">params</span> <span class="o">+</span> <span class="n">rvs</span> <span class="o">+</span> <span class="n">dataset_col</span> <span class="o">+</span> <span class="n">misc</span>
+
+<span class="k">def</span> <span class="nf">_create_symbol</span><span class="p">(</span><span class="n">statements</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">random_variables</span><span class="p">,</span> <span class="n">datainfo</span><span class="p">,</span> <span class="n">stem</span><span class="p">,</span> <span class="n">force_numbering</span><span class="p">):</span>
+    <span class="n">symbols</span> <span class="o">=</span> <span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">symbol</span><span class="p">)</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">statements</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">]</span>
+    <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
+    <span class="n">rvs</span> <span class="o">=</span> <span class="n">random_variables</span><span class="o">.</span><span class="n">names</span>
+    <span class="n">dataset_col</span> <span class="o">=</span> <span class="n">datainfo</span><span class="o">.</span><span class="n">names</span>
+
+    <span class="n">all_names</span> <span class="o">=</span> <span class="n">symbols</span> <span class="o">+</span> <span class="n">params</span> <span class="o">+</span> <span class="n">rvs</span> <span class="o">+</span> <span class="n">dataset_col</span>
 
     <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">stem</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_names</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">force_numbering</span><span class="p">:</span>
         <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">stem</span><span class="p">))</span>
@@ -730,7 +737,7 @@ document.write(`
         <span class="n">candidate</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">stem</span><span class="si">}{</span><span class="n">i</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="k">if</span> <span class="n">candidate</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">all_names</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">candidate</span><span class="p">)</span>
-        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span></div>
+        <span class="n">i</span> <span class="o">+=</span> <span class="mi">1</span>
 
 
 <span class="k">def</span> <span class="nf">_find_eta_assignments</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
@@ -839,12 +846,10 @@ document.write(`
 <span class="sd">    Example</span>
 <span class="sd">    -------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.plugins.nonmem import conf</span>
-<span class="sd">    &gt;&gt;&gt; conf.parameter_names = [&#39;comment&#39;, &#39;basic&#39;]</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, simplify_expression</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; simplify_expression(model, &quot;Abs(PTVCL)&quot;)</span>
 <span class="sd">    PTVCL</span>
-<span class="sd">    &gt;&gt;&gt; conf.parameter_names = [&#39;basic&#39;]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">expr</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
     <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
@@ -1188,9 +1193,10 @@ document.write(`
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">epsilon</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">epsilons</span><span class="o">.</span><span class="n">names</span><span class="p">,</span> <span class="n">start</span><span class="o">=</span><span class="mi">1</span><span class="p">):</span>
         <span class="n">subscript</span> <span class="o">=</span> <span class="n">get_subscript</span><span class="p">(</span><span class="n">epsilon</span><span class="p">,</span> <span class="n">i</span><span class="p">,</span> <span class="n">named_subscripts</span><span class="p">)</span>
         <span class="n">subs</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">epsilon</span><span class="p">)]</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;epsilon_</span><span class="si">{</span><span class="n">subscript</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
-    <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">subs</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
+    <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">rename_symbols</span>
+
+    <span class="n">model</span> <span class="o">=</span> <span class="n">rename_symbols</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">subs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
 
 
 <div class="viewcode-block" id="get_individual_parameters"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_individual_parameters.html#pharmpy.modeling.get_individual_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_individual_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
@@ -2046,7 +2052,7 @@ document.write(`
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 6.2.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
     <br/>
   </p>
 </div>

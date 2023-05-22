@@ -23,8 +23,10 @@ Compartment
    .. autosummary::
 
       ~Compartment.create
+      ~Compartment.from_dict
       ~Compartment.replace
       ~Compartment.subs
+      ~Compartment.to_dict
 
    .. rubric:: Attributes Documentation
 
@@ -39,5 +41,7 @@ Compartment
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: from_dict
    .. automethod:: replace
    .. automethod:: subs
+   .. automethod:: to_dict
