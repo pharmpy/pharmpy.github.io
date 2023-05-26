@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.model &#8212; Pharmpy 0.95.0 documentation</title>
+    <title>pharmpy.model.model &#8212; Pharmpy 0.96.0 documentation</title>
   
   
   
@@ -495,13 +495,12 @@ document.write(`
 <span class="kn">from</span> <span class="nn">__future__</span> <span class="kn">import</span> <span class="n">annotations</span>
 
 <span class="kn">import</span> <span class="nn">warnings</span>
-<span class="kn">from</span> <span class="nn">io</span> <span class="kn">import</span> <span class="n">IOBase</span>
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.immutable</span> <span class="kn">import</span> <span class="n">Immutable</span><span class="p">,</span> <span class="n">frozenmapping</span>
-<span class="kn">from</span> <span class="nn">pharmpy.plugins.utils</span> <span class="kn">import</span> <span class="n">detect_model</span>
+<span class="kn">from</span> <span class="nn">pharmpy.model.external</span> <span class="kn">import</span> <span class="n">detect_model</span>
 
 <span class="kn">from</span> <span class="nn">.datainfo</span> <span class="kn">import</span> <span class="n">ColumnInfo</span><span class="p">,</span> <span class="n">DataInfo</span>
 <span class="kn">from</span> <span class="nn">.estimation</span> <span class="kn">import</span> <span class="n">EstimationSteps</span>
@@ -540,7 +539,7 @@ document.write(`
         <span class="n">statements</span><span class="o">=</span><span class="n">Statements</span><span class="p">(),</span>
         <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">datainfo</span><span class="o">=</span><span class="n">DataInfo</span><span class="p">(),</span>
-        <span class="n">dependent_variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dependent_variables</span><span class="o">=</span><span class="n">frozenmapping</span><span class="p">({</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">):</span> <span class="mi">1</span><span class="p">}),</span>
         <span class="n">observation_transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">estimation_steps</span><span class="o">=</span><span class="n">EstimationSteps</span><span class="p">(),</span>
         <span class="n">modelfit_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -551,24 +550,18 @@ document.write(`
         <span class="n">description</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
         <span class="n">internals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="n">actual_dependent_variables</span> <span class="o">=</span> <span class="p">(</span>
-            <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">):</span> <span class="mi">1</span><span class="p">}</span> <span class="k">if</span> <span class="n">dependent_variables</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">dependent_variables</span>
-        <span class="p">)</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_datainfo</span> <span class="o">=</span> <span class="n">datainfo</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span> <span class="o">=</span> <span class="n">dataset</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_random_variables</span> <span class="o">=</span> <span class="n">random_variables</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parameters</span> <span class="o">=</span> <span class="n">parameters</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_statements</span> <span class="o">=</span> <span class="n">statements</span>
-        <span class="c1"># FIXME: Only do this conversion in the future Model.create</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span> <span class="o">=</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">actual_dependent_variables</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dependent_variables</span> <span class="o">=</span> <span class="n">dependent_variables</span>
         <span class="k">if</span> <span class="n">observation_transformation</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span> <span class="o">=</span> <span class="n">frozenmapping</span><span class="p">(</span>
-                <span class="p">{</span><span class="n">dv</span><span class="p">:</span> <span class="n">dv</span> <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">actual_dependent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+            <span class="n">observation_transformation</span> <span class="o">=</span> <span class="n">frozenmapping</span><span class="p">(</span>
+                <span class="p">{</span><span class="n">dv</span><span class="p">:</span> <span class="n">dv</span> <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">dependent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
             <span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="c1"># FIXME: Only do this conversion in the future Model.create</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span> <span class="o">=</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">observation_transformation</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_observation_transformation</span> <span class="o">=</span> <span class="n">observation_transformation</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_estimation_steps</span> <span class="o">=</span> <span class="n">estimation_steps</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_modelfit_results</span> <span class="o">=</span> <span class="n">modelfit_results</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_parent_model</span> <span class="o">=</span> <span class="n">parent_model</span>
@@ -577,6 +570,61 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span> <span class="o">=</span> <span class="n">value_type</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="n">description</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_internals</span> <span class="o">=</span> <span class="n">internals</span>
+
+<div class="viewcode-block" id="Model.create"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.create">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
+        <span class="bp">cls</span><span class="p">,</span>
+        <span class="n">name</span><span class="p">,</span>
+        <span class="n">parameters</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">random_variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">statements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">datainfo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">dependent_variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">observation_transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">estimation_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">modelfit_results</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">parent_model</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">initial_individual_estimates</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">filename_extension</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">value_type</span><span class="o">=</span><span class="s1">&#39;PREDICTION&#39;</span><span class="p">,</span>
+        <span class="n">description</span><span class="o">=</span><span class="s1">&#39;&#39;</span><span class="p">,</span>
+        <span class="n">internals</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+    <span class="p">):</span>
+        <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">dependent_variables</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_dependent_variables</span><span class="p">(</span><span class="n">dependent_variables</span><span class="p">)</span>
+        <span class="n">observation_transformation</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_observation_transformation</span><span class="p">(</span>
+            <span class="n">observation_transformation</span><span class="p">,</span> <span class="n">dependent_variables</span>
+        <span class="p">)</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_parameters</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="n">random_variables</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_random_variables</span><span class="p">(</span><span class="n">random_variables</span><span class="p">)</span>
+        <span class="n">parameters</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_parameter_estimates</span><span class="p">(</span><span class="n">parameters</span><span class="p">,</span> <span class="n">random_variables</span><span class="p">)</span>
+        <span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_estimation_steps</span><span class="p">(</span><span class="n">estimation_steps</span><span class="p">)</span>
+        <span class="n">value_type</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_value_type</span><span class="p">(</span><span class="n">value_type</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">datainfo</span><span class="p">,</span> <span class="n">DataInfo</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.datainfo must be of DataInfo type&quot;</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">datainfo</span> <span class="o">=</span> <span class="n">update_datainfo</span><span class="p">(</span><span class="n">datainfo</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
+
+        <span class="n">statements</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_statements</span><span class="p">(</span>
+            <span class="n">statements</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">random_variables</span><span class="p">,</span> <span class="n">datainfo</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
+            <span class="n">dependent_variables</span><span class="o">=</span><span class="n">dependent_variables</span><span class="p">,</span>
+            <span class="n">observation_transformation</span><span class="o">=</span><span class="n">observation_transformation</span><span class="p">,</span>
+            <span class="n">parameters</span><span class="o">=</span><span class="n">parameters</span><span class="p">,</span>
+            <span class="n">random_variables</span><span class="o">=</span><span class="n">random_variables</span><span class="p">,</span>
+            <span class="n">estimation_steps</span><span class="o">=</span><span class="n">estimation_steps</span><span class="p">,</span>
+            <span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">,</span>
+            <span class="n">modelfit_results</span><span class="o">=</span><span class="n">modelfit_results</span><span class="p">,</span>
+            <span class="n">description</span><span class="o">=</span><span class="n">description</span><span class="p">,</span>
+            <span class="n">parent_model</span><span class="o">=</span><span class="n">parent_model</span><span class="p">,</span>
+            <span class="n">filename_extension</span><span class="o">=</span><span class="n">filename_extension</span><span class="p">,</span>
+            <span class="n">internals</span><span class="o">=</span><span class="n">internals</span><span class="p">,</span>
+            <span class="n">initial_individual_estimates</span><span class="o">=</span><span class="n">initial_individual_estimates</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
     <span class="k">def</span> <span class="nf">_canonicalize_value_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
         <span class="n">allowed_strings</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;PREDICTION&#39;</span><span class="p">,</span> <span class="s1">&#39;LIKELIHOOD&#39;</span><span class="p">,</span> <span class="s1">&#39;-2LL&#39;</span><span class="p">)</span>
@@ -609,9 +657,15 @@ document.write(`
     <span class="k">def</span> <span class="nf">_canonicalize_random_variables</span><span class="p">(</span><span class="n">rvs</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">rvs</span><span class="p">,</span> <span class="n">RandomVariables</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.random_variables must be of RandomVariables type&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">rvs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">RandomVariables</span><span class="o">.</span><span class="n">create</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">rvs</span>
 
     <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">_canonicalize_statements</span><span class="p">(</span><span class="n">statements</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">datainfo</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">statements</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Statements</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statements</span><span class="p">,</span> <span class="n">Statements</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.statements must be of Statements type&quot;</span><span class="p">)</span>
         <span class="n">colnames</span> <span class="o">=</span> <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">colname</span><span class="p">)</span> <span class="k">for</span> <span class="n">colname</span> <span class="ow">in</span> <span class="n">datainfo</span><span class="o">.</span><span class="n">names</span><span class="p">}</span>
@@ -641,27 +695,68 @@ document.write(`
                         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Symbol </span><span class="si">{</span><span class="n">symb</span><span class="si">}</span><span class="s1"> defined after being used&#39;</span><span class="p">)</span>
 
             <span class="n">sset_prev</span> <span class="o">+=</span> <span class="n">statement</span>
+        <span class="k">return</span> <span class="n">statements</span>
 
-<div class="viewcode-block" id="Model.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-        <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_canonicalize_name</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Name of a model has to be of string type&quot;</span><span class="p">)</span>
 
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_canonicalize_dependent_variables</span><span class="p">(</span><span class="n">dvs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">dvs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dvs</span> <span class="o">=</span> <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;y&#39;</span><span class="p">):</span> <span class="mi">1</span><span class="p">}</span>
+        <span class="k">return</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">dvs</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_canonicalize_observation_transformation</span><span class="p">(</span><span class="n">obs</span><span class="p">,</span> <span class="n">dvs</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">obs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">obs</span> <span class="o">=</span> <span class="p">{</span><span class="n">dv</span><span class="p">:</span> <span class="n">dv</span> <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">dvs</span><span class="o">.</span><span class="n">keys</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">obs</span><span class="p">)</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_canonicalize_parameters</span><span class="p">(</span><span class="n">params</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">params</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">Parameters</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">params</span><span class="p">,</span> <span class="n">Parameters</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;parameters must be of Parameters type&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">params</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_canonicalize_estimation_steps</span><span class="p">(</span><span class="n">steps</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">steps</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">EstimationSteps</span><span class="p">()</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">steps</span><span class="p">,</span> <span class="n">EstimationSteps</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.estimation_steps must be of EstimationSteps type&quot;</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">steps</span>
+
+<div class="viewcode-block" id="Model.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+
         <span class="k">if</span> <span class="s1">&#39;dependent_variables&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">dependent_variables</span> <span class="o">=</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;dependent_variables&#39;</span><span class="p">])</span>
+            <span class="n">dependent_variables</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_dependent_variables</span><span class="p">(</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;dependent_variables&#39;</span><span class="p">]</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dependent_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dependent_variables</span>
 
         <span class="k">if</span> <span class="s1">&#39;observation_transformation&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">observation_transformation</span> <span class="o">=</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;observation_transformation&#39;</span><span class="p">])</span>
+            <span class="n">observation_transformation</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_observation_transformation</span><span class="p">(</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;observation_transformation&#39;</span><span class="p">],</span> <span class="n">dependent_variables</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">observation_transformation</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">observation_transformation</span>
 
-        <span class="n">parameters</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parameters&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;parameters&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_parameters</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;parameters&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">parameters</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">parameters</span>
 
         <span class="k">if</span> <span class="s1">&#39;random_variables&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">random_variables</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;random_variables&#39;</span><span class="p">]</span>
-            <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_random_variables</span><span class="p">(</span><span class="n">random_variables</span><span class="p">)</span>
+            <span class="n">random_variables</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_random_variables</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;random_variables&#39;</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">random_variables</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">random_variables</span>
 
@@ -686,14 +781,17 @@ document.write(`
 
         <span class="c1"># Has to be checked after datainfo is updated since it looks for symbols in datainfo as well</span>
         <span class="k">if</span> <span class="s1">&#39;statements&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">statements</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;statements&#39;</span><span class="p">]</span>
-            <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_statements</span><span class="p">(</span><span class="n">statements</span><span class="p">,</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">random_variables</span><span class="p">,</span> <span class="n">datainfo</span><span class="p">)</span>
+            <span class="n">statements</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_statements</span><span class="p">(</span>
+                <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;statements&#39;</span><span class="p">],</span> <span class="n">parameters</span><span class="p">,</span> <span class="n">random_variables</span><span class="p">,</span> <span class="n">datainfo</span>
+            <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">statements</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">statements</span>
 
-        <span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;estimation_steps&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">)</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">estimation_steps</span><span class="p">,</span> <span class="n">EstimationSteps</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.estimation_steps must be of EstimationSteps type&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="s1">&#39;estimation_steps&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
+            <span class="n">estimation_steps</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_estimation_steps</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;estimation_steps&#39;</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">estimation_steps</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">estimation_steps</span>
+
         <span class="n">modelfit_results</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;modelfit_results&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">modelfit_results</span><span class="p">)</span>
         <span class="n">parent_model</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;parent_model&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">parent_model</span><span class="p">)</span>
         <span class="n">initial_individual_estimates</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span>
@@ -943,40 +1041,44 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A free text discription of the model&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_description</span>
 
-<div class="viewcode-block" id="Model.create_model"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.create_model">[docs]</a>    <span class="nd">@staticmethod</span>
-    <span class="k">def</span> <span class="nf">create_model</span><span class="p">(</span><span class="n">obj</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Factory for creating a :class:`pharmpy.model` object from an object representing the model</span>
-
-<span class="sd">        .. _path-like object: https://docs.python.org/3/glossary.html#term-path-like-object</span>
+<div class="viewcode-block" id="Model.parse_model"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.parse_model">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">parse_model</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a model object by parsing a model file of any supported type</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
-<span class="sd">        obj</span>
-<span class="sd">            `path-like object`_ pointing to the model file or an IO object.</span>
+<span class="sd">        path : Path or str</span>
+<span class="sd">            Path to a model file</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Model</span>
-<span class="sd">            Generic :class:`~pharmpy.generic.Model` if obj is None, otherwise appropriate</span>
-<span class="sd">            implementation is invoked (e.g. NONMEM7 :class:`~pharmpy.plugins.nonmem.Model`).</span>
+<span class="sd">            A model object</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="n">obj</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">return</span> <span class="n">Model</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">IOBase</span><span class="p">):</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="kc">None</span>
-            <span class="n">code</span> <span class="o">=</span> <span class="n">obj</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">)):</span>
-            <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
-            <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;latin-1&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
-                <span class="n">code</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Unknown input type to Model constructor&quot;</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="s1">&#39;r&#39;</span><span class="p">,</span> <span class="n">encoding</span><span class="o">=</span><span class="s1">&#39;latin-1&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">fp</span><span class="p">:</span>
+            <span class="n">code</span> <span class="o">=</span> <span class="n">fp</span><span class="o">.</span><span class="n">read</span><span class="p">()</span>
 
         <span class="n">model_module</span> <span class="o">=</span> <span class="n">detect_model</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">model_module</span><span class="o">.</span><span class="n">parse_code</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span>
-        <span class="c1"># Setup model database here</span>
-        <span class="c1"># Read in model results here?</span>
-        <span class="c1"># Set filename extension?</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model_module</span><span class="o">.</span><span class="n">parse_model</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">model</span></div>
+
+<div class="viewcode-block" id="Model.parse_model_from_string"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.parse_model_from_string">[docs]</a>    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">parse_model_from_string</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a model object by parsing a string with model code of any supported type</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        code : str</span>
+<span class="sd">            Model code</span>
+
+<span class="sd">        Returns</span>
+<span class="sd">        -------</span>
+<span class="sd">        Model</span>
+<span class="sd">            A model object</span>
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">model_module</span> <span class="o">=</span> <span class="n">detect_model</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model_module</span><span class="o">.</span><span class="n">parse_model</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">model</span></div>
 
 <div class="viewcode-block" id="Model.update_source"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.update_source">[docs]</a>    <span class="k">def</span> <span class="nf">update_source</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>

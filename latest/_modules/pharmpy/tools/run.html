@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.run &#8212; Pharmpy 0.95.0 documentation</title>
+    <title>pharmpy.tools.run &#8212; Pharmpy 0.96.0 documentation</title>
   
   
   
@@ -504,6 +504,8 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pharmpy.workflows.model_database</span> <span class="kn">import</span> <span class="n">LocalModelDirectoryDatabase</span><span class="p">,</span> <span class="n">ModelDatabase</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows.tool_database</span> <span class="kn">import</span> <span class="n">ToolDatabase</span>
 
+<span class="kn">from</span> <span class="nn">.external</span> <span class="kn">import</span> <span class="n">parse_modelfit_results</span>
+
 
 <div class="viewcode-block" id="fit"><a class="viewcode-back" href="../../../api/pharmpy.tools.fit.html#pharmpy.tools.fit">[docs]</a><span class="k">def</span> <span class="nf">fit</span><span class="p">(</span>
     <span class="n">model_or_models</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">]],</span> <span class="n">tool</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
@@ -662,7 +664,7 @@ document.write(`
 <span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">Tuple</span><span class="p">[</span><span class="n">Model</span><span class="p">],</span> <span class="n">Results</span><span class="p">]:</span>
     <span class="c1"># FIXME: workaround until ModelfitResults is disentangled with</span>
     <span class="c1">#  Model object</span>
-    <span class="k">if</span> <span class="s1">&#39;model&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span> <span class="ow">and</span> <span class="s1">&#39;results&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+    <span class="k">if</span> <span class="s1">&#39;model&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span> <span class="ow">and</span> <span class="s1">&#39;results&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">]</span>
         <span class="n">res</span> <span class="o">=</span> <span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;results&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Model</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">res</span><span class="p">,</span> <span class="n">ModelfitResults</span><span class="p">):</span>
@@ -1158,15 +1160,15 @@ document.write(`
         <span class="n">results</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">lzma</span><span class="o">=</span><span class="n">lzma</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="summarize_errors"><a class="viewcode-back" href="../../../api/pharmpy.tools.summarize_errors.html#pharmpy.tools.summarize_errors">[docs]</a><span class="k">def</span> <span class="nf">summarize_errors</span><span class="p">(</span><span class="n">models</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">Model</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
+<div class="viewcode-block" id="summarize_errors"><a class="viewcode-back" href="../../../api/pharmpy.tools.summarize_errors.html#pharmpy.tools.summarize_errors">[docs]</a><span class="k">def</span> <span class="nf">summarize_errors</span><span class="p">(</span><span class="n">results</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">ModelfitResults</span><span class="p">,</span> <span class="n">List</span><span class="p">[</span><span class="n">ModelfitResults</span><span class="p">]])</span> <span class="o">-&gt;</span> <span class="n">pd</span><span class="o">.</span><span class="n">DataFrame</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Summarize errors and warnings from one or multiple model runs.</span>
 
 <span class="sd">    Summarize the errors and warnings found after running the model/models.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    models : list, Model</span>
-<span class="sd">        List of models or single model</span>
+<span class="sd">    results : list, ModelfitResults</span>
+<span class="sd">        List of ModelfitResults or single ModelfitResults</span>
 
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
@@ -1182,16 +1184,15 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; summarize_errors(model)      # doctest: +SKIP</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="c1"># FIXME: have example with errors</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">models</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
-        <span class="n">models</span> <span class="o">=</span> <span class="p">[</span><span class="n">models</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">ModelfitResults</span><span class="p">):</span>
+        <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">results</span><span class="p">]</span>
 
     <span class="n">idcs</span><span class="p">,</span> <span class="n">rows</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[]</span>
 
-    <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">models</span><span class="p">:</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span>
+    <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">res</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">entry</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">res</span><span class="o">.</span><span class="n">log</span><span class="o">.</span><span class="n">log</span><span class="p">):</span>
-                <span class="n">idcs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">category</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
+                <span class="n">idcs</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">res</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">category</span><span class="p">,</span> <span class="n">i</span><span class="p">))</span>
                 <span class="n">rows</span><span class="o">.</span><span class="n">append</span><span class="p">([</span><span class="n">entry</span><span class="o">.</span><span class="n">time</span><span class="p">,</span> <span class="n">entry</span><span class="o">.</span><span class="n">message</span><span class="p">])</span>
 
     <span class="n">index_names</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;model&#39;</span><span class="p">,</span> <span class="s1">&#39;category&#39;</span><span class="p">,</span> <span class="s1">&#39;error_no&#39;</span><span class="p">]</span>
@@ -1392,6 +1393,9 @@ document.write(`
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">results</span><span class="p">,</span> <span class="n">ModelfitResults</span><span class="p">):</span>
         <span class="n">results</span> <span class="o">=</span> <span class="p">[</span><span class="n">results</span><span class="p">]</span>
 
+    <span class="k">if</span> <span class="nb">all</span><span class="p">(</span><span class="n">res</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">results</span><span class="p">):</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;All input results are empty&#39;</span><span class="p">)</span>
+
     <span class="n">summaries</span> <span class="o">=</span> <span class="p">[]</span>
 
     <span class="k">for</span> <span class="n">res</span> <span class="ow">in</span> <span class="n">results</span><span class="p">:</span>
@@ -1504,9 +1508,9 @@ document.write(`
 <span class="sd">        Results object</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="c1"># FIXME: Quick and dirty solution</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">read_model</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">mfr</span><span class="p">(</span><span class="n">model</span><span class="p">)</span></div>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">parse_modelfit_results</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
 
 
 <span class="k">def</span> <span class="nf">_get_run_setup_from_metadata</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
@@ -1526,6 +1530,43 @@ document.write(`
     <span class="k">assert</span> <span class="n">common_options</span><span class="p">[</span><span class="s1">&#39;database&#39;</span><span class="p">][</span><span class="s1">&#39;toolname&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="n">tool_name</span>
 
     <span class="k">return</span> <span class="n">dispatcher</span><span class="p">,</span> <span class="n">tool_database</span>
+
+
+<div class="viewcode-block" id="load_example_modelfit_results"><a class="viewcode-back" href="../../../api/pharmpy.tools.load_example_modelfit_results.html#pharmpy.tools.load_example_modelfit_results">[docs]</a><span class="k">def</span> <span class="nf">load_example_modelfit_results</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Load the modelfit results of an example model</span>
+
+<span class="sd">    Load the modelfit results of an example model built into Pharmpy</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of the model. Currently available models are &quot;pheno&quot; and &quot;pheno_linear&quot;</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    ModelfitResults</span>
+<span class="sd">        Loaded modelfit results object</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.tools import load_example_modelfit_results</span>
+<span class="sd">    &gt;&gt;&gt; results = load_example_modelfit_results(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; results.parameter_estimates</span>
+<span class="sd">        PTVCL        0.004696</span>
+<span class="sd">    PTVV         0.984258</span>
+<span class="sd">    THETA_3      0.158920</span>
+<span class="sd">    IVCL         0.029351</span>
+<span class="sd">    IVV          0.027906</span>
+<span class="sd">    SIGMA_1_1    0.013241</span>
+<span class="sd">    Name: estimates, dtype: float64</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">available</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;moxo&#39;</span><span class="p">,</span> <span class="s1">&#39;pheno&#39;</span><span class="p">,</span> <span class="s1">&#39;pheno_linear&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">available</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown example model </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">. Available examples: </span><span class="si">{</span><span class="n">available</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+    <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;modeling&#39;</span> <span class="o">/</span> <span class="s1">&#39;example_models&#39;</span> <span class="o">/</span> <span class="p">(</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.mod&#39;</span><span class="p">)</span>
+    <span class="n">res</span> <span class="o">=</span> <span class="n">read_modelfit_results</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">res</span></div>
 </pre></div>
 
                 </article>
