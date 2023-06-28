@@ -33,10 +33,12 @@ Model
    .. autosummary::
 
       ~Model.create
+      ~Model.from_dict
       ~Model.has_same_dataset_as
       ~Model.parse_model
       ~Model.parse_model_from_string
       ~Model.replace
+      ~Model.to_dict
       ~Model.update_source
       ~Model.write_files
 
@@ -63,9 +65,11 @@ Model
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: from_dict
    .. automethod:: has_same_dataset_as
    .. automethod:: parse_model
    .. automethod:: parse_model_from_string
    .. automethod:: replace
+   .. automethod:: to_dict
    .. automethod:: update_source
    .. automethod:: write_files

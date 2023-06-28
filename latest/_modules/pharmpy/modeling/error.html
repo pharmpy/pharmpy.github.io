@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.error &#8212; Pharmpy 0.96.0 documentation</title>
+    <title>pharmpy.modeling.error &#8212; Pharmpy 0.97.0 documentation</title>
   
   
   
@@ -495,7 +495,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">.blq</span> <span class="kn">import</span> <span class="n">get_blq_symb_and_type</span><span class="p">,</span> <span class="n">get_sd_expr</span><span class="p">,</span> <span class="n">has_blq_transformation</span>
 <span class="kn">from</span> <span class="nn">.common</span> <span class="kn">import</span> <span class="n">_get_unused_parameters_and_rvs</span><span class="p">,</span> <span class="n">remove_unused_parameters_and_rvs</span>
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">get_observations</span>
-<span class="kn">from</span> <span class="nn">.expressions</span> <span class="kn">import</span> <span class="n">_create_symbol</span><span class="p">,</span> <span class="n">create_symbol</span><span class="p">,</span> <span class="n">get_dv_symbol</span><span class="p">,</span> <span class="n">simplify_expression</span>
+<span class="kn">from</span> <span class="nn">.expressions</span> <span class="kn">import</span> <span class="n">_create_symbol</span><span class="p">,</span> <span class="n">create_symbol</span><span class="p">,</span> <span class="n">get_dv_symbol</span>
 <span class="kn">from</span> <span class="nn">.help_functions</span> <span class="kn">import</span> <span class="n">_format_input_list</span><span class="p">,</span> <span class="n">_get_epsilons</span>
 <span class="kn">from</span> <span class="nn">.parameters</span> <span class="kn">import</span> <span class="n">add_population_parameter</span><span class="p">,</span> <span class="n">fix_parameters</span><span class="p">,</span> <span class="n">set_initial_estimates</span>
 
@@ -764,7 +764,7 @@ document.write(`
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not supported data transformation </span><span class="si">{</span><span class="n">data_trans</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">has_blq_transformation</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-        <span class="n">f</span><span class="p">,</span> <span class="n">stats_new</span> <span class="o">=</span> <span class="n">_get_updated_blq_statements</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">error_expr</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">f_dummy</span><span class="p">,</span> <span class="n">eps</span><span class="p">)</span>
+        <span class="n">f</span><span class="p">,</span> <span class="n">stats_new</span> <span class="o">=</span> <span class="n">_get_updated_blq_statements</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">error_expr</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">f_dummy</span><span class="p">,</span> <span class="n">eps</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="n">error_expr</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">f_dummy</span><span class="p">:</span> <span class="n">f</span><span class="p">})</span>
         <span class="n">stats_new</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
@@ -789,22 +789,26 @@ document.write(`
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
-<span class="k">def</span> <span class="nf">_get_updated_blq_statements</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expr_dummy</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">f_dummy</span><span class="p">,</span> <span class="n">eps_new</span><span class="p">):</span>
-    <span class="n">blq_symb</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_blq_symb_and_type</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="k">for</span> <span class="n">expr</span><span class="p">,</span> <span class="n">cond</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">blq_symb</span> <span class="ow">in</span> <span class="n">cond</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
-            <span class="n">f_above_lloq</span> <span class="o">=</span> <span class="n">expr</span>
-            <span class="k">break</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;BLQ symbol not found&#39;</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_get_updated_blq_statements</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expr_dummy</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">f_dummy</span><span class="p">,</span> <span class="n">eps_new</span><span class="p">):</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">())[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">f_above_lloq</span> <span class="o">=</span> <span class="n">_get_f_above_lloq</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
     <span class="n">expr_above_lloq</span> <span class="o">=</span> <span class="n">expr_dummy</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">f_dummy</span><span class="p">:</span> <span class="n">f_above_lloq</span><span class="p">})</span>
     <span class="n">expr</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">f_above_lloq</span><span class="p">:</span> <span class="n">expr_above_lloq</span><span class="p">})</span>
     <span class="c1"># FIXME: make more general</span>
     <span class="n">sd</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;SD&#39;</span><span class="p">)</span>
-    <span class="n">sd_new</span> <span class="o">=</span> <span class="n">get_sd_expr</span><span class="p">(</span><span class="n">expr_above_lloq</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">+</span> <span class="n">eps_new</span><span class="p">)</span>
-    <span class="n">stats_new</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">simplify_expression</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sd_new</span><span class="p">))</span>
+    <span class="n">sd_new</span> <span class="o">=</span> <span class="n">get_sd_expr</span><span class="p">(</span><span class="n">expr_above_lloq</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span> <span class="o">+</span> <span class="n">eps_new</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
+    <span class="n">stats_new</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">sd_new</span><span class="p">)</span>
     <span class="n">stats_new</span> <span class="o">=</span> <span class="n">stats_new</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">f_above_lloq</span><span class="p">,</span> <span class="n">stats_new</span>
+
+
+<span class="k">def</span> <span class="nf">_get_f_above_lloq</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">f</span><span class="p">):</span>
+    <span class="n">blq_symb</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">get_blq_symb_and_type</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">for</span> <span class="n">expr</span><span class="p">,</span> <span class="n">cond</span> <span class="ow">in</span> <span class="n">f</span><span class="o">.</span><span class="n">args</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">blq_symb</span> <span class="ow">in</span> <span class="n">cond</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">expr</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">AssertionError</span><span class="p">(</span><span class="s1">&#39;BLQ symbol not found&#39;</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="set_combined_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_combined_error_model.html#pharmpy.modeling.set_combined_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_combined_error_model</span><span class="p">(</span>
@@ -932,7 +936,7 @@ document.write(`
 
     <span class="k">if</span> <span class="n">has_blq_transformation</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
         <span class="n">_</span><span class="p">,</span> <span class="n">stats_new</span> <span class="o">=</span> <span class="n">_get_updated_blq_statements</span><span class="p">(</span>
-            <span class="n">model</span><span class="p">,</span> <span class="n">error_expr</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">f_dummy</span><span class="p">,</span> <span class="p">[</span><span class="n">eps_prop</span><span class="p">,</span> <span class="n">eps_add</span><span class="p">]</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">error_expr</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">f_dummy</span><span class="p">,</span> <span class="p">[</span><span class="n">eps_prop</span><span class="p">,</span> <span class="n">eps_add</span><span class="p">]</span>
         <span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">expr</span> <span class="o">=</span> <span class="n">error_expr</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">f_dummy</span><span class="p">:</span> <span class="n">f</span><span class="p">})</span>
@@ -1427,19 +1431,30 @@ document.write(`
         <span class="n">theta_init</span> <span class="o">=</span> <span class="mf">0.1</span>
 
     <span class="c1"># Find for example W = IPRED</span>
+    <span class="n">ipredadj</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">alternative</span> <span class="o">=</span> <span class="kc">None</span>
     <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">sset</span><span class="p">:</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">)</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">expression</span> <span class="o">==</span> <span class="n">ipred</span><span class="p">:</span>
-            <span class="n">alternative</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">symbol</span>
-            <span class="k">if</span> <span class="n">zero_protection</span><span class="p">:</span>
-                <span class="n">guard_expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Piecewise</span><span class="p">(</span>
-                    <span class="p">(</span><span class="mf">2.225e-307</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="n">guard_assignment</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">ipred</span><span class="p">,</span> <span class="n">guard_expr</span><span class="p">)</span>
-                <span class="n">ind</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
-                <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">ind</span><span class="p">]</span> <span class="o">+</span> <span class="n">guard_assignment</span> <span class="o">+</span> <span class="n">sset</span><span class="p">[</span><span class="n">ind</span><span class="p">:]</span>
-            <span class="k">break</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">alternative</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">expression</span> <span class="o">==</span> <span class="n">ipred</span><span class="p">:</span>
+                <span class="n">alternative</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">symbol</span>
+                <span class="k">if</span> <span class="n">zero_protection</span><span class="p">:</span>
+                    <span class="n">guard_expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Piecewise</span><span class="p">(</span>
+                        <span class="p">(</span><span class="mf">2.225e-307</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
+                    <span class="p">)</span>
+                    <span class="n">guard_assignment</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">ipred</span><span class="p">,</span> <span class="n">guard_expr</span><span class="p">)</span>
+                    <span class="n">ind</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+                    <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">ind</span><span class="p">]</span> <span class="o">+</span> <span class="n">guard_assignment</span> <span class="o">+</span> <span class="n">sset</span><span class="p">[</span><span class="n">ind</span><span class="p">:]</span>
+                <span class="k">break</span>
+            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Piecewise</span><span class="p">):</span>
+                <span class="n">args</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">args</span>
+                <span class="k">for</span> <span class="n">expr</span><span class="p">,</span> <span class="n">cond</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+                    <span class="k">if</span> <span class="n">expr</span> <span class="o">==</span> <span class="n">ipred</span><span class="p">:</span>
+                        <span class="n">ipredadj</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">symbol</span>
+                        <span class="k">break</span>
+
+        <span class="k">if</span> <span class="n">has_blq_transformation</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+            <span class="n">_</span><span class="p">,</span> <span class="n">_</span><span class="p">,</span> <span class="n">f</span> <span class="o">=</span> <span class="n">_preparations</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+            <span class="n">ipred</span> <span class="o">=</span> <span class="n">_get_f_above_lloq</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">f</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">eps</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
         <span class="n">theta_name</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span>
@@ -1457,7 +1472,20 @@ document.write(`
         <span class="p">)</span>  <span class="c1"># To avoid getting F*EPS*F**THETA</span>
         <span class="k">if</span> <span class="n">alternative</span><span class="p">:</span>  <span class="c1"># To avoid getting W*EPS*F**THETA</span>
             <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span> <span class="n">alternative</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="p">)})</span>
-        <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="p">):</span> <span class="n">ipred</span> <span class="o">**</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">theta</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">*</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="p">)})</span>
+
+        <span class="k">if</span> <span class="n">ipredadj</span><span class="p">:</span>
+            <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span>
+                <span class="p">{</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="p">)</span> <span class="o">*</span> <span class="n">ipredadj</span><span class="p">:</span> <span class="n">ipredadj</span> <span class="o">**</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">theta</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">*</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="p">)}</span>
+            <span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="p">):</span> <span class="n">ipred</span> <span class="o">**</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">theta</span><span class="o">.</span><span class="n">name</span><span class="p">)</span> <span class="o">*</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="p">)})</span>
+
+        <span class="k">if</span> <span class="n">has_blq_transformation</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+            <span class="c1"># FIXME: make more general</span>
+            <span class="n">y_above_lloq</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">sd</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;SD&#39;</span><span class="p">)</span>
+            <span class="n">sd_new</span> <span class="o">=</span> <span class="n">get_sd_expr</span><span class="p">(</span><span class="n">y_above_lloq</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span> <span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pset</span><span class="p">))</span>
+            <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">sd</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">sd_new</span><span class="p">)</span>
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">parameters</span><span class="o">=</span><span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pset</span><span class="p">),</span> <span class="n">statements</span><span class="o">=</span><span class="n">sset</span><span class="p">)</span>
 

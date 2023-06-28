@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.statements &#8212; Pharmpy 0.96.0 documentation</title>
+    <title>pharmpy.model.statements &#8212; Pharmpy 0.97.0 documentation</title>
   
   
   
@@ -497,6 +497,13 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pharmpy.internals.immutable</span> <span class="kn">import</span> <span class="n">Immutable</span>
 
 
+<span class="k">def</span> <span class="nf">is_zero_matrix</span><span class="p">(</span><span class="n">A</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">A</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">e</span><span class="o">.</span><span class="n">is_zero</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
+    <span class="k">return</span> <span class="kc">True</span>
+
+
 <div class="viewcode-block" id="Statement"><a class="viewcode-back" href="../../../api/pharmpy.model.Statement.html#pharmpy.model.Statement">[docs]</a><span class="k">class</span> <span class="nc">Statement</span><span class="p">(</span><span class="n">Immutable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Abstract base class for all types of statements&quot;&quot;&quot;</span>
 
@@ -913,7 +920,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="to_compartmental_system"><a class="viewcode-back" href="../../../api/pharmpy.model.to_compartmental_system.html#pharmpy.model.to_compartmental_system">[docs]</a><span class="k">def</span> <span class="nf">to_compartmental_system</span><span class="p">(</span><span class="n">names</span><span class="p">,</span> <span class="n">eqs</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert an list of odes to a compartmenal system</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Convert an list of odes to a compartmental system</span>
 
 <span class="sd">    names : func to compartment name map</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -978,18 +985,19 @@ document.write(`
                                 <span class="n">neweqs</span><span class="p">[</span><span class="n">i</span><span class="p">]</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">neweq</span><span class="o">.</span><span class="n">lhs</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">expand</span><span class="p">(</span><span class="n">neweq</span><span class="o">.</span><span class="n">rhs</span> <span class="o">+</span> <span class="n">term</span><span class="p">))</span>
     <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="n">neweqs</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">eq</span><span class="o">.</span><span class="n">rhs</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">i</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-            <span class="n">o</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">i</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+            <span class="n">o</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
             <span class="k">for</span> <span class="n">term</span> <span class="ow">in</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Add</span><span class="o">.</span><span class="n">make_args</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">rhs</span><span class="p">):</span>
                 <span class="k">if</span> <span class="n">_is_positive</span><span class="p">(</span><span class="n">term</span><span class="p">):</span>
                     <span class="n">i</span> <span class="o">=</span> <span class="n">i</span> <span class="o">+</span> <span class="n">term</span>
                 <span class="k">else</span><span class="p">:</span>
                     <span class="n">o</span> <span class="o">=</span> <span class="n">o</span> <span class="o">+</span> <span class="n">term</span>
-
             <span class="n">comp_func</span> <span class="o">=</span> <span class="n">eq</span><span class="o">.</span><span class="n">lhs</span><span class="o">.</span><span class="n">args</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
             <span class="n">from_comp</span> <span class="o">=</span> <span class="n">compartments</span><span class="p">[</span><span class="n">names</span><span class="p">[</span><span class="n">comp_func</span><span class="o">.</span><span class="n">func</span><span class="p">]]</span>
-            <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">from_comp</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span> <span class="n">comp_func</span><span class="p">)</span>
-            <span class="n">cb</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">from_comp</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">o</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">from_comp</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="o">-</span><span class="n">o</span> <span class="o">/</span> <span class="n">comp_func</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                <span class="n">cb</span><span class="o">.</span><span class="n">set_input</span><span class="p">(</span><span class="n">from_comp</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
     <span class="n">cs</span> <span class="o">=</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">cs</span></div>
 
@@ -1688,16 +1696,24 @@ document.write(`
                 <span class="k">break</span>
 
         <span class="n">noutput</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_compartment_inflows</span><span class="p">(</span><span class="n">output</span><span class="p">))</span>
-        <span class="n">nrows</span> <span class="o">=</span> <span class="n">comp_height</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">noutput</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">have_zo_input</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="ow">not</span> <span class="n">is_zero_matrix</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zero_order_inputs</span><span class="p">))</span>
+        <span class="n">comp_nrows</span> <span class="o">=</span> <span class="n">comp_height</span> <span class="o">*</span> <span class="mi">2</span> <span class="o">-</span> <span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="mi">1</span> <span class="k">if</span> <span class="n">noutput</span> <span class="o">&gt;</span> <span class="mi">1</span> <span class="k">else</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">nrows</span> <span class="o">=</span> <span class="n">comp_nrows</span> <span class="o">+</span> <span class="n">have_zo_input</span>
         <span class="n">ncols</span> <span class="o">=</span> <span class="n">comp_width</span> <span class="o">*</span> <span class="mi">2</span>
         <span class="n">grid</span> <span class="o">=</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">)</span>
 
         <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartment</span>
         <span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">if</span> <span class="n">nrows</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">nrows</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
-            <span class="n">main_row</span> <span class="o">=</span> <span class="mi">0</span>
+        <span class="k">if</span> <span class="n">comp_nrows</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">comp_nrows</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
+            <span class="n">main_row</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">+</span> <span class="n">have_zo_input</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">main_row</span> <span class="o">=</span> <span class="mi">2</span>
+            <span class="n">main_row</span> <span class="o">=</span> <span class="mi">2</span> <span class="o">+</span> <span class="n">have_zo_input</span>
+
+        <span class="k">if</span> <span class="n">have_zo_input</span><span class="p">:</span>
+            <span class="c1"># Assuming a fully linear layout</span>
+            <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">zo</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">zero_order_inputs</span><span class="p">):</span>
+                <span class="k">if</span> <span class="n">zo</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+                    <span class="n">grid</span><span class="o">.</span><span class="n">set</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="n">i</span> <span class="o">*</span> <span class="mi">2</span><span class="p">,</span> <span class="n">unicode</span><span class="o">.</span><span class="n">VerticalArrow</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">zo</span><span class="p">)))</span>
 
         <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
             <span class="n">bidirects</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_bidirectionals</span><span class="p">(</span><span class="n">current</span><span class="p">)</span>

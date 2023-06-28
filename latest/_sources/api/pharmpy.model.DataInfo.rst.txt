@@ -25,6 +25,7 @@ DataInfo
    .. autosummary::
 
       ~DataInfo.create
+      ~DataInfo.from_dict
       ~DataInfo.from_json
       ~DataInfo.get_dtype_dict
       ~DataInfo.read_json
@@ -34,6 +35,7 @@ DataInfo
       ~DataInfo.set_id_column
       ~DataInfo.set_idv_column
       ~DataInfo.set_types
+      ~DataInfo.to_dict
       ~DataInfo.to_json
 
    .. rubric:: Attributes Documentation
@@ -51,6 +53,7 @@ DataInfo
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: from_dict
    .. automethod:: from_json
    .. automethod:: get_dtype_dict
    .. automethod:: read_json
@@ -60,4 +63,5 @@ DataInfo
    .. automethod:: set_id_column
    .. automethod:: set_idv_column
    .. automethod:: set_types
+   .. automethod:: to_dict
    .. automethod:: to_json

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.datainfo &#8212; Pharmpy 0.96.0 documentation</title>
+    <title>pharmpy.model.datainfo &#8212; Pharmpy 0.97.0 documentation</title>
   
   
   
@@ -761,7 +761,7 @@ document.write(`
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
             <span class="nb">type</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;type&#39;</span><span class="p">],</span>
-            <span class="n">unit</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">parse_expr</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]),</span>
+            <span class="n">unit</span><span class="o">=</span><span class="n">parse_units</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;unit&#39;</span><span class="p">]),</span>
             <span class="n">scale</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;scale&#39;</span><span class="p">],</span>
             <span class="n">continuous</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;continuous&#39;</span><span class="p">],</span>
             <span class="n">categories</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;categories&#39;</span><span class="p">],</span>
@@ -1351,6 +1351,14 @@ document.write(`
             <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span>
         <span class="p">}</span></div>
 
+<div class="viewcode-block" id="DataInfo.to_dict"><a class="viewcode-back" href="../../../api/pharmpy.model.DataInfo.html#pharmpy.model.DataInfo.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_to_dict</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span></div>
+
+<div class="viewcode-block" id="DataInfo.from_dict"><a class="viewcode-back" href="../../../api/pharmpy.model.DataInfo.html#pharmpy.model.DataInfo.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
+    <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">ColumnInfo</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;columns&#39;</span><span class="p">]]</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">],</span> <span class="n">separator</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;separator&#39;</span><span class="p">])</span></div>
+
     <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
         <span class="n">a</span> <span class="o">=</span> <span class="p">[]</span>
         <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">:</span>
@@ -1363,9 +1371,8 @@ document.write(`
                 <span class="s2">&quot;unit&quot;</span><span class="p">:</span> <span class="nb">str</span><span class="p">(</span><span class="n">col</span><span class="o">.</span><span class="n">unit</span><span class="p">),</span>
                 <span class="s2">&quot;datatype&quot;</span><span class="p">:</span> <span class="n">col</span><span class="o">.</span><span class="n">datatype</span><span class="p">,</span>
                 <span class="s2">&quot;drop&quot;</span><span class="p">:</span> <span class="n">col</span><span class="o">.</span><span class="n">drop</span><span class="p">,</span>
+                <span class="s2">&quot;descriptor&quot;</span><span class="p">:</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span><span class="p">,</span>
             <span class="p">}</span>
-            <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-                <span class="n">d</span><span class="p">[</span><span class="s2">&quot;descriptor&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span>
             <span class="n">a</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
 
         <span class="k">return</span> <span class="p">{</span>

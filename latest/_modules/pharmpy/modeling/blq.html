@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.blq &#8212; Pharmpy 0.96.0 documentation</title>
+    <title>pharmpy.modeling.blq &#8212; Pharmpy 0.97.0 documentation</title>
   
   
   
@@ -490,7 +490,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Assignment</span><span class="p">,</span> <span class="n">EstimationSteps</span><span class="p">,</span> <span class="n">JointNormalDistribution</span><span class="p">,</span> <span class="n">Model</span>
 
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">remove_loq_data</span>
-<span class="kn">from</span> <span class="nn">.expressions</span> <span class="kn">import</span> <span class="n">create_symbol</span><span class="p">,</span> <span class="n">simplify_expression</span>
+<span class="kn">from</span> <span class="nn">.expressions</span> <span class="kn">import</span> <span class="n">_simplify_expression_from_parameters</span><span class="p">,</span> <span class="n">create_symbol</span>
 
 <span class="n">SUPPORTED_METHODS</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">([</span><span class="s1">&#39;m1&#39;</span><span class="p">,</span> <span class="s1">&#39;m3&#39;</span><span class="p">,</span> <span class="s1">&#39;m4&#39;</span><span class="p">])</span>
 
@@ -664,12 +664,12 @@ document.write(`
 
 <span class="k">def</span> <span class="nf">_get_sd</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">y</span><span class="p">):</span>
     <span class="n">y_expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span><span class="o">.</span><span class="n">expression</span>
-    <span class="n">sd_expr</span> <span class="o">=</span> <span class="n">get_sd_expr</span><span class="p">(</span><span class="n">y_expr</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">)</span>
+    <span class="n">sd_expr</span> <span class="o">=</span> <span class="n">get_sd_expr</span><span class="p">(</span><span class="n">y_expr</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="p">)</span>
     <span class="n">symb_sd</span> <span class="o">=</span> <span class="n">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;SD&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symb_sd</span><span class="p">,</span> <span class="n">simplify_expression</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">sd_expr</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symb_sd</span><span class="p">,</span> <span class="n">sd_expr</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">get_sd_expr</span><span class="p">(</span><span class="n">y_expr</span><span class="p">,</span> <span class="n">rvs</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">get_sd_expr</span><span class="p">(</span><span class="n">y_expr</span><span class="p">,</span> <span class="n">rvs</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
     <span class="n">rv_terms</span> <span class="o">=</span> <span class="p">[</span><span class="n">arg</span> <span class="k">for</span> <span class="n">arg</span> <span class="ow">in</span> <span class="n">y_expr</span><span class="o">.</span><span class="n">args</span> <span class="k">if</span> <span class="n">arg</span><span class="o">.</span><span class="n">free_symbols</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">rvs</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">)]</span>
     <span class="n">sd_expr</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">term</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">rv_terms</span><span class="p">,</span> <span class="mi">1</span><span class="p">):</span>
@@ -682,7 +682,9 @@ document.write(`
         <span class="n">expr</span> <span class="o">=</span> <span class="n">rvs</span><span class="o">.</span><span class="n">replace_with_sympy_rvs</span><span class="p">(</span><span class="n">term</span><span class="p">)</span>
         <span class="n">sd_expr</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">stats</span><span class="o">.</span><span class="n">std</span><span class="p">(</span><span class="n">expr</span><span class="p">))</span>
 
-    <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">expr</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">sd_expr</span><span class="p">]))</span>
+    <span class="k">return</span> <span class="n">_simplify_expression_from_parameters</span><span class="p">(</span>
+        <span class="n">sympy</span><span class="o">.</span><span class="n">sqrt</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Add</span><span class="p">(</span><span class="o">*</span><span class="p">[</span><span class="n">expr</span><span class="o">**</span><span class="mi">2</span> <span class="k">for</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">sd_expr</span><span class="p">])),</span> <span class="n">params</span>
+    <span class="p">)</span>
 </pre></div>
 
                 </article>

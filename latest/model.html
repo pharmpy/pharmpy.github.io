@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>The Pharmpy model &#8212; Pharmpy 0.96.0 documentation</title>
+    <title>The Pharmpy model &#8212; Pharmpy 0.97.0 documentation</title>
   
   
   
@@ -52,7 +52,7 @@
     <link rel="index" title="Index" href="genindex.html" />
     <link rel="search" title="Search" href="search.html" />
     <link rel="next" title="Datasets in Pharmpy" href="data.html" />
-    <link rel="prev" title="User guide" href="user_guide.html" />
+    <link rel="prev" title="Modeling" href="modeling.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
   </head>
@@ -440,10 +440,6 @@ document.write(`
      aria-label="Section Navigation">
   <p class="bd-links__title" role="heading" aria-level="1">Section Navigation</p>
   <div class="bd-toc-item navbar-nav"><ul class="current nav bd-sidenav">
-<li class="toctree-l1 current active"><a class="current reference internal" href="#">The Pharmpy model</a></li>
-<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets in Pharmpy</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modeling.html">Modeling</a></li>
-<li class="toctree-l1"><a class="reference internal" href="modelfit.html">Reading modelfit results</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="tools.html">Tools</a><input class="toctree-checkbox" id="toctree-checkbox-1" name="toctree-checkbox-1" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-1"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="amd.html">AMD - automatic model development</a></li>
 <li class="toctree-l2"><a class="reference internal" href="modelsearch.html">Modelsearch - search for best structural model for a PK model</a></li>
@@ -455,10 +451,13 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="estmethod.html">estmethod - compare estimation methods and/or solvers</a></li>
 </ul>
 </li>
-<li class="toctree-l1"><a class="reference internal" href="nonmem_plugin.html">Using the NONMEM plugin</a></li>
-<li class="toctree-l1"><a class="reference internal" href="cli.html">The Pharmpy command line interface</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modelfit.html">Model estimation and results</a></li>
+<li class="toctree-l1"><a class="reference internal" href="modeling.html">Modeling</a></li>
+<li class="toctree-l1 current active"><a class="current reference internal" href="#">The Pharmpy model</a></li>
+<li class="toctree-l1"><a class="reference internal" href="data.html">Datasets in Pharmpy</a></li>
 <li class="toctree-l1"><a class="reference internal" href="configuration.html">Configuration</a></li>
 <li class="toctree-l1"><a class="reference internal" href="using_r.html">Pharmpy in R</a></li>
+<li class="toctree-l1"><a class="reference internal" href="cli.html">The Pharmpy command line interface</a></li>
 <li class="toctree-l1 has-children"><a class="reference internal" href="psn_tools.html">PsN with Pharmpy</a><input class="toctree-checkbox" id="toctree-checkbox-2" name="toctree-checkbox-2" type="checkbox"/><label class="toctree-toggle" for="toctree-checkbox-2"><i class="fa-solid fa-chevron-down"></i></label><ul>
 <li class="toctree-l2"><a class="reference internal" href="bootstrap.html">Bootstrap</a></li>
 <li class="toctree-l2"><a class="reference internal" href="cdd.html">Case deletion diagnostics</a></li>
@@ -530,10 +529,23 @@ document.write(`
                   
   <section id="the-pharmpy-model">
 <span id="model"></span><h1>The Pharmpy model<a class="headerlink" href="#the-pharmpy-model" title="Permalink to this heading">#</a></h1>
-<p>At the heart of Pharmpy lies its non-linear mixed effects model abstraction. A model needs to follow the interface of the base model class <a class="reference internal" href="api/pharmpy.model.Model.html#pharmpy.model.Model" title="pharmpy.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.Model</span></code></a>. This means that any model format can in theory be supported by Pharmpy via subclasses that implement the same base interface. This makes any operation performed on a model be the same regardless of the underlying implementation of the model and it is one of the core design principles of Pharmpy.</p>
+<p>At the heart of Pharmpy lies its non-linear mixed effects model abstraction. A model needs to follow the interface of
+the base model class <a class="reference internal" href="api/pharmpy.model.Model.html#pharmpy.model.Model" title="pharmpy.model.Model"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.Model</span></code></a>. This means that any model format can in theory be supported by
+Pharmpy via subclasses that implement the same base interface. This makes any operation performed on a model be the
+same regardless of the underlying implementation of the model and it is one of the core design principles of Pharmpy.
+This allows the functions in <a class="reference internal" href="api_modeling.html#module-pharmpy.modeling" title="pharmpy.modeling"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pharmpy.modeling</span></code></a> and tools in <a class="reference internal" href="api_tools.html#module-pharmpy.tools" title="pharmpy.tools"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pharmpy.tools</span></code></a> to be independent
+on the estimation software: it is only when writing and fitting a model that the implementation is estimation software
+specific.</p>
+<div class="admonition warning">
+<p class="admonition-title">Warning</p>
+<p>This section is intended to give an overview of the Pharmpy model and its different components. For higher level
+manipulations, please check out the functions in <a class="reference internal" href="api_modeling.html#module-pharmpy.modeling" title="pharmpy.modeling"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pharmpy.modeling</span></code></a>, which are described in further detail
+in <a class="reference internal" href="modeling.html#modeling"><span class="std std-ref">the modeling user guide</span></a></p>
+</div>
 <section id="reading-in-a-model">
 <h2>Reading in a model<a class="headerlink" href="#reading-in-a-model" title="Permalink to this heading">#</a></h2>
-<p>Reading a model from a model specification file into a Pharmy model object can be done by using the <a class="reference internal" href="api/pharmpy.modeling.read_model.html#pharmpy.modeling.read_model" title="pharmpy.modeling.read_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">read_model</span></code></a> function.</p>
+<p>Reading a model from a model specification file into a Pharmpy model object can be done by using the
+<a class="reference internal" href="api/pharmpy.modeling.read_model.html#pharmpy.modeling.read_model" title="pharmpy.modeling.read_model"><code class="xref py py-func docutils literal notranslate"><span class="pre">pharmpy.modeling.read_model()</span></code></a> function.</p>
 <div class="pharmpy-snippet docutils container">
 <div class="jupyter_cell docutils container">
 <div class="cell_output docutils container">
@@ -556,17 +568,48 @@ document.write(`
 </div>
 </div>
 </div>
-<p>Internally this will trigger a model type detection to select which model implementation to use, i.e. if it is an NM-TRAN control stream the Pharmpy NONMEM model class will be selected transparent to the user.</p>
+<p>Internally this will trigger a model type detection to select which model implementation to use, i.e. if it is an
+NM-TRAN control stream the Pharmpy NONMEM model subclass will be selected.</p>
 </section>
-<section id="model-name">
-<h2>Model name<a class="headerlink" href="#model-name" title="Permalink to this heading">#</a></h2>
-<p>A model has a name property that can be read or changed. After reading a model from a file the name is set to the filename without extension.</p>
-<div class="pharmpy-snippet with-output docutils container">
+<section id="writing-a-model">
+<span id="model-write"></span><h2>Writing a model<a class="headerlink" href="#writing-a-model" title="Permalink to this heading">#</a></h2>
+<p>A model object can be written to a file using its source format. By default the model file will be created in the
+current working directory using the name of the model.</p>
+<div class="pharmpy-snippet docutils container">
 <div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-1-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-1-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-1-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-1-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-1-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-1-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">name</span>
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-1-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-1-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-1-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-1-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-1-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-1-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">write_model</span>
+<span class="n">write_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 </pre></div>
 </div>
-</div><div aria-labelledby="tab-1-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-1-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">$</span><span class="n">name</span>
+</div><div aria-labelledby="tab-1-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-1-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">write_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></div>
+</div>
+<p>Optionally a path can be specified:</p>
+<div class="pharmpy-snippet docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-2-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-2-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-2-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-2-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-2-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-2-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">write_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;/home/user/mymodel.mod&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-2-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-2-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">write_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="o">=</span><span class="s">&#39;/home/user/mymodel.mod&#39;</span><span class="p">)</span>
+</pre></div>
+</div>
+</div></div>
+</div>
+</section>
+<section id="inspecting-the-model-attributes">
+<h2>Inspecting the model attributes<a class="headerlink" href="#inspecting-the-model-attributes" title="Permalink to this heading">#</a></h2>
+<section id="name-and-description">
+<h3>Name and description<a class="headerlink" href="#name-and-description" title="Permalink to this heading">#</a></h3>
+<p>A model has a name property that can be read or changed. After reading a model from a file the name is set to the
+filename without extension.</p>
+<div class="pharmpy-snippet with-output docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-3-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-3-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-3-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-3-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-3-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-3-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">name</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-3-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-3-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">$</span><span class="n">name</span>
 </pre></div>
 </div>
 </div></div>
@@ -579,142 +622,22 @@ document.write(`
 </div>
 </div>
 </section>
-<section id="writing-a-model">
-<span id="model-write"></span><h2>Writing a model<a class="headerlink" href="#writing-a-model" title="Permalink to this heading">#</a></h2>
-<p>A model object can be written to a file using its source format. By default the model file will be created in the current working directory using the name of the model.</p>
-<div class="pharmpy-snippet docutils container">
-<div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-2-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-2-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-2-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-2-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-2-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-2-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">write_model</span>
-<span class="n">write_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-</pre></div>
-</div>
-</div><div aria-labelledby="tab-2-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-2-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">write_model</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-</pre></div>
-</div>
-</div></div>
-</div>
-<p>Optionally a path can be specified:</p>
-<div class="pharmpy-snippet docutils container">
-<div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-3-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-3-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-3-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-3-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-3-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-3-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">write_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="s1">&#39;/home/user/mymodel.mod&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div><div aria-labelledby="tab-3-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-3-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">write_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span><span class="w"> </span><span class="n">path</span><span class="o">=</span><span class="s">&#39;/home/user/mymodel.mod&#39;</span><span class="p">)</span>
-</pre></div>
-</div>
-</div></div>
-</div>
-</section>
-<section id="getting-the-model-code">
-<h2>Getting the model code<a class="headerlink" href="#getting-the-model-code" title="Permalink to this heading">#</a></h2>
-<p>The model code can be inspected using <a class="reference internal" href="api/pharmpy.modeling.print_model_code.html#pharmpy.modeling.print_model_code" title="pharmpy.modeling.print_model_code"><code class="xref py py-func docutils literal notranslate"><span class="pre">print_model_code</span></code></a> or retrieved using <code class="xref py py-func docutils literal notranslate"><span class="pre">generate_model_code</span></code>.</p>
+<section id="parameters">
+<h3>Parameters<a class="headerlink" href="#parameters" title="Permalink to this heading">#</a></h3>
+<p>Model parameters are scalar values that are used in the mathematical definition of the model and are estimated when a
+model is fit from data. The parameters of a model are thus optimization parameters and can in turn be used as
+parameters in statistical distributions or as structural parameters. A parameter is represented by using the
+<a class="reference internal" href="api/pharmpy.model.Parameter.html#pharmpy.model.Parameter" title="pharmpy.model.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.Parameter</span></code></a> class.</p>
+<p>It is often convenient to work with a set of parameters at the same time, for example all parameters of a model.
+In Pharmpy multiple parameters are organized using the <a class="reference internal" href="api/pharmpy.model.Parameters.html#pharmpy.model.Parameters" title="pharmpy.model.Parameters"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.Parameters</span></code></a> class as an ordered set of
+<a class="reference internal" href="api/pharmpy.model.Parameter.html#pharmpy.model.Parameter" title="pharmpy.model.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.Parameter</span></code></a>. All parameters of a model can be accessed by using the parameters attribute:</p>
 <div class="pharmpy-snippet with-output docutils container">
 <div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-4-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-4-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-4-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-4-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-4-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-4-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">print_model_code</span>
-
-<span class="n">print_model_code</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-</pre></div>
-</div>
-</div><div aria-labelledby="tab-4-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-4-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">print_model_code</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-</pre></div>
-</div>
-</div></div>
-<div class="jupyter_cell docutils container">
-<div class="cell_output docutils container">
-<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>$PROBLEM PHENOBARB SIMPLE MODEL
-$DATA &#39;pheno.dta&#39; IGNORE=@
-$INPUT ID TIME AMT WGT APGR DV FA1 FA2
-$SUBROUTINE ADVAN1 TRANS2
-
-$PK
-IF(AMT.GT.0) BTIME=TIME
-TAD=TIME-BTIME
-TVCL=THETA(1)*WGT
-TVV=THETA(2)*WGT
-IF(APGR.LT.5) TVV=TVV*(1+THETA(3))
-CL=TVCL*EXP(ETA(1))
-V=TVV*EXP(ETA(2))
-S1=V
-
-$ERROR
-W=F
-Y=F+W*EPS(1)
-IPRED=F
-IRES=DV-IPRED
-IWRES=IRES/W
-
-$THETA (0,0.00469307) ; PTVCL
-$THETA (0,1.00916) ; PTVV
-$THETA (-.99,.1)
-$OMEGA DIAGONAL(2)
- 0.0309626  ;       IVCL
- 0.031128  ;        IVV
-
-$SIGMA 0.013241
-$ESTIMATION METHOD=1 INTERACTION
-$COVARIANCE UNCONDITIONAL
-$TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
-       NOPRINT ONEHEADER FILE=sdtab1
-
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section id="model-parameters">
-<h2>Model parameters<a class="headerlink" href="#model-parameters" title="Permalink to this heading">#</a></h2>
-<p>Model parameters are scalar values that are used in the mathematical definition of the model and are estimated when a model is fit from data. The parameters of a model are thus optimization parameters and can in turn be used as parameters in statistical distributions or as structural parameters. A parameter is represented by using the <code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.Parameter</span></code> class.</p>
-<div class="pharmpy-snippet with-output docutils container">
-<div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-5-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-5-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-5-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-5-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-5-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-5-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Parameter</span>
-
-<span class="n">par</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;THETA_1&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">fix</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
-<span class="n">par</span>
-</pre></div>
-</div>
-</div><div aria-labelledby="tab-5-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-5-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">par</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">Parameter</span><span class="p">(</span><span class="s">&#39;THETA_1&#39;</span><span class="p">,</span><span class="w"> </span><span class="m">0.1</span><span class="p">,</span><span class="w"> </span><span class="n">upper</span><span class="o">=</span><span class="m">2</span><span class="p">,</span><span class="w"> </span><span class="n">fix</span><span class="o">=</span><span class="kc">FALSE</span><span class="p">)</span>
-<span class="n">par</span>
-</pre></div>
-</div>
-</div></div>
-<div class="jupyter_cell docutils container">
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>Parameter(&quot;THETA_1&quot;, 0.1, lower=-∞, upper=2, fix=False)
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<p>A model parameter must have a name and an inital value and can optionally be constrained to a lower and or upper bound. A parameter can also be fixed meaning that it will be set to its initial value. The parameter attributes can be read out via properties.</p>
-<div class="pharmpy-snippet with-output docutils container">
-<div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-6-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-6-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-6-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-6-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-6-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-6-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">par</span><span class="o">.</span><span class="n">lower</span>
-</pre></div>
-</div>
-</div><div aria-labelledby="tab-6-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-6-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">par</span><span class="o">$</span><span class="n">lower</span>
-</pre></div>
-</div>
-</div></div>
-<div class="jupyter_cell docutils container">
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>-inf
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-</section>
-<section id="parameter-sets">
-<h2>Parameter sets<a class="headerlink" href="#parameter-sets" title="Permalink to this heading">#</a></h2>
-<p>It is often convenient to work with a set of parameters at the same time, for example all parameters of a model. In Pharmpy multiple parameters are organized using the <code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.Parameters</span></code> class as an ordered set of <code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.Parameter</span></code>. All parameters of a model can be accessed by using the parameters attribute:</p>
-<div class="pharmpy-snippet with-output docutils container">
-<div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-7-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-7-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-7-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-7-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-7-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-7-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">parset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-4-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-4-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-4-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-4-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-4-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-4-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">parset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span>
 <span class="n">parset</span>
 </pre></div>
 </div>
-</div><div aria-labelledby="tab-7-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-7-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">parset</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">model</span><span class="o">$</span><span class="n">parameters</span>
+</div><div aria-labelledby="tab-4-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-4-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">parset</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">model</span><span class="o">$</span><span class="n">parameters</span>
 <span class="n">parset</span>
 </pre></div>
 </div>
@@ -778,32 +701,14 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 </table></div></div>
 </div>
 </div>
-<p>Each parameter can be retrieved using indexing</p>
+<p>Operations on multiple parameters are made easier using methods or properties on parameter sets. For example, to get
+all initial estimates as a dictionary:</p>
 <div class="pharmpy-snippet with-output docutils container">
 <div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-8-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-8-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-8-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-8-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-8-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-8-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">parset</span><span class="p">[</span><span class="s1">&#39;PTVCL&#39;</span><span class="p">]</span>
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-5-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-5-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-5-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-5-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-5-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-5-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">parset</span><span class="o">.</span><span class="n">inits</span>
 </pre></div>
 </div>
-</div><div aria-labelledby="tab-8-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-8-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">parset</span><span class="p">[</span><span class="s">&#39;PTVCL&#39;</span><span class="p">]</span>
-</pre></div>
-</div>
-</div></div>
-<div class="jupyter_cell docutils container">
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>Parameter(&quot;PTVCL&quot;, 0.00469307, lower=0.0, upper=1000000.0, fix=False)
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<p>Operations on multiple parameters are made easier using methods or properties on parameter sets. For example:</p>
-<p>Get all initial estimates as a dictionary:</p>
-<div class="pharmpy-snippet with-output docutils container">
-<div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-9-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-9-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-9-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-9-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-9-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-9-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">parset</span><span class="o">.</span><span class="n">inits</span>
-</pre></div>
-</div>
-</div><div aria-labelledby="tab-9-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-9-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">parset</span><span class="o">$</span><span class="n">inits</span>
+</div><div aria-labelledby="tab-5-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-5-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">parset</span><span class="o">$</span><span class="n">inits</span>
 </pre></div>
 </div>
 </div></div>
@@ -820,17 +725,55 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 </div>
 </div>
 </div>
-</section>
-<section id="random-variables">
-<h2>Random variables<a class="headerlink" href="#random-variables" title="Permalink to this heading">#</a></h2>
-<p>The random variables of a model are available through the <code class="docutils literal notranslate"><span class="pre">random_variables</span></code> property:</p>
+<p>Each parameter can be retrieved using indexing:</p>
 <div class="pharmpy-snippet with-output docutils container">
 <div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-10-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-10-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-10-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-10-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-10-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-10-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-6-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-6-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-6-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-6-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-6-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-6-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">par</span> <span class="o">=</span> <span class="n">parset</span><span class="p">[</span><span class="s1">&#39;PTVCL&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-6-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-6-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">par</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">parset</span><span class="p">[</span><span class="s">&#39;PTVCL&#39;</span><span class="p">]</span>
+</pre></div>
+</div>
+</div></div>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+</div>
+</div>
+</div>
+<p>A model parameter must have a name and an initial value and can optionally be constrained to a lower and or upper bound.
+A parameter can also be fixed meaning that it will be set to its initial value. The parameter attributes can be read
+out via properties.</p>
+<div class="pharmpy-snippet with-output docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-7-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-7-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-7-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-7-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-7-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-7-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">par</span><span class="o">.</span><span class="n">lower</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-7-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-7-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">par</span><span class="o">$</span><span class="n">lower</span>
+</pre></div>
+</div>
+</div></div>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>0.0
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="random-variables">
+<h3>Random variables<a class="headerlink" href="#random-variables" title="Permalink to this heading">#</a></h3>
+<p>The random variables of a model are available through the <code class="docutils literal notranslate"><span class="pre">random_variables</span></code> property and are organized using the
+<a class="reference internal" href="api/pharmpy.model.RandomVariables.html#pharmpy.model.RandomVariables" title="pharmpy.model.RandomVariables"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.RandomVariables</span></code></a> which is an ordered set of distributions of either
+<a class="reference internal" href="api/pharmpy.model.NormalDistribution.html#pharmpy.model.NormalDistribution" title="pharmpy.model.NormalDistribution"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.NormalDistribution</span></code></a> or <a class="reference internal" href="api/pharmpy.model.JointNormalDistribution.html#pharmpy.model.JointNormalDistribution" title="pharmpy.model.JointNormalDistribution"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.JointNormalDistribution</span></code></a> class. All random
+variables of a model can be accessed by using the random variables attribute:</p>
+<div class="pharmpy-snippet with-output docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-8-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-8-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-8-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-8-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-8-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-8-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span>
 <span class="n">rvs</span>
 </pre></div>
 </div>
-</div><div aria-labelledby="tab-10-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-10-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">rvs</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">model</span><span class="o">$</span><span class="n">random_variables</span>
+</div><div aria-labelledby="tab-8-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-8-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">rvs</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">model</span><span class="o">$</span><span class="n">random_variables</span>
 <span class="n">rvs</span>
 </pre></div>
 </div>
@@ -843,24 +786,257 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 </div>
 </div>
 </div>
-<div class="pharmpy-snippet docutils container">
+<p>The set of random variables can be split into subsets of random variables, for example IIVs:</p>
+<div class="pharmpy-snippet with-output docutils container">
 <div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-11-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-11-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-11-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-11-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-11-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-11-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">eta1</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="s1">&#39;ETA_1&#39;</span><span class="p">]</span>
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-9-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-9-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-9-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-9-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-9-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-9-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">rvs</span><span class="o">.</span><span class="n">iiv</span>
 </pre></div>
 </div>
-</div><div aria-labelledby="tab-11-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-11-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">eta1</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rvs</span><span class="p">[</span><span class="s">&#39;ETA_1&#39;</span><span class="p">]</span>
+</div><div aria-labelledby="tab-9-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-9-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">rvs</span><span class="o">$</span><span class="n">iiv</span>
 </pre></div>
 </div>
 </div></div>
 <div class="jupyter_cell docutils container">
 <div class="cell_output docutils container">
+<div class="output text_latex math notranslate nohighlight">
+\[\begin{split}\begin{align*}
+\displaystyle \eta_{1} &amp; \sim  \mathcal{N} \left(\displaystyle 0,\displaystyle IVCL\right) \\ \displaystyle \eta_{2} &amp; \sim  \mathcal{N} \left(\displaystyle 0,\displaystyle IVV\right)\end{align*}\end{split}\]</div>
 </div>
 </div>
 </div>
-<p>Joint distributions are also supported</p>
+<p>A distribution can be extracted using the name of one of the etas:</p>
 <div class="pharmpy-snippet with-output docutils container">
 <div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-12-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-12-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-12-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-12-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-12-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-12-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.tools</span> <span class="kn">import</span> <span class="n">read_modelfit_results</span>
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-10-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-10-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-10-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-10-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-10-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-10-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">dist</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="s1">&#39;ETA_1&#39;</span><span class="p">]</span>
+<span class="n">dist</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-10-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-10-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">dist</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rvs</span><span class="p">[</span><span class="s">&#39;ETA_1&#39;</span><span class="p">]</span>
+<span class="n">dist</span>
+</pre></div>
+</div>
+</div></div>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_latex math notranslate nohighlight">
+\[\displaystyle \eta_{1}\sim  \mathcal{N} \left(\displaystyle 0,\displaystyle IVCL\right)\]</div>
+</div>
+</div>
+</div>
+<p>Similarly to parameters, we can extract different attributes from the distribution:</p>
+<div class="pharmpy-snippet with-output docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-11-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-11-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-11-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-11-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-11-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-11-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">dist</span><span class="o">.</span><span class="n">names</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-11-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-11-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">dist</span><span class="o">$</span><span class="n">names</span>
+</pre></div>
+</div>
+</div></div>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>(&#39;ETA_1&#39;,)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="statements">
+<h3>Statements<a class="headerlink" href="#statements" title="Permalink to this heading">#</a></h3>
+<p>The model statements represent the mathematical description of the model. All statements can be retrieved via the
+statements property as a <a class="reference internal" href="api/pharmpy.model.Statements.html#pharmpy.model.Statements" title="pharmpy.model.Statements"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.Statements</span></code></a> object, which is a list of model statements of either the
+class <a class="reference internal" href="api/pharmpy.model.Assignment.html#pharmpy.model.Assignment" title="pharmpy.model.Assignment"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.Assignment</span></code></a> or <a class="reference internal" href="api/pharmpy.model.ODESystem.html#pharmpy.model.ODESystem" title="pharmpy.model.ODESystem"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.ODESystem</span></code></a>.</p>
+<div class="pharmpy-snippet with-output docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-12-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-12-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-12-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-12-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-12-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-12-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+<span class="n">statements</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-12-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-12-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">model</span><span class="o">$</span><span class="n">statements</span>
+<span class="n">statements</span>
+</pre></div>
+</div>
+</div></div>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_html">\begin{align*}BTIME &= \begin{cases} TIME & \text{for}\: AMT > 0 \\0 & \text{otherwise} \end{cases}\\TAD &= - BTIME + TIME\\TVCL &= PTVCL \cdot WGT\\TVV &= PTVV \cdot WGT\\TVV &= \begin{cases} TVV \cdot \left(\theta_{3} + 1\right) & \text{for}\: APGR < 5 \\TVV & \text{otherwise} \end{cases}\\CL &= TVCL \cdot e^{\eta_{1}}\\V &= TVV \cdot e^{\eta_{2}}\\S_{1} &= V\\\end{align*}<pre>Bolus(AMT, admid=1)
+┌───────┐       
+│CENTRAL│──CL/V→
+└───────┘</pre>\begin{align*}F &= \frac{A_{CENTRAL}}{S_{1}}\\W &= F\\Y &= EPS_{1} \cdot W + F\\IPRED &= F\\IRES &= DV - IPRED\\IWRES &= \frac{IRES}{W}\\\end{align*}</div></div>
+</div>
+</div>
+<p>Changing the statements of a model can be done by setting the statements property. This way of manipulating a model is
+quite low level and flexible but cumbersome. For higher level model manipulation use the <a class="reference internal" href="api_modeling.html#module-pharmpy.modeling" title="pharmpy.modeling"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pharmpy.modeling</span></code></a>
+module.</p>
+<p>If the model has a system of ordinary differential equations this will be part of the statements. It can easily be
+retrieved from the statement object</p>
+<div class="pharmpy-snippet with-output docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-13-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-13-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-13-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-13-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-13-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-13-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-13-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-13-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span><span class="o">$</span><span class="n">ode_system</span>
+</pre></div>
+</div>
+</div></div>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_html"><pre>Bolus(AMT, admid=1)
+┌───────┐       
+│CENTRAL│──CL/V→
+└───────┘</pre></div></div>
+</div>
+</div>
+<p>Get the amounts vector:</p>
+<div class="pharmpy-snippet with-output docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-14-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-14-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-14-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-14-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-14-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-14-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">amounts</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-14-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-14-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span><span class="o">$</span><span class="n">ode_system</span><span class="o">$</span><span class="n">amounts</span>
+</pre></div>
+</div>
+</div></div>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_latex math notranslate nohighlight">
+\[\displaystyle \left[\begin{matrix}A_{CENTRAL}\end{matrix}\right]\]</div>
+</div>
+</div>
+</div>
+<p>Get the compartmental matrix:</p>
+<div class="pharmpy-snippet with-output docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-15-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-15-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-15-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-15-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-15-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-15-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">compartmental_matrix</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-15-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-15-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span><span class="o">$</span><span class="n">ode_system</span><span class="o">$</span><span class="n">compartmental_matrix</span>
+</pre></div>
+</div>
+</div></div>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_latex math notranslate nohighlight">
+\[\displaystyle \left[\begin{matrix}- \frac{CL}{V}\end{matrix}\right]\]</div>
+</div>
+</div>
+</div>
+</section>
+<section id="dataset-and-datainfo">
+<h3>Dataset and datainfo<a class="headerlink" href="#dataset-and-datainfo" title="Permalink to this heading">#</a></h3>
+<p>See <a class="reference internal" href="data.html#dataset"><span class="std std-ref">Datasets in Pharmpy</span></a>.</p>
+</section>
+<section id="estimation-steps">
+<h3>Estimation steps<a class="headerlink" href="#estimation-steps" title="Permalink to this heading">#</a></h3>
+<p>The <a class="reference internal" href="api/pharmpy.model.EstimationSteps.html#pharmpy.model.EstimationSteps" title="pharmpy.model.EstimationSteps"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.EstimationSteps</span></code></a> object contains information on how to estimate the model.</p>
+<div class="pharmpy-snippet with-output docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-16-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-16-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-16-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-16-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-16-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-16-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">ests</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
+<span class="n">ests</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-16-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-16-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">ests</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">model</span><span class="o">$</span><span class="n">estimation_steps</span>
+<span class="n">ests</span>
+</pre></div>
+</div>
+</div></div>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_html"><table border="1" class="dataframe">
+  <thead>
+    <tr style="text-align: right;">
+      <th></th>
+      <th>method</th>
+      <th>interaction</th>
+      <th>cov</th>
+      <th>evaluation</th>
+      <th>maximum_evaluations</th>
+      <th>laplace</th>
+      <th>isample</th>
+      <th>niter</th>
+      <th>auto</th>
+      <th>keep_every_nth_iter</th>
+      <th>tool_options</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <th>0</th>
+      <td>FOCE</td>
+      <td>True</td>
+      <td>True</td>
+      <td>False</td>
+      <td>None</td>
+      <td>False</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>None</td>
+      <td>{}</td>
+    </tr>
+  </tbody>
+</table></div></div>
+</div>
+</div>
+</section>
+<section id="dependent-variables">
+<h3>Dependent variables<a class="headerlink" href="#dependent-variables" title="Permalink to this heading">#</a></h3>
+<p>A model can describe one or more dependent variables (output variables). Each dependent variable is defined in the
+<code class="docutils literal notranslate"><span class="pre">dependent_variables</span></code> attribute. This is a dictionary of each dependent variable symbol to the corresponding <code class="docutils literal notranslate"><span class="pre">DVID</span></code>.
+If there is only one dependent variable the <code class="docutils literal notranslate"><span class="pre">DVID</span></code> column in the dataset is not needed and its value in this
+definition is unimportant. The expressions of the dependent variables are all found in the statements.</p>
+<div class="pharmpy-snippet with-output docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-17-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-17-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-17-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-17-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-17-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-17-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-17-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-17-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">$</span><span class="n">dependent_variables</span>
+</pre></div>
+</div>
+</div></div>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>{Y: 1}
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+</section>
+<section id="low-level-manipulations-of-the-model-object">
+<h2>Low level manipulations of the model object<a class="headerlink" href="#low-level-manipulations-of-the-model-object" title="Permalink to this heading">#</a></h2>
+<section id="creating-and-adding-parameters">
+<h3>Creating and adding parameters<a class="headerlink" href="#creating-and-adding-parameters" title="Permalink to this heading">#</a></h3>
+<p>It is possible to create a parameter of the <a class="reference internal" href="api/pharmpy.model.Parameter.html#pharmpy.model.Parameter" title="pharmpy.model.Parameter"><code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.model.Parameter</span></code></a> class.</p>
+<div class="pharmpy-snippet with-output docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-18-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-18-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-18-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-18-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-18-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-18-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Parameter</span>
+
+<span class="n">par</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;THETA_1&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">,</span> <span class="n">upper</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">fix</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+<span class="n">par</span>
+</pre></div>
+</div>
+</div><div aria-labelledby="tab-18-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-18-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">par</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">Parameter</span><span class="p">(</span><span class="s">&#39;THETA_1&#39;</span><span class="p">,</span><span class="w"> </span><span class="m">0.1</span><span class="p">,</span><span class="w"> </span><span class="n">upper</span><span class="o">=</span><span class="m">2</span><span class="p">,</span><span class="w"> </span><span class="n">fix</span><span class="o">=</span><span class="kc">FALSE</span><span class="p">)</span>
+<span class="n">par</span>
+</pre></div>
+</div>
+</div></div>
+<div class="jupyter_cell docutils container">
+<div class="cell_output docutils container">
+<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>Parameter(&quot;THETA_1&quot;, 0.1, lower=-∞, upper=2, fix=False)
+</pre></div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section id="substituting-symbolic-random-variable-distribution-with-numeric">
+<h3>Substituting symbolic random variable distribution with numeric<a class="headerlink" href="#substituting-symbolic-random-variable-distribution-with-numeric" title="Permalink to this heading">#</a></h3>
+<div class="pharmpy-snippet with-output docutils container">
+<div class="sphinx-tabs docutils container">
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-19-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-19-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-19-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-19-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-19-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-19-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">from</span> <span class="nn">pharmpy.tools</span> <span class="kn">import</span> <span class="n">read_modelfit_results</span>
 
 <span class="n">frem_path</span> <span class="o">=</span> <span class="n">path</span> <span class="o">/</span> <span class="s2">&quot;frem&quot;</span> <span class="o">/</span> <span class="s2">&quot;pheno&quot;</span> <span class="o">/</span> <span class="s2">&quot;model_4.mod&quot;</span>
 <span class="n">frem_model</span> <span class="o">=</span> <span class="n">read_model</span><span class="p">(</span><span class="n">frem_path</span><span class="p">)</span>
@@ -870,7 +1046,7 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 <span class="n">rvs</span>
 </pre></div>
 </div>
-</div><div aria-labelledby="tab-12-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-12-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">frem_path</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;frem&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;pheno&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;model_4.mod&quot;</span>
+</div><div aria-labelledby="tab-19-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-19-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">frem_path</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">path</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;frem&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;pheno&quot;</span><span class="w"> </span><span class="o">/</span><span class="w"> </span><span class="s">&quot;model_4.mod&quot;</span>
 <span class="n">frem_model</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">read_model</span><span class="p">(</span><span class="n">frem_path</span><span class="p">)</span>
 <span class="n">frem_model_results</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="nf">read_modelfit_results</span><span class="p">(</span><span class="n">frem_path</span><span class="p">)</span>
 
@@ -887,13 +1063,14 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 </div>
 </div>
 </div>
+<p>Starting by extracting the variance:</p>
 <div class="pharmpy-snippet with-output docutils container">
 <div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-13-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-13-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-13-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-13-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-13-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-13-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">omega</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="s1">&#39;ETA_1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">variance</span>
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-20-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-20-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-20-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-20-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-20-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-20-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">omega</span> <span class="o">=</span> <span class="n">rvs</span><span class="p">[</span><span class="s1">&#39;ETA_1&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">variance</span>
 <span class="n">omega</span>
 </pre></div>
 </div>
-</div><div aria-labelledby="tab-13-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-13-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">omega</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rvs</span><span class="p">[</span><span class="s">&#39;ETA_1&#39;</span><span class="p">]</span><span class="n">.variance</span>
+</div><div aria-labelledby="tab-20-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-20-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">omega</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">rvs</span><span class="p">[</span><span class="s">&#39;ETA_1&#39;</span><span class="p">]</span><span class="n">.variance</span>
 <span class="n">omega</span>
 </pre></div>
 </div>
@@ -908,10 +1085,10 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 <p>Substitution of numerical values can be done directly from initial values</p>
 <div class="pharmpy-snippet with-output docutils container">
 <div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-14-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-14-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-14-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-14-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-14-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-14-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">omega</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">frem_model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span>
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-21-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-21-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-21-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-21-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-21-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-21-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">omega</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">frem_model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span>
 </pre></div>
 </div>
-</div><div aria-labelledby="tab-14-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-14-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">omega</span><span class="o">$</span><span class="nf">subs</span><span class="p">(</span><span class="n">frem_model</span><span class="o">$</span><span class="n">parameters</span><span class="o">$</span><span class="n">inits</span><span class="p">)</span>
+</div><div aria-labelledby="tab-21-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-21-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">omega</span><span class="o">$</span><span class="nf">subs</span><span class="p">(</span><span class="n">frem_model</span><span class="o">$</span><span class="n">parameters</span><span class="o">$</span><span class="n">inits</span><span class="p">)</span>
 </pre></div>
 </div>
 </div></div>
@@ -925,11 +1102,11 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 <p>or from estimated values</p>
 <div class="pharmpy-snippet with-output docutils container">
 <div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-15-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-15-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-15-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-15-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-15-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-15-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">omega_est</span> <span class="o">=</span> <span class="n">omega</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">frem_model_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="p">))</span>
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-22-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-22-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-22-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-22-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-22-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-22-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">omega_est</span> <span class="o">=</span> <span class="n">omega</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="nb">dict</span><span class="p">(</span><span class="n">frem_model_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="p">))</span>
 <span class="n">omega_est</span>
 </pre></div>
 </div>
-</div><div aria-labelledby="tab-15-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-15-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">omega_est</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">omega</span><span class="o">$</span><span class="nf">subs</span><span class="p">(</span><span class="nf">list</span><span class="p">(</span><span class="n">frem_model_results</span><span class="o">$</span><span class="n">parameter_estimates</span><span class="p">))</span>
+</div><div aria-labelledby="tab-22-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-22-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">omega_est</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">omega</span><span class="o">$</span><span class="nf">subs</span><span class="p">(</span><span class="nf">list</span><span class="p">(</span><span class="n">frem_model_results</span><span class="o">$</span><span class="n">parameter_estimates</span><span class="p">))</span>
 <span class="n">omega_est</span>
 </pre></div>
 </div>
@@ -944,10 +1121,10 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 <p>Operations on this parameter matrix can be done either by using SymPy</p>
 <div class="pharmpy-snippet with-output docutils container">
 <div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-16-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-16-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-16-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-16-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-16-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-16-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">omega_est</span><span class="o">.</span><span class="n">cholesky</span><span class="p">()</span>
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-23-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-23-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-23-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-23-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-23-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-23-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">omega_est</span><span class="o">.</span><span class="n">cholesky</span><span class="p">()</span>
 </pre></div>
 </div>
-</div><div aria-labelledby="tab-16-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-16-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">omega_est</span><span class="o">$</span><span class="nf">cholesky</span><span class="p">()</span>
+</div><div aria-labelledby="tab-23-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-23-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">omega_est</span><span class="o">$</span><span class="nf">cholesky</span><span class="p">()</span>
 </pre></div>
 </div>
 </div></div>
@@ -961,13 +1138,13 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 <p>or in a pure numerical setting in NumPy</p>
 <div class="pharmpy-snippet with-output docutils container">
 <div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-17-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-17-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-17-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-17-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-17-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-17-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-24-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-24-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-24-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-24-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-24-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-24-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
 
 <span class="n">a</span> <span class="o">=</span> <span class="n">np</span><span class="o">.</span><span class="n">array</span><span class="p">(</span><span class="n">omega_est</span><span class="p">)</span><span class="o">.</span><span class="n">astype</span><span class="p">(</span><span class="n">np</span><span class="o">.</span><span class="n">float64</span><span class="p">)</span>
 <span class="n">a</span>
 </pre></div>
 </div>
-</div><div aria-labelledby="tab-17-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-17-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">a</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">np</span><span class="o">$</span><span class="nf">array</span><span class="p">(</span><span class="n">omega_est</span><span class="p">)</span><span class="nf">.astype</span><span class="p">(</span><span class="n">np</span><span class="o">$</span><span class="n">numeric64</span><span class="p">)</span>
+</div><div aria-labelledby="tab-24-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-24-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">a</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">np</span><span class="o">$</span><span class="nf">array</span><span class="p">(</span><span class="n">omega_est</span><span class="p">)</span><span class="nf">.astype</span><span class="p">(</span><span class="n">np</span><span class="o">$</span><span class="n">numeric64</span><span class="p">)</span>
 <span class="n">a</span>
 </pre></div>
 </div>
@@ -985,10 +1162,10 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 </div>
 <div class="pharmpy-snippet with-output docutils container">
 <div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-18-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-18-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-18-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-18-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-18-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-18-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-25-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-25-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-25-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-25-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-25-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-25-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">.</span><span class="n">linalg</span><span class="o">.</span><span class="n">cholesky</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 </pre></div>
 </div>
-</div><div aria-labelledby="tab-18-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-18-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">$</span><span class="n">linalg</span><span class="o">$</span><span class="nf">cholesky</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
+</div><div aria-labelledby="tab-25-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-25-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">np</span><span class="o">$</span><span class="n">linalg</span><span class="o">$</span><span class="nf">cholesky</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 </pre></div>
 </div>
 </div></div>
@@ -1004,132 +1181,6 @@ $TABLE ID TIME DV AMT WGT APGR IPRED PRED RES TAD CWRES NPDE NOAPPEND
 </div>
 </div>
 </section>
-<section id="model-statements">
-<h2>Model statements<a class="headerlink" href="#model-statements" title="Permalink to this heading">#</a></h2>
-<p>The model statements represent the mathematical description of the model. All statements can be retrieved via the statements property as a <code class="xref py py-class docutils literal notranslate"><span class="pre">pharmpy.Statements</span></code> object, which is a list of model statements.</p>
-<div class="pharmpy-snippet with-output docutils container">
-<div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-19-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-19-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-19-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-19-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-19-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-19-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
-<span class="nb">print</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
-</pre></div>
-</div>
-</div><div aria-labelledby="tab-19-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-19-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span><span class="w"> </span><span class="o">&lt;-</span><span class="w"> </span><span class="n">model</span><span class="o">$</span><span class="n">statements</span>
-<span class="nf">print</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
-</pre></div>
-</div>
-</div></div>
-<div class="jupyter_cell docutils container">
-<div class="cell_output docutils container">
-<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>        ⎧TIME  for AMT &gt; 0
-        ⎨
-BTIME = ⎩ 0     otherwise
-TAD = -BTIME + TIME
-TVCL = PTVCL⋅WGT
-TVV = PTVV⋅WGT
-      ⎧TVV⋅(THETA₃ + 1)  for APGR &lt; 5
-      ⎨
-TVV = ⎩      TVV          otherwise
-           ETA₁
-CL = TVCL⋅ℯ
-         ETA₂
-V = TVV⋅ℯ
-S₁ = V
-Bolus(AMT, admid=1)
-┌───────┐       
-│CENTRAL│──CL/V→
-└───────┘
-    A_CENTRAL
-    ─────────
-F =     S₁
-W = F
-Y = EPS₁⋅W + F
-IPRED = F
-IRES = DV - IPRED
-        IRES
-        ────
-IWRES =  W
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<p>Changing the statements of a model can be done by setting the statements property. This way of manipulating a model is quite low level and flexible but cumbersome. For higher level model manipulation use the <a class="reference internal" href="api_modeling.html#module-pharmpy.modeling" title="pharmpy.modeling"><code class="xref py py-mod docutils literal notranslate"><span class="pre">pharmpy.modeling</span></code></a> module.</p>
-<p>If the model has a system of ordinary differential equations this will be part of the statements. It can easily be retrieved from the statement object</p>
-<div class="pharmpy-snippet with-output docutils container">
-<div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-20-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-20-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-20-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-20-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-20-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-20-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="nb">print</span><span class="p">(</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">)</span>
-</pre></div>
-</div>
-</div><div aria-labelledby="tab-20-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-20-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="nf">print</span><span class="p">(</span><span class="n">statements</span><span class="o">$</span><span class="n">ode_system</span><span class="p">)</span>
-</pre></div>
-</div>
-</div></div>
-<div class="jupyter_cell docutils container">
-<div class="cell_output docutils container">
-<div class="output stream highlight-none notranslate"><div class="highlight"><pre><span></span>Bolus(AMT, admid=1)
-┌───────┐       
-│CENTRAL│──CL/V→
-└───────┘
-</pre></div>
-</div>
-</div>
-</div>
-</div>
-<p>Get the amounts vector:</p>
-<div class="pharmpy-snippet with-output docutils container">
-<div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-21-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-21-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-21-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-21-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-21-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-21-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">amounts</span>
-</pre></div>
-</div>
-</div><div aria-labelledby="tab-21-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-21-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span><span class="o">$</span><span class="n">ode_system</span><span class="o">$</span><span class="n">amounts</span>
-</pre></div>
-</div>
-</div></div>
-<div class="jupyter_cell docutils container">
-<div class="cell_output docutils container">
-<div class="output text_latex math notranslate nohighlight">
-\[\displaystyle \left[\begin{matrix}A_{CENTRAL}\end{matrix}\right]\]</div>
-</div>
-</div>
-</div>
-<p>Get the compartmental matrix:</p>
-<div class="pharmpy-snippet with-output docutils container">
-<div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-22-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-22-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-22-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-22-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-22-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-22-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">compartmental_matrix</span>
-</pre></div>
-</div>
-</div><div aria-labelledby="tab-22-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-22-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">statements</span><span class="o">$</span><span class="n">ode_system</span><span class="o">$</span><span class="n">compartmental_matrix</span>
-</pre></div>
-</div>
-</div></div>
-<div class="jupyter_cell docutils container">
-<div class="cell_output docutils container">
-<div class="output text_latex math notranslate nohighlight">
-\[\displaystyle \left[\begin{matrix}- \frac{CL}{V}\end{matrix}\right]\]</div>
-</div>
-</div>
-</div>
-</section>
-<section id="dependent-variables">
-<h2>Dependent variables<a class="headerlink" href="#dependent-variables" title="Permalink to this heading">#</a></h2>
-<p>A model can describe one or more dependent variables (output variables). Each dependent variable is defined in the <code class="docutils literal notranslate"><span class="pre">dependent_variables</span></code> attribute. This is a dictionary of each dependent variable symbol to the corresponding <code class="docutils literal notranslate"><span class="pre">DVID</span></code>. If there is only one dependent variable the <code class="docutils literal notranslate"><span class="pre">DVID</span></code> column in the dataset is not needed and its value in this definition is unimportant. The expressions of the dependent variables are all found in the statements.</p>
-<div class="pharmpy-snippet with-output docutils container">
-<div class="sphinx-tabs docutils container">
-<div aria-label="Tabbed content" class="closeable" role="tablist"><button aria-controls="panel-23-UHl0aG9u" aria-selected="true" class="sphinx-tabs-tab code-tab group-tab" id="tab-23-UHl0aG9u" name="UHl0aG9u" role="tab" tabindex="0">Python</button><button aria-controls="panel-23-Ug==" aria-selected="false" class="sphinx-tabs-tab code-tab group-tab" id="tab-23-Ug==" name="Ug==" role="tab" tabindex="-1">R</button></div><div aria-labelledby="tab-23-UHl0aG9u" class="sphinx-tabs-panel code-tab group-tab" id="panel-23-UHl0aG9u" name="UHl0aG9u" role="tabpanel" tabindex="0"><div class="highlight-py notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span>
-</pre></div>
-</div>
-</div><div aria-labelledby="tab-23-Ug==" class="sphinx-tabs-panel code-tab group-tab" hidden="true" id="panel-23-Ug==" name="Ug==" role="tabpanel" tabindex="0"><div class="highlight-r notranslate"><div class="highlight"><pre><span></span><span class="n">model</span><span class="o">$</span><span class="n">dependent_variables</span>
-</pre></div>
-</div>
-</div></div>
-<div class="jupyter_cell docutils container">
-<div class="cell_output docutils container">
-<div class="output text_plain highlight-none notranslate"><div class="highlight"><pre><span></span>{Y: 1}
-</pre></div>
-</div>
-</div>
-</div>
-</div>
 </section>
 </section>
 
@@ -1145,12 +1196,12 @@ IWRES =  W
     <div class="footer-article-item"><!-- Previous / next buttons -->
 <div class="prev-next-area">
     <a class="left-prev"
-       href="user_guide.html"
+       href="modeling.html"
        title="previous page">
       <i class="fa-solid fa-angle-left"></i>
       <div class="prev-next-info">
         <p class="prev-next-subtitle">previous</p>
-        <p class="prev-next-title">User guide</p>
+        <p class="prev-next-title">Modeling</p>
       </div>
     </a>
     <a class="right-next"
@@ -1181,14 +1232,22 @@ IWRES =  W
   <nav class="bd-toc-nav page-toc">
     <ul class="visible nav section-nav flex-column">
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#reading-in-a-model">Reading in a model</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-name">Model name</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#writing-a-model">Writing a model</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#getting-the-model-code">Getting the model code</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-parameters">Model parameters</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#parameter-sets">Parameter sets</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#random-variables">Random variables</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#model-statements">Model statements</a></li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#dependent-variables">Dependent variables</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#inspecting-the-model-attributes">Inspecting the model attributes</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#name-and-description">Name and description</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#parameters">Parameters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#random-variables">Random variables</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#statements">Statements</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dataset-and-datainfo">Dataset and datainfo</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#estimation-steps">Estimation steps</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#dependent-variables">Dependent variables</a></li>
+</ul>
+</li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#low-level-manipulations-of-the-model-object">Low level manipulations of the model object</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#creating-and-adding-parameters">Creating and adding parameters</a></li>
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#substituting-symbolic-random-variable-distribution-with-numeric">Substituting symbolic random variable distribution with numeric</a></li>
+</ul>
+</li>
 </ul>
   </nav></div>
 
