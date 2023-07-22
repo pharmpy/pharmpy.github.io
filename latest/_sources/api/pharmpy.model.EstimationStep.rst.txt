@@ -27,6 +27,7 @@ EstimationStep
       ~EstimationStep.solver
       ~EstimationStep.solver_atol
       ~EstimationStep.solver_rtol
+      ~EstimationStep.supported_covs
       ~EstimationStep.supported_methods
       ~EstimationStep.supported_solvers
       ~EstimationStep.tool_options
@@ -59,6 +60,7 @@ EstimationStep
    .. autoattribute:: solver
    .. autoattribute:: solver_atol
    .. autoattribute:: solver_rtol
+   .. autoattribute:: supported_covs
    .. autoattribute:: supported_methods
    .. autoattribute:: supported_solvers
    .. autoattribute:: tool_options

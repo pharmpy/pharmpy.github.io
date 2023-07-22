@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.estimation_steps &#8212; Pharmpy 0.97.0 documentation</title>
+    <title>pharmpy.modeling.estimation_steps &#8212; Pharmpy 0.98.0 documentation</title>
   
   
   
@@ -513,9 +513,9 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; opts = {&#39;NITER&#39;: 1000, &#39;ISAMPLE&#39;: 100}</span>
-<span class="sd">    &gt;&gt;&gt; model = set_estimation_step(model, &quot;IMP&quot;, evaluation=True, tool_options=opts)</span>
+<span class="sd">    &gt;&gt;&gt; model = set_estimation_step(model, &#39;IMP&#39;, evaluation=True, tool_options=opts)</span>
 <span class="sd">    &gt;&gt;&gt; model.estimation_steps[0]   # doctest: +ELLIPSIS</span>
-<span class="sd">    EstimationStep(&quot;IMP&quot;, interaction=True, cov=True, evaluation=True, ..., tool_options=...</span>
+<span class="sd">    EstimationStep(&#39;IMP&#39;, interaction=True, cov=&#39;SANDWICH&#39;, evaluation=True, ..., tool_options=...</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -568,12 +568,12 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; opts = {&#39;NITER&#39;: 1000, &#39;ISAMPLE&#39;: 100}</span>
-<span class="sd">    &gt;&gt;&gt; model = add_estimation_step(model, &quot;IMP&quot;, tool_options=opts)</span>
+<span class="sd">    &gt;&gt;&gt; model = add_estimation_step(model, &#39;IMP&#39;, tool_options=opts)</span>
 <span class="sd">    &gt;&gt;&gt; ests = model.estimation_steps</span>
 <span class="sd">    &gt;&gt;&gt; len(ests)</span>
 <span class="sd">    2</span>
 <span class="sd">    &gt;&gt;&gt; ests[1]   # doctest: +ELLIPSIS</span>
-<span class="sd">    EstimationStep(&quot;IMP&quot;, interaction=False, cov=False, ..., tool_options={&#39;NITER&#39;: 1000,...</span>
+<span class="sd">    EstimationStep(&#39;IMP&#39;, interaction=False, cov=None, ..., tool_options={&#39;NITER&#39;: 1000,...</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -699,13 +699,15 @@ document.write(`
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="add_covariance_step"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_covariance_step.html#pharmpy.modeling.add_covariance_step">[docs]</a><span class="k">def</span> <span class="nf">add_covariance_step</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<div class="viewcode-block" id="add_covariance_step"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_covariance_step.html#pharmpy.modeling.add_covariance_step">[docs]</a><span class="k">def</span> <span class="nf">add_covariance_step</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">cov</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Adds covariance step to the final estimation step</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model</span>
+<span class="sd">    cov : str</span>
+<span class="sd">        covariance method to use</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -716,11 +718,11 @@ document.write(`
 <span class="sd">    --------</span>
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; model = set_estimation_step(model, &#39;FOCE&#39;, cov=False)</span>
-<span class="sd">    &gt;&gt;&gt; model = add_covariance_step(model)</span>
+<span class="sd">    &gt;&gt;&gt; model = set_estimation_step(model, &#39;FOCE&#39;, cov=None)</span>
+<span class="sd">    &gt;&gt;&gt; model = add_covariance_step(model, &#39;SANDWICH&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; ests = model.estimation_steps</span>
 <span class="sd">    &gt;&gt;&gt; ests[0]   # doctest: +ELLIPSIS</span>
-<span class="sd">    EstimationStep(&quot;FOCE&quot;, interaction=True, cov=True, ...)</span>
+<span class="sd">    EstimationStep(&#39;FOCE&#39;, interaction=True, cov=&#39;SANDWICH&#39;, ...)</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -733,7 +735,7 @@ document.write(`
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
-    <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">cov</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">cov</span><span class="o">=</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">cov</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
@@ -759,7 +761,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; model = remove_covariance_step(model)</span>
 <span class="sd">    &gt;&gt;&gt; ests = model.estimation_steps</span>
 <span class="sd">    &gt;&gt;&gt; ests[0]   # doctest: +ELLIPSIS</span>
-<span class="sd">    EstimationStep(&quot;FOCE&quot;, interaction=True, cov=False, ...)</span>
+<span class="sd">    EstimationStep(&#39;FOCE&#39;, interaction=True, cov=None, ...)</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -772,7 +774,7 @@ document.write(`
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
-    <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">cov</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">cov</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
     <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
@@ -802,7 +804,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; model = set_evaluation_step(model)</span>
 <span class="sd">    &gt;&gt;&gt; model.estimation_steps[0]   # doctest: +ELLIPSIS</span>
-<span class="sd">    EstimationStep(&quot;FOCE&quot;, interaction=True, cov=True, evaluation=True, ...</span>
+<span class="sd">    EstimationStep(&#39;FOCE&#39;, interaction=True, cov=&#39;SANDWICH&#39;, evaluation=True, ...</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>

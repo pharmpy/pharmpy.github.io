@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.estimation &#8212; Pharmpy 0.97.0 documentation</title>
+    <title>pharmpy.model.estimation &#8212; Pharmpy 0.98.0 documentation</title>
   
   
   
@@ -496,12 +496,13 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">supported_methods</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="s1">&#39;FO&#39;</span><span class="p">,</span> <span class="s1">&#39;FOCE&#39;</span><span class="p">,</span> <span class="s1">&#39;ITS&#39;</span><span class="p">,</span> <span class="s1">&#39;IMPMAP&#39;</span><span class="p">,</span> <span class="s1">&#39;IMP&#39;</span><span class="p">,</span> <span class="s1">&#39;SAEM&#39;</span><span class="p">,</span> <span class="s1">&#39;BAYES&#39;</span><span class="p">))</span>
     <span class="n">supported_solvers</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="s1">&#39;CVODES&#39;</span><span class="p">,</span> <span class="s1">&#39;DGEAR&#39;</span><span class="p">,</span> <span class="s1">&#39;DVERK&#39;</span><span class="p">,</span> <span class="s1">&#39;IDA&#39;</span><span class="p">,</span> <span class="s1">&#39;LSODA&#39;</span><span class="p">,</span> <span class="s1">&#39;LSODI&#39;</span><span class="p">))</span>
+    <span class="n">supported_covs</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="s1">&#39;SANDWICH&#39;</span><span class="p">,</span> <span class="s1">&#39;CPG&#39;</span><span class="p">,</span> <span class="s1">&#39;OFIM&#39;</span><span class="p">))</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">method</span><span class="p">,</span>
         <span class="n">interaction</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">cov</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">cov</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">evaluation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">maximum_evaluations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">laplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -542,7 +543,7 @@ document.write(`
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">method</span><span class="p">,</span>
         <span class="n">interaction</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">cov</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
+        <span class="n">cov</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">evaluation</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
         <span class="n">maximum_evaluations</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">laplace</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
@@ -574,6 +575,12 @@ document.write(`
             <span class="n">predictions</span> <span class="o">=</span> <span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">predictions</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">predictions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">cov</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">cov</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">cov</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">cov</span> <span class="ow">in</span> <span class="n">EstimationStep</span><span class="o">.</span><span class="n">supported_covs</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="sa">f</span><span class="s2">&quot;Unknown cov </span><span class="si">{</span><span class="n">cov</span><span class="si">}</span><span class="s2">. Recognized covs are </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">EstimationStep</span><span class="o">.</span><span class="n">supported_covs</span><span class="p">)</span><span class="si">}</span><span class="s2">.&quot;</span>
+            <span class="p">)</span>
         <span class="k">if</span> <span class="n">solver</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">solver</span> <span class="o">=</span> <span class="n">solver</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="n">solver</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">solver</span> <span class="ow">in</span> <span class="n">EstimationStep</span><span class="o">.</span><span class="n">supported_solvers</span><span class="p">):</span>
@@ -651,7 +658,19 @@ document.write(`
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">cov</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Should the parameter uncertainty be estimated?&quot;&quot;&quot;</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Method to use when estimating parameter uncertainty</span>
+<span class="sd">        Supported methods and their corresponding NMTRAN code:</span>
+
+<span class="sd">        +----------------------------+------------------+</span>
+<span class="sd">        | Method                     | NMTRAN           |</span>
+<span class="sd">        +============================+==================+</span>
+<span class="sd">        | Sandwich                   | $COV             |</span>
+<span class="sd">        +----------------------------+------------------+</span>
+<span class="sd">        | Cross-product gradient     | $COV MATRIX=S    |</span>
+<span class="sd">        +----------------------------+------------------+</span>
+<span class="sd">        | Observed FIM               | $COV MATRIX=R    |</span>
+<span class="sd">        +----------------------------+------------------+</span>
+<span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_cov</span>
 
     <span class="nd">@property</span>
@@ -800,14 +819,16 @@ document.write(`
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="o">**</span><span class="n">d</span><span class="p">)</span></div>
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">cov</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cov</span><span class="si">}</span><span class="s2">&#39;&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">cov</span>
+        <span class="n">solver</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s2">&#39;&quot;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="bp">self</span><span class="o">.</span><span class="n">solver</span>
         <span class="k">return</span> <span class="p">(</span>
-            <span class="sa">f</span><span class="s1">&#39;EstimationStep(&quot;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s1">&quot;, interaction=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">interaction</span><span class="si">}</span><span class="s1">, &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;cov=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">cov</span><span class="si">}</span><span class="s1">, evaluation=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluation</span><span class="si">}</span><span class="s1">, &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;maximum_evaluations=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum_evaluations</span><span class="si">}</span><span class="s1">, laplace=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">laplace</span><span class="si">}</span><span class="s1">, &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;isample=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">isample</span><span class="si">}</span><span class="s1">, niter=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">niter</span><span class="si">}</span><span class="s1">, auto=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">auto</span><span class="si">}</span><span class="s1">, &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;keep_every_nth_iter=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">keep_every_nth_iter</span><span class="si">}</span><span class="s1">, solver=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">solver</span><span class="si">}</span><span class="s1">, &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;solver_rtol=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">solver_rtol</span><span class="si">}</span><span class="s1">, solver_atol=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">solver_atol</span><span class="si">}</span><span class="s1">, &#39;</span>
-            <span class="sa">f</span><span class="s1">&#39;tool_options=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tool_options</span><span class="si">}</span><span class="s1">)&#39;</span>
+            <span class="sa">f</span><span class="s2">&quot;EstimationStep(&#39;</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">method</span><span class="si">}</span><span class="s2">&#39;, interaction=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">interaction</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;cov=</span><span class="si">{</span><span class="n">cov</span><span class="si">}</span><span class="s2">, evaluation=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">evaluation</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;maximum_evaluations=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">maximum_evaluations</span><span class="si">}</span><span class="s2">, laplace=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">laplace</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;isample=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">isample</span><span class="si">}</span><span class="s2">, niter=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">niter</span><span class="si">}</span><span class="s2">, auto=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">auto</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;keep_every_nth_iter=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">keep_every_nth_iter</span><span class="si">}</span><span class="s2">, solver=</span><span class="si">{</span><span class="n">solver</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;solver_rtol=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">solver_rtol</span><span class="si">}</span><span class="s2">, solver_atol=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">solver_atol</span><span class="si">}</span><span class="s2">, &quot;</span>
+            <span class="sa">f</span><span class="s2">&quot;tool_options=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">tool_options</span><span class="si">}</span><span class="s2">)&quot;</span>
         <span class="p">)</span></div>
 
 
@@ -896,8 +917,8 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; model.estimation_steps.to_dataframe()   # doctest: +ELLIPSIS</span>
-<span class="sd">          method  interaction   cov  ...  auto keep_every_nth_iter  tool_options</span>
-<span class="sd">        0   FOCE         True  True  ...  None                None            {}</span>
+<span class="sd">          method  interaction       cov  ...  auto keep_every_nth_iter  tool_options</span>
+<span class="sd">        0   FOCE         True  SANDWICH  ...  None                None            {}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">method</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">method</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steps</span><span class="p">]</span>
         <span class="n">interaction</span> <span class="o">=</span> <span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">interaction</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_steps</span><span class="p">]</span>

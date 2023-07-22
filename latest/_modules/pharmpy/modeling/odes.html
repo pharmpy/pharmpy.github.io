@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.97.0 documentation</title>
+    <title>pharmpy.modeling.odes &#8212; Pharmpy 0.98.0 documentation</title>
   
   
   
@@ -688,6 +688,110 @@ document.write(`
     <span class="k">return</span> <span class="n">model</span></div>
 
 
+<div class="viewcode-block" id="add_bioavailability"><a class="viewcode-back" href="../../../api/pharmpy.modeling.add_bioavailability.html#pharmpy.modeling.add_bioavailability">[docs]</a><span class="k">def</span> <span class="nf">add_bioavailability</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">add_parameter</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add bioavailability statement for the first dose compartment of the model.</span>
+<span class="sd">    Can be added as a new parameter or otherwise it will be set to 1.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    add_parameter : bool</span>
+<span class="sd">        Add new parameter representing bioavailability or not</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model = add_bioavailability(model)</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    remove_bioavailability</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="k">if</span> <span class="n">odes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Model </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has no ODE system&#39;</span><span class="p">)</span>
+
+    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">bio</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">bioavailability</span>
+
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">bio</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Number</span><span class="p">):</span>
+        <span class="c1"># Bio not defined</span>
+        <span class="k">if</span> <span class="n">add_parameter</span><span class="p">:</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">bio_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;BIO&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="nb">float</span><span class="p">(</span><span class="n">bio</span><span class="p">))</span>
+            <span class="n">f_ass</span> <span class="o">=</span> <span class="n">Assignment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;F_BIO&#39;</span><span class="p">),</span> <span class="n">bio_symb</span><span class="p">)</span>
+
+            <span class="n">new_before_odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">f_ass</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># Add as a number</span>
+            <span class="n">bio_ass</span> <span class="o">=</span> <span class="n">Assignment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;BIO&quot;</span><span class="p">),</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+            <span class="n">f_ass</span> <span class="o">=</span> <span class="n">Assignment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;F_BIO&quot;</span><span class="p">),</span> <span class="n">bio_ass</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
+            <span class="n">new_before_odes</span> <span class="o">=</span> <span class="n">bio_ass</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">f_ass</span>
+
+        <span class="c1"># Add statement to code</span>
+        <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">set_bioavailability</span><span class="p">(</span><span class="n">dose_comp</span><span class="p">,</span> <span class="n">f_ass</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">statements</span><span class="o">=</span><span class="p">(</span><span class="n">new_before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span><span class="p">)</span>
+        <span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="c1"># BIO already defined, leave it alone?</span>
+        <span class="k">pass</span>
+
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
+
+
+<div class="viewcode-block" id="remove_bioavailability"><a class="viewcode-back" href="../../../api/pharmpy.modeling.remove_bioavailability.html#pharmpy.modeling.remove_bioavailability">[docs]</a><span class="k">def</span> <span class="nf">remove_bioavailability</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove bioavailability from the first dose compartment of model.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model = remove_bioavailability(model)</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    set_bioavailability</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="k">if</span> <span class="n">odes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Model </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has no ODE system&#39;</span><span class="p">)</span>
+    <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">bio</span> <span class="o">=</span> <span class="n">dosing_comp</span><span class="o">.</span><span class="n">bioavailability</span>
+    <span class="k">if</span> <span class="n">bio</span><span class="p">:</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">bio</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">set_bioavailability</span><span class="p">(</span><span class="n">dosing_comp</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+        <span class="p">)</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">remove_symbol_definitions</span><span class="p">(</span><span class="n">symbols</span><span class="p">,</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
 <div class="viewcode-block" id="set_zero_order_elimination"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_zero_order_elimination.html#pharmpy.modeling.set_zero_order_elimination">[docs]</a><span class="k">def</span> <span class="nf">set_zero_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets elimination to zero order.</span>
 
@@ -1184,6 +1288,8 @@ document.write(`
     <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Number of compartments must be integer: </span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
 
+    <span class="n">model</span> <span class="o">=</span> <span class="n">remove_lag_time</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
     <span class="c1"># Handle keep_depot option</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
     <span class="n">mdt_init</span> <span class="o">=</span> <span class="kc">None</span>
@@ -1238,7 +1344,7 @@ document.write(`
                 <span class="n">init</span> <span class="o">=</span> <span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
             <span class="n">model</span><span class="p">,</span> <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">init</span><span class="p">)</span>
         <span class="n">rate</span> <span class="o">=</span> <span class="n">n</span> <span class="o">/</span> <span class="n">mdt_symb</span>
-        <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span>
+        <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">comp</span> <span class="o">=</span> <span class="n">dosing_comp</span>
         <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
         <span class="k">while</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
@@ -1247,6 +1353,8 @@ document.write(`
             <span class="n">n</span> <span class="o">-=</span> <span class="mi">1</span>
             <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">new_comp</span><span class="p">,</span> <span class="n">comp</span><span class="p">,</span> <span class="n">rate</span><span class="p">)</span>
             <span class="n">comp</span> <span class="o">=</span> <span class="n">new_comp</span>
+        <span class="n">comp</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">set_bioavailability</span><span class="p">(</span><span class="n">comp</span><span class="p">,</span> <span class="n">dosing_comp</span><span class="o">.</span><span class="n">bioavailability</span><span class="p">)</span>
+        <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">set_bioavailability</span><span class="p">(</span><span class="n">dosing_comp</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
         <span class="n">cb</span><span class="o">.</span><span class="n">move_dose</span><span class="p">(</span><span class="n">dosing_comp</span><span class="p">,</span> <span class="n">comp</span><span class="p">)</span>
         <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
@@ -1272,7 +1380,7 @@ document.write(`
             <span class="n">nremove</span> <span class="o">-=</span> <span class="mi">1</span>
 
         <span class="k">if</span> <span class="n">n</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
-            <span class="n">dose</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="o">.</span><span class="n">dose</span>
+            <span class="n">dose</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dose</span>
             <span class="n">cb</span><span class="o">.</span><span class="n">set_dose</span><span class="p">(</span><span class="n">destination</span><span class="p">,</span> <span class="n">dose</span><span class="p">)</span>
 
         <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
@@ -1377,7 +1485,7 @@ document.write(`
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="k">if</span> <span class="n">odes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Model </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has no ODE system&#39;</span><span class="p">)</span>
-    <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
+    <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">old_lag_time</span> <span class="o">=</span> <span class="n">dosing_comp</span><span class="o">.</span><span class="n">lag_time</span>
     <span class="n">model</span><span class="p">,</span> <span class="n">mdt_symb</span> <span class="o">=</span> <span class="n">_add_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">,</span> <span class="n">init</span><span class="o">=</span><span class="n">_get_absorption_init</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">))</span>
     <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
@@ -1426,7 +1534,7 @@ document.write(`
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="k">if</span> <span class="n">odes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Model </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has no ODE system&#39;</span><span class="p">)</span>
-    <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
+    <span class="n">dosing_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">lag_time</span> <span class="o">=</span> <span class="n">dosing_comp</span><span class="o">.</span><span class="n">lag_time</span>
     <span class="k">if</span> <span class="n">lag_time</span><span class="p">:</span>
         <span class="n">symbols</span> <span class="o">=</span> <span class="n">lag_time</span><span class="o">.</span><span class="n">free_symbols</span>
@@ -1481,7 +1589,7 @@ document.write(`
     <span class="n">_disallow_infusion</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">odes</span><span class="p">)</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
 
-    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
+    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">symbols</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">free_symbols</span>
     <span class="n">dose</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span>
     <span class="n">lag_time</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">lag_time</span>
@@ -1510,7 +1618,7 @@ document.write(`
         <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
         <span class="k">assert</span> <span class="n">odes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">_add_zero_order_absorption</span><span class="p">(</span>
-            <span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">,</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">lag_time</span>
+            <span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">lag_time</span>
         <span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
@@ -1555,10 +1663,11 @@ document.write(`
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Model </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has no ODE system&#39;</span><span class="p">)</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
 
-    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span>
+    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">amount</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span>
     <span class="n">symbols</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">free_symbols</span>
     <span class="n">lag_time</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">lag_time</span>
+    <span class="n">bio</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">bioavailability</span>
     <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">depot</span> <span class="ow">and</span> <span class="n">depot</span> <span class="o">==</span> <span class="n">dose_comp</span><span class="p">:</span>
         <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">set_dose</span><span class="p">(</span><span class="n">dose_comp</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">))</span>
@@ -1577,7 +1686,7 @@ document.write(`
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">depot</span><span class="p">:</span>
-        <span class="n">model</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">amount</span><span class="p">),</span> <span class="n">dose_comp</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">)</span>
+        <span class="n">model</span><span class="p">,</span> <span class="n">_</span> <span class="o">=</span> <span class="n">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">amount</span><span class="p">),</span> <span class="n">dose_comp</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">,</span> <span class="n">bio</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
@@ -1632,7 +1741,7 @@ document.write(`
         <span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">remove_unused_parameters_and_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">has_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
-        <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span>
+        <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">old_symbols</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">cs</span><span class="p">)</span>
         <span class="n">new_dose</span> <span class="o">=</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span>
@@ -1691,7 +1800,7 @@ document.write(`
     <span class="n">_disallow_infusion</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">cs</span><span class="p">)</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">find_depot</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
 
-    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span>
+    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">have_ZO</span> <span class="o">=</span> <span class="n">has_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">depot</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">have_ZO</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">_add_zero_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">amount</span><span class="p">,</span> <span class="n">depot</span><span class="p">,</span> <span class="s1">&#39;MDT&#39;</span><span class="p">)</span>
@@ -1706,7 +1815,7 @@ document.write(`
 
 
 <span class="k">def</span> <span class="nf">_disallow_infusion</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">odes</span><span class="p">):</span>
-    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span>
+    <span class="n">dose_comp</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="p">,</span> <span class="n">Infusion</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">rate</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ex</span> <span class="o">=</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">rate</span>
@@ -1745,7 +1854,7 @@ document.write(`
     <span class="n">cs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="k">if</span> <span class="n">cs</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Model </span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> has no ODE system&#39;</span><span class="p">)</span>
-    <span class="n">dosing</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span>
+    <span class="n">dosing</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="n">dose</span> <span class="o">=</span> <span class="n">dosing</span><span class="o">.</span><span class="n">dose</span>
     <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dose</span><span class="p">,</span> <span class="n">Infusion</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">dose</span><span class="o">.</span><span class="n">rate</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -1780,7 +1889,7 @@ document.write(`
     <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="p">)</span>
     <span class="n">cb</span><span class="o">.</span><span class="n">set_dose</span><span class="p">(</span><span class="n">to_comp</span><span class="p">,</span> <span class="n">new_dose</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lag_time</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-        <span class="n">cb</span><span class="o">.</span><span class="n">set_lag_time</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">,</span> <span class="n">lag_time</span><span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">set_lag_time</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">lag_time</span><span class="p">)</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
         <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span>
         <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span>
@@ -1789,18 +1898,22 @@ document.write(`
     <span class="k">return</span> <span class="n">model</span>
 
 
-<span class="k">def</span> <span class="nf">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="n">lag_time</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_add_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">to_comp</span><span class="p">,</span> <span class="n">lag_time</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">bioavailability</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Add first order absorption</span>
 <span class="sd">    Disregards what is currently in the model.</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
     <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
     <span class="n">depot</span> <span class="o">=</span> <span class="n">Compartment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-        <span class="s1">&#39;DEPOT&#39;</span><span class="p">,</span> <span class="n">dose</span><span class="o">=</span><span class="n">dose</span><span class="p">,</span> <span class="n">lag_time</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">lag_time</span>
+        <span class="s1">&#39;DEPOT&#39;</span><span class="p">,</span>
+        <span class="n">dose</span><span class="o">=</span><span class="n">dose</span><span class="p">,</span>
+        <span class="n">lag_time</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="k">if</span> <span class="n">lag_time</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">lag_time</span><span class="p">,</span>
+        <span class="n">bioavailability</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="k">if</span> <span class="n">bioavailability</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="n">bioavailability</span><span class="p">,</span>
     <span class="p">)</span>
     <span class="n">cb</span><span class="o">.</span><span class="n">add_compartment</span><span class="p">(</span><span class="n">depot</span><span class="p">)</span>
     <span class="n">to_comp</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">set_dose</span><span class="p">(</span><span class="n">to_comp</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="n">to_comp</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">set_lag_time</span><span class="p">(</span><span class="n">to_comp</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">))</span>
+    <span class="n">to_comp</span> <span class="o">=</span> <span class="n">cb</span><span class="o">.</span><span class="n">set_bioavailability</span><span class="p">(</span><span class="n">to_comp</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
 
     <span class="n">mat_assign</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;MAT&#39;</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">mat_assign</span><span class="p">:</span>

@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.error &#8212; Pharmpy 0.97.0 documentation</title>
+    <title>pharmpy.modeling.error &#8212; Pharmpy 0.98.0 documentation</title>
   
   
   
@@ -1320,7 +1320,9 @@ document.write(`
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
-<div class="viewcode-block" id="set_time_varying_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_time_varying_error_model.html#pharmpy.modeling.set_time_varying_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_time_varying_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">idv</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;TIME&#39;</span><span class="p">):</span>
+<div class="viewcode-block" id="set_time_varying_error_model"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_time_varying_error_model.html#pharmpy.modeling.set_time_varying_error_model">[docs]</a><span class="k">def</span> <span class="nf">set_time_varying_error_model</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">cutoff</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span> <span class="n">idv</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;TIME&#39;</span><span class="p">,</span> <span class="n">dv</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Set a time varying error model per time cutoff</span>
 
 <span class="sd">    Parameters</span>
@@ -1331,6 +1333,8 @@ document.write(`
 <span class="sd">        A value at the given quantile over idv column</span>
 <span class="sd">    idv : str</span>
 <span class="sd">        Time or time after dose, default is Time</span>
+<span class="sd">    dv : Union[sympy.Symbol, str, int, None]</span>
+<span class="sd">        Name or DVID of dependent variable. None for the default (first or only)</span>
 
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
@@ -1348,7 +1352,8 @@ document.write(`
 <span class="sd">    Y = ⎩      EPS₁⋅W + F           otherwise</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;Y&#39;</span><span class="p">)</span>
+    <span class="n">dv</span> <span class="o">=</span> <span class="n">get_dv_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">dv</span><span class="p">)</span>
     <span class="n">idv</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">idv</span><span class="p">)</span>
     <span class="n">theta</span> <span class="o">=</span> <span class="n">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;time_varying&#39;</span><span class="p">)</span>
     <span class="n">eps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">epsilons</span>
@@ -1508,6 +1513,7 @@ document.write(`
 
 <div class="viewcode-block" id="set_iiv_on_ruv"><a class="viewcode-back" href="../../../api/pharmpy.modeling.set_iiv_on_ruv.html#pharmpy.modeling.set_iiv_on_ruv">[docs]</a><span class="k">def</span> <span class="nf">set_iiv_on_ruv</span><span class="p">(</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">dv</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">list_of_eps</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">same_eta</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">eta_names</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="nb">str</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
@@ -1529,6 +1535,8 @@ document.write(`
 <span class="sd">        should be created for each RUV. True is default.</span>
 <span class="sd">    eta_names : str, list</span>
 <span class="sd">        Custom names of new etas. Must be equal to the number epsilons or 1 if same eta.</span>
+<span class="sd">    dv : Union[sympy.Symbol, str, int, None]</span>
+<span class="sd">        Name or DVID of dependent variable. None for the default (first or only)</span>
 
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
@@ -1568,13 +1576,20 @@ document.write(`
         <span class="n">rvs</span> <span class="o">=</span> <span class="n">rvs</span> <span class="o">+</span> <span class="n">etas</span>
         <span class="n">eta_dict</span> <span class="o">=</span> <span class="nb">dict</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">eps</span><span class="p">,</span> <span class="n">etas</span><span class="p">))</span>
 
+    <span class="n">dv_symb</span> <span class="o">=</span> <span class="n">get_dv_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="p">)</span>
+    <span class="n">y</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">dv_symb</span><span class="p">)</span>
+
     <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">eps</span><span class="p">:</span>
-        <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span>
-            <span class="p">{</span>
-                <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-                <span class="o">*</span> <span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">eta_dict</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
-            <span class="p">}</span>
-        <span class="p">)</span>
+        <span class="n">subs_dict</span> <span class="o">=</span> <span class="p">{</span>
+            <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]):</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">e</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="o">*</span> <span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">eta_dict</span><span class="p">[</span><span class="n">e</span><span class="p">]</span><span class="o">.</span><span class="n">names</span><span class="p">[</span><span class="mi">0</span><span class="p">]))</span>
+        <span class="p">}</span>
+        <span class="c1"># FIXME: this is needed if you e.g. have Y and IPRED, with multiple DVs, how should this be handled?</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">dv</span><span class="p">:</span>
+            <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">subs_dict</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">subs_dict</span><span class="p">)</span>
+            <span class="n">sset</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">y</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">y</span><span class="o">.</span><span class="n">expression</span><span class="p">)</span>
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">random_variables</span><span class="o">=</span><span class="n">rvs</span><span class="p">,</span> <span class="n">parameters</span><span class="o">=</span><span class="n">Parameters</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">pset</span><span class="p">),</span> <span class="n">statements</span><span class="o">=</span><span class="n">sset</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>

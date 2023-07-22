@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.97.0 documentation</title>
+    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.98.0 documentation</title>
   
   
   
@@ -1616,7 +1616,7 @@ document.write(`
 
 
 <div class="viewcode-block" id="get_pk_parameters"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_pk_parameters.html#pharmpy.modeling.get_pk_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_pk_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves PK parameters in :class:`pharmpy.model`.</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves PK parameters in :class:`pharmpy.model.Model`.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -1657,7 +1657,52 @@ document.write(`
 
     <span class="n">dependency_graph</span> <span class="o">=</span> <span class="n">_dependency_graph</span><span class="p">(</span><span class="n">natural_assignments</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">_filter_symbols</span><span class="p">(</span><span class="n">dependency_graph</span><span class="p">,</span> <span class="n">free_symbols</span><span class="p">)))</span></div>
+    <span class="n">pk_symbols</span> <span class="o">=</span> <span class="n">_filter_symbols</span><span class="p">(</span><span class="n">dependency_graph</span><span class="p">,</span> <span class="n">free_symbols</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="s2">&quot;EFFECT&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">pd_symbols</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="s2">&quot;EFFECT&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">pk_symbols</span> <span class="o">=</span> <span class="n">pk_symbols</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">pd_symbols</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pk_symbols</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="get_pd_parameters"><a class="viewcode-back" href="../../../api/pharmpy.modeling.get_pd_parameters.html#pharmpy.modeling.get_pd_parameters">[docs]</a><span class="k">def</span> <span class="nf">get_pd_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves PD parameters in :class:`pharmpy.model.Model`.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model to retrieve the PD parameters from</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    list[str]</span>
+<span class="sd">        A list of the PD parameter names of the given model</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model = set_direct_effect(model, &quot;linear&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; get_pd_parameters(model)</span>
+<span class="sd">    [&#39;E0&#39;, &#39;S&#39;]</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    get_pk_parameters</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># FIXME: this function needs to be updated. Currently uses fixed parameter names.</span>
+
+    <span class="n">pd_symbols</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="k">if</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;Y_2&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">:</span>
+        <span class="n">parameters_in_e</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">pk_parameters</span> <span class="o">=</span> <span class="n">get_pk_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">parameters_in_e</span> <span class="o">=</span> <span class="p">{</span><span class="n">x</span> <span class="k">for</span> <span class="n">x</span> <span class="ow">in</span> <span class="n">parameters_in_e</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">x</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pk_parameters</span><span class="p">}</span>
+        <span class="n">pd_symbols</span> <span class="o">=</span> <span class="p">{</span><span class="n">statement</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">statement</span> <span class="ow">in</span> <span class="n">sset</span><span class="o">.</span><span class="n">before_odes</span><span class="p">}</span>
+        <span class="n">pd_symbols</span> <span class="o">=</span> <span class="n">pd_symbols</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">parameters_in_e</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">sset</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="s2">&quot;EFFECT&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">pd_symbols</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s2">&quot;KE0&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd_symbols</span><span class="p">))</span></div>
 
 
 <span class="k">def</span> <span class="nf">_get_natural_assignments</span><span class="p">(</span><span class="n">before_odes</span><span class="p">):</span>
@@ -1690,8 +1735,8 @@ document.write(`
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;absorption&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="p">[]</span>
-            <span class="k">if</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span> <span class="o">==</span> <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span>
-            <span class="k">else</span> <span class="n">_pk_free_symbols_from_compartment</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">)</span>
+            <span class="k">if</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span>
+            <span class="k">else</span> <span class="n">_pk_free_symbols_from_compartment</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;distribution&#39;</span><span class="p">:</span>

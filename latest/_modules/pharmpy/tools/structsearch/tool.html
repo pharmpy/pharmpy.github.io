@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.structsearch.tool &#8212; Pharmpy 0.97.0 documentation</title>
+    <title>pharmpy.tools.structsearch.tool &#8212; Pharmpy 0.98.0 documentation</title>
   
   
   
@@ -486,19 +486,21 @@ document.write(`
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Optional</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
+<span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fn.signature</span> <span class="kn">import</span> <span class="n">with_same_arguments_as</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fn.type</span> <span class="kn">import</span> <span class="n">with_runtime_arguments_type_check</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.results</span> <span class="kn">import</span> <span class="n">ModelfitResults</span>
 <span class="kn">from</span> <span class="nn">pharmpy.tools</span> <span class="kn">import</span> <span class="n">summarize_modelfit_results</span>
-<span class="kn">from</span> <span class="nn">pharmpy.tools.common</span> <span class="kn">import</span> <span class="n">ToolResults</span>
+<span class="kn">from</span> <span class="nn">pharmpy.tools.common</span> <span class="kn">import</span> <span class="n">ToolResults</span><span class="p">,</span> <span class="n">create_results</span>
 <span class="kn">from</span> <span class="nn">pharmpy.tools.modelfit</span> <span class="kn">import</span> <span class="n">create_fit_workflow</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">call_workflow</span>
 
+<span class="kn">from</span> <span class="nn">.pkpd</span> <span class="kn">import</span> <span class="n">create_pkpd_models</span>
 <span class="kn">from</span> <span class="nn">.tmdd</span> <span class="kn">import</span> <span class="n">create_qss_models</span><span class="p">,</span> <span class="n">create_remaining_models</span>
 
 <span class="n">ROUTES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="s1">&#39;iv&#39;</span><span class="p">,</span> <span class="s1">&#39;oral&#39;</span><span class="p">))</span>
-<span class="n">TYPES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="s1">&#39;tmdd&#39;</span><span class="p">,))</span>
+<span class="n">TYPES</span> <span class="o">=</span> <span class="nb">frozenset</span><span class="p">((</span><span class="s1">&#39;tmdd&#39;</span><span class="p">,</span> <span class="s1">&#39;pkpd&#39;</span><span class="p">))</span>
 
 
 <span class="k">def</span> <span class="nf">create_workflow</span><span class="p">(</span>
@@ -514,7 +516,7 @@ document.write(`
 <span class="sd">    route : str</span>
 <span class="sd">        Route of administration. Either &#39;pk&#39; or &#39;oral&#39;</span>
 <span class="sd">    type : str</span>
-<span class="sd">        Type of model. Currently only &#39;tmdd&#39;</span>
+<span class="sd">        Type of model. Currently only &#39;tmdd&#39; and &#39;pkpd&#39;</span>
 <span class="sd">    results : ModelfitResults</span>
 <span class="sd">        Results for the start model</span>
 <span class="sd">    model : Model</span>
@@ -536,10 +538,11 @@ document.write(`
 
     <span class="n">wf</span> <span class="o">=</span> <span class="n">Workflow</span><span class="p">()</span>
     <span class="n">wf</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s1">&#39;structsearch&#39;</span>
-    <span class="n">start_task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;run_tmdd&#39;</span><span class="p">,</span> <span class="n">run_tmdd</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;tmdd&#39;</span><span class="p">:</span>
+        <span class="n">start_task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;run_tmdd&#39;</span><span class="p">,</span> <span class="n">run_tmdd</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;pkpd&#39;</span><span class="p">:</span>
+        <span class="n">start_task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;run_pkpd&#39;</span><span class="p">,</span> <span class="n">run_pkpd</span><span class="p">,</span> <span class="n">model</span><span class="p">)</span>
     <span class="n">wf</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">start_task</span><span class="p">)</span>
-    <span class="n">results_task</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;results&#39;</span><span class="p">,</span> <span class="n">_results</span><span class="p">)</span>
-    <span class="n">wf</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">results_task</span><span class="p">,</span> <span class="n">predecessors</span><span class="o">=</span><span class="p">[</span><span class="n">start_task</span><span class="p">])</span>
     <span class="k">return</span> <span class="n">wf</span>
 
 
@@ -561,13 +564,44 @@ document.write(`
     <span class="n">wf</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">task_results</span><span class="p">,</span> <span class="n">predecessors</span><span class="o">=</span><span class="n">wf2</span><span class="o">.</span><span class="n">output_tasks</span><span class="p">)</span>
     <span class="n">run_models</span> <span class="o">=</span> <span class="n">call_workflow</span><span class="p">(</span><span class="n">wf</span><span class="p">,</span> <span class="s1">&#39;results_remaining&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
 
-    <span class="n">summary_models</span> <span class="o">=</span> <span class="n">summarize_modelfit_results</span><span class="p">(</span>
+    <span class="n">summary_input</span> <span class="o">=</span> <span class="n">summarize_modelfit_results</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="p">)</span>
+    <span class="n">summary_candidates</span> <span class="o">=</span> <span class="n">summarize_modelfit_results</span><span class="p">(</span>
         <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">qss_run_models</span> <span class="o">+</span> <span class="n">run_models</span><span class="p">]</span>
     <span class="p">)</span>
 
-    <span class="n">res</span> <span class="o">=</span> <span class="n">StructSearchResults</span><span class="p">(</span><span class="n">summary_models</span><span class="o">=</span><span class="n">summary_models</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">create_results</span><span class="p">(</span>
+        <span class="n">StructSearchResults</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">qss_run_models</span> <span class="o">+</span> <span class="n">run_models</span><span class="p">,</span>
+        <span class="n">rank_type</span><span class="o">=</span><span class="s1">&#39;bic&#39;</span><span class="p">,</span>
+        <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">summary_models</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">summary_input</span><span class="p">,</span> <span class="n">summary_candidates</span><span class="p">],</span> <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;step&#39;</span><span class="p">]),</span>
+    <span class="p">)</span>
 
-    <span class="k">return</span> <span class="n">res</span>
+
+<span class="k">def</span> <span class="nf">run_pkpd</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="n">pkpd_models</span> <span class="o">=</span> <span class="n">create_pkpd_models</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span><span class="p">)</span>
+
+    <span class="n">wf</span> <span class="o">=</span> <span class="n">create_fit_workflow</span><span class="p">(</span><span class="n">pkpd_models</span><span class="p">)</span>
+    <span class="n">task_results</span> <span class="o">=</span> <span class="n">Task</span><span class="p">(</span><span class="s1">&#39;results2&#39;</span><span class="p">,</span> <span class="n">bundle_results</span><span class="p">)</span>
+    <span class="n">wf</span><span class="o">.</span><span class="n">add_task</span><span class="p">(</span><span class="n">task_results</span><span class="p">,</span> <span class="n">predecessors</span><span class="o">=</span><span class="n">wf</span><span class="o">.</span><span class="n">output_tasks</span><span class="p">)</span>
+    <span class="n">pkpd_models_fit</span> <span class="o">=</span> <span class="n">call_workflow</span><span class="p">(</span><span class="n">wf</span><span class="p">,</span> <span class="s1">&#39;results_remaining&#39;</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+
+    <span class="n">summary_input</span> <span class="o">=</span> <span class="n">summarize_modelfit_results</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span><span class="p">)</span>
+    <span class="n">summary_candidates</span> <span class="o">=</span> <span class="n">summarize_modelfit_results</span><span class="p">(</span>
+        <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="k">for</span> <span class="n">model</span> <span class="ow">in</span> <span class="n">pkpd_models_fit</span><span class="p">]</span>
+    <span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">create_results</span><span class="p">(</span>
+        <span class="n">StructSearchResults</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="n">model</span><span class="p">,</span>
+        <span class="nb">list</span><span class="p">(</span><span class="n">pkpd_models_fit</span><span class="p">),</span>
+        <span class="n">rank_type</span><span class="o">=</span><span class="s1">&#39;bic&#39;</span><span class="p">,</span>
+        <span class="n">cutoff</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">summary_models</span><span class="o">=</span><span class="n">pd</span><span class="o">.</span><span class="n">concat</span><span class="p">([</span><span class="n">summary_input</span><span class="p">,</span> <span class="n">summary_candidates</span><span class="p">],</span> <span class="n">keys</span><span class="o">=</span><span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">],</span> <span class="n">names</span><span class="o">=</span><span class="p">[</span><span class="s2">&quot;step&quot;</span><span class="p">]),</span>
+    <span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">bundle_results</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">):</span>
