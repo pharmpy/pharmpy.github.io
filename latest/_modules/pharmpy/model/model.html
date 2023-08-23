@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.model &#8212; Pharmpy 0.98.2 documentation</title>
+    <title>pharmpy.model.model &#8212; Pharmpy 0.99.0 documentation</title>
   
   
   
@@ -27,22 +27,22 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-brands-400.woff2" />
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../_static/vendor/fontawesome/6.1.2/webfonts/fa-regular-400.woff2" />
 
-    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/pygments.css?v=d10597a4" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/graphviz.css?v=eafc0fe6" />
     <link rel="stylesheet" type="text/css" href="../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../_static/thebelab.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/tabs.css" />
-    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/tabs.css?v=a5c4661c" />
+    <link rel="stylesheet" type="text/css" href="../../../_static/custom.css?v=63439bfe" />
   
   <!-- Pre-loaded scripts that we'll load fully later -->
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script data-url_root="../../../" id="documentation_options" src="../../../_static/documentation_options.js"></script>
-    <script src="../../../_static/doctools.js"></script>
-    <script src="../../../_static/sphinx_highlight.js"></script>
+    <script src="../../../_static/documentation_options.js?v=b24fcec3"></script>
+    <script src="../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
-    <script src="../../../_static/tabs.js"></script>
+    <script src="../../../_static/tabs.js?v=3030b3cb"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = '_modules/pharmpy/model/model';</script>
@@ -501,7 +501,8 @@ document.write(`
 <span class="kn">import</span> <span class="nn">pharmpy</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
-<span class="kn">from</span> <span class="nn">pharmpy.internals.immutable</span> <span class="kn">import</span> <span class="n">Immutable</span><span class="p">,</span> <span class="n">frozenmapping</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.df</span> <span class="kn">import</span> <span class="n">hash_df_runtime</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.immutable</span> <span class="kn">import</span> <span class="n">Immutable</span><span class="p">,</span> <span class="n">cache_method</span><span class="p">,</span> <span class="n">frozenmapping</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model.external</span> <span class="kn">import</span> <span class="n">detect_model</span>
 
 <span class="kn">from</span> <span class="nn">.datainfo</span> <span class="kn">import</span> <span class="n">ColumnInfo</span><span class="p">,</span> <span class="n">DataInfo</span>
@@ -511,26 +512,37 @@ document.write(`
 <span class="kn">from</span> <span class="nn">.statements</span> <span class="kn">import</span> <span class="n">ODESystem</span><span class="p">,</span> <span class="n">Statements</span>
 
 
-<div class="viewcode-block" id="ModelError"><a class="viewcode-back" href="../../../api/pharmpy.model.ModelError.html#pharmpy.model.ModelError">[docs]</a><span class="k">class</span> <span class="nc">ModelError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
+<div class="viewcode-block" id="ModelError">
+<a class="viewcode-back" href="../../../api/pharmpy.model.ModelError.html#pharmpy.model.ModelError">[docs]</a>
+<span class="k">class</span> <span class="nc">ModelError</span><span class="p">(</span><span class="ne">Exception</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception for errors in model object&quot;&quot;&quot;</span>
 
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="ModelSyntaxError"><a class="viewcode-back" href="../../../api/pharmpy.model.ModelSyntaxError.html#pharmpy.model.ModelSyntaxError">[docs]</a><span class="k">class</span> <span class="nc">ModelSyntaxError</span><span class="p">(</span><span class="n">ModelError</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ModelSyntaxError">
+<a class="viewcode-back" href="../../../api/pharmpy.model.ModelSyntaxError.html#pharmpy.model.ModelSyntaxError">[docs]</a>
+<span class="k">class</span> <span class="nc">ModelSyntaxError</span><span class="p">(</span><span class="n">ModelError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception for Syntax errors in model code&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">msg</span><span class="o">=</span><span class="s1">&#39;model syntax error&#39;</span><span class="p">):</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">msg</span><span class="p">)</span></div>
 
 
-<div class="viewcode-block" id="ModelfitResultsError"><a class="viewcode-back" href="../../../api/pharmpy.model.ModelfitResultsError.html#pharmpy.model.ModelfitResultsError">[docs]</a><span class="k">class</span> <span class="nc">ModelfitResultsError</span><span class="p">(</span><span class="n">ModelError</span><span class="p">):</span>
+
+<div class="viewcode-block" id="ModelfitResultsError">
+<a class="viewcode-back" href="../../../api/pharmpy.model.ModelfitResultsError.html#pharmpy.model.ModelfitResultsError">[docs]</a>
+<span class="k">class</span> <span class="nc">ModelfitResultsError</span><span class="p">(</span><span class="n">ModelError</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Exception for issues with ModelfitResults&quot;&quot;&quot;</span>
 
     <span class="k">pass</span></div>
 
 
-<div class="viewcode-block" id="Model"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model">[docs]</a><span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">Immutable</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Model">
+<a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model">[docs]</a>
+<span class="k">class</span> <span class="nc">Model</span><span class="p">(</span><span class="n">Immutable</span><span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;The Pharmpy model class&quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -573,7 +585,9 @@ document.write(`
         <span class="bp">self</span><span class="o">.</span><span class="n">_description</span> <span class="o">=</span> <span class="n">description</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_internals</span> <span class="o">=</span> <span class="n">internals</span>
 
-<div class="viewcode-block" id="Model.create"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.create">[docs]</a>    <span class="nd">@classmethod</span>
+<div class="viewcode-block" id="Model.create">
+<a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.create">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">create</span><span class="p">(</span>
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">name</span><span class="p">,</span>
@@ -581,7 +595,7 @@ document.write(`
         <span class="n">random_variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">statements</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">dataset</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">datainfo</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">datainfo</span><span class="o">=</span><span class="n">DataInfo</span><span class="p">(),</span>
         <span class="n">dependent_variables</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">observation_transformation</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
         <span class="n">estimation_steps</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
@@ -626,9 +640,13 @@ document.write(`
             <span class="n">filename_extension</span><span class="o">=</span><span class="n">filename_extension</span><span class="p">,</span>
             <span class="n">internals</span><span class="o">=</span><span class="n">internals</span><span class="p">,</span>
             <span class="n">initial_individual_estimates</span><span class="o">=</span><span class="n">initial_individual_estimates</span><span class="p">,</span>
+            <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">,</span>
+            <span class="n">datainfo</span><span class="o">=</span><span class="n">datainfo</span><span class="p">,</span>
         <span class="p">)</span></div>
 
-    <span class="k">def</span> <span class="nf">_canonicalize_value_type</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">):</span>
+
+    <span class="nd">@staticmethod</span>
+    <span class="k">def</span> <span class="nf">_canonicalize_value_type</span><span class="p">(</span><span class="n">value</span><span class="p">):</span>
         <span class="n">allowed_strings</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;PREDICTION&#39;</span><span class="p">,</span> <span class="s1">&#39;LIKELIHOOD&#39;</span><span class="p">,</span> <span class="s1">&#39;-2LL&#39;</span><span class="p">)</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">value</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">value</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">allowed_strings</span><span class="p">:</span>
@@ -736,7 +754,9 @@ document.write(`
                 <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;model.estimation_steps must be of EstimationSteps type&quot;</span><span class="p">)</span>
             <span class="k">return</span> <span class="n">steps</span>
 
-<div class="viewcode-block" id="Model.replace"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.replace">[docs]</a>    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.replace">
+<a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.replace">[docs]</a>
+    <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_name</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
 
@@ -805,7 +825,7 @@ document.write(`
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">filename_extension</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;Filename extension has to be of string type&quot;</span><span class="p">)</span>
         <span class="k">if</span> <span class="s1">&#39;value_type&#39;</span> <span class="ow">in</span> <span class="n">kwargs</span><span class="p">:</span>
-            <span class="n">value_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_canonicalize_value_type</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;value_type&#39;</span><span class="p">])</span>
+            <span class="n">value_type</span> <span class="o">=</span> <span class="n">Model</span><span class="o">.</span><span class="n">_canonicalize_value_type</span><span class="p">(</span><span class="n">kwargs</span><span class="p">[</span><span class="s1">&#39;value_type&#39;</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">value_type</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">value_type</span>
         <span class="n">description</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;description&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">description</span><span class="p">)</span>
@@ -828,6 +848,7 @@ document.write(`
             <span class="n">internals</span><span class="o">=</span><span class="n">internals</span><span class="p">,</span>
             <span class="n">observation_transformation</span><span class="o">=</span><span class="n">observation_transformation</span><span class="p">,</span>
         <span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Compare two models for equality</span>
@@ -896,6 +917,7 @@ document.write(`
 
         <span class="k">return</span> <span class="kc">True</span>
 
+    <span class="nd">@cache_method</span>
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">hash</span><span class="p">(</span>
             <span class="p">(</span>
@@ -907,11 +929,14 @@ document.write(`
                 <span class="bp">self</span><span class="o">.</span><span class="n">_estimation_steps</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_initial_individual_estimates</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_datainfo</span><span class="p">,</span>
+                <span class="n">hash_df_runtime</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_dataset</span><span class="p">),</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_value_type</span><span class="p">,</span>
             <span class="p">)</span>
         <span class="p">)</span>
 
-<div class="viewcode-block" id="Model.to_dict"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.to_dict">[docs]</a>    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.to_dict">
+<a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.to_dict">[docs]</a>
+    <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_individual_estimates</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ie</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_initial_individual_estimates</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
@@ -933,7 +958,10 @@ document.write(`
             <span class="s1">&#39;initial_individual_estimates&#39;</span><span class="p">:</span> <span class="n">ie</span><span class="p">,</span>
         <span class="p">}</span></div>
 
-<div class="viewcode-block" id="Model.from_dict"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.from_dict">[docs]</a>    <span class="nd">@classmethod</span>
+
+<div class="viewcode-block" id="Model.from_dict">
+<a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.from_dict">[docs]</a>
+    <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
         <span class="n">ie_dict</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;initial_individual_estimates&#39;</span><span class="p">]</span>
         <span class="k">if</span> <span class="n">ie_dict</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -956,6 +984,7 @@ document.write(`
             <span class="n">observation_transformation</span><span class="o">=</span><span class="n">frozenmapping</span><span class="p">(</span><span class="n">obstrans</span><span class="p">),</span>
             <span class="n">initial_individual_estimates</span><span class="o">=</span><span class="n">ie</span><span class="p">,</span>
         <span class="p">)</span></div>
+
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;&lt;Pharmpy model object </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">&gt;&#39;</span>
@@ -1070,7 +1099,9 @@ document.write(`
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Name of parent model&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_parent_model</span>
 
-<div class="viewcode-block" id="Model.has_same_dataset_as"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.has_same_dataset_as">[docs]</a>    <span class="k">def</span> <span class="nf">has_same_dataset_as</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
+<div class="viewcode-block" id="Model.has_same_dataset_as">
+<a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.has_same_dataset_as">[docs]</a>
+    <span class="k">def</span> <span class="nf">has_same_dataset_as</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Check if this model has the same dataset as another model</span>
 
 <span class="sd">        Parameters</span>
@@ -1095,12 +1126,15 @@ document.write(`
         <span class="c1"># NOTE rely on duck-typing here (?)</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span></div>
 
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">description</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;A free text discription of the model&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_description</span>
 
-<div class="viewcode-block" id="Model.parse_model"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.parse_model">[docs]</a>    <span class="nd">@staticmethod</span>
+<div class="viewcode-block" id="Model.parse_model">
+<a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.parse_model">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">parse_model</span><span class="p">(</span><span class="n">path</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a model object by parsing a model file of any supported type</span>
 
@@ -1122,7 +1156,10 @@ document.write(`
         <span class="n">model</span> <span class="o">=</span> <span class="n">model_module</span><span class="o">.</span><span class="n">parse_model</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">model</span></div>
 
-<div class="viewcode-block" id="Model.parse_model_from_string"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.parse_model_from_string">[docs]</a>    <span class="nd">@staticmethod</span>
+
+<div class="viewcode-block" id="Model.parse_model_from_string">
+<a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.parse_model_from_string">[docs]</a>
+    <span class="nd">@staticmethod</span>
     <span class="k">def</span> <span class="nf">parse_model_from_string</span><span class="p">(</span><span class="n">code</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Create a model object by parsing a string with model code of any supported type</span>
 
@@ -1140,14 +1177,22 @@ document.write(`
         <span class="n">model</span> <span class="o">=</span> <span class="n">model_module</span><span class="o">.</span><span class="n">parse_model</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">model</span></div>
 
-<div class="viewcode-block" id="Model.update_source"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.update_source">[docs]</a>    <span class="k">def</span> <span class="nf">update_source</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Model.update_source">
+<a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.update_source">[docs]</a>
+    <span class="k">def</span> <span class="nf">update_source</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Update source code of the model. If any paths need to be changed or added (e.g. for a</span>
 <span class="sd">        NONMEM model with an updated dataset) they will be replaced with DUMMYPATH&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span></div>
 
-<div class="viewcode-block" id="Model.write_files"><a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.write_files">[docs]</a>    <span class="k">def</span> <span class="nf">write_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+
+<div class="viewcode-block" id="Model.write_files">
+<a class="viewcode-back" href="../../../api/pharmpy.model.Model.html#pharmpy.model.Model.write_files">[docs]</a>
+    <span class="k">def</span> <span class="nf">write_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Write all extra files needed for a specific external format.&quot;&quot;&quot;</span>
-        <span class="k">return</span> <span class="bp">self</span></div></div>
+        <span class="k">return</span> <span class="bp">self</span></div>
+</div>
+
 
 
 <span class="k">def</span> <span class="nf">compare_before_after_params</span><span class="p">(</span><span class="n">old</span><span class="p">,</span> <span class="n">new</span><span class="p">):</span>
@@ -1227,7 +1272,7 @@ document.write(`
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.0.1.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.2.
     <br/>
   </p>
 </div>
