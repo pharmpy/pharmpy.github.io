@@ -12,7 +12,7 @@ Compartment
 
       ~Compartment.amount
       ~Compartment.bioavailability
-      ~Compartment.dose
+      ~Compartment.doses
       ~Compartment.free_symbols
       ~Compartment.input
       ~Compartment.lag_time
@@ -25,6 +25,7 @@ Compartment
       ~Compartment.create
       ~Compartment.from_dict
       ~Compartment.replace
+      ~Compartment.sorted_doses
       ~Compartment.subs
       ~Compartment.to_dict
 
@@ -32,7 +33,7 @@ Compartment
 
    .. autoattribute:: amount
    .. autoattribute:: bioavailability
-   .. autoattribute:: dose
+   .. autoattribute:: doses
    .. autoattribute:: free_symbols
    .. autoattribute:: input
    .. autoattribute:: lag_time
@@ -43,5 +44,6 @@ Compartment
    .. automethod:: create
    .. automethod:: from_dict
    .. automethod:: replace
+   .. automethod:: sorted_doses
    .. automethod:: subs
    .. automethod:: to_dict

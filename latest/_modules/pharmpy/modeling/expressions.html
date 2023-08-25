@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.99.0 documentation</title>
+    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.100.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script src="../../../_static/documentation_options.js?v=b24fcec3"></script>
+    <script src="../../../_static/documentation_options.js?v=fdc1a90b"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -710,7 +710,7 @@ document.write(`
 <span class="sd">        First part of the new variable name</span>
 <span class="sd">    force_numbering : bool</span>
 <span class="sd">        Forces addition of number to name even if variable does not exist, e.g.</span>
-<span class="sd">        COVEFF --&gt; COVEFF1</span>
+<span class="sd">        COVEFF → COVEFF1</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1048,7 +1048,7 @@ document.write(`
 <span class="sd">             ETA₂</span>
 <span class="sd">    V = TVV⋅ℯ</span>
 <span class="sd">    S₁ = V</span>
-<span class="sd">    Bolus(AMT, admid=1)</span>
+<span class="sd">    Bolus(AMT, admid=1) → CENTRAL</span>
 <span class="sd">    ┌───────┐</span>
 <span class="sd">    │CENTRAL│──CL/V→</span>
 <span class="sd">    └───────┘</span>
@@ -1076,7 +1076,7 @@ document.write(`
 <span class="sd">    CL = TVCL⋅ℯ</span>
 <span class="sd">             ETA₂</span>
 <span class="sd">    V = TVV⋅ℯ</span>
-<span class="sd">    Bolus(AMT, admid=1)</span>
+<span class="sd">    Bolus(AMT, admid=1) → CENTRAL</span>
 <span class="sd">    ┌───────┐</span>
 <span class="sd">    │CENTRAL│──CL/V→</span>
 <span class="sd">    └───────┘</span>
@@ -1141,7 +1141,7 @@ document.write(`
 <span class="sd">             ETA₂</span>
 <span class="sd">    V = TVV⋅ℯ</span>
 <span class="sd">    S₁ = V</span>
-<span class="sd">    Bolus(AMT, admid=1)</span>
+<span class="sd">    Bolus(AMT, admid=1) → CENTRAL</span>
 <span class="sd">    ┌───────┐</span>
 <span class="sd">    │CENTRAL│──CL/V→</span>
 <span class="sd">    └───────┘</span>
@@ -1170,7 +1170,7 @@ document.write(`
 <span class="sd">    CL = TVCL⋅ℯ</span>
 <span class="sd">             η₂</span>
 <span class="sd">    V = TVV⋅ℯ</span>
-<span class="sd">    Bolus(AMT, admid=1)</span>
+<span class="sd">    Bolus(AMT, admid=1) → CENTRAL</span>
 <span class="sd">    ┌───────┐</span>
 <span class="sd">    │CENTRAL│──CL/V→</span>
 <span class="sd">    └───────┘</span>
@@ -1706,9 +1706,13 @@ document.write(`
     <span class="n">dependency_graph</span> <span class="o">=</span> <span class="n">_dependency_graph</span><span class="p">(</span><span class="n">natural_assignments</span><span class="p">)</span>
 
     <span class="n">pk_symbols</span> <span class="o">=</span> <span class="n">_filter_symbols</span><span class="p">(</span><span class="n">dependency_graph</span><span class="p">,</span> <span class="n">free_symbols</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="s2">&quot;EFFECT&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">pd_symbols</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="s2">&quot;EFFECT&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">free_symbols</span>
-        <span class="n">pk_symbols</span> <span class="o">=</span> <span class="n">pk_symbols</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">pd_symbols</span><span class="p">)</span>
+        <span class="n">pd_outflow</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="s2">&quot;EFFECT&quot;</span><span class="p">),</span> <span class="n">output</span>
+        <span class="p">)</span>
+        <span class="n">pk_symbols</span><span class="o">.</span><span class="n">remove</span><span class="p">(</span><span class="n">pd_outflow</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pk_symbols</span><span class="p">))</span></div>
 
 
@@ -1734,7 +1738,7 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; model = set_direct_effect(model, &quot;linear&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; get_pd_parameters(model)</span>
-<span class="sd">    [&#39;E0&#39;, &#39;Slope&#39;]</span>
+<span class="sd">    [&#39;E0&#39;, &#39;SLOPE&#39;]</span>
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
@@ -1787,8 +1791,8 @@ document.write(`
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;absorption&#39;</span><span class="p">:</span>
         <span class="k">return</span> <span class="p">(</span>
             <span class="p">[]</span>
-            <span class="k">if</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span>
-            <span class="k">else</span> <span class="n">_pk_free_symbols_from_compartment</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
+            <span class="k">if</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span>
+            <span class="k">else</span> <span class="n">_pk_free_symbols_from_compartment</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartments</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
         <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;distribution&#39;</span><span class="p">:</span>
@@ -2173,7 +2177,7 @@ document.write(`
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.3.
     <br/>
   </p>
 </div>

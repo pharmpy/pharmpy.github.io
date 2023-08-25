@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.statements &#8212; Pharmpy 0.99.0 documentation</title>
+    <title>pharmpy.model.statements &#8212; Pharmpy 0.100.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script src="../../../_static/documentation_options.js?v=b24fcec3"></script>
+    <script src="../../../_static/documentation_options.js?v=fdc1a90b"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -856,7 +856,7 @@ document.write(`
 
 <div class="viewcode-block" id="CompartmentalSystemBuilder.move_dose">
 <a class="viewcode-back" href="../../../api/pharmpy.model.CompartmentalSystemBuilder.html#pharmpy.model.CompartmentalSystemBuilder.move_dose">[docs]</a>
-    <span class="k">def</span> <span class="nf">move_dose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">move_dose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">source</span><span class="p">,</span> <span class="n">destination</span><span class="p">,</span> <span class="n">admid</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Move a dose input from one compartment to another</span>
 
 <span class="sd">        Parameters</span>
@@ -865,18 +865,37 @@ document.write(`
 <span class="sd">            Source compartment</span>
 <span class="sd">        destination : Compartment</span>
 <span class="sd">            Destination compartment</span>
+<span class="sd">        admid : int</span>
+<span class="sd">            Move dose with specified admid, move all if None. Default is None.</span>
+<span class="sd">        replace : bool</span>
+<span class="sd">            Replace dose of destination or add to. Default to True</span>
 
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">new_source</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dose</span><span class="o">=</span><span class="kc">None</span><span class="p">)</span>
-        <span class="n">new_dest</span> <span class="o">=</span> <span class="n">destination</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dose</span><span class="o">=</span><span class="n">source</span><span class="o">.</span><span class="n">dose</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">admid</span><span class="p">:</span>
+            <span class="n">new_source_dose</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">source</span><span class="o">.</span><span class="n">doses</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">admid</span> <span class="o">!=</span> <span class="n">admid</span><span class="p">])</span>
+            <span class="n">new_dest_dose</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">source</span><span class="o">.</span><span class="n">doses</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">admid</span> <span class="o">==</span> <span class="n">admid</span><span class="p">])</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_source_dose</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+            <span class="n">new_dest_dose</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">doses</span>
+        <span class="n">new_source</span> <span class="o">=</span> <span class="n">source</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">doses</span><span class="o">=</span><span class="n">new_source_dose</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">replace</span><span class="p">:</span>
+            <span class="n">new_dest</span> <span class="o">=</span> <span class="n">destination</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">doses</span><span class="o">=</span><span class="n">source</span><span class="o">.</span><span class="n">doses</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_dest</span> <span class="o">=</span> <span class="n">destination</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">doses</span><span class="o">=</span><span class="n">destination</span><span class="o">.</span><span class="n">doses</span> <span class="o">+</span> <span class="n">new_dest_dose</span><span class="p">)</span>
         <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">source</span><span class="p">:</span> <span class="n">new_source</span><span class="p">,</span> <span class="n">destination</span><span class="p">:</span> <span class="n">new_dest</span><span class="p">}</span>
-        <span class="n">nx</span><span class="o">.</span><span class="n">relabel_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span></div>
+        <span class="n">nx</span><span class="o">.</span><span class="n">relabel_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new_source</span><span class="p">,</span> <span class="n">new_dest</span></div>
 
 
 <div class="viewcode-block" id="CompartmentalSystemBuilder.set_dose">
 <a class="viewcode-back" href="../../../api/pharmpy.model.CompartmentalSystemBuilder.html#pharmpy.model.CompartmentalSystemBuilder.set_dose">[docs]</a>
-    <span class="k">def</span> <span class="nf">set_dose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compartment</span><span class="p">,</span> <span class="n">dose</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set dose of compartment</span>
+    <span class="k">def</span> <span class="nf">set_dose</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">compartment</span><span class="p">,</span> <span class="n">dose</span><span class="p">,</span> <span class="n">replace</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">admid</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Set dose of compartment, replacing the previous by default.</span>
+
+<span class="sd">        Set replace to False to instead add the dose to existing ones.</span>
+
+<span class="sd">        Given an admid, the given dose will replace the corresponding dose</span>
+<span class="sd">        based on that admid. This will ignore the &#39;replace&#39; argument.</span>
 
 <span class="sd">        Parameters</span>
 <span class="sd">        ----------</span>
@@ -884,13 +903,30 @@ document.write(`
 <span class="sd">            Compartment for which to change dose</span>
 <span class="sd">        dose : Dose</span>
 <span class="sd">            New dose</span>
+<span class="sd">        replace : bool</span>
+<span class="sd">            Replace existing doses or not. Default is True</span>
+<span class="sd">        admid : Optional[int]</span>
+<span class="sd">            Option to replace doses with specified admid.</span>
 
 <span class="sd">        Returns</span>
 <span class="sd">        -------</span>
 <span class="sd">        Compartment</span>
 <span class="sd">            The new updated compartment</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="n">new_comp</span> <span class="o">=</span> <span class="n">compartment</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dose</span><span class="o">=</span><span class="n">dose</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">dose</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">dose</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dose</span><span class="p">,</span> <span class="n">Dose</span><span class="p">):</span>
+            <span class="n">dose</span> <span class="o">=</span> <span class="p">(</span><span class="n">dose</span><span class="p">,)</span>
+
+        <span class="k">elif</span> <span class="n">admid</span><span class="p">:</span>
+            <span class="n">replace</span> <span class="o">=</span> <span class="kc">True</span>
+            <span class="n">old_dose</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">([</span><span class="n">d</span> <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">compartment</span><span class="o">.</span><span class="n">doses</span> <span class="k">if</span> <span class="n">d</span><span class="o">.</span><span class="n">admid</span> <span class="o">!=</span> <span class="n">admid</span><span class="p">])</span>
+            <span class="n">dose</span> <span class="o">=</span> <span class="n">old_dose</span> <span class="o">+</span> <span class="n">dose</span>
+
+        <span class="k">if</span> <span class="n">replace</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">compartment</span><span class="o">.</span><span class="n">doses</span><span class="p">:</span>
+            <span class="n">new_comp</span> <span class="o">=</span> <span class="n">compartment</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">doses</span><span class="o">=</span><span class="n">dose</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">new_comp</span> <span class="o">=</span> <span class="n">compartment</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">doses</span><span class="o">=</span><span class="n">compartment</span><span class="o">.</span><span class="n">doses</span> <span class="o">+</span> <span class="n">dose</span><span class="p">)</span>
         <span class="n">mapping</span> <span class="o">=</span> <span class="p">{</span><span class="n">compartment</span><span class="p">:</span> <span class="n">new_comp</span><span class="p">}</span>
         <span class="n">nx</span><span class="o">.</span><span class="n">relabel_nodes</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">,</span> <span class="n">mapping</span><span class="p">,</span> <span class="n">copy</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">new_comp</span></div>
@@ -1204,7 +1240,7 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; model.statements.ode_system.subs({&#39;AMT&#39;: &#39;DOSE&#39;})</span>
-<span class="sd">        Bolus(DOSE, admid=1)</span>
+<span class="sd">        Bolus(DOSE, admid=1) → CENTRAL</span>
 <span class="sd">        ┌───────┐</span>
 <span class="sd">        │CENTRAL│──CL/V→</span>
 <span class="sd">        └───────┘</span>
@@ -1247,7 +1283,7 @@ document.write(`
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">)</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_t</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_t</span>
             <span class="ow">and</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_dict_of_dicts</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span> <span class="o">==</span> <span class="n">nx</span><span class="o">.</span><span class="n">to_dict_of_dicts</span><span class="p">(</span><span class="n">other</span><span class="o">.</span><span class="n">_g</span><span class="p">)</span>
-            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartment</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">dosing_compartment</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartments</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">dosing_compartments</span>
         <span class="p">)</span>
 
     <span class="k">def</span> <span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1387,7 +1423,7 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; model.statements.ode_system.get_compartment_inflows(output)</span>
-<span class="sd">        [(Compartment(CENTRAL, amount=A_CENTRAL, dose=Bolus(AMT, admid=1)), CL/V)]</span>
+<span class="sd">        [(Compartment(CENTRAL, amount=A_CENTRAL, doses=Bolus(AMT, admid=1)), CL/V)]</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">compartment</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
             <span class="n">compartment</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="n">compartment</span><span class="p">)</span>
@@ -1451,7 +1487,7 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; central = model.statements.ode_system.find_compartment(&quot;CENTRAL&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; central</span>
-<span class="sd">        Compartment(CENTRAL, amount=A_CENTRAL, dose=Bolus(AMT, admid=1))</span>
+<span class="sd">        Compartment(CENTRAL, amount=A_CENTRAL, doses=Bolus(AMT, admid=1))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">for</span> <span class="n">comp</span> <span class="ow">in</span> <span class="n">_comps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">):</span>
             <span class="k">if</span> <span class="n">comp</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">name</span><span class="p">:</span>
@@ -1488,8 +1524,8 @@ document.write(`
 
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dosing_compartment</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-<span class="w">        </span><span class="sd">&quot;&quot;&quot;The dosing compartment</span>
+    <span class="k">def</span> <span class="nf">dosing_compartments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;The dosing compartment(s)</span>
 
 <span class="sd">        A dosing compartment is a compartment that receives an input dose. Multiple</span>
 <span class="sd">        dose compartments are supported. The order of dose compartments is defined</span>
@@ -1504,12 +1540,12 @@ document.write(`
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; model.statements.ode_system.dosing_compartment[0]</span>
-<span class="sd">        Compartment(CENTRAL, amount=A_CENTRAL, dose=Bolus(AMT, admid=1))</span>
+<span class="sd">        &gt;&gt;&gt; model.statements.ode_system.dosing_compartments</span>
+<span class="sd">        (Compartment(CENTRAL, amount=A_CENTRAL, doses=Bolus(AMT, admid=1)),)</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">dosing_comps</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
         <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">_comps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">doses</span><span class="p">:</span>
                 <span class="k">if</span> <span class="n">node</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">central_compartment</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                     <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">dosing_comps</span><span class="p">)</span> <span class="o">&gt;=</span> <span class="mi">2</span><span class="p">:</span>
                         <span class="n">dosing_comps</span> <span class="o">=</span> <span class="n">dosing_comps</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="p">(</span><span class="n">node</span><span class="p">,)</span> <span class="o">+</span> <span class="n">dosing_comps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">:]</span>
@@ -1540,7 +1576,7 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; model.statements.ode_system.central_compartment</span>
-<span class="sd">        Compartment(CENTRAL, amount=A_CENTRAL, dose=Bolus(AMT, admid=1))</span>
+<span class="sd">        Compartment(CENTRAL, amount=A_CENTRAL, doses=Bolus(AMT, admid=1))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="c1"># E.g. TMDD models have more than one input</span>
@@ -1601,7 +1637,7 @@ document.write(`
 <span class="sd">        []</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">transits</span> <span class="o">=</span> <span class="p">[]</span>
-        <span class="n">comp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">comp</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">get_compartment_inflows</span><span class="p">(</span><span class="n">comp</span><span class="p">))</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">transits</span>
         <span class="n">outflows</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
@@ -1652,7 +1688,7 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; model = set_first_order_absorption(model)</span>
 <span class="sd">        &gt;&gt;&gt; model.statements.ode_system.find_depot(model.statements)</span>
-<span class="sd">        Compartment(DEPOT, amount=A_DEPOT, dose=Bolus(AMT, admid=1))</span>
+<span class="sd">        Compartment(DEPOT, amount=A_DEPOT, doses=Bolus(AMT, admid=1))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">transits</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">find_transit_compartments</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
         <span class="n">depot</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_depot</span><span class="p">()</span>
@@ -1740,7 +1776,7 @@ document.write(`
     <span class="k">def</span> <span class="nf">_order_compartments</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Return list of all compartments in canonical order&quot;&quot;&quot;</span>
         <span class="k">try</span><span class="p">:</span>
-            <span class="n">dosecmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+            <span class="n">dosecmt</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
             <span class="c1"># Fallback for cases where no dose is available (yet)</span>
             <span class="k">return</span> <span class="nb">list</span><span class="p">(</span><span class="n">_comps</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_g</span><span class="p">))</span>
@@ -1805,7 +1841,7 @@ document.write(`
         <span class="k">def</span> <span class="nf">comp_string</span><span class="p">(</span><span class="n">comp</span><span class="p">):</span>
             <span class="k">return</span> <span class="n">comp</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">lag_string</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span> <span class="o">+</span> <span class="n">f_string</span><span class="p">(</span><span class="n">comp</span><span class="p">)</span>
 
-        <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">comp_height</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="n">comp_width</span> <span class="o">=</span> <span class="mi">0</span>
 
@@ -1828,7 +1864,7 @@ document.write(`
         <span class="n">ncols</span> <span class="o">=</span> <span class="n">comp_width</span> <span class="o">*</span> <span class="mi">2</span>
         <span class="n">grid</span> <span class="o">=</span> <span class="n">unicode</span><span class="o">.</span><span class="n">Grid</span><span class="p">(</span><span class="n">nrows</span><span class="p">,</span> <span class="n">ncols</span><span class="p">)</span>
 
-        <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">current</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">col</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="k">if</span> <span class="n">comp_nrows</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">or</span> <span class="n">comp_nrows</span> <span class="o">==</span> <span class="mi">2</span><span class="p">:</span>
             <span class="n">main_row</span> <span class="o">=</span> <span class="mi">0</span> <span class="o">+</span> <span class="n">have_zo_input</span>
@@ -1895,8 +1931,11 @@ document.write(`
             <span class="k">if</span> <span class="ow">not</span> <span class="n">current</span><span class="p">:</span>
                 <span class="k">break</span>
 
-        <span class="n">dose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartment</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">dose</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">dose</span><span class="p">)</span> <span class="o">+</span> <span class="s1">&#39;</span><span class="se">\n</span><span class="s1">&#39;</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
+        <span class="n">all_doses</span> <span class="o">=</span> <span class="s2">&quot;&quot;</span>
+        <span class="k">for</span> <span class="n">dose_comp</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">dosing_compartments</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">dose</span> <span class="ow">in</span> <span class="n">dose_comp</span><span class="o">.</span><span class="n">doses</span><span class="p">:</span>
+                <span class="n">all_doses</span> <span class="o">+=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="nb">str</span><span class="p">(</span><span class="n">dose</span><span class="p">)</span><span class="si">}</span><span class="s1"> → </span><span class="si">{</span><span class="n">dose_comp</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> </span><span class="se">\n</span><span class="s1">&#39;</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">all_doses</span> <span class="o">+</span> <span class="nb">str</span><span class="p">(</span><span class="n">grid</span><span class="p">)</span><span class="o">.</span><span class="n">rstrip</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">s</span></div>
 
 
@@ -1910,7 +1949,7 @@ document.write(`
 <span class="sd">    ----------</span>
 <span class="sd">    name : str</span>
 <span class="sd">        Compartment name</span>
-<span class="sd">    dose : Dose</span>
+<span class="sd">    doses : tuple(Dose)</span>
 <span class="sd">        Dose object for dose into this compartment. Default None for no dose.</span>
 <span class="sd">    input : Expression</span>
 <span class="sd">        Expression for other inputs to the compartment</span>
@@ -1929,23 +1968,23 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; comp</span>
 <span class="sd">    Compartment(DEPOT, amount=A_DEPOT, lag_time=ALAG)</span>
 <span class="sd">    &gt;&gt;&gt; dose = Bolus.create(&quot;AMT&quot;)</span>
-<span class="sd">    &gt;&gt;&gt; comp = Compartment.create(&quot;DEPOT&quot;, dose=dose)</span>
+<span class="sd">    &gt;&gt;&gt; comp = Compartment.create(&quot;DEPOT&quot;, doses=(dose,))</span>
 <span class="sd">    &gt;&gt;&gt; comp</span>
-<span class="sd">    Compartment(DEPOT, amount=A_DEPOT, dose=Bolus(AMT, admid=1))</span>
+<span class="sd">    Compartment(DEPOT, amount=A_DEPOT, doses=Bolus(AMT, admid=1))</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">,</span>
         <span class="n">amount</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">doses</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span>
         <span class="nb">input</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="n">lag_time</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="n">bioavailability</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_amount</span> <span class="o">=</span> <span class="n">amount</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_dose</span> <span class="o">=</span> <span class="n">dose</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_doses</span> <span class="o">=</span> <span class="n">doses</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_input</span> <span class="o">=</span> <span class="nb">input</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span> <span class="o">=</span> <span class="n">lag_time</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span> <span class="o">=</span> <span class="n">bioavailability</span>
@@ -1957,7 +1996,7 @@ document.write(`
         <span class="bp">cls</span><span class="p">,</span>
         <span class="n">name</span><span class="p">,</span>
         <span class="n">amount</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
-        <span class="n">dose</span><span class="o">=</span><span class="kc">None</span><span class="p">,</span>
+        <span class="n">doses</span><span class="o">=</span><span class="nb">tuple</span><span class="p">(),</span>
         <span class="nb">input</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="n">lag_time</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span>
         <span class="n">bioavailability</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Integer</span><span class="p">(</span><span class="mi">1</span><span class="p">),</span>
@@ -1968,15 +2007,21 @@ document.write(`
             <span class="n">amount</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">amount</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">amount</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;A_</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">dose</span><span class="p">,</span> <span class="n">Dose</span><span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;dose must be of Dose type (or None)&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">doses</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="nb">tuple</span><span class="p">(</span><span class="n">doses</span><span class="p">)</span>
+            <span class="k">except</span> <span class="ne">TypeError</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;dose(s) need to be given as a sequence&quot;</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="n">doses</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">Dose</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s2">&quot;All doses need to be of type Dose&quot;</span><span class="p">)</span>
         <span class="nb">input</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span>
         <span class="n">lag_time</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">lag_time</span><span class="p">)</span>
         <span class="n">bioavailability</span> <span class="o">=</span> <span class="n">parse_expr</span><span class="p">(</span><span class="n">bioavailability</span><span class="p">)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">amount</span><span class="o">=</span><span class="n">amount</span><span class="p">,</span>
-            <span class="n">dose</span><span class="o">=</span><span class="n">dose</span><span class="p">,</span>
+            <span class="n">doses</span><span class="o">=</span><span class="n">doses</span><span class="p">,</span>
             <span class="nb">input</span><span class="o">=</span><span class="nb">input</span><span class="p">,</span>
             <span class="n">lag_time</span><span class="o">=</span><span class="n">lag_time</span><span class="p">,</span>
             <span class="n">bioavailability</span><span class="o">=</span><span class="n">bioavailability</span><span class="p">,</span>
@@ -1988,14 +2033,14 @@ document.write(`
     <span class="k">def</span> <span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">):</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
         <span class="n">amount</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;amount&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_amount</span><span class="p">)</span>
-        <span class="n">dose</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;dose&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dose</span><span class="p">)</span>
+        <span class="n">doses</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;doses&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doses</span><span class="p">)</span>
         <span class="nb">input</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;input&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input</span><span class="p">)</span>
         <span class="n">lag_time</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;lag_time&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span><span class="p">)</span>
         <span class="n">bioavailability</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;bioavailability&quot;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">Compartment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
             <span class="n">amount</span><span class="o">=</span><span class="n">amount</span><span class="p">,</span>
-            <span class="n">dose</span><span class="o">=</span><span class="n">dose</span><span class="p">,</span>
+            <span class="n">doses</span><span class="o">=</span><span class="n">doses</span><span class="p">,</span>
             <span class="nb">input</span><span class="o">=</span><span class="nb">input</span><span class="p">,</span>
             <span class="n">lag_time</span><span class="o">=</span><span class="n">lag_time</span><span class="p">,</span>
             <span class="n">bioavailability</span><span class="o">=</span><span class="n">bioavailability</span><span class="p">,</span>
@@ -2013,8 +2058,25 @@ document.write(`
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_amount</span>
 
     <span class="nd">@property</span>
-    <span class="k">def</span> <span class="nf">dose</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dose</span>
+    <span class="k">def</span> <span class="nf">doses</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="c1"># FIXME : return in defined order with oral doses coming first!</span>
+        <span class="c1"># Only do this for multiple doses.</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_doses</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_doses</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">d</span><span class="p">,</span> <span class="n">Infusion</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doses</span>
+
+<div class="viewcode-block" id="Compartment.sorted_doses">
+<a class="viewcode-back" href="../../../api/pharmpy.model.Compartment.html#pharmpy.model.Compartment.sorted_doses">[docs]</a>
+    <span class="k">def</span> <span class="nf">sorted_doses</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Return doses to compartment where oral doses are located first&quot;&quot;&quot;</span>
+        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_doses</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="kn">from</span> <span class="nn">pharmpy.modeling.odes</span> <span class="kn">import</span> <span class="n">_dose_zo</span>
+
+            <span class="k">return</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">doses</span><span class="p">,</span> <span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">d</span><span class="p">:</span> <span class="n">_dose_zo</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">d</span><span class="p">),</span> <span class="n">reverse</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doses</span></div>
+
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">input</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -2038,13 +2100,14 @@ document.write(`
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from pharmpy.model import Bolus, Compartment</span>
 <span class="sd">        &gt;&gt;&gt; dose = Bolus.create(&quot;AMT&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; comp = Compartment.create(&quot;CENTRAL&quot;, dose=dose, lag_time=&quot;ALAG&quot;)</span>
+<span class="sd">        &gt;&gt;&gt; comp = Compartment.create(&quot;CENTRAL&quot;, doses=(dose,), lag_time=&quot;ALAG&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; comp.free_symbols  # doctest: +SKIP</span>
 <span class="sd">        {A_CENTRAL, ALAG, AMT}</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="n">symbs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">symbs</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">doses</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">doses</span><span class="p">:</span>
+                <span class="n">symbs</span> <span class="o">|=</span> <span class="n">d</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">symbs</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">symbs</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">lag_time</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="n">symbs</span> <span class="o">|=</span> <span class="bp">self</span><span class="o">.</span><span class="n">bioavailability</span><span class="o">.</span><span class="n">free_symbols</span>
@@ -2059,18 +2122,20 @@ document.write(`
 <span class="sd">        --------</span>
 <span class="sd">        &gt;&gt;&gt; from pharmpy.model import Bolus, Compartment</span>
 <span class="sd">        &gt;&gt;&gt; dose = Bolus.create(&quot;AMT&quot;)</span>
-<span class="sd">        &gt;&gt;&gt; comp = Compartment.create(&quot;CENTRAL&quot;, dose=dose)</span>
+<span class="sd">        &gt;&gt;&gt; comp = Compartment.create(&quot;CENTRAL&quot;, doses=(dose,))</span>
 <span class="sd">        &gt;&gt;&gt; comp.subs({&quot;AMT&quot;: &quot;DOSE&quot;})</span>
-<span class="sd">        Compartment(CENTRAL, amount=A_CENTRAL, dose=Bolus(DOSE, admid=1))</span>
+<span class="sd">        Compartment(CENTRAL, amount=A_CENTRAL, doses=Bolus(DOSE, admid=1))</span>
 <span class="sd">        &quot;&quot;&quot;</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">dose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">)</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">doses</span><span class="p">:</span>
+            <span class="n">new_doses</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">d</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">doses</span><span class="p">:</span>
+                <span class="n">new_doses</span> <span class="o">=</span> <span class="n">new_doses</span> <span class="o">+</span> <span class="p">(</span><span class="n">d</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">substitutions</span><span class="p">),)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">dose</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="n">new_doses</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">Compartment</span><span class="p">(</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="p">,</span>
             <span class="n">amount</span><span class="o">=</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_amount</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">),</span>
-            <span class="n">dose</span><span class="o">=</span><span class="n">dose</span><span class="p">,</span>
+            <span class="n">doses</span><span class="o">=</span><span class="n">new_doses</span><span class="p">,</span>
             <span class="nb">input</span><span class="o">=</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">),</span>
             <span class="n">lag_time</span><span class="o">=</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">),</span>
             <span class="n">bioavailability</span><span class="o">=</span><span class="n">subs</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span><span class="p">,</span> <span class="n">substitutions</span><span class="p">),</span>
@@ -2082,7 +2147,7 @@ document.write(`
             <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">Compartment</span><span class="p">)</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_name</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_amount</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_amount</span>
-            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dose</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_dose</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doses</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_doses</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_input</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_input</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_lag_time</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_bioavailability</span>
@@ -2093,7 +2158,7 @@ document.write(`
             <span class="p">(</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_amount</span><span class="p">,</span>
-                <span class="bp">self</span><span class="o">.</span><span class="n">_dose</span><span class="p">,</span>
+                <span class="bp">self</span><span class="o">.</span><span class="n">_doses</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_input</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span><span class="p">,</span>
                 <span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span><span class="p">,</span>
@@ -2103,15 +2168,15 @@ document.write(`
 <div class="viewcode-block" id="Compartment.to_dict">
 <a class="viewcode-back" href="../../../api/pharmpy.model.Compartment.html#pharmpy.model.Compartment.to_dict">[docs]</a>
     <span class="k">def</span> <span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dose</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">dose</span> <span class="o">=</span> <span class="kc">None</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doses</span><span class="p">:</span>
+            <span class="n">all_doses</span> <span class="o">=</span> <span class="kc">None</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">dose</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dose</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span>
+            <span class="n">all_doses</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">dose</span><span class="o">.</span><span class="n">to_dict</span><span class="p">()</span> <span class="k">for</span> <span class="n">dose</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_doses</span><span class="p">)</span>
         <span class="k">return</span> <span class="p">{</span>
             <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="s1">&#39;Compartment&#39;</span><span class="p">,</span>
             <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
             <span class="s1">&#39;amount&#39;</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">srepr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_amount</span><span class="p">),</span>
-            <span class="s1">&#39;dose&#39;</span><span class="p">:</span> <span class="n">dose</span><span class="p">,</span>
+            <span class="s1">&#39;doses&#39;</span><span class="p">:</span> <span class="n">all_doses</span><span class="p">,</span>
             <span class="s1">&#39;input&#39;</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">srepr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_input</span><span class="p">),</span>
             <span class="s1">&#39;lag_time&#39;</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">srepr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span><span class="p">),</span>
             <span class="s1">&#39;bioavailability&#39;</span><span class="p">:</span> <span class="n">sympy</span><span class="o">.</span><span class="n">srepr</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span><span class="p">),</span>
@@ -2122,16 +2187,19 @@ document.write(`
 <a class="viewcode-back" href="../../../api/pharmpy.model.Compartment.html#pharmpy.model.Compartment.from_dict">[docs]</a>
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;dose&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">dose</span> <span class="o">=</span> <span class="kc">None</span>
-        <span class="k">elif</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;dose&#39;</span><span class="p">][</span><span class="s1">&#39;class&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Bolus&#39;</span><span class="p">:</span>
-            <span class="n">dose</span> <span class="o">=</span> <span class="n">Bolus</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;dose&#39;</span><span class="p">])</span>
+        <span class="k">if</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;doses&#39;</span><span class="p">]</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">all_doses</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">dose</span> <span class="o">=</span> <span class="n">Infusion</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;dose&#39;</span><span class="p">])</span>
+            <span class="n">all_doses</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">()</span>
+            <span class="k">for</span> <span class="n">dose</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;doses&#39;</span><span class="p">]:</span>
+                <span class="k">if</span> <span class="n">dose</span><span class="p">[</span><span class="s1">&#39;class&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="s1">&#39;Bolus&#39;</span><span class="p">:</span>
+                    <span class="n">all_doses</span> <span class="o">+=</span> <span class="p">(</span><span class="n">Bolus</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">dose</span><span class="p">),)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">all_doses</span> <span class="o">+=</span> <span class="p">(</span><span class="n">Infusion</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">dose</span><span class="p">),)</span>
         <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
             <span class="n">name</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
             <span class="n">amount</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">parse_expr</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;amount&#39;</span><span class="p">]),</span>
-            <span class="n">dose</span><span class="o">=</span><span class="n">dose</span><span class="p">,</span>
+            <span class="n">doses</span><span class="o">=</span><span class="n">all_doses</span><span class="p">,</span>
             <span class="nb">input</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">parse_expr</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;input&#39;</span><span class="p">]),</span>
             <span class="n">lag_time</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">parse_expr</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;lag_time&#39;</span><span class="p">]),</span>
             <span class="n">bioavailability</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">parse_expr</span><span class="p">(</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;bioavailability&#39;</span><span class="p">]),</span>
@@ -2140,12 +2208,18 @@ document.write(`
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">lag</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">lag_time</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;, lag_time=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_lag_time</span><span class="si">}</span><span class="s1">&#39;</span>
-        <span class="n">dose</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">dose</span> <span class="ow">is</span> <span class="kc">None</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;, dose=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_dose</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="n">doses</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="s1">&#39;&#39;</span>
+            <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">doses</span> <span class="ow">is</span> <span class="nb">tuple</span><span class="p">()</span>
+            <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;, doses=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_doses</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="w"> </span><span class="k">if</span><span class="w"> </span><span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_doses</span><span class="p">)</span><span class="w"> </span><span class="o">==</span><span class="w"> </span><span class="mi">1</span><span class="w"> </span><span class="k">else</span><span class="w"> </span><span class="bp">self</span><span class="o">.</span><span class="n">_doses</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
         <span class="nb">input</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">input</span> <span class="o">==</span> <span class="mi">0</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;, input=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_input</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="n">bioavailability</span> <span class="o">=</span> <span class="p">(</span>
             <span class="s1">&#39;&#39;</span> <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">bioavailability</span> <span class="o">==</span> <span class="mi">1</span> <span class="k">else</span> <span class="sa">f</span><span class="s1">&#39;, bioavailability=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_bioavailability</span><span class="si">}</span><span class="s1">&#39;</span>
         <span class="p">)</span>
-        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;Compartment(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">, amount=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_amount</span><span class="si">}{</span><span class="n">dose</span><span class="si">}{</span><span class="nb">input</span><span class="si">}{</span><span class="n">lag</span><span class="si">}{</span><span class="n">bioavailability</span><span class="si">}</span><span class="s1">)&#39;</span></div>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;Compartment(</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1">, amount=</span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">_amount</span><span class="si">}{</span><span class="n">doses</span><span class="si">}{</span><span class="nb">input</span><span class="si">}{</span><span class="n">lag</span><span class="si">}{</span><span class="n">bioavailability</span><span class="si">}</span><span class="s1">)&#39;</span>
+        <span class="p">)</span></div>
 
 
 
@@ -2533,7 +2607,7 @@ document.write(`
 <span class="sd">        &gt;&gt;&gt; from pharmpy.modeling import load_example_model</span>
 <span class="sd">        &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">        &gt;&gt;&gt; model.statements.ode_system</span>
-<span class="sd">        Bolus(AMT, admid=1)</span>
+<span class="sd">        Bolus(AMT, admid=1) → CENTRAL</span>
 <span class="sd">        ┌───────┐</span>
 <span class="sd">        │CENTRAL│──CL/V→</span>
 <span class="sd">        └───────┘</span>
@@ -3047,7 +3121,7 @@ document.write(`
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.3.
     <br/>
   </p>
 </div>

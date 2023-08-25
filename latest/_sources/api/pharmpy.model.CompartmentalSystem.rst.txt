@@ -14,7 +14,7 @@ CompartmentalSystem
       ~CompartmentalSystem.central_compartment
       ~CompartmentalSystem.compartment_names
       ~CompartmentalSystem.compartmental_matrix
-      ~CompartmentalSystem.dosing_compartment
+      ~CompartmentalSystem.dosing_compartments
       ~CompartmentalSystem.eqs
       ~CompartmentalSystem.free_symbols
       ~CompartmentalSystem.peripheral_compartments
@@ -47,7 +47,7 @@ CompartmentalSystem
    .. autoattribute:: central_compartment
    .. autoattribute:: compartment_names
    .. autoattribute:: compartmental_matrix
-   .. autoattribute:: dosing_compartment
+   .. autoattribute:: dosing_compartments
    .. autoattribute:: eqs
    .. autoattribute:: free_symbols
    .. autoattribute:: peripheral_compartments

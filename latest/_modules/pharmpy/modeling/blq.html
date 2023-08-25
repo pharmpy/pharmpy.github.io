@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.blq &#8212; Pharmpy 0.99.0 documentation</title>
+    <title>pharmpy.modeling.blq &#8212; Pharmpy 0.100.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script src="../../../_static/documentation_options.js?v=b24fcec3"></script>
+    <script src="../../../_static/documentation_options.js?v=fdc1a90b"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -501,14 +501,37 @@ document.write(`
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Transform for BLQ data</span>
 
 <span class="sd">    Transform a given model, methods available are m1, m3, m4, m5, m6 and m7 [1]_.</span>
+<span class="sd">    The blq information can come from the dataset, the lloq option or a combination. Both LLOQ and BLQ</span>
+<span class="sd">    columns are supported. The table below explains which columns are used for the various cases:</span>
+
+<span class="sd">    +-------------+-------------+------------+-------------------+---------------+-------------------+</span>
+<span class="sd">    | lloq option | LLOQ column | BLQ column | Used as indicator | Used as level | Note              |</span>
+<span class="sd">    +=============+=============+============+===================+===============+===================+</span>
+<span class="sd">    | Available   | NA          | NA         | DV &lt; lloq         | lloq          |                   |</span>
+<span class="sd">    +-------------+-------------+------------+-------------------+---------------+-------------------+</span>
+<span class="sd">    | NA          | Available   | NA         | DV &lt; LLOQ         | LLOQ          |                   |</span>
+<span class="sd">    +-------------+-------------+------------+-------------------+---------------+-------------------+</span>
+<span class="sd">    | NA          | NA          | Available  | BLQ               | nothing       | Only for M1 and M7|</span>
+<span class="sd">    +-------------+-------------+------------+-------------------+---------------+-------------------+</span>
+<span class="sd">    | NA          | NA          | NA         | NA                | NA            | No BLQ handling   |</span>
+<span class="sd">    +-------------+-------------+------------+-------------------+---------------+-------------------+</span>
+<span class="sd">    | NA          | Available   | Available  | BLQ               | LLOQ          | DV column not used|</span>
+<span class="sd">    +-------------+-------------+------------+-------------------+---------------+-------------------+</span>
+<span class="sd">    | Available   | NA          | Available  | BLQ               | lloq          |                   |</span>
+<span class="sd">    +-------------+-------------+------------+-------------------+---------------+-------------------+</span>
+<span class="sd">    | Available   | Available   | NA         | DV &lt; lloq         | lloq          | Column overridden |</span>
+<span class="sd">    +-------------+-------------+------------+-------------------+---------------+-------------------+</span>
+<span class="sd">    | Available   | Available   | Available  | DV &lt; lloq         | lloq          | Columns overridden|</span>
+<span class="sd">    +-------------+-------------+------------+-------------------+---------------+-------------------+</span>
+
 <span class="sd">    Current limitations of the m3 and m4 method:</span>
 
 <span class="sd">    * Does not support covariance between epsilons</span>
 <span class="sd">    * Supports additive, proportional, combined, and power error model</span>
 
 <span class="sd">    .. [1] Beal SL. Ways to fit a PK model with some data below the quantification</span>
-<span class="sd">    limit. J Pharmacokinet Pharmacodyn. 2001 Oct;28(5):481-504. doi: 10.1023/a:1012299115260.</span>
-<span class="sd">    Erratum in: J Pharmacokinet Pharmacodyn 2002 Jun;29(3):309. PMID: 11768292.</span>
+<span class="sd">       limit. J Pharmacokinet Pharmacodyn. 2001 Oct;28(5):481-504. doi: 10.1023/a:1012299115260.</span>
+<span class="sd">       Erratum in: J Pharmacokinet Pharmacodyn 2002 Jun;29(3):309. PMID: 11768292.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
@@ -539,6 +562,7 @@ document.write(`
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
 <span class="sd">    remove_loq_data</span>
+<span class="sd">    set_lloq_data</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">method</span> <span class="o">=</span> <span class="n">method</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
@@ -547,79 +571,66 @@ document.write(`
             <span class="sa">f</span><span class="s1">&#39;Invalid `method`: got `</span><span class="si">{</span><span class="n">method</span><span class="si">}</span><span class="s1">`,&#39;</span> <span class="sa">f</span><span class="s1">&#39; must be one of </span><span class="si">{</span><span class="nb">sorted</span><span class="p">(</span><span class="n">SUPPORTED_METHODS</span><span class="p">)</span><span class="si">}</span><span class="s1">.&#39;</span>
         <span class="p">)</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">lloq_col</span><span class="p">,</span> <span class="n">tp</span> <span class="o">=</span> <span class="n">_get_blq_name_and_type</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-        <span class="n">tp</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">blq_col</span><span class="p">,</span> <span class="n">lloq_col</span> <span class="o">=</span> <span class="n">_get_blq_and_lloq_columns</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">indicator</span><span class="p">,</span> <span class="n">indicator_type</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">level_type</span> <span class="o">=</span> <span class="n">_which_indicator_and_level</span><span class="p">(</span>
+        <span class="n">lloq</span><span class="p">,</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="n">blq_col</span><span class="p">,</span> <span class="n">method</span>
+    <span class="p">)</span>
 
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;m1&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">_m1_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="p">,</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_m1_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">indicator_type</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">method</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;m3&#39;</span><span class="p">,</span> <span class="s1">&#39;m4&#39;</span><span class="p">):</span>
         <span class="n">_verify_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">_m3_m4_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_m3_m4_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">indicator_type</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">level_type</span><span class="p">,</span> <span class="n">method</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;m5&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">_m5_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="p">,</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_m5_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">indicator_type</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">level_type</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;m6&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">_m6_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="p">,</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_m6_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">indicator_type</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">level_type</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;m7&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">_m7_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="p">,</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="n">tp</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">_m7_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">indicator_type</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
 
 
 
-<span class="k">def</span> <span class="nf">_m1_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="p">,</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="n">tp</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">lloq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">tp</span> <span class="o">==</span> <span class="s1">&#39;lloq&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq_col</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">tp</span> <span class="o">==</span> <span class="s1">&#39;blqdv&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">blq</span><span class="o">=</span><span class="n">lloq_col</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_m1_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">tp</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">tp</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;lloq&#39;</span><span class="p">,</span> <span class="s1">&#39;LLOQ&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">indicator</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># tp == &#39;blq&#39;</span>
+        <span class="k">return</span> <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">blq</span><span class="o">=</span><span class="n">indicator</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_m5_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">level_type</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">level_type</span> <span class="o">==</span> <span class="s1">&#39;LLOQ&#39;</span><span class="p">:</span>
+        <span class="n">half</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s1">/2&#39;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;M1 method needs either LLOQ or BLQ in datainfo or a provided LLOQ value&quot;</span><span class="p">)</span>
+        <span class="n">half</span> <span class="o">=</span> <span class="n">level</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="n">tp</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;lloq&#39;</span><span class="p">,</span> <span class="s1">&#39;LLOQ&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">half</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">indicator</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># tp == &#39;blq&#39;</span>
+        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">half</span><span class="p">,</span> <span class="n">blq</span><span class="o">=</span><span class="n">indicator</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_m5_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="p">,</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="n">tp</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">lloq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tp</span> <span class="o">==</span> <span class="s1">&#39;blqdv&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">blq</span><span class="o">=</span><span class="n">lloq_col</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">lloq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">tp</span> <span class="o">==</span> <span class="s1">&#39;lloq&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lloq_col</span><span class="si">}</span><span class="s1">/2&#39;</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq_col</span><span class="p">)</span>
+<span class="k">def</span> <span class="nf">_m6_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">tp</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">level_type</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">level_type</span> <span class="o">==</span> <span class="s1">&#39;LLOQ&#39;</span><span class="p">:</span>
+        <span class="n">half</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s1">/2&#39;</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;M5 method needs either LLOQ in datainfo, BLQ in datainfo + an LLOQ value or only a provided LLOQ value&quot;</span>
-        <span class="p">)</span>
+        <span class="n">half</span> <span class="o">=</span> <span class="n">level</span> <span class="o">/</span> <span class="mi">2</span>
+    <span class="k">if</span> <span class="n">tp</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;lloq&#39;</span><span class="p">,</span> <span class="s1">&#39;LLOQ&#39;</span><span class="p">):</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">indicator</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">half</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">indicator</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># tp == &#39;blq&#39;</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">blq</span><span class="o">=</span><span class="n">indicator</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">half</span><span class="p">,</span> <span class="n">blq</span><span class="o">=</span><span class="n">indicator</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_m6_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="p">,</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="n">tp</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">lloq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">tp</span> <span class="o">==</span> <span class="s1">&#39;blqdv&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">blq</span><span class="o">=</span><span class="n">lloq_col</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">blq</span><span class="o">=</span><span class="n">lloq_col</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">lloq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span> <span class="o">/</span> <span class="mi">2</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">tp</span> <span class="o">==</span> <span class="s1">&#39;lloq&#39;</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">remove_loq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq_col</span><span class="p">,</span> <span class="n">keep</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">lloq_col</span><span class="si">}</span><span class="s1">/2&#39;</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq_col</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-            <span class="s2">&quot;M6 method needs either LLOQ in datainfo, BLQ in datainfo + an LLOQ value or only a provided LLOQ value&quot;</span>
-        <span class="p">)</span>
+<span class="k">def</span> <span class="nf">_m7_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">tp</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">tp</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;lloq&#39;</span><span class="p">,</span> <span class="s1">&#39;LLOQ&#39;</span><span class="p">):</span>
+        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">indicator</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>  <span class="c1"># tp == &#39;blq&#39;:</span>
+        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">blq</span><span class="o">=</span><span class="n">indicator</span><span class="p">)</span>
 
 
-<span class="k">def</span> <span class="nf">_m7_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="p">,</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="n">tp</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">lloq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">tp</span> <span class="o">==</span> <span class="s1">&#39;lloq&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">lloq</span><span class="o">=</span><span class="n">lloq_col</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="n">tp</span> <span class="o">==</span> <span class="s1">&#39;blqdv&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">set_lloq_data</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="n">blq</span><span class="o">=</span><span class="n">lloq_col</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;M7 method needs either LLOQ or BLQ in datainfo or a provided LLOQ value&quot;</span><span class="p">)</span>
-
-
-<span class="k">def</span> <span class="nf">_m3_m4_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">lloq</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+<span class="k">def</span> <span class="nf">_m3_m4_method</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">indicator</span><span class="p">,</span> <span class="n">indicator_type</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">level_type</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
     <span class="n">sset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
 
     <span class="n">est_steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
@@ -631,31 +642,40 @@ document.write(`
     <span class="n">y</span> <span class="o">=</span> <span class="n">sset</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">y_symb</span><span class="p">)</span>
     <span class="n">ipred</span> <span class="o">=</span> <span class="n">y</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">subs</span><span class="p">({</span><span class="n">rv</span><span class="p">:</span> <span class="mi">0</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">epsilons</span><span class="o">.</span><span class="n">names</span><span class="p">})</span>
 
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lloq</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="n">blq_symb</span> <span class="o">=</span> <span class="n">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;LLOQ&#39;</span><span class="p">)</span>
-        <span class="n">blq_type</span> <span class="o">=</span> <span class="s1">&#39;lloq&#39;</span>
+    <span class="n">lloq_symbol</span> <span class="o">=</span> <span class="n">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;LLOQ&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">indicator_type</span> <span class="o">==</span> <span class="s1">&#39;lloq&#39;</span><span class="p">:</span>
+        <span class="n">indicator_symb</span> <span class="o">=</span> <span class="n">lloq_symbol</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">blq_symb</span><span class="p">,</span> <span class="n">blq_type</span> <span class="o">=</span> <span class="n">get_blq_symb_and_type</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">indicator_symb</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">indicator</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">level_type</span> <span class="o">==</span> <span class="s1">&#39;lloq&#39;</span><span class="p">:</span>
+        <span class="n">level_symb</span> <span class="o">=</span> <span class="n">lloq_symbol</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">level_symb</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">level</span><span class="p">)</span>
 
     <span class="n">sd</span> <span class="o">=</span> <span class="n">_get_sd</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">y</span><span class="p">)</span>
     <span class="n">symb_dv</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">dv_column</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
     <span class="n">symb_fflag</span> <span class="o">=</span> <span class="n">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;F_FLAG&#39;</span><span class="p">)</span>
     <span class="n">symb_cumd</span> <span class="o">=</span> <span class="n">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;CUMD&#39;</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="n">blq_type</span> <span class="o">==</span> <span class="s1">&#39;lloq&#39;</span><span class="p">:</span>
-        <span class="n">is_above_lloq</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">GreaterThan</span><span class="p">(</span><span class="n">symb_dv</span><span class="p">,</span> <span class="n">blq_symb</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">indicator_type</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;lloq&#39;</span><span class="p">,</span> <span class="s1">&#39;LLOQ&#39;</span><span class="p">):</span>
+        <span class="n">is_above_lloq</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">GreaterThan</span><span class="p">(</span><span class="n">symb_dv</span><span class="p">,</span> <span class="n">indicator_symb</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">is_above_lloq</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Equality</span><span class="p">(</span><span class="n">blq_symb</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
+        <span class="n">is_above_lloq</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Equality</span><span class="p">(</span><span class="n">indicator_symb</span><span class="p">,</span> <span class="mi">0</span><span class="p">)</span>
 
     <span class="n">assignments</span> <span class="o">=</span> <span class="p">[</span><span class="n">sd</span><span class="p">]</span>
-
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">lloq</span><span class="p">,</span> <span class="nb">float</span><span class="p">):</span>
-        <span class="n">lloq</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">blq_symb</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="n">lloq</span><span class="p">))</span>
+    <span class="k">if</span> <span class="n">indicator_type</span> <span class="o">==</span> <span class="s1">&#39;lloq&#39;</span> <span class="ow">or</span> <span class="n">level_type</span> <span class="o">==</span> <span class="s1">&#39;lloq&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">indicator_type</span> <span class="o">==</span> <span class="s1">&#39;lloq&#39;</span><span class="p">:</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="n">indicator_symb</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">indicator</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">symbol</span> <span class="o">=</span> <span class="n">level_symb</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="n">level</span>
+        <span class="n">lloq</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symbol</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Float</span><span class="p">(</span><span class="n">value</span><span class="p">))</span>
         <span class="n">assignments</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">lloq</span><span class="p">)</span>
 
     <span class="n">assignments</span> <span class="o">+=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symb_fflag</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Piecewise</span><span class="p">((</span><span class="mi">0</span><span class="p">,</span> <span class="n">is_above_lloq</span><span class="p">),</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="kc">True</span><span class="p">)))</span>
 
-    <span class="n">cumd</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symb_cumd</span><span class="p">,</span> <span class="n">PHI</span><span class="p">((</span><span class="n">blq_symb</span> <span class="o">-</span> <span class="n">ipred</span><span class="p">)</span> <span class="o">/</span> <span class="n">sd</span><span class="o">.</span><span class="n">symbol</span><span class="p">))</span>
+    <span class="n">cumd</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">symb_cumd</span><span class="p">,</span> <span class="n">PHI</span><span class="p">((</span><span class="n">level_symb</span> <span class="o">-</span> <span class="n">ipred</span><span class="p">)</span> <span class="o">/</span> <span class="n">sd</span><span class="o">.</span><span class="n">symbol</span><span class="p">))</span>
     <span class="k">if</span> <span class="n">method</span> <span class="o">==</span> <span class="s1">&#39;m3&#39;</span><span class="p">:</span>
         <span class="n">assignments</span> <span class="o">+=</span> <span class="n">Assignment</span><span class="p">(</span>
             <span class="n">y</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Piecewise</span><span class="p">((</span><span class="n">y</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">is_above_lloq</span><span class="p">),</span> <span class="p">(</span><span class="n">cumd</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
@@ -697,13 +717,50 @@ document.write(`
     <span class="p">)</span>
 
 
+<span class="k">def</span> <span class="nf">_get_blq_and_lloq_columns</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">blq_datainfo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;blq&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="n">blq</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">blq</span> <span class="o">=</span> <span class="n">blq_datainfo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">try</span><span class="p">:</span>
+        <span class="n">lloq_datainfo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;lloq&#39;</span><span class="p">]</span>
+    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+        <span class="n">lloq</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">lloq</span> <span class="o">=</span> <span class="n">lloq_datainfo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
+    <span class="k">return</span> <span class="n">blq</span><span class="p">,</span> <span class="n">lloq</span>
+
+
+<span class="k">def</span> <span class="nf">_which_indicator_and_level</span><span class="p">(</span><span class="n">lloq</span><span class="p">,</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="n">blq_col</span><span class="p">,</span> <span class="n">method</span><span class="p">):</span>
+    <span class="c1"># Returns indicator, indicator type, level and level_type</span>
+    <span class="c1"># indicator type can be &#39;lloq&#39; for a value, &#39;LLOQ&#39; for a column or &#39;blq&#39;</span>
+    <span class="c1"># level_type can be &#39;lloq&#39; or &#39;LLOQ&#39;</span>
+    <span class="k">if</span> <span class="n">lloq</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">lloq_col</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">blq_col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">blq_col</span><span class="p">,</span> <span class="s1">&#39;blq&#39;</span><span class="p">,</span> <span class="n">lloq</span><span class="p">,</span> <span class="s1">&#39;lloq&#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lloq</span><span class="p">,</span> <span class="s1">&#39;lloq&#39;</span><span class="p">,</span> <span class="n">lloq</span><span class="p">,</span> <span class="s1">&#39;lloq&#39;</span>
+    <span class="k">elif</span> <span class="n">blq_col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">lloq</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">lloq_col</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">method</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;m1&#39;</span><span class="p">,</span> <span class="s1">&#39;m7&#39;</span><span class="p">):</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                <span class="s2">&quot;Can only find a BLQ column. Only supported for the M1 and M7 methods.&quot;</span>
+            <span class="p">)</span>
+        <span class="k">return</span> <span class="n">blq_col</span><span class="p">,</span> <span class="s1">&#39;blq&#39;</span><span class="p">,</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="s1">&#39;LLOQ&#39;</span>
+    <span class="k">elif</span> <span class="n">lloq_col</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="s1">&#39;LLOQ&#39;</span><span class="p">,</span> <span class="n">lloq_col</span><span class="p">,</span> <span class="s1">&#39;LLOQ&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;No BLQ or LLOQ information available&quot;</span><span class="p">)</span>
+
+
 <span class="k">def</span> <span class="nf">_get_blq_name_and_type</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
     <span class="k">try</span><span class="p">:</span>
         <span class="n">blq_datainfo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;lloq&#39;</span><span class="p">]</span>
         <span class="k">return</span> <span class="n">blq_datainfo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;lloq&#39;</span>
     <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-        <span class="n">blq_datainfo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;blqdv&#39;</span><span class="p">]</span>
-        <span class="k">return</span> <span class="n">blq_datainfo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;blqdv&#39;</span>
+        <span class="n">blq_datainfo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;blq&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="n">blq_datainfo</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="s1">&#39;blq&#39;</span>
 
 
 <span class="k">def</span> <span class="nf">get_blq_symb_and_type</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
@@ -802,7 +859,7 @@ document.write(`
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.2.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.3.
     <br/>
   </p>
 </div>
