@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.amd.run &#8212; Pharmpy 0.100.2 documentation</title>
+    <title>pharmpy.tools.amd.run &#8212; Pharmpy 0.101.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script src="../../../../_static/documentation_options.js?v=74304786"></script>
+    <script src="../../../../_static/documentation_options.js?v=990e794f"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/thebelab-helper.js"></script>
@@ -543,9 +543,9 @@ document.write(`
 <span class="sd">    results : ModelfitResults</span>
 <span class="sd">        Reults of input if input is a model</span>
 <span class="sd">    modeltype : str</span>
-<span class="sd">        Type of model to build. Either &#39;basic_pk&#39; or &#39;tmdd&#39;</span>
+<span class="sd">        Type of model to build. Either &#39;basic_pk&#39;</span>
 <span class="sd">    administration : str</span>
-<span class="sd">        Route of administration. Either &#39;iv&#39; or &#39;oral&#39;</span>
+<span class="sd">        Route of administration. Either &#39;iv&#39;, &#39;oral&#39; or &#39;ivoral&#39;</span>
 <span class="sd">    cl_init : float</span>
 <span class="sd">        Initial estimate for the population clearance</span>
 <span class="sd">    vc_init : float</span>
@@ -590,17 +590,20 @@ document.write(`
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="kn">from</span> <span class="nn">pharmpy.model.external</span> <span class="kn">import</span> <span class="n">nonmem</span>  <span class="c1"># FIXME We should not depend on NONMEM</span>
 
-    <span class="c1"># FIXME: temporary until modeltype and administration is fully supported in e.g. create_start_model</span>
-    <span class="k">if</span> <span class="n">modeltype</span> <span class="o">==</span> <span class="s1">&#39;basic_pk&#39;</span> <span class="ow">and</span> <span class="n">administration</span> <span class="o">==</span> <span class="s1">&#39;iv&#39;</span><span class="p">:</span>
-        <span class="n">modeltype</span> <span class="o">=</span> <span class="s1">&#39;pk_iv&#39;</span>
-    <span class="k">elif</span> <span class="n">modeltype</span> <span class="o">==</span> <span class="s1">&#39;basic_pk&#39;</span> <span class="ow">and</span> <span class="n">administration</span> <span class="o">==</span> <span class="s1">&#39;oral&#39;</span><span class="p">:</span>
-        <span class="n">modeltype</span> <span class="o">=</span> <span class="s1">&#39;pk_oral&#39;</span>
+    <span class="k">if</span> <span class="n">administration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;iv&#39;</span><span class="p">,</span> <span class="s1">&#39;oral&#39;</span><span class="p">,</span> <span class="s1">&#39;ivoral&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid input: &quot;</span><span class="si">{</span><span class="n">administration</span><span class="si">}</span><span class="s1">&quot; as administration is not supported&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">modeltype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span><span class="s1">&#39;basic_pk&#39;</span><span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid input: &quot;</span><span class="si">{</span><span class="n">modeltype</span><span class="si">}</span><span class="s1">&quot; as modeltype is not supported&#39;</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="nb">type</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span> <span class="ow">is</span> <span class="nb">str</span><span class="p">:</span>
-        <span class="kn">from</span> <span class="nn">pharmpy.tools.amd.funcs</span> <span class="kn">import</span> <span class="n">create_start_model</span>
+        <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">create_basic_pk_model</span>
 
-        <span class="n">model</span> <span class="o">=</span> <span class="n">create_start_model</span><span class="p">(</span>
-            <span class="nb">input</span><span class="p">,</span> <span class="n">modeltype</span><span class="o">=</span><span class="n">modeltype</span><span class="p">,</span> <span class="n">cl_init</span><span class="o">=</span><span class="n">cl_init</span><span class="p">,</span> <span class="n">vc_init</span><span class="o">=</span><span class="n">vc_init</span><span class="p">,</span> <span class="n">mat_init</span><span class="o">=</span><span class="n">mat_init</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">create_basic_pk_model</span><span class="p">(</span>
+            <span class="n">administration</span><span class="p">,</span>
+            <span class="n">dataset_path</span><span class="o">=</span><span class="nb">input</span><span class="p">,</span>
+            <span class="n">cl_init</span><span class="o">=</span><span class="n">cl_init</span><span class="p">,</span>
+            <span class="n">vc_init</span><span class="o">=</span><span class="n">vc_init</span><span class="p">,</span>
+            <span class="n">mat_init</span><span class="o">=</span><span class="n">mat_init</span><span class="p">,</span>
         <span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">convert_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s1">&#39;nonmem&#39;</span><span class="p">)</span>  <span class="c1"># FIXME: Workaround for results retrieval system</span>
     <span class="k">elif</span> <span class="nb">type</span><span class="p">(</span><span class="nb">input</span><span class="p">)</span> <span class="ow">is</span> <span class="n">nonmem</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">Model</span><span class="p">:</span>
@@ -635,13 +638,21 @@ document.write(`
         <span class="p">)</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">modelsearch_features</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">modeltype</span> <span class="o">==</span> <span class="s1">&#39;pk_oral&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">modeltype</span> <span class="o">==</span> <span class="s1">&#39;basic_pk&#39;</span> <span class="ow">and</span> <span class="n">administration</span> <span class="o">==</span> <span class="s1">&#39;oral&#39;</span><span class="p">:</span>
             <span class="n">modelsearch_features</span> <span class="o">=</span> <span class="p">(</span>
                 <span class="n">Absorption</span><span class="p">((</span><span class="n">Name</span><span class="p">(</span><span class="s1">&#39;ZO&#39;</span><span class="p">),</span> <span class="n">Name</span><span class="p">(</span><span class="s1">&#39;SEQ-ZO-FO&#39;</span><span class="p">))),</span>
                 <span class="n">Elimination</span><span class="p">((</span><span class="n">Name</span><span class="p">(</span><span class="s1">&#39;MM&#39;</span><span class="p">),</span> <span class="n">Name</span><span class="p">(</span><span class="s1">&#39;MIX-FO-MM&#39;</span><span class="p">))),</span>
                 <span class="n">LagTime</span><span class="p">(),</span>
                 <span class="n">Transits</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">Wildcard</span><span class="p">()),</span>
                 <span class="n">Peripherals</span><span class="p">((</span><span class="mi">1</span><span class="p">,)),</span>
+            <span class="p">)</span>
+        <span class="k">elif</span> <span class="n">modeltype</span> <span class="o">==</span> <span class="s1">&#39;basic_pk&#39;</span> <span class="ow">and</span> <span class="n">administration</span> <span class="o">==</span> <span class="s1">&#39;ivoral&#39;</span><span class="p">:</span>
+            <span class="n">modelsearch_features</span> <span class="o">=</span> <span class="p">(</span>
+                <span class="n">Absorption</span><span class="p">((</span><span class="n">Name</span><span class="p">(</span><span class="s1">&#39;ZO&#39;</span><span class="p">),</span> <span class="n">Name</span><span class="p">(</span><span class="s1">&#39;SEQ-ZO-FO&#39;</span><span class="p">))),</span>
+                <span class="n">Elimination</span><span class="p">((</span><span class="n">Name</span><span class="p">(</span><span class="s1">&#39;MM&#39;</span><span class="p">),</span> <span class="n">Name</span><span class="p">(</span><span class="s1">&#39;MIX-FO-MM&#39;</span><span class="p">))),</span>
+                <span class="n">LagTime</span><span class="p">(),</span>
+                <span class="n">Transits</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span> <span class="n">Wildcard</span><span class="p">()),</span>
+                <span class="n">Peripherals</span><span class="p">((</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)),</span>
             <span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">modelsearch_features</span> <span class="o">=</span> <span class="p">(</span>
@@ -656,10 +667,16 @@ document.write(`
         <span class="p">)</span>
     <span class="p">)</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span> <span class="n">statement</span><span class="p">:</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">Covariate</span><span class="p">),</span> <span class="n">covsearch_features</span><span class="p">)):</span>
-        <span class="n">covsearch_features</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">def_cov_search_feature</span> <span class="o">=</span> <span class="p">(</span>
             <span class="n">Covariate</span><span class="p">(</span><span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;IIV&#39;</span><span class="p">),</span> <span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;CONTINUOUS&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;exp&#39;</span><span class="p">,),</span> <span class="s1">&#39;*&#39;</span><span class="p">),</span>
             <span class="n">Covariate</span><span class="p">(</span><span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;IIV&#39;</span><span class="p">),</span> <span class="n">Ref</span><span class="p">(</span><span class="s1">&#39;CATEGORICAL&#39;</span><span class="p">),</span> <span class="p">(</span><span class="s1">&#39;cat&#39;</span><span class="p">,),</span> <span class="s1">&#39;*&#39;</span><span class="p">),</span>
-        <span class="p">)</span> <span class="o">+</span> <span class="n">covsearch_features</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">modeltype</span> <span class="o">==</span> <span class="s1">&#39;basic_pk&#39;</span> <span class="ow">and</span> <span class="n">administration</span> <span class="o">==</span> <span class="s1">&#39;ivoral&#39;</span><span class="p">:</span>
+            <span class="n">def_cov_search_feature</span> <span class="o">=</span> <span class="n">def_cov_search_feature</span> <span class="o">+</span> <span class="p">(</span>
+                <span class="n">Covariate</span><span class="p">((</span><span class="s1">&#39;RUV&#39;</span><span class="p">,),</span> <span class="p">(</span><span class="s1">&#39;ADMID&#39;</span><span class="p">,),</span> <span class="p">(</span><span class="s1">&#39;cat&#39;</span><span class="p">,),</span> <span class="s1">&#39;*&#39;</span><span class="p">),</span>
+            <span class="p">)</span>
+
+        <span class="n">covsearch_features</span> <span class="o">=</span> <span class="n">def_cov_search_feature</span> <span class="o">+</span> <span class="n">covsearch_features</span>
 
     <span class="n">db</span> <span class="o">=</span> <span class="n">default_tool_database</span><span class="p">(</span><span class="n">toolname</span><span class="o">=</span><span class="s1">&#39;amd&#39;</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="n">resume</span><span class="p">)</span>
     <span class="n">run_subfuncs</span> <span class="o">=</span> <span class="p">{}</span>
@@ -701,7 +718,7 @@ document.write(`
             <span class="n">sum_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
             <span class="n">sum_inds_counts</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">subresults</span><span class="o">.</span><span class="n">final_model_name</span> <span class="o">!=</span> <span class="n">next_model</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">subresults</span><span class="o">.</span><span class="n">final_model</span><span class="o">.</span><span class="n">name</span> <span class="o">!=</span> <span class="n">next_model</span><span class="o">.</span><span class="n">name</span><span class="p">:</span>
                 <span class="n">next_model</span> <span class="o">=</span> <span class="n">retrieve_final_model</span><span class="p">(</span><span class="n">subresults</span><span class="p">)</span>
             <span class="n">sum_subtools</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">_create_sum_subtool</span><span class="p">(</span><span class="n">tool_name</span><span class="p">,</span> <span class="n">next_model</span><span class="p">))</span>
             <span class="n">sum_models</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">subresults</span><span class="o">.</span><span class="n">summary_models</span><span class="o">.</span><span class="n">reset_index</span><span class="p">())</span>
@@ -997,7 +1014,7 @@ document.write(`
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.5.
     <br/>
   </p>
 </div>

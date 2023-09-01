@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.basic_models &#8212; Pharmpy 0.100.2 documentation</title>
+    <title>pharmpy.modeling.basic_models &#8212; Pharmpy 0.101.0 documentation</title>
   
   
   
@@ -38,7 +38,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=e353d410970836974a52" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=e353d410970836974a52" />
 
-    <script src="../../../_static/documentation_options.js?v=74304786"></script>
+    <script src="../../../_static/documentation_options.js?v=990e794f"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -491,7 +491,6 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fs.path</span> <span class="kn">import</span> <span class="n">path_absolute</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">Assignment</span><span class="p">,</span>
-    <span class="n">Bolus</span><span class="p">,</span>
     <span class="n">ColumnInfo</span><span class="p">,</span>
     <span class="n">Compartment</span><span class="p">,</span>
     <span class="n">CompartmentalSystem</span><span class="p">,</span>
@@ -499,7 +498,6 @@ document.write(`
     <span class="n">DataInfo</span><span class="p">,</span>
     <span class="n">EstimationStep</span><span class="p">,</span>
     <span class="n">EstimationSteps</span><span class="p">,</span>
-    <span class="n">Infusion</span><span class="p">,</span>
     <span class="n">Model</span><span class="p">,</span>
     <span class="n">NormalDistribution</span><span class="p">,</span>
     <span class="n">Parameter</span><span class="p">,</span>
@@ -509,9 +507,9 @@ document.write(`
     <span class="n">output</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">read_dataset_from_datainfo</span>
+<span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">add_admid</span><span class="p">,</span> <span class="n">read_dataset_from_datainfo</span>
 <span class="kn">from</span> <span class="nn">.error</span> <span class="kn">import</span> <span class="n">set_proportional_error_model</span>
-<span class="kn">from</span> <span class="nn">.odes</span> <span class="kn">import</span> <span class="n">set_first_order_absorption</span>
+<span class="kn">from</span> <span class="nn">.odes</span> <span class="kn">import</span> <span class="n">add_bioavailability</span><span class="p">,</span> <span class="n">set_first_order_absorption</span>
 <span class="kn">from</span> <span class="nn">.parameter_variability</span> <span class="kn">import</span> <span class="n">add_iiv</span><span class="p">,</span> <span class="n">create_joint_distribution</span>
 <span class="kn">from</span> <span class="nn">.parameters</span> <span class="kn">import</span> <span class="n">set_initial_estimates</span>
 
@@ -519,7 +517,7 @@ document.write(`
 <div class="viewcode-block" id="create_basic_pk_model">
 <a class="viewcode-back" href="../../../api/pharmpy.modeling.create_basic_pk_model.html#pharmpy.modeling.create_basic_pk_model">[docs]</a>
 <span class="k">def</span> <span class="nf">create_basic_pk_model</span><span class="p">(</span>
-    <span class="n">modeltype</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
+    <span class="n">administration</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;iv&#39;</span><span class="p">,</span>
     <span class="n">dataset_path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">cl_init</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">0.01</span><span class="p">,</span>
     <span class="n">vc_init</span><span class="p">:</span> <span class="nb">float</span> <span class="o">=</span> <span class="mf">1.0</span><span class="p">,</span>
@@ -530,8 +528,8 @@ document.write(`
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    modeltype : str</span>
-<span class="sd">        Type of PK model to create. Supported are &#39;oral&#39; and &#39;iv&#39;</span>
+<span class="sd">    administration : str</span>
+<span class="sd">        Type of PK model to create. Supported are &#39;iv&#39;, &#39;oral&#39; and &#39;ivoral&#39;</span>
 <span class="sd">    dataset_path : str</span>
 <span class="sd">        Optional path to a dataset</span>
 <span class="sd">    cl_init : float</span>
@@ -560,6 +558,13 @@ document.write(`
         <span class="n">di</span> <span class="o">=</span> <span class="n">DataInfo</span><span class="p">()</span>
         <span class="n">df</span> <span class="o">=</span> <span class="kc">None</span>
 
+    <span class="k">if</span> <span class="n">administration</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">[</span>
+        <span class="s1">&#39;iv&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;oral&#39;</span><span class="p">,</span>
+        <span class="s1">&#39;ivoral&#39;</span><span class="p">,</span>
+    <span class="p">]:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Invalid input: `</span><span class="si">{</span><span class="n">administration</span><span class="si">}</span><span class="s1">` as administration is not supported.&#39;</span><span class="p">)</span>
+
     <span class="n">pop_cl</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;POP_CL&#39;</span><span class="p">,</span> <span class="n">cl_init</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">pop_vc</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;POP_VC&#39;</span><span class="p">,</span> <span class="n">vc_init</span><span class="p">,</span> <span class="n">lower</span><span class="o">=</span><span class="mi">0</span><span class="p">)</span>
     <span class="n">iiv_cl</span> <span class="o">=</span> <span class="n">Parameter</span><span class="p">(</span><span class="s1">&#39;IIV_CL&#39;</span><span class="p">,</span> <span class="mf">0.1</span><span class="p">)</span>
@@ -579,7 +584,11 @@ document.write(`
     <span class="n">vc_ass</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">VC</span><span class="p">,</span> <span class="n">pop_vc</span><span class="o">.</span><span class="n">symbol</span> <span class="o">*</span> <span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">eta_vc_name</span><span class="p">)))</span>
 
     <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">()</span>
-    <span class="n">central</span> <span class="o">=</span> <span class="n">Compartment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;CENTRAL&#39;</span><span class="p">,</span> <span class="n">doses</span><span class="o">=</span><span class="p">(</span><span class="n">dosing</span><span class="p">(</span><span class="n">di</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="mi">1</span><span class="p">),))</span>
+    <span class="c1"># FIXME: This shouldn&#39;t be used here</span>
+    <span class="kn">from</span> <span class="nn">pharmpy.model.external.nonmem.advan</span> <span class="kn">import</span> <span class="n">dosing</span><span class="p">,</span> <span class="n">find_dose</span>
+
+    <span class="n">doses</span> <span class="o">=</span> <span class="n">dosing</span><span class="p">(</span><span class="n">di</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+    <span class="n">central</span> <span class="o">=</span> <span class="n">Compartment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="s1">&#39;CENTRAL&#39;</span><span class="p">,</span> <span class="n">doses</span><span class="o">=</span><span class="n">find_dose</span><span class="p">(</span><span class="n">doses</span><span class="p">,</span> <span class="mi">1</span><span class="p">))</span>
     <span class="n">cb</span><span class="o">.</span><span class="n">add_compartment</span><span class="p">(</span><span class="n">central</span><span class="p">)</span>
     <span class="n">cb</span><span class="o">.</span><span class="n">add_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">,</span> <span class="n">CL</span> <span class="o">/</span> <span class="n">VC</span><span class="p">)</span>
 
@@ -618,10 +627,78 @@ document.write(`
         <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="k">else</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">)</span>
-    <span class="k">if</span> <span class="n">modeltype</span> <span class="o">==</span> <span class="s1">&#39;oral&#39;</span><span class="p">:</span>
+
+    <span class="k">if</span> <span class="n">administration</span> <span class="o">==</span> <span class="s1">&#39;oral&#39;</span> <span class="ow">or</span> <span class="n">administration</span> <span class="o">==</span> <span class="s1">&#39;ivoral&#39;</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">set_first_order_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">set_initial_estimates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;POP_MAT&#39;</span><span class="p">:</span> <span class="n">mat_init</span><span class="p">})</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">add_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_parameters</span><span class="o">=</span><span class="s1">&#39;MAT&#39;</span><span class="p">,</span> <span class="n">expression</span><span class="o">=</span><span class="s1">&#39;exp&#39;</span><span class="p">,</span> <span class="n">initial_estimate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">administration</span> <span class="o">==</span> <span class="s1">&#39;ivoral&#39;</span><span class="p">:</span>
+        <span class="c1"># FIXME : Dependent on CMT column having 1 and 2 as values otherwise</span>
+        <span class="c1"># compartment structure don&#39;t match</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">add_bioavailability</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">logit_transform</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">set_initial_estimates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;POP_BIO&#39;</span><span class="p">:</span> <span class="mf">0.5</span><span class="p">})</span>
+
+        <span class="c1"># Add IIV to BIO</span>
+        <span class="c1"># TODO ? Should there be another initial estimate?</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">add_iiv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">list_of_parameters</span><span class="o">=</span><span class="s2">&quot;BIO&quot;</span><span class="p">,</span> <span class="n">expression</span><span class="o">=</span><span class="s1">&#39;add&#39;</span><span class="p">,</span> <span class="n">initial_estimate</span><span class="o">=</span><span class="mf">0.1</span><span class="p">)</span>
+
+        <span class="c1"># Set dosing to the CENTRAL compartment as well</span>
+        <span class="n">ode</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+        <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">ode</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">doses</span> <span class="o">=</span> <span class="n">dosing</span><span class="p">(</span><span class="n">di</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+            <span class="n">central_dose</span> <span class="o">=</span> <span class="n">find_dose</span><span class="p">(</span><span class="n">doses</span><span class="p">,</span> <span class="n">comp_number</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">admid</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="c1"># doses = dosing(di, df, 1)</span>
+            <span class="n">central_dose</span> <span class="o">=</span> <span class="n">find_dose</span><span class="p">(</span><span class="n">doses</span><span class="p">,</span> <span class="n">comp_number</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">admid</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">central_dose</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+                    <span class="p">(</span>
+                        <span class="s2">&quot;Could not determine IV dose from dataset. &quot;</span>
+                        <span class="s2">&quot;Currently require CMT column with values 1 and 2 &quot;</span>
+                    <span class="p">)</span>
+                <span class="p">)</span>
+        <span class="n">cb</span><span class="o">.</span><span class="n">set_dose</span><span class="p">(</span><span class="n">cb</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="s2">&quot;CENTRAL&quot;</span><span class="p">),</span> <span class="n">dose</span><span class="o">=</span><span class="n">central_dose</span><span class="p">)</span>
+
+        <span class="n">ode</span> <span class="o">=</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">ode</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">df</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">add_admid</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+            <span class="c1"># Change bioavailability to piecewise for oral/iv doses</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span>
+                    <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;F_BIO&quot;</span><span class="p">),</span>
+                    <span class="n">sympy</span><span class="o">.</span><span class="n">Piecewise</span><span class="p">(</span>
+                        <span class="p">(</span>
+                            <span class="mi">1</span> <span class="o">/</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">sympy</span><span class="o">.</span><span class="n">exp</span><span class="p">(</span><span class="o">-</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;BIO&quot;</span><span class="p">))),</span>
+                            <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;ADMID&#39;</span><span class="p">),</span> <span class="mi">1</span><span class="p">),</span>
+                        <span class="p">),</span>
+                        <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">true</span><span class="p">),</span>
+                    <span class="p">),</span>
+                <span class="p">)</span>
+            <span class="p">)</span>
+
+        <span class="c1"># Add covariate to error model with the following logic</span>
+        <span class="c1"># RUV = 1 * covariate</span>
+        <span class="c1"># Y = F + F*EPS*RUV</span>
+        <span class="n">ruv_ass</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s2">&quot;RUV&quot;</span><span class="p">),</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Number</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span>
+            <span class="o">+</span> <span class="n">ruv_ass</span>
+            <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+            <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
+        <span class="p">)</span>
+        <span class="n">Y_ass</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s2">&quot;Y&quot;</span><span class="p">)</span>
+        <span class="n">ipred</span> <span class="o">=</span> <span class="n">Y_ass</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">make_args</span><span class="p">(</span><span class="n">Y_ass</span><span class="o">.</span><span class="n">expression</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">error</span> <span class="o">=</span> <span class="n">Y_ass</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">make_args</span><span class="p">(</span><span class="n">Y_ass</span><span class="o">.</span><span class="n">expression</span><span class="p">)[</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">new_Y_ass</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">Y_ass</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">ipred</span> <span class="o">+</span> <span class="n">error</span> <span class="o">*</span> <span class="n">ruv_ass</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
+
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+            <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">Y_ass</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">new_Y_ass</span><span class="o">.</span><span class="n">expression</span><span class="p">)</span>
+        <span class="p">)</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
 
@@ -679,25 +756,6 @@ document.write(`
         <span class="n">column_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
     <span class="n">di</span> <span class="o">=</span> <span class="n">DataInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">column_info</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">separator</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">di</span>
-
-
-<span class="k">def</span> <span class="nf">dosing</span><span class="p">(</span><span class="n">di</span><span class="p">:</span> <span class="n">DataInfo</span><span class="p">,</span> <span class="n">dataset</span><span class="p">,</span> <span class="n">dose_comp</span><span class="p">:</span> <span class="nb">int</span><span class="p">):</span>
-    <span class="c1"># FIXME: Copied from plugins.nonmem.advan</span>
-    <span class="k">if</span> <span class="n">di</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;AMT&#39;</span><span class="p">))</span>
-
-    <span class="k">if</span> <span class="s1">&#39;RATE&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">di</span><span class="o">.</span><span class="n">names</span> <span class="ow">or</span> <span class="n">di</span><span class="p">[</span><span class="s1">&#39;RATE&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">drop</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;AMT&#39;</span><span class="p">))</span>
-
-    <span class="n">df</span> <span class="o">=</span> <span class="n">dataset</span>
-    <span class="k">if</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;RATE&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">all</span><span class="p">():</span>
-        <span class="k">return</span> <span class="n">Bolus</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;AMT&#39;</span><span class="p">))</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;RATE&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-        <span class="k">return</span> <span class="n">Infusion</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;AMT&#39;</span><span class="p">),</span> <span class="n">rate</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;R</span><span class="si">{</span><span class="n">dose_comp</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
-    <span class="k">elif</span> <span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;RATE&#39;</span><span class="p">]</span> <span class="o">==</span> <span class="o">-</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">any</span><span class="p">():</span>
-        <span class="k">return</span> <span class="n">Infusion</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;AMT&#39;</span><span class="p">),</span> <span class="n">duration</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;D</span><span class="si">{</span><span class="n">dose_comp</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">Infusion</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;AMT&#39;</span><span class="p">),</span> <span class="n">rate</span><span class="o">=</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;RATE&#39;</span><span class="p">))</span>
 </pre></div>
 
                 </article>
@@ -750,7 +808,7 @@ document.write(`
       
         <div class="footer-item">
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.5.
     <br/>
   </p>
 </div>
