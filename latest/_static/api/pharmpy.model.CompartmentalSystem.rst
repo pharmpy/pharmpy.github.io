@@ -17,7 +17,6 @@ CompartmentalSystem
       ~CompartmentalSystem.dosing_compartments
       ~CompartmentalSystem.eqs
       ~CompartmentalSystem.free_symbols
-      ~CompartmentalSystem.peripheral_compartments
       ~CompartmentalSystem.rhs_symbols
       ~CompartmentalSystem.t
       ~CompartmentalSystem.zero_order_inputs
@@ -30,6 +29,7 @@ CompartmentalSystem
       ~CompartmentalSystem.create
       ~CompartmentalSystem.find_compartment
       ~CompartmentalSystem.find_depot
+      ~CompartmentalSystem.find_peripheral_compartments
       ~CompartmentalSystem.find_transit_compartments
       ~CompartmentalSystem.from_dict
       ~CompartmentalSystem.get_bidirectionals
@@ -50,7 +50,6 @@ CompartmentalSystem
    .. autoattribute:: dosing_compartments
    .. autoattribute:: eqs
    .. autoattribute:: free_symbols
-   .. autoattribute:: peripheral_compartments
    .. autoattribute:: rhs_symbols
    .. autoattribute:: t
    .. autoattribute:: zero_order_inputs
@@ -61,6 +60,7 @@ CompartmentalSystem
    .. automethod:: create
    .. automethod:: find_compartment
    .. automethod:: find_depot
+   .. automethod:: find_peripheral_compartments
    .. automethod:: find_transit_compartments
    .. automethod:: from_dict
    .. automethod:: get_bidirectionals

@@ -27,6 +27,7 @@ Distribution
       ~Distribution.latex_string
       ~Distribution.replace
       ~Distribution.subs
+      ~Distribution.to_dict
 
    .. rubric:: Attributes Documentation
 
@@ -45,3 +46,4 @@ Distribution
    .. automethod:: latex_string
    .. automethod:: replace
    .. automethod:: subs
+   .. automethod:: to_dict

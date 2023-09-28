@@ -33,7 +33,7 @@ project = 'Pharmpy'
 year = '2018-2023'
 authors = ['the Pharmpy development team']
 copyright = '{0}; {1}'.format(year, ', '.join(authors))
-version = release = '0.101.2'
+version = release = '0.102.0'
 html_show_sourcelink = False
 
 pygments_style = 'trac'
@@ -84,4 +84,5 @@ pd.set_option('display.width', 1000)
 pd.set_option('display.max_columns', 1000)
 '''
 
+# Page is reachable from browser but gives 403 with GET
 linkcheck_ignore = [r'https://doi.org/10.1002/psp4.12741']

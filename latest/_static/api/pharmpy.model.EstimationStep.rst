@@ -11,7 +11,6 @@ EstimationStep
    .. autosummary::
 
       ~EstimationStep.auto
-      ~EstimationStep.cov
       ~EstimationStep.epsilon_derivatives
       ~EstimationStep.eta_derivatives
       ~EstimationStep.evaluation
@@ -22,13 +21,14 @@ EstimationStep
       ~EstimationStep.maximum_evaluations
       ~EstimationStep.method
       ~EstimationStep.niter
+      ~EstimationStep.parameter_uncertainty_method
       ~EstimationStep.predictions
       ~EstimationStep.residuals
       ~EstimationStep.solver
       ~EstimationStep.solver_atol
       ~EstimationStep.solver_rtol
-      ~EstimationStep.supported_covs
       ~EstimationStep.supported_methods
+      ~EstimationStep.supported_parameter_uncertainty_methods
       ~EstimationStep.supported_solvers
       ~EstimationStep.tool_options
 
@@ -44,7 +44,6 @@ EstimationStep
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: auto
-   .. autoattribute:: cov
    .. autoattribute:: epsilon_derivatives
    .. autoattribute:: eta_derivatives
    .. autoattribute:: evaluation
@@ -55,13 +54,14 @@ EstimationStep
    .. autoattribute:: maximum_evaluations
    .. autoattribute:: method
    .. autoattribute:: niter
+   .. autoattribute:: parameter_uncertainty_method
    .. autoattribute:: predictions
    .. autoattribute:: residuals
    .. autoattribute:: solver
    .. autoattribute:: solver_atol
    .. autoattribute:: solver_rtol
-   .. autoattribute:: supported_covs
    .. autoattribute:: supported_methods
+   .. autoattribute:: supported_parameter_uncertainty_methods
    .. autoattribute:: supported_solvers
    .. autoattribute:: tool_options
 
