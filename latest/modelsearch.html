@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>Modelsearch &#8212; Pharmpy 0.102.0 documentation</title>
+    <title>Modelsearch &#8212; Pharmpy 0.102.1 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
   <script src="_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
 
-    <script src="_static/documentation_options.js?v=345e0983"></script>
+    <script src="_static/documentation_options.js?v=9d1e7de5"></script>
     <script src="_static/doctools.js?v=888ff710"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/thebelab-helper.js"></script>
@@ -55,7 +55,7 @@
     <link rel="prev" title="Automatic Model Development (AMD)" href="amd.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Sep 28, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 04, 2023"/>
   </head>
   
   
@@ -591,10 +591,6 @@ which for BIC is None/NULL.</p>
 <div class="highlight-default notranslate"><div class="highlight"><pre><span></span><span class="n">pharmpy</span> <span class="n">run</span> <span class="n">modelsearch</span> <span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">model</span> <span class="s1">&#39;PERIPHERALS(1);LAGTIME()&#39;</span> <span class="s1">&#39;reduced_stepwise&#39;</span> <span class="o">--</span><span class="n">iiv_strategy</span> <span class="s1">&#39;absorption_delay&#39;</span> <span class="o">--</span><span class="n">rank_type</span> <span class="s1">&#39;bic&#39;</span>
 </pre></div>
 </div>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>Currently modelsearch does not support a CMT-column, make sure it is dropped before starting the tool.</p>
-</div>
 <section id="arguments">
 <h3>Arguments<a class="headerlink" href="#arguments" title="Link to this heading">#</a></h3>
 <p>For a more detailed description of each argument, see their respective chapter on this page.</p>
@@ -635,9 +631,130 @@ add to absorption delay parameters)</p></td>
 </section>
 <section id="the-search-space">
 <span id="id2"></span><h2>The search space<a class="headerlink" href="#the-search-space" title="Link to this heading">#</a></h2>
-<p>The model feature search space is a set of possible combinations of model features that will be applied and tested on
-the input model. The supported features cover absorption, absorption delay, elimination, and distribution. The search
-space is given as a string with a specific grammar, according to the <cite>Model Feature Language</cite> (MFL) (see <a class="reference internal" href="tools.html#mfl"><span class="std std-ref">detailed description</span></a>).</p>
+<p>The model feature search space is a set of all possible combinations of model features that is allowed for the final model. The supported
+features cover absorption, absorption delay, elimination, and distribution. The search space is given as a string with a specific
+grammar, according to the <cite>Model Feature Language</cite> (MFL) (see <a class="reference internal" href="tools.html#mfl"><span class="std std-ref">detailed description</span></a>). If an attribute is not given, the default
+value for that attribute will be used as seen below. If the input model is not part of the given search space, a base model will be created. This is
+done by performing the least amount of transformations to the input model in order to make the base model a part of the given search
+space.</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Category</p></th>
+<th class="head"><p>DEFAULT</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ABSORPTION</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">INST</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>ELIMINATION</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">FO</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>PERIPHERALS</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">0</span></code></p></td>
+</tr>
+<tr class="row-odd"><td><p>TRANSITS</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">0</span></code>, <code class="code docutils literal notranslate"><span class="pre">DEPOT</span></code></p></td>
+</tr>
+<tr class="row-even"><td><p>LAGTIME</p></td>
+<td><p><code class="code docutils literal notranslate"><span class="pre">OFF</span></code></p></td>
+</tr>
+</tbody>
+</table>
+<p>The logical flow for the creation of the base model can be seen below. In summary, given an input model and a search space, the first step is
+to examine if the input model is a part of the search space. If so, the model features for the input model is filtered from the search space.
+As these are already present in the input model, they are not needed in the search space. After filtration, all transformations that are left will
+be examined. However, if the input model is not part of the search space, the base model is created by which will be part of the search space.
+Following this, the model features from the base model is filtered from the search space which leaves the transformations left to be examined.</p>
+<div class="graphviz"><object data="_images/graphviz-0cf89390245c24e65949affa32b25ced2718412e.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph G {
+splines = false
+  input_model [
+    label = &quot;Input model&quot;;
+  ];
+
+  search_space [
+    label = &quot;Search space&quot;;
+  ];
+
+  input_ss [
+    label = &quot;Input + search space&quot;;
+  ];
+
+  filter_model [
+    label = &quot;Filter model features from search space&quot;;
+  ];
+
+  create_base [
+    label = &quot;Create a base&quot;;
+  ];
+
+  input_model -&gt; input_ss;
+  search_space -&gt; input_ss;
+  input_ss -&gt; create_base [label = &quot;Input model &amp;notin; search space&quot;];
+  create_base -&gt; filter_model;
+  input_ss -&gt; filter_model [label = &quot;Input model &amp;isin; search space&quot;];
+}</p></object></div>
+<p>Some examples of this workflow :</p>
+<table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>Search space</p></th>
+<th class="head"><p>Input model</p></th>
+<th class="head"><p>Base model</p></th>
+<th class="head"><p>Transformations to apply</p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>ABSORPTION([FO,ZO])
+ELIMINATION(FO)
+PERIPHERALS([1,2])</p></td>
+<td><p>ABSORPTION(FO)
+ELIMINATION(ZO)
+TRANSITS(0)
+PERIPHERALS(0)
+LAGTIME(ON)</p></td>
+<td><p>ABSORPTION(FO)
+ELIMINATION(FO)
+TRANSITS(0)
+PERIPHERALS(1)
+LAGTIME(OFF)</p></td>
+<td><p>ABSORPTION(ZO)
+PERIPHERALS(2)</p></td>
+</tr>
+<tr class="row-odd"><td><p>ABSORPTION(FO)
+ELIMINATION(FO)
+TRANSITS([1,2])</p></td>
+<td><p>ABSORPTION(FO)
+ELIMINATION(ZO)
+TRANSITS(0)
+PERIPHERALS(2)
+LAGTIME(OFF)</p></td>
+<td><p>ABSORPTION(FO)
+ELIMINATION(FO)
+TRANSITS(1)
+PERIPHERALS(0)
+LAGTIME(OFF)</p></td>
+<td><p>TRANSITS(2)</p></td>
+</tr>
+<tr class="row-even"><td><p>ABSORPTION([FO,ZO])
+ELIMINATION([FO,ZO,MM])
+PERIPHERALS([0,1,2])
+LAGTIME([OFF,ON])</p></td>
+<td><p>ABSORPTION(FO)
+ELIMINATION(FO)
+TRANSITS(0)
+PERIPHERALS(0)
+LAGTIME(OFF)</p></td>
+<td><p>Not needed since
+input model is part
+of search space</p></td>
+<td><p>ABSORPTION(ZO)
+ELIMINATION([ZO,MM])
+PERIPHERALS([1,2]
+LAGTIME(ON)</p></td>
+</tr>
+</tbody>
+</table>
 </section>
 <section id="algorithms">
 <span id="algorithms-modelsearch"></span><h2>Algorithms<a class="headerlink" href="#algorithms" title="Link to this heading">#</a></h2>
@@ -682,9 +799,15 @@ never run:</p>
 <td><p>TRANSITS</p></td>
 </tr>
 <tr class="row-even"><td><p>ABSORPTION(SEQ-ZO-FO)</p></td>
-<td><p>LAGTIME</p></td>
+<td><p>LAGTIME(ON)</p></td>
 </tr>
-<tr class="row-odd"><td><p>LAGTIME</p></td>
+<tr class="row-odd"><td><p>ABSORPTION(INST)</p></td>
+<td><p>LAGTIME(ON)</p></td>
+</tr>
+<tr class="row-even"><td><p>ABSORPTION(INST)</p></td>
+<td><p>TRANSITS</p></td>
+</tr>
+<tr class="row-odd"><td><p>LAGTIME(ON)</p></td>
 <td><p>TRANSITS</p></td>
 </tr>
 </tbody>

@@ -95,8 +95,15 @@ The AMD tool can use both a dataset and a model as input. If the input is a data
 
 If the input is a model, the model needs to be a PK model.
 
+When running the tool for modeltype 'ivoral' with a dataset as input, the dataset is required to have a CMT column with values 1 
+(oral doses) and 2 (IV doses). This is required for the creation of the initial one-compartment model with first order absorption. 
+In order to easily differentiate the two doses, an administration ID (ADMID) column will be added to the data as well. This will be 
+used in order to differentiate the different doses from one another with respect to the applied error model. If a model is used as 
+input instead, this is not applied as it is assumed to have the correct CMT values for the connected model, along with a way of 
+differentiating the doses from one another.
+
 .. warning::
-    The AMD tool, or more specifically the :ref:`modelsearch` tool, does not support NONMEM models with a CMT or RATE
+    The AMD tool, or more specifically the :ref:`modelsearch` tool, does not support NONMEM models with a RATE
     column. This needs to be dropped (either via model or datainfo file) or excluded from the dataset.
 
 .. _search_space_amd:
@@ -113,11 +120,11 @@ default is:
 
 .. code-block::
 
-    ABSORPTION([ZO,SEQ-ZO-FO])
-    ELIMINATION([MM,MIX-FO-MM])
-    LAGTIME()
-    TRANSITS([1,3,10],*)
-    PERIPHERALS(1)
+    ABSORPTION([FO,ZO,SEQ-ZO-FO])
+    ELIMINATION(FO)
+    LAGTIME([OFF,ON])
+    TRANSITS([0,1,3,10],*)
+    PERIPHERALS(0,1)
     COVARIATE(@IIV, @CONTINUOUS, *)
     COVARIATE(@IIV, @CATEGORICAL, CAT)
 
@@ -125,8 +132,20 @@ For a PK IV model, the default is:
 
 .. code-block::
 
-    ELIMINATION([MM,MIX-FO-MM])
-    PERIPHERALS([1,2])
+    ELIMINATION(FO)
+    PERIPHERALS([0,1,2])
+    COVARIATE(@IIV, @CONTINUOUS, *)
+    COVARIATE(@IIV, @CATEGORICAL, CAT)
+    
+For a PK IV+ORAL model, the default is:
+
+.. code-block::
+
+    ABSORPTION([FO,ZO,SEQ-ZO-FO])
+    ELIMINATION(FO)
+    LAGTIME([OFF,ON])
+    TRANSITS([0,1,3,10],*)
+    PERIPHERALS([0,1,2])
     COVARIATE(@IIV, @CONTINUOUS, *)
     COVARIATE(@IIV, @CATEGORICAL, CAT)
 
@@ -421,7 +440,7 @@ start model (in this case comparing BIC), and final ranking:
 .. pharmpy-execute::
     :hide-code:
 
-    from pharmpy.results import read_results
+    from pharmpy.workflows.results import read_results
     res = read_results('tests/testdata/results/amd_results.json')
     res.summary_tool
 
@@ -451,3 +470,29 @@ See :py:func:`pharmpy.tools.summarize_errors` for information on the content of 
     import pandas as pd
     pd.set_option('display.max_colwidth', None)
     res.summary_errors
+
+
+Final model
+~~~~~~~~~~~
+
+Some plots and tables on the final model can be found both in the amd report and in the results object.
+
+.. pharmpy-execute::
+   :hide-code:
+
+   res.final_model_parameter_estimates.style.format({
+       'estimates': '{:,.4f}'.format,
+       'RSE': '{:,.1%}'.format,
+   })
+
+
+.. pharmpy-execute::
+   :hide-code:
+
+   res.final_model_dv_vs_ipred_plot
+
+
+.. pharmpy-execute::
+   :hide-code:
+
+   res.final_model_cwres_vs_idv_plot

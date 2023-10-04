@@ -10,7 +10,8 @@ Log
 
    .. autosummary::
 
-      ~Log.log
+      ~Log.errors
+      ~Log.warnings
 
    .. rubric:: Methods Summary
 
@@ -24,7 +25,8 @@ Log
 
    .. rubric:: Attributes Documentation
 
-   .. autoattribute:: log
+   .. autoattribute:: errors
+   .. autoattribute:: warnings
 
    .. rubric:: Methods Documentation
 
