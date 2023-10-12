@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.modelfit.tool &#8212; Pharmpy 0.102.1 documentation</title>
+    <title>pharmpy.tools.modelfit.tool &#8212; Pharmpy 0.103.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
   <script src="../../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=9d1e7de5"></script>
+    <script src="../../../../_static/documentation_options.js?v=5091d9c7"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/thebelab-helper.js"></script>
@@ -52,7 +52,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Oct 04, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 12, 2023"/>
   </head>
   
   
@@ -498,7 +498,7 @@ document.write(`
 <span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Iterable</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Tuple</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
-<span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">WorkflowBuilder</span>
+<span class="kn">from</span> <span class="nn">pharmpy.workflows</span> <span class="kn">import</span> <span class="n">ModelEntry</span><span class="p">,</span> <span class="n">Task</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">WorkflowBuilder</span>
 
 <span class="n">SupportedPlugin</span> <span class="o">=</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;nonmem&#39;</span><span class="p">,</span> <span class="s1">&#39;nlmixr&#39;</span><span class="p">]</span>
 
@@ -576,7 +576,25 @@ document.write(`
 
 
 <span class="k">def</span> <span class="nf">retrieve_from_database_or_execute_model_with_tool</span><span class="p">(</span><span class="n">tool</span><span class="p">):</span>
-    <span class="k">def</span> <span class="nf">task</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">model</span><span class="p">):</span>
+    <span class="k">def</span> <span class="nf">task</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">model_or_model_entry</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_or_model_entry</span><span class="p">,</span> <span class="n">ModelEntry</span><span class="p">):</span>
+            <span class="n">model_entry</span> <span class="o">=</span> <span class="n">model_or_model_entry</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model_or_model_entry</span><span class="o">.</span><span class="n">model</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">db_model_entry</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">model_database</span><span class="o">.</span><span class="n">retrieve_model_entry</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+            <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">FileNotFoundError</span><span class="p">):</span>
+                <span class="n">db_model_entry</span> <span class="o">=</span> <span class="kc">None</span>
+
+            <span class="k">if</span> <span class="n">db_model_entry</span> <span class="ow">and</span> <span class="n">db_model_entry</span><span class="o">.</span><span class="n">modelfit_results</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">has_same_dataset_as</span><span class="p">(</span><span class="n">db_model_entry</span><span class="o">.</span><span class="n">model</span><span class="p">):</span>
+                    <span class="k">return</span> <span class="n">model_entry</span><span class="o">.</span><span class="n">attach_results</span><span class="p">(</span>
+                        <span class="n">db_model_entry</span><span class="o">.</span><span class="n">modelfit_results</span><span class="p">,</span> <span class="n">db_model_entry</span><span class="o">.</span><span class="n">log</span>
+                    <span class="p">)</span>
+
+            <span class="c1"># NOTE: Fallback to executing the model</span>
+            <span class="n">execute_model</span> <span class="o">=</span> <span class="n">get_execute_model</span><span class="p">(</span><span class="n">tool</span><span class="p">)</span>
+            <span class="k">return</span> <span class="n">execute_model</span><span class="p">(</span><span class="n">model_entry</span><span class="p">,</span> <span class="n">context</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model_or_model_entry</span>
         <span class="k">try</span><span class="p">:</span>
             <span class="n">db_results</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">model_database</span><span class="o">.</span><span class="n">retrieve_modelfit_results</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="k">except</span> <span class="p">(</span><span class="ne">KeyError</span><span class="p">,</span> <span class="ne">AttributeError</span><span class="p">,</span> <span class="ne">FileNotFoundError</span><span class="p">):</span>

@@ -13,10 +13,12 @@ default_model_database
       ~default_model_database.retrieve_file
       ~default_model_database.retrieve_local_files
       ~default_model_database.retrieve_model
+      ~default_model_database.retrieve_model_entry
       ~default_model_database.retrieve_modelfit_results
       ~default_model_database.store_local_file
       ~default_model_database.store_metadata
       ~default_model_database.store_model
+      ~default_model_database.store_model_entry
       ~default_model_database.store_modelfit_results
 
    .. rubric:: Methods Documentation
@@ -24,8 +26,10 @@ default_model_database
    .. automethod:: retrieve_file
    .. automethod:: retrieve_local_files
    .. automethod:: retrieve_model
+   .. automethod:: retrieve_model_entry
    .. automethod:: retrieve_modelfit_results
    .. automethod:: store_local_file
    .. automethod:: store_metadata
    .. automethod:: store_model
+   .. automethod:: store_model_entry
    .. automethod:: store_modelfit_results

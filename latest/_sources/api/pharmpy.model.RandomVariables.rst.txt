@@ -21,6 +21,7 @@ RandomVariables
       ~RandomVariables.names
       ~RandomVariables.nrvs
       ~RandomVariables.parameter_names
+      ~RandomVariables.symbols
       ~RandomVariables.variance_parameters
 
    .. rubric:: Methods Summary
@@ -55,6 +56,7 @@ RandomVariables
    .. autoattribute:: names
    .. autoattribute:: nrvs
    .. autoattribute:: parameter_names
+   .. autoattribute:: symbols
    .. autoattribute:: variance_parameters
 
    .. rubric:: Methods Documentation

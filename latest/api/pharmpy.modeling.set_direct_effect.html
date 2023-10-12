@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>set_direct_effect &#8212; Pharmpy 0.102.1 documentation</title>
+    <title>set_direct_effect &#8212; Pharmpy 0.103.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
 
-    <script src="../_static/documentation_options.js?v=9d1e7de5"></script>
+    <script src="../_static/documentation_options.js?v=5091d9c7"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/thebelab-helper.js"></script>
@@ -54,7 +54,7 @@
     <link rel="prev" title="set_covariates" href="pharmpy.modeling.set_covariates.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Oct 04, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 12, 2023"/>
   </head>
   
   
@@ -816,37 +816,45 @@ document.write(`
 <span class="sig-prename descclassname"><span class="pre">pharmpy.modeling.</span></span><span class="sig-name descname"><span class="pre">set_direct_effect</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em>, <em class="sig-param"><span class="n"><span class="pre">expr</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/modeling/pd.html#set_direct_effect"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pharmpy.modeling.set_direct_effect" title="Link to this definition">#</a></dt>
 <dd><p>Add an effect to a model.</p>
 <p>Implemented PD models are:</p>
-<ul class="simple">
-<li><p>Baseline:</p></li>
-</ul>
-<div class="math notranslate nohighlight">
+<ul>
+<li><p>Baseline:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
 \[E = B\]</div>
-<ul class="simple">
-<li><p>Linear:</p></li>
-</ul>
-<div class="math notranslate nohighlight">
+</div></blockquote>
+</li>
+<li><p>Linear:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
 \[E = B \cdot (1 + \text{slope} \cdot C)\]</div>
-<ul class="simple">
-<li><p>Emax:</p></li>
-</ul>
-<div class="math notranslate nohighlight">
+</div></blockquote>
+</li>
+<li><p>Emax:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
 \[E = B \cdot \Bigg(1 + \frac {E_{max} \cdot C } { EC_{50} + C}  \Bigg)\]</div>
-<ul class="simple">
-<li><p>Step effect:</p></li>
-</ul>
-<div class="math notranslate nohighlight">
+</div></blockquote>
+</li>
+<li><p>Step effect:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
 \[E = \Biggl \lbrace {B \quad \text{if C} \leq 0 \atop B \cdot (1+ E_{max}) \quad \text{else}}\]</div>
-<ul class="simple">
-<li><p>Sigmoidal:</p></li>
-</ul>
-<div class="math notranslate nohighlight">
+</div></blockquote>
+</li>
+<li><p>Sigmoidal:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
 \[E=\Biggl \lbrace {B \cdot \Bigl(1+\frac{E_{max} \cdot C^n}{EC_{50}^n+C^n}\Bigl) \quad \
 \text{if C}&gt;0 \atop B \quad \text{else}}\]</div>
-<ul class="simple">
-<li><p>Log-linear:</p></li>
-</ul>
-<div class="math notranslate nohighlight">
+</div></blockquote>
+</li>
+<li><p>Log-linear:</p>
+<blockquote>
+<div><div class="math notranslate nohighlight">
 \[E = \text{slope} \cdot \text{log}(C + C_0)\]</div>
+</div></blockquote>
+</li>
+</ul>
 <p><span class="math notranslate nohighlight">\(B\)</span> is the baseline effect</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
@@ -864,9 +872,9 @@ document.write(`
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">load_example_model</span><span class="p">(</span><span class="s2">&quot;pheno&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">set_direct_effect</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;linear&quot;</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">)</span>
-<span class="go">      ⎛A_CENTRAL⋅SLOPE    ⎞</span>
-<span class="go">    B⋅⎜─────────────── + 1⎟</span>
-<span class="go">E =   ⎝       V           ⎠</span>
+<span class="go">      ⎛SLOPE⋅A_CENTRAL(t)    ⎞</span>
+<span class="go">    B⋅⎜────────────────── + 1⎟</span>
+<span class="go">E =   ⎝        V             ⎠</span>
 </pre></div>
 </div>
 </dd></dl>

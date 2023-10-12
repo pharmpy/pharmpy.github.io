@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.102.1 documentation</title>
+    <title>pharmpy.modeling.expressions &#8212; Pharmpy 0.103.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
   <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
 
-    <script src="../../../_static/documentation_options.js?v=9d1e7de5"></script>
+    <script src="../../../_static/documentation_options.js?v=5091d9c7"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -52,7 +52,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Oct 04, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 12, 2023"/>
   </head>
   
   
@@ -530,11 +530,13 @@ document.write(`
     <span class="n">output</span><span class="p">,</span>
 <span class="p">)</span>
 
-<span class="kn">from</span> <span class="nn">.parameters</span> <span class="kn">import</span> <span class="n">get_thetas</span>
+<span class="kn">from</span> <span class="nn">.parameters</span> <span class="kn">import</span> <span class="n">get_omegas</span><span class="p">,</span> <span class="n">get_sigmas</span><span class="p">,</span> <span class="n">get_thetas</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
+    <span class="kn">import</span> <span class="nn">networkx</span> <span class="k">as</span> <span class="nn">nx</span>
     <span class="kn">import</span> <span class="nn">sympy</span>
 <span class="k">else</span><span class="p">:</span>
+    <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">networkx</span> <span class="k">as</span> <span class="n">nx</span>
     <span class="kn">from</span> <span class="nn">pharmpy.deps</span> <span class="kn">import</span> <span class="n">sympy</span>
 
 <span class="n">T</span> <span class="o">=</span> <span class="n">TypeVar</span><span class="p">(</span><span class="s1">&#39;T&#39;</span><span class="p">)</span>
@@ -1082,9 +1084,9 @@ document.write(`
 <span class="sd">    ┌───────┐</span>
 <span class="sd">    │CENTRAL│──CL/V→</span>
 <span class="sd">    └───────┘</span>
-<span class="sd">        A_CENTRAL</span>
-<span class="sd">        ─────────</span>
-<span class="sd">    F =     S₁</span>
+<span class="sd">        A_CENTRAL(t)</span>
+<span class="sd">        ────────────</span>
+<span class="sd">    F =      S₁</span>
 <span class="sd">    W = F</span>
 <span class="sd">    Y = EPS₁⋅W + F</span>
 <span class="sd">    IPRED = F</span>
@@ -1110,9 +1112,9 @@ document.write(`
 <span class="sd">    ┌───────┐</span>
 <span class="sd">    │CENTRAL│──CL/V→</span>
 <span class="sd">    └───────┘</span>
-<span class="sd">        A_CENTRAL</span>
-<span class="sd">        ─────────</span>
-<span class="sd">    F =     V</span>
+<span class="sd">        A_CENTRAL(t)</span>
+<span class="sd">        ────────────</span>
+<span class="sd">    F =      V</span>
 <span class="sd">    Y = EPS₁⋅F + F</span>
 <span class="sd">    IRES = DV - F</span>
 <span class="sd">            IRES</span>
@@ -1175,9 +1177,9 @@ document.write(`
 <span class="sd">    ┌───────┐</span>
 <span class="sd">    │CENTRAL│──CL/V→</span>
 <span class="sd">    └───────┘</span>
-<span class="sd">        A_CENTRAL</span>
-<span class="sd">        ─────────</span>
-<span class="sd">    F =     S₁</span>
+<span class="sd">        A_CENTRAL(t)</span>
+<span class="sd">        ────────────</span>
+<span class="sd">    F =      S₁</span>
 <span class="sd">    W = F</span>
 <span class="sd">    Y = EPS₁⋅W + F</span>
 <span class="sd">    IPRED = F</span>
@@ -1204,9 +1206,9 @@ document.write(`
 <span class="sd">    ┌───────┐</span>
 <span class="sd">    │CENTRAL│──CL/V→</span>
 <span class="sd">    └───────┘</span>
-<span class="sd">        A_CENTRAL</span>
-<span class="sd">        ─────────</span>
-<span class="sd">    F =     V</span>
+<span class="sd">        A_CENTRAL(t)</span>
+<span class="sd">        ────────────</span>
+<span class="sd">    F =      V</span>
 <span class="sd">    Y = F⋅ε₁ + F</span>
 <span class="sd">    IRES = DV - F</span>
 <span class="sd">            IRES</span>
@@ -1271,15 +1273,24 @@ document.write(`
 
 <div class="viewcode-block" id="get_individual_parameters">
 <a class="viewcode-back" href="../../../api/pharmpy.modeling.get_individual_parameters.html#pharmpy.modeling.get_individual_parameters">[docs]</a>
-<span class="k">def</span> <span class="nf">get_individual_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves all parameters with IIV or IOV in :class:`pharmpy.model`.</span>
+<span class="k">def</span> <span class="nf">get_individual_parameters</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">,</span> <span class="n">dv</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">,</span> <span class="nb">str</span><span class="p">,</span> <span class="nb">int</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves all individual parameters in a :class:`pharmpy.model`.</span>
+
+<span class="sd">    By default all individual parameters will be found even ones having no random effect. The level</span>
+<span class="sd">    arguments makes it possible to find only those having any random effect or only those having a certain</span>
+<span class="sd">    random effect. Using the dv option will give all individual parameters affecting a certain dv. Note that</span>
+<span class="sd">    the DV for PD in a PKPD model often also is affected by the PK parameters.</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    model : Model</span>
 <span class="sd">        Pharmpy model to retrieve the individuals parameters from</span>
 <span class="sd">    level : str</span>
-<span class="sd">        The variability level to look for: &#39;iiv&#39;, &#39;iov&#39;, or &#39;all&#39; (default)</span>
+<span class="sd">        The variability level to look for: &#39;iiv&#39;, &#39;iov&#39;, &#39;random&#39; or &#39;all&#39; (default)</span>
+<span class="sd">    dv : Union[sympy.Symbol, str, int, None]</span>
+<span class="sd">        Name or DVID of dependent variable. None for all (default)</span>
 
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
@@ -1299,44 +1310,299 @@ document.write(`
 
 <span class="sd">    See also</span>
 <span class="sd">    --------</span>
+<span class="sd">    get_pd_parameters</span>
 <span class="sd">    get_pk_parameters</span>
 <span class="sd">    get_rv_parameters</span>
 <span class="sd">    has_random_effect</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
+    <span class="c1"># FIXME: Support multiple DVs</span>
 
-    <span class="n">rvs</span> <span class="o">=</span> <span class="n">_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">level</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_declarative</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">_replace_trivial_redefinitions</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
 
-    <span class="n">assignments</span> <span class="o">=</span> <span class="n">_get_natural_assignments</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="p">)</span>
+    <span class="c1"># Arrow means is depending on</span>
+    <span class="n">full_graph</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">_create_dependency_graph</span><span class="p">()</span>
+    <span class="n">all_statements</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">full_graph</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span>
+    <span class="n">theta_eta_deps</span> <span class="o">=</span> <span class="n">_find_theta_eta_dependents</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">full_graph</span><span class="p">)</span>
+    <span class="n">eps_deps</span> <span class="o">=</span> <span class="n">_find_eps_dependents</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">full_graph</span><span class="p">)</span>
+    <span class="n">separable_statements</span> <span class="o">=</span> <span class="n">_find_separable_statements</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">ode_statement</span> <span class="o">=</span> <span class="n">_find_ode_statement</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">dv_statements</span> <span class="o">=</span> <span class="n">_find_dv_statements</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">time_deps</span> <span class="o">=</span> <span class="n">_find_time_dependents</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">full_graph</span><span class="p">)</span>
+    <span class="n">all_candidates</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">all_statements</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">theta_eta_deps</span><span class="p">)</span>
+        <span class="o">-</span> <span class="n">eps_deps</span>
+        <span class="o">-</span> <span class="n">separable_statements</span>
+        <span class="o">-</span> <span class="n">ode_statement</span>
+        <span class="o">-</span> <span class="n">dv_statements</span>
+        <span class="o">-</span> <span class="n">time_deps</span>
+    <span class="p">)</span>
 
-    <span class="n">free_symbols</span> <span class="o">=</span> <span class="p">{</span><span class="n">assignment</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">assignment</span> <span class="ow">in</span> <span class="n">assignments</span><span class="p">}</span>
+    <span class="n">parameter_symbs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">dv</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">dvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">dvs</span> <span class="o">=</span> <span class="p">{</span><span class="n">get_dv_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="p">)}</span>
+    <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">dvs</span><span class="p">:</span>
+        <span class="n">ind</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">gsub</span> <span class="o">=</span> <span class="n">_subgraph_of</span><span class="p">(</span><span class="n">full_graph</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
+        <span class="n">gsub</span> <span class="o">=</span> <span class="n">_cut_partial_odes</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">gsub</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span>
 
-    <span class="n">dependency_graph</span> <span class="o">=</span> <span class="n">_dependency_graph</span><span class="p">(</span><span class="n">assignments</span><span class="p">)</span>
+        <span class="n">candidates</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">gsub</span><span class="o">.</span><span class="n">nodes</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">all_candidates</span><span class="p">)</span>
 
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span>
-        <span class="nb">map</span><span class="p">(</span>
-            <span class="nb">str</span><span class="p">,</span>
-            <span class="n">_filter_symbols</span><span class="p">(</span>
-                <span class="n">dependency_graph</span><span class="p">,</span>
-                <span class="n">free_symbols</span><span class="p">,</span>
-                <span class="nb">set</span><span class="p">()</span><span class="o">.</span><span class="n">union</span><span class="p">(</span>
-                    <span class="o">*</span><span class="p">(</span><span class="n">rvs</span><span class="p">[</span><span class="n">rv</span><span class="p">]</span><span class="o">.</span><span class="n">free_symbols</span> <span class="k">for</span> <span class="n">rv</span> <span class="ow">in</span> <span class="n">rvs</span><span class="o">.</span><span class="n">names</span> <span class="k">if</span> <span class="n">rvs</span><span class="p">[</span><span class="n">rv</span><span class="p">]</span><span class="o">.</span><span class="n">get_variance</span><span class="p">(</span><span class="n">rv</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">)</span>
-                <span class="p">),</span>
-            <span class="p">),</span>
-        <span class="p">)</span>
-    <span class="p">)</span></div>
+        <span class="n">parameter_indices</span> <span class="o">=</span> <span class="n">_find_individual_parameters</span><span class="p">(</span><span class="n">gsub</span><span class="p">,</span> <span class="n">candidates</span><span class="p">)</span>
+
+        <span class="n">parameter_symbs</span> <span class="o">|=</span> <span class="p">{</span><span class="n">statements</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">parameter_indices</span><span class="p">}</span>
+
+    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;random&#39;</span><span class="p">:</span>
+        <span class="n">wanted_levels</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;iov&#39;</span><span class="p">,</span> <span class="s1">&#39;iiv&#39;</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;iiv&#39;</span><span class="p">:</span>
+        <span class="n">wanted_levels</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;iiv&#39;</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;iov&#39;</span><span class="p">:</span>
+        <span class="n">wanted_levels</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;iov&#39;</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">wanted_levels</span> <span class="o">=</span> <span class="kc">None</span>
+
+    <span class="k">if</span> <span class="n">wanted_levels</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">parameter_symbs</span><span class="p">:</span>
+            <span class="n">levels</span> <span class="o">=</span> <span class="n">_random_levels_of_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">full_graph</span><span class="p">,</span> <span class="n">param</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="n">wanted_levels</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">levels</span><span class="p">):</span>
+                <span class="n">filtered</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">filtered</span> <span class="o">=</span> <span class="n">parameter_symbs</span>
+
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">([</span><span class="n">s</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">filtered</span><span class="p">])</span></div>
 
 
 
-<span class="k">def</span> <span class="nf">_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;iiv&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv</span>
-    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;iov&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iov</span>
-    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span>
+<span class="k">def</span> <span class="nf">_subgraph_of</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+    <span class="n">gsub</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">subgraph</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">descendants</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">ind</span><span class="p">)</span> <span class="o">|</span> <span class="p">{</span><span class="n">ind</span><span class="p">})</span>
+    <span class="k">return</span> <span class="n">gsub</span>
 
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot handle level `</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s1">`&#39;</span><span class="p">)</span>
+
+<span class="k">def</span> <span class="nf">_cut_partial_odes</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">dv</span><span class="p">):</span>
+    <span class="c1"># Cut not needed deps of the ode-system for this dv</span>
+    <span class="c1"># This prevents the entire ode-system to be needed in case</span>
+    <span class="c1"># of a disjoint system.</span>
+
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+
+    <span class="k">if</span> <span class="n">odes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">g</span>
+
+    <span class="k">def</span> <span class="nf">dep_funcs</span><span class="p">(</span><span class="n">eq</span><span class="p">):</span>
+        <span class="kn">from</span> <span class="nn">sympy.core.function</span> <span class="kn">import</span> <span class="n">AppliedUndef</span>
+
+        <span class="n">funcs</span> <span class="o">=</span> <span class="n">eq</span><span class="o">.</span><span class="n">atoms</span><span class="p">(</span><span class="n">AppliedUndef</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">funcs</span>
+
+    <span class="k">def</span> <span class="nf">dep_amounts</span><span class="p">(</span><span class="n">ode_deps</span><span class="p">,</span> <span class="n">amounts</span><span class="p">):</span>
+        <span class="n">deps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">amounts</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">amount</span> <span class="ow">in</span> <span class="n">amounts</span><span class="p">:</span>
+            <span class="n">deps</span> <span class="o">|=</span> <span class="nb">set</span><span class="p">(</span><span class="n">nx</span><span class="o">.</span><span class="n">descendants</span><span class="p">(</span><span class="n">ode_deps</span><span class="p">,</span> <span class="n">amount</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">deps</span>
+
+    <span class="n">ode_deps</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">DiGraph</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="n">odes</span><span class="o">.</span><span class="n">eqs</span><span class="p">:</span>
+        <span class="n">fn</span> <span class="o">=</span> <span class="n">dep_funcs</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">lhs</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">ode_deps</span><span class="o">.</span><span class="n">add_node</span><span class="p">(</span><span class="n">fn</span><span class="p">)</span>
+
+    <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="n">odes</span><span class="o">.</span><span class="n">eqs</span><span class="p">:</span>
+        <span class="n">lhs_func</span> <span class="o">=</span> <span class="n">dep_funcs</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">lhs</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="n">rhs_funcs</span> <span class="o">=</span> <span class="n">dep_funcs</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">rhs</span><span class="p">)</span> <span class="o">-</span> <span class="p">{</span><span class="n">lhs_func</span><span class="p">}</span>
+        <span class="k">for</span> <span class="n">fn</span> <span class="ow">in</span> <span class="n">rhs_funcs</span><span class="p">:</span>
+            <span class="n">ode_deps</span><span class="o">.</span><span class="n">add_edge</span><span class="p">(</span><span class="n">lhs_func</span><span class="p">,</span> <span class="n">fn</span><span class="p">)</span>
+
+    <span class="n">all_dep_funcs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">():</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">):</span>
+            <span class="n">all_dep_funcs</span> <span class="o">|=</span> <span class="n">dep_funcs</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">expression</span><span class="p">)</span>
+
+    <span class="n">deps</span> <span class="o">=</span> <span class="n">dep_amounts</span><span class="p">(</span><span class="n">ode_deps</span><span class="p">,</span> <span class="n">all_dep_funcs</span><span class="p">)</span>
+
+    <span class="n">dep_symbs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">nondep_symbs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+
+    <span class="k">for</span> <span class="n">eq</span> <span class="ow">in</span> <span class="n">odes</span><span class="o">.</span><span class="n">eqs</span><span class="p">:</span>
+        <span class="n">lhs_func</span> <span class="o">=</span> <span class="n">dep_funcs</span><span class="p">(</span><span class="n">eq</span><span class="o">.</span><span class="n">lhs</span><span class="p">)</span><span class="o">.</span><span class="n">pop</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">lhs_func</span> <span class="ow">in</span> <span class="n">deps</span><span class="p">:</span>
+            <span class="n">dep_symbs</span> <span class="o">|=</span> <span class="n">eq</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">nondep_symbs</span> <span class="o">|=</span> <span class="n">eq</span><span class="o">.</span><span class="n">free_symbols</span>
+
+    <span class="n">not_needed_symbs</span> <span class="o">=</span> <span class="n">nondep_symbs</span> <span class="o">-</span> <span class="n">dep_symbs</span>
+
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">):</span>
+            <span class="n">ode_index</span> <span class="o">=</span> <span class="n">i</span>
+            <span class="k">break</span>
+
+    <span class="n">g</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">g</span> <span class="ow">and</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">)</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">not_needed_symbs</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">ode_index</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">nx</span><span class="o">.</span><span class="n">NetworkXError</span><span class="p">:</span>
+                <span class="k">pass</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">g</span><span class="o">.</span><span class="n">remove_edge</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="n">ode_index</span><span class="p">)</span>
+            <span class="k">except</span> <span class="n">nx</span><span class="o">.</span><span class="n">NetworkXError</span><span class="p">:</span>
+                <span class="k">pass</span>
+    <span class="n">g</span> <span class="o">=</span> <span class="n">_subgraph_of</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">dv</span><span class="p">)</span>  <span class="c1"># Remove all nodes no longer connected</span>
+    <span class="k">return</span> <span class="n">g</span>
+
+
+<span class="k">def</span> <span class="nf">_random_levels_of_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">param</span><span class="p">):</span>
+    <span class="n">ind</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
+    <span class="n">iiv_symbs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv</span><span class="o">.</span><span class="n">symbols</span>
+    <span class="n">iov_symbs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iov</span><span class="o">.</span><span class="n">symbols</span>
+    <span class="n">levels</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">nx</span><span class="o">.</span><span class="n">dfs_preorder_nodes</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">ind</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">iiv_symbs</span><span class="p">):</span>
+            <span class="n">levels</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;iiv&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="n">node</span><span class="p">]</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">iov_symbs</span><span class="p">):</span>
+            <span class="n">levels</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="s1">&#39;iov&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">levels</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_find_ode_statement</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">):</span>
+            <span class="k">return</span> <span class="p">{</span><span class="n">i</span><span class="p">}</span>
+    <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+
+
+<span class="k">def</span> <span class="nf">_find_dv_statements</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">inds</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">):</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">)</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+            <span class="n">inds</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">inds</span>
+
+
+<span class="k">def</span> <span class="nf">_find_separable_statements</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="c1"># Statements with only assignment dependencies</span>
+    <span class="c1"># where these are dependencies of other assignments</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">all_assigned_symbols</span> <span class="o">=</span> <span class="n">_get_all_assigned_symbols</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">candidates</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">i</span>
+        <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">)</span> <span class="ow">and</span> <span class="n">s</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="o">.</span><span class="n">issubset</span><span class="p">(</span><span class="n">all_assigned_symbols</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="n">separable</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+        <span class="n">rhs</span> <span class="o">=</span> <span class="n">statements</span><span class="p">[</span><span class="n">i</span><span class="p">]</span><span class="o">.</span><span class="n">rhs_symbols</span>
+        <span class="k">for</span> <span class="n">j</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">statements</span><span class="p">):</span>
+            <span class="k">if</span> <span class="n">i</span> <span class="o">!=</span> <span class="n">j</span> <span class="ow">and</span> <span class="ow">not</span> <span class="n">rhs</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="p">):</span>
+                <span class="n">separable</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+                <span class="k">break</span>
+    <span class="k">return</span> <span class="n">separable</span>
+
+
+<span class="k">def</span> <span class="nf">_get_all_assigned_symbols</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">all_assigned_symbols</span> <span class="o">=</span> <span class="p">{</span>
+        <span class="n">statement</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">statement</span> <span class="ow">in</span> <span class="n">statements</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">statement</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">)</span>
+    <span class="p">}</span>
+    <span class="k">return</span> <span class="n">all_assigned_symbols</span>
+
+
+<span class="k">def</span> <span class="nf">_replace_trivial_redefinitions</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="c1"># Remove and replace X = Y and X = 1/Y</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">all_assigned_symbols</span> <span class="o">=</span> <span class="n">_get_all_assigned_symbols</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+
+    <span class="n">d</span> <span class="o">=</span> <span class="p">{}</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">statements</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">)</span> <span class="ow">and</span> <span class="p">(</span>
+            <span class="n">s</span><span class="o">.</span><span class="n">expression</span> <span class="ow">in</span> <span class="n">all_assigned_symbols</span> <span class="ow">or</span> <span class="mi">1</span> <span class="o">/</span> <span class="n">s</span><span class="o">.</span><span class="n">expression</span> <span class="ow">in</span> <span class="n">all_assigned_symbols</span>
+        <span class="p">):</span>
+            <span class="n">d</span><span class="p">[</span><span class="n">s</span><span class="o">.</span><span class="n">symbol</span><span class="p">]</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">expression</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">keep</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+    <span class="n">new</span> <span class="o">=</span> <span class="n">Statements</span><span class="p">(</span><span class="nb">tuple</span><span class="p">(</span><span class="n">keep</span><span class="p">))</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">new</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_find_individual_parameters</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">candidates</span><span class="p">):</span>
+    <span class="c1"># Starting from all sinks of g find all deepest candidate nodes</span>
+    <span class="n">keep</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="n">current_step</span> <span class="o">=</span> <span class="n">_sinks</span><span class="p">(</span><span class="n">g</span><span class="p">)</span>
+
+    <span class="k">while</span> <span class="n">current_step</span><span class="p">:</span>
+        <span class="n">next_step</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">current_step</span><span class="p">:</span>
+            <span class="n">pred</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">g</span><span class="o">.</span><span class="n">predecessors</span><span class="p">(</span><span class="n">node</span><span class="p">))</span>
+            <span class="k">if</span> <span class="n">node</span> <span class="ow">in</span> <span class="n">candidates</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">pred</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">candidates</span><span class="p">):</span>
+                    <span class="n">keep</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">node</span><span class="p">)</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="n">next_step</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">next_step</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">pred</span><span class="p">)</span>
+        <span class="n">current_step</span> <span class="o">=</span> <span class="n">next_step</span>
+    <span class="k">return</span> <span class="n">keep</span>
+
+
+<span class="k">def</span> <span class="nf">_sinks</span><span class="p">(</span><span class="n">g</span><span class="p">):</span>
+    <span class="k">return</span> <span class="p">(</span><span class="n">node</span> <span class="k">for</span> <span class="n">node</span><span class="p">,</span> <span class="n">out_degree</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">out_degree</span><span class="p">()</span> <span class="k">if</span> <span class="n">out_degree</span> <span class="o">==</span> <span class="mi">0</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_find_time_dependents</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+    <span class="n">direct</span> <span class="o">=</span> <span class="n">_find_direct_time_dependents</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_find_dependents</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">direct</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_find_dependents</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">nodes</span><span class="p">):</span>
+    <span class="n">deps</span> <span class="o">=</span> <span class="n">nodes</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">nodes</span><span class="p">:</span>
+        <span class="n">ancestors</span> <span class="o">=</span> <span class="n">nx</span><span class="o">.</span><span class="n">ancestors</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">i</span><span class="p">)</span>
+        <span class="n">deps</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">ancestors</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">deps</span>
+
+
+<span class="k">def</span> <span class="nf">_find_direct_param_dependents</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="kc">False</span><span class="p">):</span>
+    <span class="c1"># Look for statements that are directly depending on</span>
+    <span class="c1"># either (thetas, omegas or etas) or (sigmas or epsilons)</span>
+    <span class="n">deps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">eps</span><span class="p">:</span>
+        <span class="n">thetas_and_omegas</span> <span class="o">=</span> <span class="n">get_thetas</span><span class="p">(</span><span class="n">model</span><span class="p">)</span> <span class="o">+</span> <span class="n">get_omegas</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">pop_params</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">thetas_and_omegas</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+        <span class="n">rvs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">sigmas</span> <span class="o">=</span> <span class="n">get_sigmas</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+        <span class="n">pop_params</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">sigmas</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+        <span class="n">rvs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">epsilons</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+    <span class="n">all_symbs</span> <span class="o">=</span> <span class="n">pop_params</span> <span class="o">|</span> <span class="n">rvs</span>
+    <span class="k">for</span> <span class="n">i</span> <span class="ow">in</span> <span class="n">g</span><span class="o">.</span><span class="n">nodes</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="n">i</span><span class="p">]</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">all_symbs</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">s</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="p">):</span>
+            <span class="n">deps</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="n">i</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">deps</span>
+
+
+<span class="k">def</span> <span class="nf">_find_theta_eta_dependents</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+    <span class="n">direct</span> <span class="o">=</span> <span class="n">_find_direct_param_dependents</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">g</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_find_dependents</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">direct</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_find_eps_dependents</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">g</span><span class="p">):</span>
+    <span class="n">direct</span> <span class="o">=</span> <span class="n">_find_direct_param_dependents</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">g</span><span class="p">,</span> <span class="n">eps</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">_find_dependents</span><span class="p">(</span><span class="n">g</span><span class="p">,</span> <span class="n">direct</span><span class="p">)</span>
+
+
+<span class="k">def</span> <span class="nf">_find_direct_time_dependents</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="k">if</span> <span class="n">odes</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">return</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">return</span> <span class="p">{</span><span class="n">i</span> <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">statements</span><span class="p">)</span> <span class="k">if</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">in</span> <span class="n">s</span><span class="o">.</span><span class="n">rhs_symbols</span><span class="p">}</span>
 
 
 <span class="k">def</span> <span class="nf">depends_on</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">symbol</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
@@ -1781,27 +2047,19 @@ document.write(`
 <span class="sd">    get_rv_parameters</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">natural_assignments</span> <span class="o">=</span> <span class="n">_get_natural_assignments</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="p">)</span>
-    <span class="n">cs_remapped</span> <span class="o">=</span> <span class="n">_remap_compartmental_system</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">,</span> <span class="n">natural_assignments</span><span class="p">)</span>
-
-    <span class="n">free_symbols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">_pk_free_symbols</span><span class="p">(</span><span class="n">cs_remapped</span><span class="p">,</span> <span class="n">kind</span><span class="p">))</span>
-
-    <span class="n">dependency_graph</span> <span class="o">=</span> <span class="n">_dependency_graph</span><span class="p">(</span><span class="n">natural_assignments</span><span class="p">)</span>
-
-    <span class="n">pk_symbols</span> <span class="o">=</span> <span class="n">_filter_symbols</span><span class="p">(</span><span class="n">dependency_graph</span><span class="p">,</span> <span class="n">free_symbols</span><span class="p">)</span>
-
-    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="c1"># Remove PD parameters if model has an effect or response compartment</span>
-    <span class="k">if</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="s2">&quot;EFFECT&quot;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="s1">&#39;RESPONSE&#39;</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">pk_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">param</span> <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">pk_symbols</span> <span class="k">if</span> <span class="nb">str</span><span class="p">(</span><span class="n">param</span><span class="p">)</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">get_pd_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">)]</span>
-
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pk_symbols</span><span class="p">))</span></div>
+    <span class="n">pkparams</span> <span class="o">=</span> <span class="n">get_individual_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">make_declarative</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">_replace_trivial_redefinitions</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">kind</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="n">symbs</span> <span class="o">=</span> <span class="p">{</span><span class="nb">str</span><span class="p">(</span><span class="n">symb</span><span class="p">)</span> <span class="k">for</span> <span class="n">symb</span> <span class="ow">in</span> <span class="n">_pk_free_symbols</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">kind</span><span class="p">)}</span>
+        <span class="n">pkparams</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pkparams</span><span class="p">)</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">symbs</span><span class="p">)</span>
+    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">pkparams</span><span class="p">)</span></div>
 
 
 
 <div class="viewcode-block" id="get_pd_parameters">
 <a class="viewcode-back" href="../../../api/pharmpy.modeling.get_pd_parameters.html#pharmpy.modeling.get_pd_parameters">[docs]</a>
-<span class="k">def</span> <span class="nf">get_pd_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="k">def</span> <span class="nf">get_pd_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieves PD parameters in :class:`pharmpy.model.Model`.</span>
 
 <span class="sd">    Parameters</span>
@@ -1827,36 +2085,22 @@ document.write(`
 <span class="sd">    get_pk_parameters</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">natural_assignments</span> <span class="o">=</span> <span class="n">_get_natural_assignments</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="p">)</span>
-    <span class="n">dependency_graph</span> <span class="o">=</span> <span class="n">_dependency_graph</span><span class="p">(</span><span class="n">natural_assignments</span><span class="p">)</span>
+    <span class="n">pkparams</span> <span class="o">=</span> <span class="n">get_individual_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="mi">1</span><span class="p">)</span>
+    <span class="n">pkpdparams</span> <span class="o">=</span> <span class="n">get_individual_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
+    <span class="n">pdparams</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">pkpdparams</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">pkparams</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">pdparams</span></div>
 
-    <span class="n">pk_symbols</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">eqs</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">free_symbols</span>
 
-    <span class="n">ass_e</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">ass_e</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">pd_symbols</span> <span class="o">=</span> <span class="p">[</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">symbol</span> <span class="ow">in</span> <span class="n">ass_e</span><span class="o">.</span><span class="n">free_symbols</span> <span class="k">if</span> <span class="n">symbol</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pk_symbols</span><span class="p">]</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">pd_symbols</span> <span class="o">=</span> <span class="p">[]</span>
 
-    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
-    <span class="n">effect</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="s2">&quot;EFFECT&quot;</span><span class="p">)</span>
-    <span class="n">response</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">find_compartment</span><span class="p">(</span><span class="s2">&quot;RESPONSE&quot;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">effect</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">output_sym</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">effect</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">)</span>
-        <span class="n">input_sym</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">effect</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">)</span>
-        <span class="n">ode_sym</span> <span class="o">=</span> <span class="n">output_sym</span> <span class="o">+</span> <span class="n">input_sym</span>
-        <span class="n">ode_sym</span> <span class="o">=</span> <span class="p">[</span><span class="n">sym</span> <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">ode_sym</span> <span class="k">if</span> <span class="n">sym</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pk_symbols</span><span class="p">]</span>
-        <span class="n">pd_symbols</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">pd_symbols</span><span class="p">)</span> <span class="o">+</span> <span class="n">ode_sym</span> <span class="o">+</span> <span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;MET&#39;</span><span class="p">)]</span>
-    <span class="k">if</span> <span class="n">response</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="n">output_sym</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">response</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">)</span>
-        <span class="n">input_sym</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">)</span>
-        <span class="n">ode_sym</span> <span class="o">=</span> <span class="n">output_sym</span> <span class="o">+</span> <span class="n">input_sym</span>
-        <span class="n">ode_sym</span> <span class="o">=</span> <span class="p">[</span><span class="n">sym</span> <span class="k">for</span> <span class="n">sym</span> <span class="ow">in</span> <span class="n">ode_sym</span> <span class="k">if</span> <span class="n">sym</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">pk_symbols</span><span class="p">]</span>
-        <span class="n">pd_symbols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">pd_symbols</span> <span class="o">+</span> <span class="n">ode_sym</span> <span class="o">+</span> <span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;B&#39;</span><span class="p">),</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="s1">&#39;MET&#39;</span><span class="p">)])</span>
+<span class="k">def</span> <span class="nf">_rvs</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;iiv&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;iov&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iov</span>
+    <span class="k">if</span> <span class="n">level</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span>
 
-    <span class="n">pd_symbols</span> <span class="o">=</span> <span class="n">_filter_symbols</span><span class="p">(</span><span class="n">dependency_graph</span><span class="p">,</span> <span class="nb">set</span><span class="p">(</span><span class="n">pd_symbols</span><span class="p">))</span>
-    <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="nb">str</span><span class="p">,</span> <span class="n">pd_symbols</span><span class="p">))</span></div>
-
+    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot handle level `</span><span class="si">{</span><span class="n">level</span><span class="si">}</span><span class="s1">`&#39;</span><span class="p">)</span>
 
 
 <span class="k">def</span> <span class="nf">_get_natural_assignments</span><span class="p">(</span><span class="n">before_odes</span><span class="p">):</span>
@@ -1882,25 +2126,48 @@ document.write(`
     <span class="k">return</span> <span class="n">cs</span>
 
 
-<span class="k">def</span> <span class="nf">_pk_free_symbols</span><span class="p">(</span><span class="n">cs</span><span class="p">:</span> <span class="n">CompartmentalSystem</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">]:</span>
-    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">cs</span><span class="o">.</span><span class="n">free_symbols</span>
-
+<span class="k">def</span> <span class="nf">_pk_free_symbols</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">kind</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Iterable</span><span class="p">[</span><span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">]:</span>
+    <span class="n">cs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="n">symbols</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
     <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;absorption&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="p">(</span>
-            <span class="p">[]</span>
-            <span class="k">if</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartments</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">==</span> <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span>
-            <span class="k">else</span> <span class="n">_pk_free_symbols_from_compartment</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartments</span><span class="p">[</span><span class="mi">0</span><span class="p">])</span>
-        <span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;distribution&#39;</span><span class="p">:</span>
-        <span class="k">return</span> <span class="n">_pk_free_symbols_from_compartment</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span><span class="p">)</span>
-
-    <span class="k">if</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;elimination&#39;</span><span class="p">:</span>
-        <span class="n">free_symbols</span> <span class="o">=</span> <span class="n">_pk_free_symbols_from_compartment</span><span class="p">(</span><span class="n">cs</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">free_symbols</span>
-
-    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot handle kind `</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">`&#39;</span><span class="p">)</span>
+        <span class="n">central</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span>
+        <span class="k">for</span> <span class="n">dosing</span> <span class="ow">in</span> <span class="n">cs</span><span class="o">.</span><span class="n">dosing_compartments</span><span class="p">:</span>
+            <span class="n">comp</span> <span class="o">=</span> <span class="n">dosing</span>
+            <span class="k">while</span> <span class="n">comp</span> <span class="o">!=</span> <span class="n">central</span><span class="p">:</span>
+                <span class="n">symbols</span> <span class="o">|=</span> <span class="n">comp</span><span class="o">.</span><span class="n">free_symbols</span>
+                <span class="n">comp</span><span class="p">,</span> <span class="n">rate</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_compartment_outflows</span><span class="p">(</span><span class="n">comp</span><span class="p">)[</span><span class="mi">0</span><span class="p">]</span>  <span class="c1"># Assumes only one flow</span>
+                <span class="n">symbols</span> <span class="o">|=</span> <span class="n">rate</span><span class="o">.</span><span class="n">free_symbols</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;distribution&#39;</span><span class="p">:</span>
+        <span class="n">central</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span>
+        <span class="n">periphs</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">find_peripheral_compartments</span><span class="p">()</span>
+        <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">periphs</span><span class="p">:</span>
+            <span class="n">symbols</span> <span class="o">|=</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span><span class="o">.</span><span class="n">free_symbols</span>
+            <span class="n">symbols</span> <span class="o">|=</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">p</span><span class="p">,</span> <span class="n">central</span><span class="p">)</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">outflow</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">cl</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">outflow</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">symbols</span> <span class="o">|=</span> <span class="p">{</span><span class="n">v</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ass</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
+            <span class="n">cl2</span><span class="p">,</span> <span class="n">v2</span> <span class="o">=</span> <span class="n">ass</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">v2</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">symbols</span> <span class="o">|=</span> <span class="p">{</span><span class="n">v2</span><span class="p">}</span>
+    <span class="k">elif</span> <span class="n">kind</span> <span class="o">==</span> <span class="s1">&#39;elimination&#39;</span><span class="p">:</span>
+        <span class="n">central</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">central_compartment</span>
+        <span class="n">outflow</span> <span class="o">=</span> <span class="n">cs</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
+        <span class="n">cl</span><span class="p">,</span> <span class="n">v</span> <span class="o">=</span> <span class="n">outflow</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">v</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+            <span class="n">symbols</span> <span class="o">|=</span> <span class="p">{</span><span class="n">cl</span><span class="p">}</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">ass</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">cl</span><span class="p">)</span>
+            <span class="n">cl2</span><span class="p">,</span> <span class="n">v2</span> <span class="o">=</span> <span class="n">ass</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">as_numer_denom</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">v2</span> <span class="o">!=</span> <span class="mi">1</span><span class="p">:</span>
+                <span class="n">symbols</span> <span class="o">|=</span> <span class="p">{</span><span class="n">cl2</span><span class="p">}</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">symbols</span> <span class="o">|=</span> <span class="p">{</span><span class="n">cl</span><span class="p">}</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Cannot handle kind `</span><span class="si">{</span><span class="n">kind</span><span class="si">}</span><span class="s1">`&#39;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">symbols</span>
 
 
 <span class="k">def</span> <span class="nf">_pk_free_symbols_from_compartment</span><span class="p">(</span>

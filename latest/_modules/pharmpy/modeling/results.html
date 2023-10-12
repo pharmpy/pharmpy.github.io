@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.results &#8212; Pharmpy 0.102.1 documentation</title>
+    <title>pharmpy.modeling.results &#8212; Pharmpy 0.103.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
   <script src="../../../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
 
-    <script src="../../../_static/documentation_options.js?v=9d1e7de5"></script>
+    <script src="../../../_static/documentation_options.js?v=5091d9c7"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -52,7 +52,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Oct 04, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 12, 2023"/>
   </head>
   
   
@@ -514,8 +514,10 @@ document.write(`
 <span class="p">)</span>
 
 <span class="kn">from</span> <span class="nn">.data</span> <span class="kn">import</span> <span class="n">get_ids</span><span class="p">,</span> <span class="n">get_observations</span>
+<span class="kn">from</span> <span class="nn">.expressions</span> <span class="kn">import</span> <span class="n">get_individual_parameters</span>
 <span class="kn">from</span> <span class="nn">.odes</span> <span class="kn">import</span> <span class="n">get_initial_conditions</span>
 <span class="kn">from</span> <span class="nn">.parameter_sampling</span> <span class="kn">import</span> <span class="n">create_rng</span><span class="p">,</span> <span class="n">sample_parameters_from_covariance_matrix</span>
+<span class="kn">from</span> <span class="nn">.parameters</span> <span class="kn">import</span> <span class="n">get_omegas</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
     <span class="kn">import</span> <span class="nn">numpy</span> <span class="k">as</span> <span class="nn">np</span>
@@ -1092,7 +1094,7 @@ document.write(`
 <span class="k">def</span> <span class="nf">calculate_bic</span><span class="p">(</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
     <span class="n">likelihood</span><span class="p">:</span> <span class="nb">float</span><span class="p">,</span>
-    <span class="nb">type</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;mixed&#39;</span><span class="p">,</span>
     <span class="n">multiple_testing</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">,</span>
     <span class="n">mult_test_p</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
     <span class="n">mult_test_e</span><span class="p">:</span> <span class="nb">int</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span>
@@ -1126,9 +1128,9 @@ document.write(`
 <span class="sd">    multiple_testing : bool</span>
 <span class="sd">        Whether to use penalty for multiple testing (default is False)</span>
 <span class="sd">    mult_test_p : int</span>
-<span class="sd">        Number of predictors if using type `mult_test`</span>
-<span class="sd">    mult_test_e : int</span>
 <span class="sd">        Number of expected models if using type `mult_test`</span>
+<span class="sd">    mult_test_e : int</span>
+<span class="sd">        E value if using type `mult_test`</span>
 
 <span class="sd">    Returns</span>
 <span class="sd">    -------</span>
@@ -1151,9 +1153,6 @@ document.write(`
 <span class="sd">    &gt;&gt;&gt; calculate_bic(model, ofv, type=&#39;iiv&#39;)</span>
 <span class="sd">    594.431131169692</span>
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">supported_types</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;mixed&#39;</span><span class="p">,</span> <span class="s1">&#39;fixed&#39;</span><span class="p">,</span> <span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="s1">&#39;iiv&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="nb">type</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">and</span> <span class="nb">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">supported_types</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown `type` </span><span class="se">\&#39;</span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="se">\&#39;</span><span class="s1">, must be one of: </span><span class="si">{</span><span class="n">supported_types</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
     <span class="n">parameters</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">nonfixed</span>
     <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;fixed&#39;</span><span class="p">:</span>
         <span class="n">penalty</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span>
@@ -1164,52 +1163,59 @@ document.write(`
             <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">iiv</span><span class="o">.</span><span class="n">parameter_names</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
         <span class="p">)</span>
         <span class="n">penalty</span> <span class="o">=</span> <span class="n">nomegas_iiv</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">)))</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="c1"># NOTE: This approach assumes a well-behaved model where each parameter is identifiable</span>
-        <span class="n">possible_params</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">free_symbols</span>
-        <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
-            <span class="n">yexpr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">dv</span><span class="p">)</span>
-            <span class="n">possible_params</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">yexpr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">)</span>
-
-        <span class="n">random_thetas</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
-        <span class="k">for</span> <span class="n">param</span> <span class="ow">in</span> <span class="n">possible_params</span><span class="p">:</span>
-            <span class="n">assignment</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">param</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">assignment</span><span class="p">:</span>
-                <span class="n">expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">assignment</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="n">_random_etas</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
-                        <span class="n">symbols</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">}</span>
-                        <span class="n">random_thetas</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
-                        <span class="k">break</span>
-        <span class="k">for</span> <span class="n">eta</span> <span class="ow">in</span> <span class="n">_random_etas</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">eta</span><span class="p">)</span> <span class="ow">in</span> <span class="n">possible_params</span><span class="p">:</span>
-                <span class="n">symbols</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">symbol</span> <span class="ow">in</span> <span class="n">possible_params</span><span class="p">}</span>
-                <span class="n">random_thetas</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">symbols</span><span class="p">)</span>
-                <span class="k">for</span> <span class="n">eps</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">epsilons</span><span class="o">.</span><span class="n">names</span><span class="p">:</span>
-                    <span class="k">if</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Symbol</span><span class="p">(</span><span class="n">eps</span><span class="p">)</span> <span class="ow">in</span> <span class="n">possible_params</span><span class="p">:</span>
-                        <span class="n">params</span> <span class="o">=</span> <span class="p">{</span>
-                            <span class="n">p</span><span class="o">.</span><span class="n">symbol</span>
-                            <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">parameters</span>
-                            <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">[</span><span class="n">eps</span><span class="p">]</span><span class="o">.</span><span class="n">parameter_names</span>
-                        <span class="p">}</span>
-                        <span class="n">random_thetas</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-                <span class="k">break</span>
-        <span class="n">nomegas</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span>
-            <span class="p">[</span><span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">parameter_names</span> <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">parameters</span><span class="p">]</span>
-        <span class="p">)</span>
-        <span class="n">dim_theta_r</span> <span class="o">=</span> <span class="n">nomegas</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">random_thetas</span><span class="p">)</span>
-        <span class="n">dim_theta_f</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">-</span> <span class="n">dim_theta_r</span>
+    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;mixed&#39;</span><span class="p">:</span>
+        <span class="n">theta_f</span><span class="p">,</span> <span class="n">theta_r</span> <span class="o">=</span> <span class="n">_categorize_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
         <span class="n">nsubs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_ids</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
         <span class="n">nobs</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
-        <span class="n">penalty</span> <span class="o">=</span> <span class="n">dim_theta_r</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">nsubs</span><span class="p">)</span> <span class="o">+</span> <span class="n">dim_theta_f</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">nobs</span><span class="p">)</span>
+        <span class="n">penalty</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">theta_r</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">nsubs</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">theta_f</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">nobs</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">supported_types</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;mixed&#39;</span><span class="p">,</span> <span class="s1">&#39;fixed&#39;</span><span class="p">,</span> <span class="s1">&#39;random&#39;</span><span class="p">,</span> <span class="s1">&#39;iiv&#39;</span><span class="p">)</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown `type` </span><span class="se">\&#39;</span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="se">\&#39;</span><span class="s1">, must be one of: </span><span class="si">{</span><span class="n">supported_types</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
     <span class="k">if</span> <span class="n">multiple_testing</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">mult_test_p</span> <span class="o">&lt;=</span> <span class="mi">0</span> <span class="ow">or</span> <span class="n">mult_test_e</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
                 <span class="s1">&#39;Options `mult_test_p` and `mult_test_e` must be &gt;= 0 for method `mult_test`&#39;</span>
             <span class="p">)</span>
         <span class="n">penalty</span> <span class="o">+=</span> <span class="mi">2</span> <span class="o">*</span> <span class="nb">len</span><span class="p">(</span><span class="n">parameters</span><span class="p">)</span> <span class="o">*</span> <span class="n">math</span><span class="o">.</span><span class="n">log</span><span class="p">(</span><span class="n">mult_test_p</span> <span class="o">/</span> <span class="n">mult_test_e</span><span class="p">)</span>
+
     <span class="k">return</span> <span class="n">likelihood</span> <span class="o">+</span> <span class="n">penalty</span></div>
 
+
+
+<span class="k">def</span> <span class="nf">_categorize_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="c1"># Categorize parameters into random and fixed</span>
+    <span class="n">indpars</span> <span class="o">=</span> <span class="n">get_individual_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">all_pop_params</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">nonfixed</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+    <span class="n">omegas</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">get_omegas</span><span class="p">(</span><span class="n">model</span><span class="p">)</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+    <span class="n">etas</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+    <span class="n">epsilons</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">epsilons</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+    <span class="n">randpars</span> <span class="o">=</span> <span class="n">omegas</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">all_pop_params</span><span class="p">)</span>
+    <span class="n">fixedpars</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">indpar</span> <span class="ow">in</span> <span class="n">indpars</span><span class="p">:</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">indpar</span><span class="p">)</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">param_symbols</span> <span class="o">=</span> <span class="n">symbols</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">all_pop_params</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">symbols</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">etas</span><span class="p">):</span>
+            <span class="n">fixedpars</span> <span class="o">|=</span> <span class="n">param_symbols</span> <span class="o">-</span> <span class="n">randpars</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fixedpars</span> <span class="o">-=</span> <span class="n">param_symbols</span>
+            <span class="n">randpars</span> <span class="o">|=</span> <span class="n">param_symbols</span>
+
+    <span class="k">for</span> <span class="n">y</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span><span class="o">.</span><span class="n">full_expression</span><span class="p">(</span><span class="n">y</span><span class="p">)</span>
+        <span class="n">symbols</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="n">param_symbols</span> <span class="o">=</span> <span class="n">symbols</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">all_pop_params</span><span class="p">)</span>
+        <span class="n">cureps</span> <span class="o">=</span> <span class="n">symbols</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">epsilons</span><span class="p">)</span>
+        <span class="n">cursigmas</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">[</span><span class="n">cureps</span><span class="p">]</span><span class="o">.</span><span class="n">free_symbols</span> <span class="o">-</span> <span class="n">cureps</span>
+        <span class="n">cursigmas</span> <span class="o">=</span> <span class="n">cursigmas</span><span class="o">.</span><span class="n">intersection</span><span class="p">(</span><span class="n">all_pop_params</span><span class="p">)</span>
+        <span class="n">cursymbols</span> <span class="o">=</span> <span class="n">param_symbols</span> <span class="o">|</span> <span class="n">cursigmas</span>
+        <span class="k">if</span> <span class="n">symbols</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">(</span><span class="n">etas</span><span class="p">):</span>
+            <span class="n">fixedpars</span> <span class="o">|=</span> <span class="n">cursymbols</span> <span class="o">-</span> <span class="n">randpars</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">fixedpars</span> <span class="o">-=</span> <span class="n">cursymbols</span>
+            <span class="n">randpars</span> <span class="o">|=</span> <span class="n">cursymbols</span>
+    <span class="k">return</span> <span class="n">fixedpars</span><span class="p">,</span> <span class="n">randpars</span>
 
 
 <div class="viewcode-block" id="check_high_correlations">

@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="generator" content="Docutils 0.18.1: http://docutils.sourceforge.net/" />
 
-    <title>transform_blq &#8212; Pharmpy 0.102.1 documentation</title>
+    <title>transform_blq &#8212; Pharmpy 0.103.0 documentation</title>
   
   
   
@@ -40,7 +40,7 @@
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=ac02cc09edc035673794" />
   <script src="../_static/vendor/fontawesome/6.1.2/js/all.min.js?digest=ac02cc09edc035673794"></script>
 
-    <script src="../_static/documentation_options.js?v=9d1e7de5"></script>
+    <script src="../_static/documentation_options.js?v=5091d9c7"></script>
     <script src="../_static/doctools.js?v=888ff710"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/thebelab-helper.js"></script>
@@ -53,7 +53,7 @@
     <link rel="prev" title="split_joint_distribution" href="pharmpy.modeling.split_joint_distribution.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Oct 04, 2023"/>
+    <meta name="docbuild:last-update" content="Oct 12, 2023"/>
   </head>
   
   
@@ -886,12 +886,45 @@ columns are supported. The table below explains which columns are used for the v
 </tr>
 </tbody>
 </table>
+<p>BLQ observations are defined as shown in the table above.
+If both a BLQ and an LLOQ column exist in the dataset and no lloq is specified then all dv values in
+rows with BLQ = 1 are counted as BLQ observations. If instead an lloq value is specified then all rows with
+dv values below the lloq value are counted as BLQ observations.
+If no lloq is specified and no BLQ column exists in the dataset then all rows with dv values below the value
+specified in the DV column are counted as BLQ observations.</p>
+<dl class="simple">
+<dt>M1 method:</dt><dd><p>All BLQ observations are discarded.
+This may affect the size of the dataset.</p>
+</dd>
+<dt>M3 method:</dt><dd><p>Including the probability that the BLQ observations are below the LLOQ
+as part of the maximum likelihood estimation.
+For more details see <a class="reference internal" href="#ref-article"><span class="std std-ref">[1]</span></a>.
+This method modifies the Y statement of the model (see examples below).</p>
+</dd>
+<dt>M4 method:</dt><dd><p>Including the probability that the BLQ observations are below the LLOQ and positive
+as part of the maximum likelihood estimation.
+For more details see <a class="reference internal" href="#ref-article"><span class="std std-ref">[1]</span></a>.
+This method modifies the Y statement of the model (see examples below).</p>
+</dd>
+<dt>M5 method:</dt><dd><p>All BLQ observations are replaced by level/2, where level = lloq if lloq is specified.
+Else level = value specified in LLOQ column (see table above).
+This method may change entries in the dataset.</p>
+</dd>
+<dt>M6 method:</dt><dd><p>Every BLQ observation in a consecutive series of BLQ observations is discarded except for the first one.
+The remaining BLQ observations are replaced by level/2, where level = lloq if lloq is specified.
+Else level = value specified in LLOQ column (see table above).
+This method may change entries in the dataset as well as the size of the dataset.</p>
+</dd>
+<dt>M7 method:</dt><dd><p>All BLQ observations are replaced by 0.
+This method may change entries in the dataset.</p>
+</dd>
+</dl>
 <p>Current limitations of the m3 and m4 method:</p>
 <ul class="simple">
 <li><p>Does not support covariance between epsilons</p></li>
 <li><p>Supports additive, proportional, combined, and power error model</p></li>
 </ul>
-<aside class="footnote-list brackets">
+<span class="target" id="ref-article"></span><aside class="footnote-list brackets">
 <aside class="footnote brackets" id="id2" role="note">
 <span class="label"><span class="fn-bracket">[</span><a role="doc-backlink" href="#id1">1</a><span class="fn-bracket">]</span></span>
 <p>Beal SL. Ways to fit a PK model with some data below the quantification
