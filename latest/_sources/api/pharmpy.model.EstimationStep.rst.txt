@@ -24,12 +24,8 @@ EstimationStep
       ~EstimationStep.parameter_uncertainty_method
       ~EstimationStep.predictions
       ~EstimationStep.residuals
-      ~EstimationStep.solver
-      ~EstimationStep.solver_atol
-      ~EstimationStep.solver_rtol
       ~EstimationStep.supported_methods
       ~EstimationStep.supported_parameter_uncertainty_methods
-      ~EstimationStep.supported_solvers
       ~EstimationStep.tool_options
 
    .. rubric:: Methods Summary
@@ -57,12 +53,8 @@ EstimationStep
    .. autoattribute:: parameter_uncertainty_method
    .. autoattribute:: predictions
    .. autoattribute:: residuals
-   .. autoattribute:: solver
-   .. autoattribute:: solver_atol
-   .. autoattribute:: solver_rtol
    .. autoattribute:: supported_methods
    .. autoattribute:: supported_parameter_uncertainty_methods
-   .. autoattribute:: supported_solvers
    .. autoattribute:: tool_options
 
    .. rubric:: Methods Documentation

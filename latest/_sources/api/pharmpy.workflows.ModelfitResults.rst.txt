@@ -12,12 +12,15 @@ ModelfitResults
 
       ~ModelfitResults.correlation_matrix
       ~ModelfitResults.covariance_matrix
+      ~ModelfitResults.covstep_successful
       ~ModelfitResults.description
       ~ModelfitResults.estimation_runtime
       ~ModelfitResults.estimation_runtime_iterations
       ~ModelfitResults.evaluation
       ~ModelfitResults.function_evaluations
       ~ModelfitResults.function_evaluations_iterations
+      ~ModelfitResults.gradients
+      ~ModelfitResults.gradients_iterations
       ~ModelfitResults.individual_estimates
       ~ModelfitResults.individual_estimates_covariance
       ~ModelfitResults.individual_ofv
@@ -42,17 +45,21 @@ ModelfitResults
       ~ModelfitResults.standard_errors_sdcorr
       ~ModelfitResults.termination_cause
       ~ModelfitResults.termination_cause_iterations
+      ~ModelfitResults.warnings
 
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: correlation_matrix
    .. autoattribute:: covariance_matrix
+   .. autoattribute:: covstep_successful
    .. autoattribute:: description
    .. autoattribute:: estimation_runtime
    .. autoattribute:: estimation_runtime_iterations
    .. autoattribute:: evaluation
    .. autoattribute:: function_evaluations
    .. autoattribute:: function_evaluations_iterations
+   .. autoattribute:: gradients
+   .. autoattribute:: gradients_iterations
    .. autoattribute:: individual_estimates
    .. autoattribute:: individual_estimates_covariance
    .. autoattribute:: individual_ofv
@@ -77,3 +84,4 @@ ModelfitResults
    .. autoattribute:: standard_errors_sdcorr
    .. autoattribute:: termination_cause
    .. autoattribute:: termination_cause_iterations
+   .. autoattribute:: warnings
