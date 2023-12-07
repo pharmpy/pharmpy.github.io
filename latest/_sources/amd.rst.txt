@@ -80,7 +80,14 @@ Arguments
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | :ref:`strictness<strictness>`                     | Strictness criteria for model selection.                                                                        |
 |                                                   | Default is "minimization_successful or                                                                          |
-|                                                   | (rounding_errors and sigdigs>= 0)"                                                                              |
+|                                                   | (rounding_errors and sigdigs>= 0.1)"                                                                            |
++---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+|``mechanistic_covariates``                         | List of covariates to run in a separate prioritezed covsearch run.                                              |
+|                                                   | The effects are extracted from the given search space                                                           |
++---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| ``retries_strategy``                              | Decide how to use the retries tool. Valid options are 'skip', 'all_final' or 'final'. Default is 'final'        |
++---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| ``seed``                                          | A random number generator or seed to use for steps with random sampling.                                        |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 
 .. _input_amd:
@@ -129,8 +136,8 @@ default is:
     LAGTIME([OFF,ON])
     TRANSITS([0,1,3,10],*)
     PERIPHERALS(0,1)
-    COVARIATE(@IIV, @CONTINUOUS, *)
-    COVARIATE(@IIV, @CATEGORICAL, CAT)
+    COVARIATE?(@IIV, @CONTINUOUS, *)
+    COVARIATE?(@IIV, @CATEGORICAL, CAT)
 
 For a PK IV model, the default is:
 
@@ -138,8 +145,8 @@ For a PK IV model, the default is:
 
     ELIMINATION(FO)
     PERIPHERALS([0,1,2])
-    COVARIATE(@IIV, @CONTINUOUS, *)
-    COVARIATE(@IIV, @CATEGORICAL, CAT)
+    COVARIATE?(@IIV, @CONTINUOUS, *)
+    COVARIATE?(@IIV, @CATEGORICAL, CAT)
     
 For a PK IV+ORAL model, the default is:
 
@@ -150,8 +157,8 @@ For a PK IV+ORAL model, the default is:
     LAGTIME([OFF,ON])
     TRANSITS([0,1,3,10],*)
     PERIPHERALS([0,1,2])
-    COVARIATE(@IIV, @CONTINUOUS, *)
-    COVARIATE(@IIV, @CATEGORICAL, CAT)
+    COVARIATE?(@IIV, @CONTINUOUS, *)
+    COVARIATE?(@IIV, @CATEGORICAL, CAT)
 
 Note that defaults are overriden selectively: structural model features
 defaults will be ignored as soon as one structural model feature is explicitly
@@ -162,8 +169,8 @@ search space will be as follows:
 .. code-block::
 
     LAGTIME()
-    COVARIATE(@IIV, @CONTINUOUS, *)
-    COVARIATE(@IIV, @CATEGORICAL, CAT)
+    COVARIATE?(@IIV, @CONTINUOUS, *)
+    COVARIATE?(@IIV, @CATEGORICAL, CAT)
 
 .. _order_amd:
 
@@ -295,6 +302,8 @@ Structural
 ~~~~~~~~~~
 
 This subtool selects the best structural model, see :ref:`modelsearch` or :ref:`structsearch` for more details about the tool.
+In this stage, structural covariate effects are also added (all at once) to the starting model. Please see :ref:`covsearch` 
+for more information of this.
 
 Modelsearch
 ===========
@@ -431,6 +440,46 @@ settings that the AMD tool uses for this subtool can be seen in the table below.
 | algorithm     | ``'scm-forward-then-backward'``                                                                    |
 +---------------+----------------------------------------------------------------------------------------------------+
 
+For an entire AMD run, it is possible to get a maximum of three covsearch runs, which are described below:
+
++---------------------+-----------------------------------------------------------------------------------------+
+| Type of covsearch   | Description                                                                             |
++=====================+=========================================================================================+
+| Structural          | Performed in the structural part of the AMD run. The structural covariates are added    |
+|                     | directly to the starting model.                                                         |
+|                     | If these cannot be added here (due to missing parameters for instance) they will        |
+|                     | be tested once more at the start of the next covsearch run.                             |
++---------------------+-----------------------------------------------------------------------------------------+
+| Mechanistic         | If any mechanistic covariates have been given as input to the AMD tool, the specified   |
+|                     | covariate effects for these covariates is run in a separate initial covsearch run When  |
+|                     | adding covariates.                                                                      |
++---------------------+-----------------------------------------------------------------------------------------+
+| Exploratory         | The remaining covariates are tested after all mechanistic covariates have been tested.  |
++---------------------+-----------------------------------------------------------------------------------------+
+
+Retries
+~~~~~~~~~~
+
+If ``retries_strategy`` is set to 'all_final', the retries tool will be run on the final model from each subtool.
+With the argument set to 'final', the retries tool will only be run on the final model from the last subtool.
+Finally, if the argument is set to 'skip', no retries will be performed. See :ref:`retries` for more details about the 
+tool. When running the tool from AMD, the settings below will be used.
+
+If argument ``seed`` is set, the chosen seed or random number generator will be used for the random sampling within the
+tool.
+
++----------------------+----------------------------------------------------------------------------------------------------+
+| Argument             | Setting                                                                                            |
++======================+====================================================================================================+
+| number_of_candidates | ``5``                                                                                              |
++----------------------+----------------------------------------------------------------------------------------------------+
+| fraction             | ``0.1``                                                                                            |
++----------------------+----------------------------------------------------------------------------------------------------+
+| scale                | ``UCP``                                                                                            |
++----------------------+----------------------------------------------------------------------------------------------------+
+| prefix_name          | The name of the previously run tool                                                                |
++----------------------+----------------------------------------------------------------------------------------------------+
+
 ~~~~~~~
 Results
 ~~~~~~~
@@ -493,7 +542,19 @@ Some plots and tables on the final model can be found both in the amd report and
 .. pharmpy-execute::
    :hide-code:
 
+   res.final_model_dv_vs_pred_plot
+
+
+.. pharmpy-execute::
+   :hide-code:
+
    res.final_model_dv_vs_ipred_plot
+
+
+.. pharmpy-execute::
+   :hide-code:
+
+   res.final_model_abs_cwres_vs_ipred_plot
 
 
 .. pharmpy-execute::
