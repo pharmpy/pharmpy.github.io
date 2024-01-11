@@ -46,27 +46,39 @@ Arguments
 ~~~~~~~~~
 For a more detailed description of each argument, see their respective chapter on this page.
 
+Mandatory
+---------
+
 +-------------------------------------------------+------------------------------------------------------------------+
 | Argument                                        | Description                                                      |
 +=================================================+==================================================================+
-| :ref:`search_space<the search space>`           | Search space to test                                             |
+| ``search_space``                                | :ref:`Search space<the search space>` to test                    |
 +-------------------------------------------------+------------------------------------------------------------------+
-| :ref:`algorithm<algorithms_modelsearch>`        | Algorithm to use (e.g. ``'reduced_stepwise'``)                   |
-+-------------------------------------------------+------------------------------------------------------------------+
-| :ref:`rank_type<ranking_modelsearch>`           | Which selection criteria to rank models on, e.g. OFV (default is |
-|                                                 | BIC)                                                             |
-+-------------------------------------------------+------------------------------------------------------------------+
-| :ref:`cutoff<ranking_modelsearch>`              | Cutoff for the ranking function, exclude models that are below   |
-|                                                 | cutoff (default is None/NULL)                                    |
-+-------------------------------------------------+------------------------------------------------------------------+
-| :ref:`iiv_strategy<iiv_strategies_modelsearch>` | If/how IIV should be added to candidate models (default is to    |
-|                                                 | add to absorption delay parameters)                              |
+| ``algorithm``                                   | :ref:`Algorithm<algorithms_modelsearch>`                         |
+|                                                 | to use (e.g. ``'reduced_stepwise'``)                             |
 +-------------------------------------------------+------------------------------------------------------------------+
 | ``model``                                       | Start model                                                      |
 +-------------------------------------------------+------------------------------------------------------------------+
 | ``results``                                     | ModelfitResults of the start model                               |
 +-------------------------------------------------+------------------------------------------------------------------+
-| :ref:`strictness<strictness>`                   | Strictness criteria for model selection.                         |
+
+Optional
+--------
+
++-------------------------------------------------+------------------------------------------------------------------+
+| Argument                                        | Description                                                      |
++=================================================+==================================================================+
+| ``rank_type``                                   | Which :ref:`selection criteria<ranking_modelsearch>` to rank     |
+|                                                 | models on, e.g. OFV (default is BIC)                             |
++-------------------------------------------------+------------------------------------------------------------------+
+| ``cutoff``                                      | :ref:`Cutoff<ranking_modelsearch>` for the ranking function,     | 
+|                                                 | exclude models that are below cutoff (default is None/NULL)      |                           
++-------------------------------------------------+------------------------------------------------------------------+
+| ``iiv_strategy``                                | If/how IIV should be added to candidate models (default is to    |
+|                                                 | add to absorption delay parameters).                             |
+|                                                 | See :ref:`iiv_strategies_modelsearch`                            |
++-------------------------------------------------+------------------------------------------------------------------+
+| ``strictness``                                  | :ref:`Strictness<strictness>` criteria for model selection.      |
 |                                                 | Default is "minimization_successful or                           |
 |                                                 | (rounding_errors and sigdigs>= 0.1)"                             |
 +-------------------------------------------------+------------------------------------------------------------------+
@@ -417,22 +429,6 @@ you can look at the ``summary_models`` table. The table is generated with
     :hide-code:
 
     res.summary_models
-
-A summary table of predicted influential individuals and outliers can be seen in ``summary_individuals_count``.
-See :py:func:`pharmpy.tools.summarize_individuals_count_table` for information on the content of this table.
-
-.. pharmpy-execute::
-    :hide-code:
-
-    res.summary_individuals_count
-
-You can see different individual statistics in ``summary_individuals``.
-See :py:func:`pharmpy.tools.summarize_individuals` for information on the content of this table.
-
-.. pharmpy-execute::
-    :hide-code:
-
-    res.summary_individuals
 
 Finally, you can see a summary of different errors and warnings in ``summary_errors``.
 See :py:func:`pharmpy.tools.summarize_errors` for information on the content of this table.

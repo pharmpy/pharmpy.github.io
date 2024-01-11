@@ -33,6 +33,20 @@ To run RUVsearch from the command line, the example code is redefined accordingl
 Arguments
 ~~~~~~~~~
 
+Mandatory
+---------
+
++---------------------------------------------------+-----------------------------------------------------------------------------------------+
+| Argument                                          | Description                                                                             |
++===================================================+=========================================================================================+
+| ``model``                                         | Start model                                                                             |
++---------------------------------------------------+-----------------------------------------------------------------------------------------+
+| ``results``                                       | ModelfitResults for the start model                                                     |
++---------------------------------------------------+-----------------------------------------------------------------------------------------+
+
+Optional
+--------
+
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
 | Argument                                          | Description                                                                             |
 +===================================================+=========================================================================================+
@@ -42,11 +56,7 @@ Arguments
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
 | ``skip``                                          | List of residual error models to not consider                                           |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| ``model``                                         | Start model                                                                             |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| ``results``                                       | ModelfitResults for the start model                                                     |
-+---------------------------------------------------+-----------------------------------------------------------------------------------------+
-| :ref:`strictness<strictness>`                     | Strictness criteria for model selection.                                                |
+| ``strictness``                                    | :ref:`Strictness<strictness>` criteria for model selection.                             |
 |                                                   | Default is "minimization_successful or                                                  |
 |                                                   | (rounding_errors and sigdigs>= 0.1)"                                                    |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
@@ -156,22 +166,5 @@ you can look at the ``summary_models`` table. The table is generated with
     :hide-code:
 
     res.summary_models
-
-A summary table of predicted influential individuals and outliers can be seen in ``summary_individuals_count``.
-See :py:func:`pharmpy.tools.summarize_individuals_count_table` for information on the content of this table.
-
-.. pharmpy-execute::
-    :hide-code:
-
-    res.summary_individuals_count
-
-Finally, you can see different individual statistics ``summary_individuals``.
-See :py:func:`pharmpy.tools.summarize_individuals` for information on the content of this table.
-
-.. pharmpy-execute::
-    :hide-code:
-
-    res.summary_individuals
-
 
 .. [Ibrahim] Moustafa M. A. Ibrahim, Rikard Nordgren, Maria C. Kjellsson, Mats O. Karlsson. Model-Based Residual Post-Processing for Residual Model Identification. The AAPS Journal 2018 https://doi.org/10.1208/s12248-018-0240-7

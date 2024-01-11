@@ -32,7 +32,7 @@ To initiate COVsearch in Python/R:
 
 In this example, we attempt up to five forward steps of the Stepwise
 Covariate Modeling (SCM) algorithm on the model ``start_model``. The p-value
-threshold for these steps is 5% and the candidate effects consists of all (\*)
+threshold for these steps is 5% and the candidate effects consists of all (*)
 supported effects (multiplicative) of continuous covariates on parameters with IIV,
 and a (multiplicative) categorical effect of categorical covariates on parameters
 with IIV. Once we have identified the best model with this method, we attempt
@@ -51,11 +51,26 @@ To run COVsearch from the command line, the example code is redefined accordingl
 Arguments
 ~~~~~~~~~
 
+Mandatory
+---------
+
 +---------------------------------------------+-----------------------------------------------------------------------+
 | Argument                                    | Description                                                           |
 +=============================================+=======================================================================+
-| :ref:`effects<effects_covsearch>`           | The candidate parameter-covariate effects to search through (required)|
+| ``effects``                                 | The candidate parameter-covariate :ref:`effects<effects_covsearch>`   |
+|                                             | to search through (required)                                          |
 +---------------------------------------------+-----------------------------------------------------------------------+
+| ``results``                                 | ModelfitResults of start model                                        |
++---------------------------------------------+-----------------------------------------------------------------------+
+| ``model``                                   | Start model                                                           |
++---------------------------------------------+-----------------------------------------------------------------------+
+
+Optional
+--------
+
++---------------------------------------------+-----------------------------------------------------------------------+
+| Argument                                    | Description                                                           |
++=============================================+=======================================================================+
 | ``p_forward``                               | The p-value threshold for forward steps (default is `0.01`)           |
 +---------------------------------------------+-----------------------------------------------------------------------+
 | ``p_backward``                              | The p-value threshold for backward steps (default is `0.001`)         |
@@ -63,13 +78,10 @@ Arguments
 | ``max_steps``                               | The maximum number of search algorithm steps to perform, or `-1`      |
 |                                             | for no maximum (default).                                             |
 +---------------------------------------------+-----------------------------------------------------------------------+
-| :ref:`algorithm<algorithm_covsearch>`       | The search algorithm to use (default is `'scm-forward-then-backward'`)|
+| ``algorithm``                               | The search :ref:`algorithm<algorithm_covsearch>` to use               |
+|                                             | (default is `'scm-forward-then-backward'`)                            |
 +---------------------------------------------+-----------------------------------------------------------------------+
-| ``results``                                 | ModelfitResults of start model                                        |
-+---------------------------------------------+-----------------------------------------------------------------------+
-| ``model``                                   | Start model                                                           |
-+---------------------------------------------+-----------------------------------------------------------------------+
-| :ref:`strictness<strictness>`               | Strictness criteria for model selection.                              |
+| ``strictness``                              | :ref:`Strictness<strictness>` criteria for model selection.           |
 |                                             | Default is "minimization_successful or                                |
 |                                             | (rounding_errors and sigdigs>= 0.1)"                                  |
 +---------------------------------------------+-----------------------------------------------------------------------+
@@ -276,23 +288,6 @@ estimation time, and parameter estimates, you can look at the
 .. pharmpy-execute::
 
     res.summary_models
-
-A summary table of predicted influential individuals and outliers can be seen
-in ``summary_individuals_count``. See
-:py:func:`pharmpy.tools.summarize_individuals_count_table` for information
-on the content of this table.
-
-.. pharmpy-execute::
-
-    res.summary_individuals_count
-
-You can see different individual statistics in ``summary_individuals``.  See
-:py:func:`pharmpy.tools.summarize_individuals` for information on the
-content of this table.
-
-.. pharmpy-execute::
-
-    res.summary_individuals
 
 You can see a summary of different errors and warnings in ``summary_errors``.
 See :py:func:`pharmpy.tools.summarize_errors` for information on the content

@@ -40,19 +40,35 @@ Arguments
 ~~~~~~~~~
 For a more detailed description of each argument, see their respective chapter on this page.
 
+Mandatory
+---------
+
 +-------------------------------------------------+------------------------------------------------------------------+
 | Argument                                        | Description                                                      |
 +=================================================+==================================================================+
-| :ref:`algorithm<algorithms_estmethod>`          | Algorithm to use (e.g. ``'reduced'``                             |
-+-------------------------------------------------+------------------------------------------------------------------+
-| :ref:`methods<methods_estmethod>`               | Which estimation methods to test (e.g. ``['IMP']``)              |
-+-------------------------------------------------+------------------------------------------------------------------+
-| :ref:`solvers<solvers_estmethod>`               | Which solvers to test (e.g. ``['LSODA']``)                       |
+| ``algorithm``                                   | :ref:`Algorithm<algorithms_estmethod>` to use                    |
+|                                                 | (e.g. ``'reduced'``)                                             |
 +-------------------------------------------------+------------------------------------------------------------------+
 | ``model``                                       | Start model                                                      |
 +-------------------------------------------------+------------------------------------------------------------------+
 | ``results``                                     | ModelfitResults of the start model                               |
 +-------------------------------------------------+------------------------------------------------------------------+
+
+Optional
+--------
+
++-------------------------------------------------+-----------------------------------------------------------------------------+
+| Argument                                        | Description                                                                 |
++=================================================+=============================================================================+
+| ``methods``                                     | List of :ref:`estimation methods<methods_estmethod>` to test                | 
+|                                                 | (e.g. ``['IMP']``)                                                          |
++-------------------------------------------------+-----------------------------------------------------------------------------+
+| ``solvers``                                     | List of :ref:`solvers<solvers_estmethod>` to test                           | 
+|                                                 | (e.g. ``['LSODA']``)                                                        |
++-------------------------------------------------+-----------------------------------------------------------------------------+
+| ``parameter_uncertainty_methods``               | List of :ref:`Parameter uncertainty methods<parameter_uncertainty_methods>` | 
+|                                                 | to test.                                                                    |
++-------------------------------------------------+-----------------------------------------------------------------------------+
 
 .. _algorithms_estmethod:
 
@@ -171,8 +187,9 @@ Settings are the same as for ``exhaustive`` evaluation step, where the method is
 Estimation methods
 ~~~~~~~~~~~~~~~~~~
 
-For a list of supported methods, see :py:func:`pharmpy.model.EstimationStep.supported_methods` (to test ``FOCE`` with
-``LAPLACE``, simply specify ``LAPLACE`` as input argument in the tool).
+For a list of supported methods, see :py:func:`pharmpy.model.EstimationStep.supported_methods`.
+
+To test ``FOCE`` with ``LAPLACE``, simply specify ``LAPLACE`` as input argument in the tool.
 
 .. _solvers_estmethod:
 
@@ -180,7 +197,17 @@ For a list of supported methods, see :py:func:`pharmpy.model.EstimationStep.supp
 Solvers
 ~~~~~~~
 
-For a list of supported solvers, see :py:func:`pharmpy.model.EstimationStep.supported_solvers`.
+Supported solvers are: CVODES, DGEAR, DVERK, IDA, LSODA and LSODI.
+
+.. _parameter_uncertainty_methods:
+
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Parameter uncertainty methods
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Method to use when estimating parameter uncertainty.
+For a list of supported parameter uncertainty methods, see 
+:py:func:`here<pharmpy.model.EstimationStep.parameter_uncertainty_method>`.
 
 ~~~~~~~~~~~~~~~~~~~~~
 The Estmethod results

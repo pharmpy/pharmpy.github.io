@@ -5,7 +5,7 @@ Automatic Model Development (AMD)
 =================================
 
 The AMD tool is a general tool for fully automatic model development to decide the best model given either a dataset
-or a starting model. The tool is a combination of the following tools: :ref:`modelsearch`, :ref:`iivsearch`,
+or a starting model. The tool is a combination of the following tools: :ref:`modelsearch`, :ref:`structsearch`, :ref:`iivsearch`,
 :ref:`iovsearch`, :ref:`ruvsearch`, :ref:`allometry`, and :ref:`covsearch`.
 
 ~~~~~~~
@@ -21,17 +21,17 @@ To initiate AMD in Python/R:
     from pharmpy.tools import run_amd
 
     dataset_path = 'path/to/dataset'
-    order = ['structural', 'iivsearch', 'residual', 'iovsearch', 'allometry', 'covariates']
+    strategy = 'all'
     res = run_amd(input=dataset_path,
                   modeltype='basic_pk',
                   administration='oral',
-                  order=order,
+                  strategy=strategy,
                   search_space='LET(CATEGORICAL, [SEX]); LET(CONTINUOUS, [AGE])',
                   allometric_variable='WGT',
                   occasion='VISI')
 
 This will take a dataset as ``input``, where the ``modeltype`` has been specified to be a PK model and ``administration`` is oral. AMD will search
-for the best structural model, IIV structure, and residual model in the specified ``order``. We specify the column SEX
+for the best structural model, IIV structure, and residual model in the order specified by ``strategy`` (see :ref:`strategy<strategy_amd>`). We specify the column SEX
 as a ``categorical`` covariate and AGE as a ``continuous`` covariate. Finally, we declare the WGT-column as our
 ``allometric_variable``, VISI as our ``occasion`` column.
 
@@ -44,11 +44,11 @@ Arguments
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | Argument                                          | Description                                                                                                     |
 +===================================================+=================================================================================================================+
-| :ref:`input<input_amd>`                           | Path to a dataset or start model object                                                                         |
+| ``input``                                         | Path to a dataset or start model object. See :ref:`input_amd`                                                   |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``results``                                       | ModelfitResults if input is a model                                                                             |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
-| ``modeltype``                                     | Type of model to build. Currently 'basic_pk', 'pkpd' or 'drug_metabolite'                                       |
+| ``modeltype``                                     | Type of model to build (e.g. 'basic_pk', 'pkpd', 'drug_metabolite' or 'tmdd')                                   |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``administration``                                | Route of administration. One of 'iv', 'oral' or 'ivoral'                                                        |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
@@ -66,33 +66,43 @@ Arguments
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``met_init``                                      | Initial estimate for the mean equilibration time (only for pkpd models, default is 0.1)                         |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
-| :ref:`search_space<search_space_amd>`             | MFL for search space of structural and covariate models (default depends on ``modeltype``)                      |
+| ``search_space``                                  | MFL for :ref:`search space<search_space_amd>` of structural and covariate models                                |
+|                                                   | (default depends on ``modeltype``)                                                                              |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``lloq_limit``                                    | Lower limit of quantification.                                                                                  |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``lloq_method``                                   | Method to use for handling lower limit of quantification. See :py:func:`pharmpy.modeling.transform_blq`.        |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
-| :ref:`order<order_amd>`                           | Run order of tools (default is ['structural', 'iivsearch', 'residual', 'iovsearch', 'allometry', 'covariates']) |
+| :ref:`strategy<strategy_amd>`                     | Strategy defining run order of the different subtools valid arguments are 'all' (deafult) and 'retries'         |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``allometric_variable``                           | Variable to use for allometry (default is name of column described as body weight)                              |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``occasion``                                      | Name of occasion column                                                                                         |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
-| :ref:`strictness<strictness>`                     | Strictness criteria for model selection.                                                                        |
+| ``strictness``                                    | :ref:`Strictness<strictness>` criteria for model selection.                                                     |
 |                                                   | Default is "minimization_successful or                                                                          |
 |                                                   | (rounding_errors and sigdigs>= 0.1)"                                                                            |
 |                                                   | If ``strictness`` is set to ``None`` no strictness                                                              |
 |                                                   | criteria are applied                                                                                            |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
-|``mechanistic_covariates``                         | List of covariates to run in a separate prioritezed covsearch run.                                              |
+| ``mechanistic_covariates``                        | List of covariates to run in a separate prioritezed covsearch run.                                              |
 |                                                   | The effects are extracted from the given search space                                                           |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
-| ``retries_strategy``                              | Decide how to use the retries tool. Valid options are 'skip', 'all_final' or 'final'. Default is 'final'        |
+| ``retries_strategy``                              | Decide how to use the retries tool. Valid options are 'skip', 'all_final' or 'final'. Default is 'all_final'    |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``seed``                                          | A random number generator or seed to use for steps with random sampling.                                        |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``dv_types``                                      | Dictionary of DV types for multiple DVs (e.g. dv_types = {'target': 2}). Default is None.                       |
 |                                                   | Allowed keys are: 'drug', 'target' and 'complex'. (For TMDD models only)                                        |
++---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| ``parameter_uncertainty_method``                  | Parameter uncertainty method to use. Currently implemented methods are: 'SANDWICH', 'CPG' and 'OFIM'.           |
+|                                                   | For more information about these methods see                                                                    |
+|                                                   | :py:func:`here<pharmpy.model.EstimationStep.parameter_uncertainty_method>`.                                     |
++---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
+| ``ignore_datainfo_fallback``                      | Decide wether or not to use connected datainfo object to infer information about the model. If True, all        |
+|                                                   | information regarding the model must be given explicitly by the user, such as the allometric varible. If False, |
+|                                                   | such information is extracted using the datainfo, in the absence of arguments given by the user. Default        |
+|                                                   | is False.                                                                                                       |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 
 .. _input_amd:
@@ -168,31 +178,34 @@ For a PK IV+ORAL model, the default is:
 Note that defaults are overriden selectively: structural model features
 defaults will be ignored as soon as one structural model feature is explicitly
 given, but the covariate model defaults will stay in place, and vice versa. For
-instance, if one defines ``search_space`` as ``LAGTIME()``, the effective
+instance, if one defines ``search_space`` as ``LAGTIME(ON)``, the effective
 search space will be as follows:
 
 .. code-block::
 
-    LAGTIME()
+    LAGTIME(ON)
     COVARIATE?(@IIV, @CONTINUOUS, *)
     COVARIATE?(@IIV, @CATEGORICAL, CAT)
 
-.. _order_amd:
+.. _strategy_amd:
 
-~~~~~~~~~~~~~~~~~
-Order of subtools
-~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~
+Strategy for running AMD
+~~~~~~~~~~~~~~~~~~~~~~~~
 
-The order of the subtools is specified in the ``order`` argument. Consider the default order:
+There are different strategies available for running the AMD tool which is specified
+in the ``strategy`` argument. They all use a combination of the different subtools
+described below and will be described below. As all tools might not be applicable to
+all model types, the used subtools in the different steps is dependent on the
+``modeltype`` argument. Please see the description for each tool described below
+for more details.
 
-.. pharmpy-code::
+all (default)
+~~~~~~~~~~~~~
 
-    from pharmpy.tools import run_amd
-
-    dataset_path = 'path/to/dataset'
-    res = run_amd(input=dataset_path, order=None)
-
-This yields the following workflow:
+If no argument is specified, 'all' will be used as the default strategy. This will use
+all tools available for the specified ``modeltype``. The exact workflow can hence differ for
+the different model type but a general visualization of this can be seen below:
 
 .. graphviz::
 
@@ -217,17 +230,15 @@ This yields the following workflow:
             s5 -> s6
         }
 
-If you want to change the order, input a list of the desired order:
 
-.. pharmpy-code::
+retries
+~~~~~~~
 
-    from pharmpy.tools import run_amd
+The retries strategy is an extension of the 'all' strategy. It is defined by the re-running
+of IIVsearch and RUVsearch. This indicate that the tool follow the exact same principles
+and the workflow hence is dependent on the model type in question.
 
-    dataset_path = 'path/to/dataset'
-    order = ['structural', 'residual', 'iivsearch', 'iovsearch', 'allometry', 'covariates']
-    res = run_amd(input=dataset_path, order=order)
-
-Here, the residual model will be decided before `iivsearch`, which will yield:
+The general order of subtools hence become:
 
 .. graphviz::
 
@@ -236,12 +247,14 @@ Here, the residual model will be decided before `iivsearch`, which will yield:
             rankdir="LR";
             base [label="Input", shape="oval"]
             s0 [label="structural"]
-            s1 [label="residual"]
-            s2 [label="iivsearch"]
+            s1 [label="iivsearch"]
+            s2 [label="residual"]
             s3 [label="iovsearch"]
             s4 [label="allometry"]
             s5 [label="covariates"]
-            s6 [label="results", shape="oval"]
+            s6 [label="rerun_iivsearch"]
+            s7 [label="rerun_ruvsearch"]
+            s8 [label="results", shape="oval"]
 
             base -> s0
             s0 -> s1
@@ -250,17 +263,16 @@ Here, the residual model will be decided before `iivsearch`, which will yield:
             s3 -> s4
             s4 -> s5
             s5 -> s6
+            s6 -> s7
+            s7 -> s8
         }
+        
+SIR
+~~~
 
-You can also run subsets of the subtools:
-
-.. pharmpy-code::
-
-    from pharmpy.tools import run_amd
-
-    dataset_path = 'path/to/dataset'
-    res = run_amd(input=dataset_path, order=['structural', 'iivsearch', 'residual'])
-
+This strategy is related to 'SRI' and 'RSI' and is an acronym for running
+the Structural, IIVsearch and RUVsearch part of the AMD tool. The workflow hence
+become as follows:
 
 .. graphviz::
 
@@ -279,36 +291,109 @@ You can also run subsets of the subtools:
             s2 -> s3
         }
 
+SRI
+~~~
+
+This strategy is related to 'SIR' and 'RSI' and is an acronym for running
+the Structural, RUVsearch and IIVsearch part of the AMD tool. The workflow hence
+become as follows:
+
+.. graphviz::
+
+    digraph BST {
+            node [fontname="Arial",shape="rect"];
+            rankdir="LR";
+            base [label="Input", shape="oval"]
+            s0 [label="structural"]
+            s1 [label="residual"]
+            s2 [label="iivsearch"]
+            s3 [label="results", shape="oval"]
+
+            base -> s0
+            s0 -> s1
+            s1 -> s2
+            s2 -> s3
+        }
+        
+RSI
+~~~
+
+This strategy is related to 'SIR' and 'SRI' and is an acronym for running
+the RUVsearch, Structural and IIVsearch part of the AMD tool. The workflow hence
+become as follows:
+
+.. graphviz::
+
+    digraph BST {
+            node [fontname="Arial",shape="rect"];
+            rankdir="LR";
+            base [label="Input", shape="oval"]
+            s0 [label="residual"]
+            s1 [label="structural"]
+            s2 [label="iivsearch"]
+            s3 [label="results", shape="oval"]
+
+            base -> s0
+            s0 -> s1
+            s1 -> s2
+            s2 -> s3
+        }
+
+~~~~~~~~~~~~~~~~~~~~
+Subtools used in AMD
+~~~~~~~~~~~~~~~~~~~~
+
 The default algorithms for six tools in amd can be seen in the table below. For more details regarding the settings
 for each subtool, see the respective subheading.
 
-+------------------+-------------------------------------------------------------------------------------------------+
-| Tool             | Description                                                                                     |
-+==================+=================================================================================================+
-| modelsearch      | Search for best structural model for a PK model, includes absorption, distribution, and         |
-|                  | elimination                                                                                     |
-+------------------+-------------------------------------------------------------------------------------------------+
-| structsearch     | Search for best structural model. Includes PKPD and drug metabolite models                      |
-+------------------+-------------------------------------------------------------------------------------------------+
-| iivsearch        | Search for best IIV structure, both in terms of number of IIVs to keep as well as covariance    |
-|                  | structure                                                                                       |
-+------------------+-------------------------------------------------------------------------------------------------+
-| iovsearch        | Search for best IOV structure and remove IIVs explained by IOV                                  |
-+------------------+-------------------------------------------------------------------------------------------------+
-| ruvsearch        | Search for best residual error model, test IIV on RUV, power on RUV, combined error model, and  |
-|                  | time-varying                                                                                    |
-+------------------+-------------------------------------------------------------------------------------------------+
-| allometry        | Test allometric scaling                                                                         |
-+------------------+-------------------------------------------------------------------------------------------------+
-| covsearch        | Test and identify covariate effects                                                             |
-+------------------+-------------------------------------------------------------------------------------------------+
++------------------+-----------------------------------------------------------------------------------------+------------------------------------+
+| Tool             | Description                                                                             | Can be used with ``modetype``      |
++==================+=========================================================================================+====================================+
+| modelsearch      | Search for best structural model for a PK model, includes absorption, distribution, and | ``basic_pk``, ``drug_metabolite``, |
+|                  | elimination (part of 'structural' AMD step)                                             | ``tmdd``                           |
++------------------+-----------------------------------------------------------------------------------------+------------------------------------+
+| structsearch     | Search for best structural model. Includes PKPD, TMDD and drug metabolite models        | ``pkpd``, ``drug_metabolite``,     |
+|                  | (part of 'structural' AMD step)  ´                                                       | ``tmdd``                           |
++------------------+-----------------------------------------------------------------------------------------+------------------------------------+
+| iivsearch        | Search for best IIV structure, both in terms of number of IIVs to keep as well as       | All model types                    |
+|                  | covariance structure                                                                    |                                    |
++------------------+-----------------------------------------------------------------------------------------+------------------------------------+
+| iovsearch        | Search for best IOV structure and remove IIVs explained by IOV                          | All model types                    |
++------------------+-----------------------------------------------------------------------------------------+------------------------------------+
+| ruvsearch        | Search for best residual error model, test IIV on RUV, power on RUV, combined error     | All model types                    |
+|                  | model, and time-varying                                                                 |                                    |
++------------------+-----------------------------------------------------------------------------------------+------------------------------------+
+| allometry        | Test allometric scaling                                                                 | ``basic_pk``, ``drug_metabolite``, |
+|                  |                                                                                         | ``tmdd``                           |
++------------------+-----------------------------------------------------------------------------------------+------------------------------------+
+| covsearch        | Test and identify covariate effects                                                     | All model types                    |
++------------------+-----------------------------------------------------------------------------------------+------------------------------------+
 
 Structural
 ~~~~~~~~~~
 
-This subtool selects the best structural model, see :ref:`modelsearch` or :ref:`structsearch` for more details about the tool.
+This subtool selects the best structural model, using the appropriate subtools for the chosen ``modeltype``. For regular PK
+analysis, modelsearch will be used. For structural components connected to PD, metabolite or TMDD however, structsearch
+will be used. See :ref:`modelsearch` or :ref:`structsearch` for more details about the tool.
 In this stage, structural covariate effects are also added (all at once) to the starting model. Please see :ref:`covsearch` 
 for more information of this.
+
+If structural components are to be run, they will be run in the order below.
+
+.. graphviz::
+
+    digraph BST {
+            node [fontname="Arial",shape="rect"];
+            rankdir="LR";
+            base [label="Input", shape="oval"]
+            s0 [label="structural covariates"]
+            s1 [label="modelsearch"]
+            s2 [label="structsearch"]
+
+            base -> s0
+            s0 -> s1
+            s1 -> s2
+        }
 
 Modelsearch
 ===========
@@ -333,7 +418,7 @@ Structsearch
 ============
 
 The structsearch tool selects the best structural model from a set of models. Currently implemented
-model types are PKPD and drug-metabolite.
+model types are PKPD, TMDD and drug-metabolite.
 
 In order to run AMD for a pkpd model the ``modeltype`` needs to be set to `pkpd`. For running drug metabolite models, 
 the expected ``modeltype`` needs to be set to `drug_metabolite`
@@ -350,23 +435,24 @@ This subtool selects the IIV structure, see :ref:`iivsearch` for more details ab
 that the AMD tool uses for this subtool can be seen in the table below.
 
 
-+---------------+----------------------------------------------------------------------------------------------------+
-| Argument      | Setting                                                                                            |
-+===============+====================================================================================================+
-| algorithm     | ``'brute_force'``                                                                                  |
-+---------------+----------------------------------------------------------------------------------------------------+
-| iiv_strategy  | ``'fullblock'``                                                                                    |
-+---------------+----------------------------------------------------------------------------------------------------+
-| rank_type     | ``'bic'`` (type: iiv)                                                                              |
-+---------------+----------------------------------------------------------------------------------------------------+
-| cutoff        | ``None``                                                                                           |
-+---------------+----------------------------------------------------------------------------------------------------+
++---------------+---------------------------+------------------------------------------------------------------------+
+| Argument      | Setting                   |   Setting (rerun)                                                      |
++===============+===========================+========================================================================+
+| algorithm     | ``'brute_force'``         |  ``'brute_force'``                                                     |
++---------------+---------------------------+------------------------------------------------------------------------+
+| iiv_strategy  | ``'fullblock'``           |  ``'no_add'``                                                          |
++---------------+---------------------------+------------------------------------------------------------------------+
+| rank_type     | ``'bic'`` (type: iiv)     |  ``'bic'`` (type: iiv)                                                 |
++---------------+---------------------------+------------------------------------------------------------------------+
+| cutoff        | ``None``                  |  ``None``                                                              |
++---------------+---------------------------+------------------------------------------------------------------------+
 
 IOVsearch
 ~~~~~~~~~
 
 This subtool selects the IOV structure and tries to remove corresponding IIVs if possible, see :ref:`iovsearch` for
-more details about the tool. The settings that the AMD tool uses for this subtool can be seen in the table below.
+more details about the tool. The settings that the AMD tool uses for this subtool can be seen in the table below. If no
+argument for ``occasion`` is given, this tool will not be run.
 
 +---------------------+----------------------------------------------------------------------------------------------+
 | Argument            | Setting                                                                                      |
@@ -386,7 +472,8 @@ Residual
 ~~~~~~~~
 
 This subtool selects the residual model, see :ref:`ruvsearch` for more details about the tool. The settings
-that the AMD tool uses for this subtool can be seen in the table below.
+that the AMD tool uses for this subtool can be seen in the table below. When re-running the tool, the settings remain
+the same.
 
 
 +---------------+----------------------------------------------------------------------------------------------------+
@@ -403,8 +490,8 @@ Allometry
 ~~~~~~~~~
 
 This subtool tries to apply allometry, see :ref:`allometry` for more details about the tool. The settings
-that the AMD tool uses for this subtool can be seen in the table below.
-
+that the AMD tool uses for this subtool can be seen in the table below. Please note that if ``ignore_datainfo_fallback`` is
+set to ``True`` and no allometric variable is given, this tool will not be run. 
 
 +----------------------+---------------------------------------------------------------------------------------------+
 | Argument             | Setting                                                                                     |
@@ -424,12 +511,15 @@ that the AMD tool uses for this subtool can be seen in the table below.
 | fixed                | ``None``                                                                                    |
 +----------------------+---------------------------------------------------------------------------------------------+
 
+.. note::
+    This tool is skipped if ``modeltype = 'pkpd'``
 
 Covariates
 ~~~~~~~~~~
 
 This subtool selects which covariate effects to apply, see :ref:`covsearch` for more details about the tool. The
-settings that the AMD tool uses for this subtool can be seen in the table below.
+settings that the AMD tool uses for this subtool can be seen in the table below. Please note that if ``ignore_datainfo_fallback``
+is set to ``True`` and no covariates are given, this tool will not be run.
 
 +---------------+----------------------------------------------------------------------------------------------------+
 | Argument      | Setting                                                                                            |
@@ -482,6 +572,8 @@ tool.
 +----------------------+----------------------------------------------------------------------------------------------------+
 | scale                | ``UCP``                                                                                            |
 +----------------------+----------------------------------------------------------------------------------------------------+
+| use_initial_estimates| False                                                                                              |
++----------------------+----------------------------------------------------------------------------------------------------+
 | prefix_name          | The name of the previously run tool                                                                |
 +----------------------+----------------------------------------------------------------------------------------------------+
 
@@ -510,14 +602,6 @@ you can look at the ``summary_models`` table. The table is generated with
     :hide-code:
 
     res.summary_models
-
-A summary table of predicted influential individuals and outliers can be seen in ``summary_individuals_count``.
-See :py:func:`pharmpy.tools.summarize_individuals_count_table` for information on the content of this table.
-
-.. pharmpy-execute::
-    :hide-code:
-
-    res.summary_individuals_count
 
 Finally, you can see a summary of any errors and warnings of the final selected model in ``summary_errors``.
 See :py:func:`pharmpy.tools.summarize_errors` for information on the content of this table.

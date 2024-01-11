@@ -43,27 +43,40 @@ To run IIVsearch from the command line, the example code is redefined accordingl
 Arguments
 ~~~~~~~~~
 
+Mandatory
+---------
+
 +-----------------------------------------------+--------------------------------------------------------------------+
 | Argument                                      | Description                                                        |
 +===============================================+====================================================================+
-| :ref:`algorithm<algorithms_iivsearch>`        | Algorithm to use (e.g. ``'brute_force'``)                          |
-+-----------------------------------------------+--------------------------------------------------------------------+
-| :ref:`iiv_strategy<iiv_strategies_iivsearch>` | If/how IIV should be added to start model (default is to not add)  |
-+-----------------------------------------------+--------------------------------------------------------------------+
-| :ref:`rank_type<ranking_iivsearch>`           | Which selection criteria to rank models on, e.g. OFV (default is   |
-|                                               | BIC)                                                               |
-+-----------------------------------------------+--------------------------------------------------------------------+
-| :ref:`cutoff<ranking_iivsearch>`              | Cutoff for the ranking function, exclude models that are below     |
-|                                               | cutoff (default is none)                                           |
+| ``algorithm``                                 | :ref:`Algorithm<algorithms_iivsearch>` to use                      | 
+|                                               | (e.g. ``'brute_force'``)                                           |
 +-----------------------------------------------+--------------------------------------------------------------------+
 | ``model``                                     | Input model                                                        |
 +-----------------------------------------------+--------------------------------------------------------------------+
 | ``results``                                   | ModelfitResults of input model                                     |
 +-----------------------------------------------+--------------------------------------------------------------------+
-| :ref:`strictness<strictness>`                 | Strictness criteria for model selection.                           |
+
+Optional
+--------
+
++-----------------------------------------------+--------------------------------------------------------------------+
+| Argument                                      | Description                                                        |
++===============================================+====================================================================+
+| ``iiv_strategy``                              | If/how IIV should be added to start model (default is to not add). |
+|                                               | See :ref:`iiv_strategies_iivsearch`                                |
++-----------------------------------------------+--------------------------------------------------------------------+
+| ``rank_type``                                 | Which :ref:`selection criteria<ranking_iivsearch>` to rank models  | 
+|                                               | on, e.g. OFV (default is BIC)                                      |
++-----------------------------------------------+--------------------------------------------------------------------+
+| ``cutoff``                                    | :ref:`Cutoff<ranking_iivsearch>` for the ranking function, exclude |
+|                                               | models that are below cutoff (default is none)                     |
++-----------------------------------------------+--------------------------------------------------------------------+
+| ``strictness``                                | :ref:`strictness<strictness>` criteria for model selection.        |
 |                                               | Default is "minimization_successful or                             |
 |                                               | (rounding_errors and sigdigs>= 0.1)"                               |
 +-----------------------------------------------+--------------------------------------------------------------------+
+
 
 .. note::
 
@@ -270,22 +283,6 @@ you can look at the ``summary_models`` table. The table is generated with
     :hide-code:
 
     res.summary_models
-
-A summary table of predicted influential individuals and outliers can be seen in ``summary_individuals_count``.
-See :py:func:`pharmpy.tools.summarize_individuals_count_table` for information on the content of this table.
-
-.. pharmpy-execute::
-    :hide-code:
-
-    res.summary_individuals_count
-
-You can see different individual statistics in ``summary_individuals``.
-See :py:func:`pharmpy.tools.summarize_individuals` for information on the content of this table.
-
-.. pharmpy-execute::
-    :hide-code:
-
-    res.summary_individuals
 
 Finally, you can see a summary of different errors and warnings in ``summary_errors``.
 See :py:func:`pharmpy.tools.summarize_errors` for information on the content of this table.

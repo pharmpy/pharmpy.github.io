@@ -33,6 +33,9 @@ To run allometry from the command line, the example code is redefined accordingl
 Arguments
 ~~~~~~~~~
 
+Mandatory
+---------
+
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
 | Argument                                          | Description                                                                             |
 +===================================================+=========================================================================================+
@@ -40,6 +43,13 @@ Arguments
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
 | ``results``                                       | ModelfitResults of model                                                                |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
+
+Optional
+--------
+
++---------------------------------------------------+-----------------------------------------------------------------------------------------+
+| Argument                                          | Description                                                                             |
++===================================================+=========================================================================================+
 | ``allometric_variable``                           | Name of the variable to use for allometric scaling (default is WT)                      |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
 | ``reference_value``                               | Reference value for the allometric variable (default is 70)                             |
@@ -54,6 +64,7 @@ Arguments
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
 | ``fixed``                                         | Should the exponents be fixed or not. (default True)                                    |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------+
+
 
 ~~~~~~~~~
 Procedure
@@ -96,19 +107,3 @@ you can look at the ``summary_models`` table. The table is generated with
     from pharmpy.workflows.results import read_results
     res = read_results('tests/testdata/results/allometry_results.json')
     res.summary_models
-
-A summary table of predicted influential individuals and outliers can be seen in ``summary_individuals_count``.
-See :py:func:`pharmpy.tools.summarize_individuals_count_table` for information on the content of this table.
-
-.. pharmpy-execute::
-    :hide-code:
-
-    res.summary_individuals_count
-
-You can see different individual statistics in ``summary_individuals``.
-See :py:func:`pharmpy.tools.summarize_individuals` for information on the content of this table.
-
-.. pharmpy-execute::
-    :hide-code:
-
-    res.summary_individuals

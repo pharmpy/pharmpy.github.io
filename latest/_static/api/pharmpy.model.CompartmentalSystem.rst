@@ -28,6 +28,7 @@ CompartmentalSystem
       ~CompartmentalSystem.atoms
       ~CompartmentalSystem.create
       ~CompartmentalSystem.find_compartment
+      ~CompartmentalSystem.find_compartment_or_raise
       ~CompartmentalSystem.find_depot
       ~CompartmentalSystem.find_peripheral_compartments
       ~CompartmentalSystem.find_transit_compartments
@@ -59,6 +60,7 @@ CompartmentalSystem
    .. automethod:: atoms
    .. automethod:: create
    .. automethod:: find_compartment
+   .. automethod:: find_compartment_or_raise
    .. automethod:: find_depot
    .. automethod:: find_peripheral_compartments
    .. automethod:: find_transit_compartments

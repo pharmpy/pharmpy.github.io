@@ -30,10 +30,10 @@ if os.getenv('SPELLCHECK'):
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'Pharmpy'
-year = '2018-2023'
+year = '2018-2024'
 authors = ['the Pharmpy development team']
 copyright = '{0}; {1}'.format(year, ', '.join(authors))
-version = release = '0.105.3'
+version = release = '0.106.0'
 html_show_sourcelink = False
 
 pygments_style = 'trac'
