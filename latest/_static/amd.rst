@@ -21,7 +21,7 @@ To initiate AMD in Python/R:
     from pharmpy.tools import run_amd
 
     dataset_path = 'path/to/dataset'
-    strategy = 'all'
+    strategy = 'default'
     res = run_amd(input=dataset_path,
                   modeltype='basic_pk',
                   administration='oral',
@@ -73,7 +73,8 @@ Arguments
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``lloq_method``                                   | Method to use for handling lower limit of quantification. See :py:func:`pharmpy.modeling.transform_blq`.        |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
-| :ref:`strategy<strategy_amd>`                     | Strategy defining run order of the different subtools valid arguments are 'all' (deafult) and 'retries'         |
+| ``strategy``                                      | :ref:`Strategy<strategy_amd>` defining run order of the different subtools valid arguments are 'default'        |
+|                                                   | (deafult) and 'reevaluation'                                                                                    |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``allometric_variable``                           | Variable to use for allometry (default is name of column described as body weight)                              |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
@@ -85,17 +86,19 @@ Arguments
 |                                                   | If ``strictness`` is set to ``None`` no strictness                                                              |
 |                                                   | criteria are applied                                                                                            |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
-| ``mechanistic_covariates``                        | List of covariates to run in a separate prioritezed covsearch run.                                              |
-|                                                   | The effects are extracted from the given search space                                                           |
+| ``mechanistic_covariates``                        | List of covariates or covariate/parameter combinations to run in a separate prioritized covsearch run. Allowed  |
+|                                                   | elements in the list are strings of covariates or tuples with one covariate and parameter each, e.g ["AGE",     |
+|                                                   | ("WGT", "CL")]. The associated effects are extracted from the given search space.                               |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``retries_strategy``                              | Decide how to use the retries tool. Valid options are 'skip', 'all_final' or 'final'. Default is 'all_final'    |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``seed``                                          | A random number generator or seed to use for steps with random sampling.                                        |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 | ``dv_types``                                      | Dictionary of DV types for multiple DVs (e.g. dv_types = {'target': 2}). Default is None.                       |
-|                                                   | Allowed keys are: 'drug', 'target' and 'complex'. (For TMDD models only)                                        |
+|                                                   | Allowed keys are: 'drug', 'target', 'complex', 'drug_tot' and 'target_tot'. (For TMDD models only)              |
+|                                                   | For more information see :ref:`here<dv_types>`.                                                                 |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
-| ``parameter_uncertainty_method``                  | Parameter uncertainty method to use. Currently implemented methods are: 'SANDWICH', 'CPG' and 'OFIM'.           |
+| ``parameter_uncertainty_method``                  | Parameter uncertainty method to use. Currently implemented methods are: 'SANDWICH', 'SMAT', 'RMAT' and 'EFIM'.  |
 |                                                   | For more information about these methods see                                                                    |
 |                                                   | :py:func:`here<pharmpy.model.EstimationStep.parameter_uncertainty_method>`.                                     |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
@@ -200,10 +203,13 @@ all model types, the used subtools in the different steps is dependent on the
 ``modeltype`` argument. Please see the description for each tool described below
 for more details.
 
-all (default)
-~~~~~~~~~~~~~
+Only a single strategy can be used for each AMD run. Combinations of strategies are not
+supported. However each of the subtools used in AMD is available to use manually as well.
 
-If no argument is specified, 'all' will be used as the default strategy. This will use
+default (default)
+~~~~~~~~~~~~~~~~~
+
+If no argument is specified, 'default' will be used as the default strategy. This will use
 all tools available for the specified ``modeltype``. The exact workflow can hence differ for
 the different model type but a general visualization of this can be seen below:
 
@@ -231,10 +237,10 @@ the different model type but a general visualization of this can be seen below:
         }
 
 
-retries
-~~~~~~~
+reevaluation
+~~~~~~~~~~~~
 
-The retries strategy is an extension of the 'all' strategy. It is defined by the re-running
+The reevaluation strategy is an extension of the 'default' strategy. It is defined by the re-running
 of IIVsearch and RUVsearch. This indicate that the tool follow the exact same principles
 and the workflow hence is dependent on the model type in question.
 
@@ -353,7 +359,7 @@ for each subtool, see the respective subheading.
 |                  | elimination (part of 'structural' AMD step)                                             | ``tmdd``                           |
 +------------------+-----------------------------------------------------------------------------------------+------------------------------------+
 | structsearch     | Search for best structural model. Includes PKPD, TMDD and drug metabolite models        | ``pkpd``, ``drug_metabolite``,     |
-|                  | (part of 'structural' AMD step)  ´                                                       | ``tmdd``                           |
+|                  | (part of 'structural' AMD step)  ´                                                      | ``tmdd``                           |
 +------------------+-----------------------------------------------------------------------------------------+------------------------------------+
 | iivsearch        | Search for best IIV structure, both in terms of number of IIVs to keep as well as       | All model types                    |
 |                  | covariance structure                                                                    |                                    |
@@ -546,14 +552,14 @@ For an entire AMD run, it is possible to get a maximum of three covsearch runs, 
 |                     | be tested once more at the start of the next covsearch run.                             |
 +---------------------+-----------------------------------------------------------------------------------------+
 | Mechanistic         | If any mechanistic covariates have been given as input to the AMD tool, the specified   |
-|                     | covariate effects for these covariates is run in a separate initial covsearch run When  |
+|                     | covariate effects for these covariates is run in a separate initial covsearch run when  |
 |                     | adding covariates.                                                                      |
 +---------------------+-----------------------------------------------------------------------------------------+
 | Exploratory         | The remaining covariates are tested after all mechanistic covariates have been tested.  |
 +---------------------+-----------------------------------------------------------------------------------------+
 
 Retries
-~~~~~~~~~~
+~~~~~~~
 
 If ``retries_strategy`` is set to 'all_final', the retries tool will be run on the final model from each subtool.
 With the argument set to 'final', the retries tool will only be run on the final model from the last subtool.
@@ -650,3 +656,55 @@ Some plots and tables on the final model can be found both in the amd report and
    :hide-code:
 
    res.final_model_cwres_vs_idv_plot
+
+
+~~~~~~~~
+Examples
+~~~~~~~~
+
+TMDD
+----
+
+Run AMD for a TMDD model:
+
+.. pharmpy-code::
+
+    from pharmpy.modeling import read_model
+    from pharmpy.tools read_modelfit_results, run_structsearch
+
+    start_model = read_model('path/to/model')
+
+    res = run_amd(
+                modeltype='tmdd',
+                input=start_model,
+                search_space='PERIPHERALS([1,2]);ELIMINATION([FO,ZO])',
+                dv_types={'drug': 1, 'target': 2, 'complex': 3}
+                )
+
+.. note::
+   The name of the DVID column must be "DVID".
+
+PKPD
+----
+
+Run AMD for a PKPD model:
+
+.. pharmpy-code::
+
+    from pharmpy.modeling import read_model
+    from pharmpy.tools read_modelfit_results, run_structsearch
+
+    start_model = read_model('path/to/model')
+
+    res = run_amd(
+                modeltype='pkpd',
+                input=start_model,
+                search_space='DIRECTEFFECT(*)',
+                b_init=0.1,
+                emax_init=1,
+                ec50_init=0.1,
+                met_init=0.4,
+                )
+
+.. note::
+   The input model must be a PK model with a PKPD dataset. The name of the DVID column must be "DVID".

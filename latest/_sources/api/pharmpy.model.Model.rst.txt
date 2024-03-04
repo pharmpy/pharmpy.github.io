@@ -19,7 +19,6 @@ Model
       ~Model.initial_individual_estimates
       ~Model.internals
       ~Model.model_code
-      ~Model.modelfit_results
       ~Model.name
       ~Model.observation_transformation
       ~Model.parameters
@@ -53,7 +52,6 @@ Model
    .. autoattribute:: initial_individual_estimates
    .. autoattribute:: internals
    .. autoattribute:: model_code
-   .. autoattribute:: modelfit_results
    .. autoattribute:: name
    .. autoattribute:: observation_transformation
    .. autoattribute:: parameters
