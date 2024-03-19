@@ -25,7 +25,6 @@ Compartment
       ~Compartment.create
       ~Compartment.from_dict
       ~Compartment.replace
-      ~Compartment.sorted_doses
       ~Compartment.subs
       ~Compartment.to_dict
 
@@ -44,6 +43,5 @@ Compartment
    .. automethod:: create
    .. automethod:: from_dict
    .. automethod:: replace
-   .. automethod:: sorted_doses
    .. automethod:: subs
    .. automethod:: to_dict

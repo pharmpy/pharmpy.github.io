@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.estimation_steps &#8212; Pharmpy 0.107.0 documentation</title>
+    <title>pharmpy.modeling.estimation_steps &#8212; Pharmpy 0.108.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../_static/documentation_options.js?v=4661e4ab"></script>
+    <script src="../../../_static/documentation_options.js?v=f0724b2f"></script>
     <script src="../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -52,7 +52,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 04, 2024"/>
+    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
   </head>
   
   
@@ -125,8 +125,8 @@
     
     
     
-    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 0.107.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark" alt="Pharmpy 0.107.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 0.108.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark" alt="Pharmpy 0.108.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -495,7 +495,7 @@ document.write(`
                 <article class="bd-article">
                   
   <h1>Source code for pharmpy.modeling.estimation_steps</h1><div class="highlight"><pre>
-<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
+<span></span><span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Dict</span><span class="p">,</span> <span class="n">List</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
 
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">EstimationStep</span><span class="p">,</span> <span class="n">EstimationSteps</span><span class="p">,</span> <span class="n">Model</span><span class="p">,</span> <span class="n">SimulationStep</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling.help_functions</span> <span class="kn">import</span> <span class="n">_as_integer</span>
@@ -920,6 +920,220 @@ document.write(`
         <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="add_predictions">
+<a class="viewcode-back" href="../../../api/pharmpy.modeling.add_predictions.html#pharmpy.modeling.add_predictions">[docs]</a>
+<span class="k">def</span> <span class="nf">add_predictions</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">pred</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add predictions and/or residuals</span>
+
+<span class="sd">    Add predictions to estimation step.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    pred : list</span>
+<span class="sd">        List of predictions (e.g. [&#39;IPRED&#39;, &#39;PRED&#39;])</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model.estimation_steps[-1].predictions</span>
+<span class="sd">    (&#39;IPRED&#39;, &#39;PRED&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; model = add_predictions(model, [&#39;CIPREDI&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; model.estimation_steps[-1].predictions</span>
+<span class="sd">    (&#39;CIPREDI&#39;, &#39;IPRED&#39;, &#39;PRED&#39;)</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    remove_predictions</span>
+<span class="sd">    remove_residuals</span>
+<span class="sd">    set_estimation_step</span>
+<span class="sd">    add_estimation_step</span>
+<span class="sd">    remove_estimation_step</span>
+<span class="sd">    append_estimation_step_options</span>
+<span class="sd">    add_parameter_uncertainty_step</span>
+<span class="sd">    remove_parameter_uncertainty_step</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
+    <span class="n">old_predictions</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predictions</span>
+    <span class="n">new_predictions</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">old_predictions</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">pred</span><span class="p">)))</span>
+    <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">predictions</span><span class="o">=</span><span class="n">new_predictions</span><span class="p">)</span>
+    <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="add_residuals">
+<a class="viewcode-back" href="../../../api/pharmpy.modeling.add_residuals.html#pharmpy.modeling.add_residuals">[docs]</a>
+<span class="k">def</span> <span class="nf">add_residuals</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">res</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Add predictions and/or residuals</span>
+
+<span class="sd">    Add residuals to estimation step.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    res : list</span>
+<span class="sd">        List of residuals (e.g. [&#39;CWRES&#39;])</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model.estimation_steps[-1].residuals</span>
+<span class="sd">    (&#39;CWRES&#39;,)</span>
+<span class="sd">    &gt;&gt;&gt; model = add_residuals(model, [&#39;RES&#39;])</span>
+<span class="sd">    &gt;&gt;&gt; model.estimation_steps[-1].residuals</span>
+<span class="sd">    (&#39;CWRES&#39;, &#39;RES&#39;)</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    remove_predictions</span>
+<span class="sd">    remove_residuals</span>
+<span class="sd">    set_estimation_step</span>
+<span class="sd">    add_estimation_step</span>
+<span class="sd">    remove_estimation_step</span>
+<span class="sd">    append_estimation_step_options</span>
+<span class="sd">    add_parameter_uncertainty_step</span>
+<span class="sd">    remove_parameter_uncertainty_step</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
+    <span class="n">old_residuals</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">residuals</span>
+    <span class="n">new_residuals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">old_residuals</span><span class="p">)</span> <span class="o">|</span> <span class="nb">set</span><span class="p">(</span><span class="n">res</span><span class="p">)))</span>
+    <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">residuals</span><span class="o">=</span><span class="n">new_residuals</span><span class="p">)</span>
+    <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
+
+
+
+<div class="viewcode-block" id="remove_predictions">
+<a class="viewcode-back" href="../../../api/pharmpy.modeling.remove_predictions.html#pharmpy.modeling.remove_predictions">[docs]</a>
+<span class="k">def</span> <span class="nf">remove_predictions</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">to_remove</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;all&#39;</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove predictions and/or residuals</span>
+
+<span class="sd">    Remove predictions from estimation step.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    to_remove : List[str]</span>
+<span class="sd">        List of predictions to remove</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model = remove_predictions(model, &#39;all&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; model.estimation_steps[-1].predictions</span>
+<span class="sd">    ()</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    add_predictions</span>
+<span class="sd">    add_residuals</span>
+<span class="sd">    set_estimation_step</span>
+<span class="sd">    add_estimation_step</span>
+<span class="sd">    remove_estimation_step</span>
+<span class="sd">    append_estimation_step_options</span>
+<span class="sd">    add_parameter_uncertainty_step</span>
+<span class="sd">    remove_parameter_uncertainty_step</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
+    <span class="n">old_predictions</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">predictions</span>
+    <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">predictions</span><span class="o">=</span><span class="p">())</span>
+    <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">to_remove</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">to_remove</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">old_predictions</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> not in predictions&quot;</span><span class="p">)</span>
+        <span class="n">new_predictions</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">old_predictions</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">to_remove</span><span class="p">)))</span>
+        <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">predictions</span><span class="o">=</span><span class="n">new_predictions</span><span class="p">)</span>
+        <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+
+<div class="viewcode-block" id="remove_residuals">
+<a class="viewcode-back" href="../../../api/pharmpy.modeling.remove_residuals.html#pharmpy.modeling.remove_residuals">[docs]</a>
+<span class="k">def</span> <span class="nf">remove_residuals</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">to_remove</span><span class="p">:</span> <span class="n">List</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Remove predictions and/or residuals</span>
+
+<span class="sd">    Remove residuals from estimation step.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    to_remove : List[str]</span>
+<span class="sd">        List of predictions to remove</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Pharmpy model object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model = remove_residuals(model, &#39;all&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; model.estimation_steps[-1].residuals</span>
+<span class="sd">    ()</span>
+
+<span class="sd">    See also</span>
+<span class="sd">    --------</span>
+<span class="sd">    add_predictions</span>
+<span class="sd">    add_residuals</span>
+<span class="sd">    set_estimation_step</span>
+<span class="sd">    add_estimation_step</span>
+<span class="sd">    remove_estimation_step</span>
+<span class="sd">    append_estimation_step_options</span>
+<span class="sd">    add_parameter_uncertainty_step</span>
+<span class="sd">    remove_parameter_uncertainty_step</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">steps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span>
+    <span class="n">old_residuals</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">residuals</span>
+    <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">residuals</span><span class="o">=</span><span class="p">())</span>
+    <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
+    <span class="k">if</span> <span class="n">to_remove</span> <span class="o">!=</span> <span class="s1">&#39;all&#39;</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">value</span> <span class="ow">in</span> <span class="n">to_remove</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">value</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">old_residuals</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">value</span><span class="si">}</span><span class="s2"> not in residuals&quot;</span><span class="p">)</span>
+        <span class="n">new_residuals</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">old_residuals</span><span class="p">)</span> <span class="o">-</span> <span class="nb">set</span><span class="p">(</span><span class="n">to_remove</span><span class="p">)))</span>
+        <span class="n">newstep</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">residuals</span><span class="o">=</span><span class="n">new_residuals</span><span class="p">)</span>
+        <span class="n">newsteps</span> <span class="o">=</span> <span class="n">steps</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span> <span class="o">+</span> <span class="n">newstep</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">estimation_steps</span><span class="o">=</span><span class="n">newsteps</span><span class="p">)</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
+    <span class="k">return</span> <span class="n">model</span></div>
 
 </pre></div>
 

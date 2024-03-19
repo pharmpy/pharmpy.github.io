@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.retries.tool &#8212; Pharmpy 0.107.0 documentation</title>
+    <title>pharmpy.tools.retries.tool &#8212; Pharmpy 0.108.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=4661e4ab"></script>
+    <script src="../../../../_static/documentation_options.js?v=f0724b2f"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/thebelab-helper.js"></script>
@@ -52,7 +52,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 04, 2024"/>
+    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
   </head>
   
   
@@ -125,8 +125,8 @@
     
     
     
-    <img src="../../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 0.107.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark" alt="Pharmpy 0.107.0 documentation - Home"/>`);</script>
+    <img src="../../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 0.108.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark" alt="Pharmpy 0.108.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -497,6 +497,7 @@ document.write(`
   <h1>Source code for pharmpy.tools.retries.tool</h1><div class="highlight"><pre>
 <span></span><span class="kn">import</span> <span class="nn">warnings</span>
 <span class="kn">from</span> <span class="nn">dataclasses</span> <span class="kn">import</span> <span class="n">dataclass</span><span class="p">,</span> <span class="n">replace</span>
+<span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="k">if</span> <span class="n">TYPE_CHECKING</span><span class="p">:</span>
@@ -508,6 +509,7 @@ document.write(`
 
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fn.signature</span> <span class="kn">import</span> <span class="n">with_same_arguments_as</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fn.type</span> <span class="kn">import</span> <span class="n">with_runtime_arguments_type_check</span>
+<span class="kn">from</span> <span class="nn">pharmpy.internals.math</span> <span class="kn">import</span> <span class="n">is_posdef</span><span class="p">,</span> <span class="n">nearest_positive_definite</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">calculate_parameters_from_ucp</span><span class="p">,</span>
@@ -621,6 +623,8 @@ document.write(`
         <span class="n">original_model</span> <span class="o">=</span> <span class="n">update_inits</span><span class="p">(</span>
             <span class="n">original_model</span><span class="p">,</span> <span class="n">modelentry</span><span class="o">.</span><span class="n">modelfit_results</span><span class="o">.</span><span class="n">parameter_estimates</span>
         <span class="p">)</span>
+
+    <span class="n">original_model</span> <span class="o">=</span> <span class="n">convert_to_posdef</span><span class="p">(</span><span class="n">original_model</span><span class="p">)</span>
 
     <span class="c1"># Add any description?</span>
     <span class="k">if</span> <span class="n">prefix_name</span><span class="p">:</span>
@@ -736,6 +740,37 @@ document.write(`
     <span class="k">return</span> <span class="n">res</span>
 
 
+<span class="k">def</span> <span class="nf">convert_to_posdef</span><span class="p">(</span><span class="n">model</span><span class="p">):</span>
+    <span class="n">new_parameter_estimates</span> <span class="o">=</span> <span class="p">{}</span>
+
+    <span class="n">omega_symbolic</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">etas</span><span class="o">.</span><span class="n">covariance_matrix</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="n">omega_symbolic</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span>
+    <span class="n">omega</span> <span class="o">=</span> <span class="n">omega</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_posdef</span><span class="p">(</span><span class="n">omega</span><span class="p">):</span>
+        <span class="n">omega</span> <span class="o">=</span> <span class="n">nearest_positive_definite</span><span class="p">(</span><span class="n">omega</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">omega</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">omega</span><span class="p">)):</span>
+                <span class="n">new_parameter_estimates</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">omega_symbolic</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">])]</span> <span class="o">=</span> <span class="n">omega</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span>
+
+    <span class="n">sigma_symbolic</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="o">.</span><span class="n">epsilons</span><span class="o">.</span><span class="n">covariance_matrix</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma_symbolic</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">parameters</span><span class="o">.</span><span class="n">inits</span><span class="p">)</span>
+    <span class="n">sigma</span> <span class="o">=</span> <span class="n">sigma</span><span class="o">.</span><span class="n">to_numpy</span><span class="p">()</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">is_posdef</span><span class="p">(</span><span class="n">sigma</span><span class="p">):</span>
+        <span class="n">sigma</span> <span class="o">=</span> <span class="n">nearest_positive_definite</span><span class="p">(</span><span class="n">sigma</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">row</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sigma</span><span class="p">)):</span>
+            <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="nb">range</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">sigma</span><span class="p">)):</span>
+                <span class="n">new_parameter_estimates</span><span class="p">[</span><span class="nb">str</span><span class="p">(</span><span class="n">sigma_symbolic</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">])]</span> <span class="o">=</span> <span class="n">sigma</span><span class="p">[</span><span class="n">row</span><span class="p">,</span> <span class="n">col</span><span class="p">]</span>
+    <span class="k">if</span> <span class="n">new_parameter_estimates</span><span class="p">:</span>
+        <span class="n">warnings</span><span class="o">.</span><span class="n">warn</span><span class="p">(</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> required adjusted value to becom&#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;postive definite. Adjusted values for parameters : &#39;</span>
+            <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">new_parameter_estimates</span><span class="o">.</span><span class="n">keys</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span>
+        <span class="p">)</span>
+        <span class="k">return</span> <span class="n">update_inits</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">new_parameter_estimates</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">model</span>
+
+
 <span class="k">def</span> <span class="nf">_modify_summary_tool</span><span class="p">(</span><span class="n">summary_tool</span><span class="p">,</span> <span class="n">retry_runs</span><span class="p">):</span>
     <span class="n">summary_tool</span> <span class="o">=</span> <span class="n">summary_tool</span><span class="o">.</span><span class="n">reset_index</span><span class="p">()</span>
     <span class="n">number_of_retries_dict</span> <span class="o">=</span> <span class="p">{</span><span class="n">r</span><span class="o">.</span><span class="n">modelentry</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span><span class="p">:</span> <span class="n">r</span><span class="o">.</span><span class="n">number_of_retries</span> <span class="k">for</span> <span class="n">r</span> <span class="ow">in</span> <span class="n">retry_runs</span><span class="p">}</span>
@@ -782,6 +817,7 @@ document.write(`
 
 <span class="nd">@dataclass</span><span class="p">(</span><span class="n">frozen</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 <span class="k">class</span> <span class="nc">RetriesResults</span><span class="p">(</span><span class="n">ToolResults</span><span class="p">):</span>
+    <span class="n">rst_path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="vm">__file__</span><span class="p">)</span><span class="o">.</span><span class="n">resolve</span><span class="p">()</span><span class="o">.</span><span class="n">parent</span> <span class="o">/</span> <span class="s1">&#39;report.rst&#39;</span>
     <span class="k">pass</span>
 </pre></div>
 

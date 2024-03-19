@@ -14,6 +14,7 @@ ModelEntry
       ~ModelEntry.model
       ~ModelEntry.modelfit_results
       ~ModelEntry.parent
+      ~ModelEntry.simulation_results
 
    .. rubric:: Methods Summary
 
@@ -28,6 +29,7 @@ ModelEntry
    .. autoattribute:: model
    .. autoattribute:: modelfit_results
    .. autoattribute:: parent
+   .. autoattribute:: simulation_results
 
    .. rubric:: Methods Documentation
 

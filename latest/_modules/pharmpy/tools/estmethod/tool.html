@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.estmethod.tool &#8212; Pharmpy 0.107.0 documentation</title>
+    <title>pharmpy.tools.estmethod.tool &#8212; Pharmpy 0.108.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=4661e4ab"></script>
+    <script src="../../../../_static/documentation_options.js?v=f0724b2f"></script>
     <script src="../../../../_static/doctools.js?v=888ff710"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/thebelab-helper.js"></script>
@@ -52,7 +52,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Mar 04, 2024"/>
+    <meta name="docbuild:last-update" content="Mar 19, 2024"/>
   </head>
   
   
@@ -125,8 +125,8 @@
     
     
     
-    <img src="../../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 0.107.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark" alt="Pharmpy 0.107.0 documentation - Home"/>`);</script>
+    <img src="../../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 0.108.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark" alt="Pharmpy 0.108.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -527,6 +527,7 @@ document.write(`
     <span class="n">parameter_uncertainty_methods</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
         <span class="n">Union</span><span class="p">[</span><span class="n">List</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="n">PARAMETER_UNCERTAINTY_METHODS</span><span class="p">]],</span> <span class="n">Literal</span><span class="p">[</span><span class="n">PARAMETER_UNCERTAINTY_METHODS</span><span class="p">]]</span>
     <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
+    <span class="n">compare_ofv</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">True</span><span class="p">,</span>
     <span class="n">results</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">ModelfitResults</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Model</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
@@ -545,6 +546,8 @@ document.write(`
 <span class="sd">    parameter_uncertainty_methods : str or list of {&#39;SANDWICH&#39;, &#39;SMAT&#39;, &#39;RMAT&#39;} or None</span>
 <span class="sd">         List of parameter uncertainty methods to test.</span>
 <span class="sd">         Can be specified as &#39;all&#39;, a list of uncertainty methods, or None (to not evaluate any uncertainty)</span>
+<span class="sd">    compare_ofv : bool</span>
+<span class="sd">        Whether to compare the OFV between candidates. Comparison is made by evaluating using IMP</span>
 <span class="sd">    results : ModelfitResults</span>
 <span class="sd">         Results for model</span>
 <span class="sd">    model : Model</span>
@@ -583,11 +586,16 @@ document.write(`
     <span class="k">if</span> <span class="n">methods</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">methods</span> <span class="o">=</span> <span class="p">[</span><span class="n">model</span><span class="o">.</span><span class="n">estimation_steps</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">method</span><span class="p">]</span>
 
-    <span class="n">wf_algorithm</span><span class="p">,</span> <span class="n">task_base_model_fit</span> <span class="o">=</span> <span class="n">algorithm_func</span><span class="p">(</span>
+    <span class="n">args</span> <span class="o">=</span> <span class="p">[</span>
         <span class="n">_format_input</span><span class="p">(</span><span class="n">methods</span><span class="p">,</span> <span class="n">METHODS</span><span class="p">),</span>
         <span class="n">_format_input</span><span class="p">(</span><span class="n">solvers</span><span class="p">,</span> <span class="n">SOLVERS</span><span class="p">),</span>
         <span class="n">_format_input</span><span class="p">(</span><span class="n">parameter_uncertainty_methods</span><span class="p">,</span> <span class="n">PARAMETER_UNCERTAINTY_METHODS</span><span class="p">),</span>
-    <span class="p">)</span>
+    <span class="p">]</span>
+
+    <span class="k">if</span> <span class="n">algorithm</span> <span class="o">!=</span> <span class="s1">&#39;exhaustive_only_eval&#39;</span><span class="p">:</span>
+        <span class="n">args</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">compare_ofv</span><span class="p">)</span>
+
+    <span class="n">wf_algorithm</span><span class="p">,</span> <span class="n">task_base_model_fit</span> <span class="o">=</span> <span class="n">algorithm_func</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
     <span class="n">wb</span><span class="o">.</span><span class="n">insert_workflow</span><span class="p">(</span><span class="n">wf_algorithm</span><span class="p">,</span> <span class="n">predecessors</span><span class="o">=</span><span class="n">start_task</span><span class="p">)</span>
 
     <span class="n">wf_fit</span> <span class="o">=</span> <span class="n">create_fit_workflow</span><span class="p">(</span><span class="n">n</span><span class="o">=</span><span class="nb">len</span><span class="p">(</span><span class="n">wb</span><span class="o">.</span><span class="n">output_tasks</span><span class="p">))</span>
