@@ -68,7 +68,7 @@ Optional
 | ``dv_types``                                      | Dictionary of DV types for multiple DVs (e.g. dv_types = {'target': 2}).                                        |
 |                                                   | Allowed keys are: 'drug', 'target', 'complex', 'drug_tot' and 'target_tot'. (For TMDD models only)              |
 |                                                   | For more information see :ref:`here<dv_types>`.                                                                 |
-|                                                   | Default is None                                                                                                 |
+|                                                   | Default is None which means that all observations are treated as drug observations.                             |
 +---------------------------------------------------+-----------------------------------------------------------------------------------------------------------------+
 
 .. note::
@@ -78,7 +78,7 @@ Optional
 Strategy components
 ~~~~~~~~~~~~~~~~~~~
 
-For a description about the different model building strategies in AMD, see :ref:Strategy<strategy_amd>.
+For a description about the different model building strategies in AMD, see :ref:`Strategy<strategy_amd>`.
 This section will cover the aspects that are specific to TMDD models.
 
 Structural
@@ -110,12 +110,13 @@ If no structural covariates are specified, no default is used.
 
 **Modelsearch**
 
+In this step the best structural PK model is found.
 The settings that the AMD tool uses for the modelsearch subtool can be seen in the table below.
 
 +-------------------+----------------------------------------------------------------------------------------------------+
 | Argument          | Setting                                                                                            |
 +===================+====================================================================================================+
-| ``search_space``  | ``'search_space'`` (As defined in :ref:`AMD options<amd_tmdd_args>`)                               |
+| ``search_space``  | ``'search_space'`` (As defined in :ref:`AMD options<amd_args_common>`)                             |
 +-------------------+----------------------------------------------------------------------------------------------------+
 | ``algorithm``     | 'reduced_stepwise'                                                                                 |
 +-------------------+----------------------------------------------------------------------------------------------------+
@@ -126,7 +127,7 @@ The settings that the AMD tool uses for the modelsearch subtool can be seen in t
 | ``cutoff``        | None                                                                                               |
 +-------------------+----------------------------------------------------------------------------------------------------+
 
-If no search space is given by the user, the default search space is dependent on the ``administration`` argument
+If no search space is given by the user, the default search space is dependent on the ``administration`` argument.
 
 .. tabs::
 
@@ -157,11 +158,20 @@ If no search space is given by the user, the default search space is dependent o
           TRANSITS([0,1,3,10],*)
           PERIPHERALS([0,1,2])
     
+
+.. note::
+   Before modelsearch is run, the dataset of the model is filtered so that it only contains PK data (i.e. DVIDs smaller than 2).
+   Before running structsearch the dataset is replaced again with the original dataset containing all DVIDs.
+
 **Structsearch**
 
-The input model to the structsearch tool is the highest ranking model from modelsearch that has mixed-mm-fo elimination
+The input model to the structsearch tool is the highest ranking (PK) model from modelsearch that has mixed-mm-fo elimination
 (note that this model might not be the highest ranking overall). If no such model exists then the final model from modelsearch
-will be used regardless of elimination type.
+will be used regardless of the elimination type.
+The dataset of the input model is replaced with the original dataset containing all DVIDs.
+
+The extra model is the highest-ranking model that has the same structural features as the input model but with one less
+peripheral compartment. If no such model exists the extra model is set to ``None``.
 
 For a TMDD model, structsearch is run to determine the best structural model. All input arguments are specified by
 the user when initializing AMD.
@@ -225,7 +235,7 @@ The settings that the AMD tool uses for this subtool can be seen in the table be
 +-------------------------+----------------------------------------------------------------------------------------------+
 | Argument                | Setting                                                                                      |
 +=========================+==============================================================================================+
-| ``column``              | ``occasion`` (As defined in :ref:`AMD options<amd_tmdd_args>`)                               |
+| ``column``              | ``occasion`` (As defined in :ref:`AMD options<amd_args_common>`)                             |
 +-------------------------+----------------------------------------------------------------------------------------------+
 | ``list_of_parameters``  | None                                                                                         |
 +-------------------------+----------------------------------------------------------------------------------------------+
@@ -244,7 +254,7 @@ The settings that the AMD tool uses for this subtool can be seen in the table be
 +--------------------------+---------------------------------------------------------------------------------------------+
 | Argument                 | Setting                                                                                     |
 +==========================+=============================================================================================+
-| ``allometric_variable``  | ``allometric_variable`` (As defined in :ref:`AMD options<amd_tmdd_args>`)                   |
+| ``allometric_variable``  | ``allometric_variable`` (As defined in :ref:`AMD options<amd_args_common>`)                 |
 +--------------------------+---------------------------------------------------------------------------------------------+
 | ``reference_value``      | 70                                                                                          |
 +--------------------------+---------------------------------------------------------------------------------------------+
@@ -275,13 +285,12 @@ covsearch
             s0 -> s1
         }
 
-The settings that the AMD tool uses for this subtool can be seen in the table below. The effects are extracted from the
-search space.
+The settings that the AMD tool uses for this subtool can be seen in the table below.
 
 +-------------------+----------------------------------------------------------------------------------------------------+
 | Argument          | Setting                                                                                            |
 +===================+====================================================================================================+
-| ``effects``       | ``search_space`` (As defined in :ref:`AMD options<amd_tmdd_args>`)                                 |
+| ``search_space``  | ``search_space`` (As defined in :ref:`AMD options<amd_args_common>`)                               |
 +-------------------+----------------------------------------------------------------------------------------------------+
 | ``p_forward``     | 0.05                                                                                               |
 +-------------------+----------------------------------------------------------------------------------------------------+
