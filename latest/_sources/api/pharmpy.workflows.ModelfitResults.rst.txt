@@ -13,7 +13,7 @@ ModelfitResults
       ~ModelfitResults.correlation_matrix
       ~ModelfitResults.covariance_matrix
       ~ModelfitResults.covstep_successful
-      ~ModelfitResults.description
+      ~ModelfitResults.derivatives
       ~ModelfitResults.estimation_runtime
       ~ModelfitResults.estimation_runtime_iterations
       ~ModelfitResults.evaluation
@@ -28,7 +28,6 @@ ModelfitResults
       ~ModelfitResults.log_likelihood
       ~ModelfitResults.minimization_successful
       ~ModelfitResults.minimization_successful_iterations
-      ~ModelfitResults.name
       ~ModelfitResults.ofv
       ~ModelfitResults.ofv_iterations
       ~ModelfitResults.parameter_estimates
@@ -52,7 +51,7 @@ ModelfitResults
    .. autoattribute:: correlation_matrix
    .. autoattribute:: covariance_matrix
    .. autoattribute:: covstep_successful
-   .. autoattribute:: description
+   .. autoattribute:: derivatives
    .. autoattribute:: estimation_runtime
    .. autoattribute:: estimation_runtime_iterations
    .. autoattribute:: evaluation
@@ -67,7 +66,6 @@ ModelfitResults
    .. autoattribute:: log_likelihood
    .. autoattribute:: minimization_successful
    .. autoattribute:: minimization_successful_iterations
-   .. autoattribute:: name
    .. autoattribute:: ofv
    .. autoattribute:: ofv_iterations
    .. autoattribute:: parameter_estimates

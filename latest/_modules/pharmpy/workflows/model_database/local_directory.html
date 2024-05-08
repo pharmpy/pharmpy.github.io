@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.workflows.model_database.local_directory &#8212; Pharmpy 0.109.0 documentation</title>
+    <title>pharmpy.workflows.model_database.local_directory &#8212; Pharmpy 0.110.0 documentation</title>
   
   
   
@@ -28,7 +28,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="../../../../_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="../../../../_static/pygments.css?v=d10597a4" />
-    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="../../../../_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="../../../../_static/tabs.css?v=a5c4661c" />
@@ -39,8 +39,8 @@
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="../../../../_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="../../../../_static/documentation_options.js?v=81a70176"></script>
-    <script src="../../../../_static/doctools.js?v=888ff710"></script>
+    <script src="../../../../_static/documentation_options.js?v=dafc297f"></script>
+    <script src="../../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/thebelab-helper.js"></script>
     <script src="../../../../_static/tabs.js?v=3030b3cb"></script>
@@ -52,7 +52,7 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Apr 10, 2024"/>
+    <meta name="docbuild:last-update" content="May 08, 2024"/>
   </head>
   
   
@@ -125,8 +125,8 @@
     
     
     
-    <img src="../../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 0.109.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark" alt="Pharmpy 0.109.0 documentation - Home"/>`);</script>
+    <img src="../../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 0.110.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark" alt="Pharmpy 0.110.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -502,13 +502,14 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">Union</span>
 
-<span class="kn">from</span> <span class="nn">pharmpy.internals.df</span> <span class="kn">import</span> <span class="n">hash_df_fs</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fs.lock</span> <span class="kn">import</span> <span class="n">path_lock</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fs.path</span> <span class="kn">import</span> <span class="n">path_absolute</span>
 <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">DataInfo</span><span class="p">,</span> <span class="n">Model</span>
+<span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">write_csv</span><span class="p">,</span> <span class="n">write_model</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows.model_entry</span> <span class="kn">import</span> <span class="n">ModelEntry</span>
 <span class="kn">from</span> <span class="nn">pharmpy.workflows.results</span> <span class="kn">import</span> <span class="n">ModelfitResults</span><span class="p">,</span> <span class="n">read_results</span>
 
+<span class="kn">from</span> <span class="nn">..hashing</span> <span class="kn">import</span> <span class="n">ModelHash</span>
 <span class="kn">from</span> <span class="nn">.baseclass</span> <span class="kn">import</span> <span class="p">(</span>
     <span class="n">ModelSnapshot</span><span class="p">,</span>
     <span class="n">ModelTransaction</span><span class="p">,</span>
@@ -714,8 +715,9 @@ document.write(`
 <div class="viewcode-block" id="LocalModelDirectoryDatabase.snapshot">
 <a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalModelDirectoryDatabase.html#pharmpy.workflows.LocalModelDirectoryDatabase.snapshot">[docs]</a>
     <span class="nd">@contextmanager</span>
-    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">model_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">model_name</span>
+    <span class="k">def</span> <span class="nf">snapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">ModelEntry</span><span class="p">,</span> <span class="n">ModelHash</span><span class="p">]):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">ModelHash</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="n">model_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="n">destination</span> <span class="o">=</span> <span class="n">model_path</span> <span class="o">/</span> <span class="n">DIRECTORY_PHARMPY_METADATA</span>
         <span class="n">destination</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_read_lock</span><span class="p">():</span>
@@ -725,18 +727,15 @@ document.write(`
                 <span class="c1"># TODO: Finish pending transaction from journal if possible</span>
                 <span class="k">raise</span> <span class="n">PendingTransactionError</span><span class="p">()</span>
 
-            <span class="k">yield</span> <span class="n">LocalModelDirectoryDatabaseSnapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_name</span><span class="p">)</span></div>
+            <span class="k">yield</span> <span class="n">LocalModelDirectoryDatabaseSnapshot</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="LocalModelDirectoryDatabase.transaction">
 <a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalModelDirectoryDatabase.html#pharmpy.workflows.LocalModelDirectoryDatabase.transaction">[docs]</a>
     <span class="nd">@contextmanager</span>
-    <span class="k">def</span> <span class="nf">transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_or_model_entry</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">ModelEntry</span><span class="p">]):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_or_model_entry</span><span class="p">,</span> <span class="n">ModelEntry</span><span class="p">):</span>
-            <span class="n">model_name</span> <span class="o">=</span> <span class="n">model_or_model_entry</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="n">model_name</span> <span class="o">=</span> <span class="n">model_or_model_entry</span><span class="o">.</span><span class="n">name</span>
-        <span class="n">model_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">model_name</span>
+    <span class="k">def</span> <span class="nf">transaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">ModelEntry</span><span class="p">,</span> <span class="n">ModelHash</span><span class="p">]):</span>
+        <span class="n">key</span> <span class="o">=</span> <span class="n">ModelHash</span><span class="p">(</span><span class="n">obj</span><span class="p">)</span>
+        <span class="n">model_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">key</span><span class="p">)</span>
         <span class="n">destination</span> <span class="o">=</span> <span class="n">model_path</span> <span class="o">/</span> <span class="n">DIRECTORY_PHARMPY_METADATA</span>
         <span class="n">destination</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">with</span> <span class="bp">self</span><span class="o">.</span><span class="n">_write_lock</span><span class="p">():</span>
@@ -748,17 +747,10 @@ document.write(`
                 <span class="c1"># TODO: Finish pending transaction from journal if possible</span>
                 <span class="k">raise</span> <span class="n">PendingTransactionError</span><span class="p">()</span>
 
-            <span class="k">yield</span> <span class="n">LocalModelDirectoryDatabaseTransaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">model_or_model_entry</span><span class="p">)</span>
+            <span class="k">yield</span> <span class="n">LocalModelDirectoryDatabaseTransaction</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">)</span>
 
             <span class="c1"># NOTE: Commit transaction (only if no exception was raised)</span>
             <span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span></div>
-
-
-<div class="viewcode-block" id="LocalModelDirectoryDatabase.list_models">
-<a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalModelDirectoryDatabase.html#pharmpy.workflows.LocalModelDirectoryDatabase.list_models">[docs]</a>
-    <span class="k">def</span> <span class="nf">list_models</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">model_dir_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="ow">not</span> <span class="n">p</span><span class="o">.</span><span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">)]</span>
-        <span class="k">return</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">model_dir_names</span><span class="p">)</span></div>
 
 
     <span class="k">def</span> <span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -767,31 +759,19 @@ document.write(`
 
 
 <span class="k">class</span> <span class="nc">LocalModelDirectoryDatabaseTransaction</span><span class="p">(</span><span class="n">ModelTransaction</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
-        <span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span> <span class="n">LocalModelDirectoryDatabase</span><span class="p">,</span> <span class="n">model_or_model_entry</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">Model</span><span class="p">,</span> <span class="n">ModelEntry</span><span class="p">]</span>
-    <span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">database</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_or_model_entry</span><span class="p">,</span> <span class="n">ModelEntry</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model_entry</span> <span class="o">=</span> <span class="n">model_or_model_entry</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">model_or_model_entry</span><span class="p">,</span> <span class="n">Model</span><span class="p">):</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">model_entry</span> <span class="o">=</span> <span class="n">ModelEntry</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">model_or_model_entry</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Invalid type `model_or_model_entry`: got </span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">model_or_model_entry</span><span class="p">)</span><span class="si">}</span><span class="s1">, expected Model or ModelEntry&#39;</span>
-            <span class="p">)</span>
-
     <span class="k">def</span> <span class="nf">store_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">read_dataset_from_datainfo</span><span class="p">,</span> <span class="n">write_csv</span><span class="p">,</span> <span class="n">write_model</span>
+        <span class="k">if</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_entry</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot store model: No model attached to transaction&quot;</span><span class="p">)</span>
 
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_entry</span><span class="o">.</span><span class="n">model</span>
-        <span class="n">datasets_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">DIRECTORY_DATASETS</span>
+        <span class="n">datasets_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">DIRECTORY_DATASETS</span>
 
         <span class="c1"># NOTE: Get the hash of the dataset and list filenames with contents</span>
         <span class="c1"># matching this hash only</span>
-        <span class="n">h</span> <span class="o">=</span> <span class="n">hash_df_fs</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">)</span>
-        <span class="n">h_dir</span> <span class="o">=</span> <span class="n">datasets_path</span> <span class="o">/</span> <span class="n">DIRECTORY_INDEX</span> <span class="o">/</span> <span class="n">h</span>
-        <span class="n">h_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="k">for</span> <span class="n">hpath</span> <span class="ow">in</span> <span class="n">h_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+        <span class="n">h</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="o">.</span><span class="n">dataset_hash</span>
+        <span class="n">h_dir</span> <span class="o">=</span> <span class="n">datasets_path</span> <span class="o">/</span> <span class="n">DIRECTORY_INDEX</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">h_dir</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">hpath</span> <span class="o">=</span> <span class="nb">next</span><span class="p">(</span><span class="n">h_dir</span><span class="o">.</span><span class="n">iterdir</span><span class="p">())</span>
             <span class="c1"># NOTE: This variable holds a string similar to &quot;run1.csv&quot;</span>
             <span class="n">matching_model_filename</span> <span class="o">=</span> <span class="n">hpath</span><span class="o">.</span><span class="n">name</span>
             <span class="n">data_path</span> <span class="o">=</span> <span class="n">datasets_path</span> <span class="o">/</span> <span class="n">matching_model_filename</span>
@@ -800,50 +780,57 @@ document.write(`
             <span class="n">curdi</span> <span class="o">=</span> <span class="n">DataInfo</span><span class="o">.</span><span class="n">read_json</span><span class="p">(</span><span class="n">dipath</span><span class="p">)</span>
             <span class="c1"># NOTE: Paths are not compared here</span>
             <span class="k">if</span> <span class="n">curdi</span> <span class="o">==</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">:</span>
-                <span class="n">df</span> <span class="o">=</span> <span class="n">read_dataset_from_datainfo</span><span class="p">(</span><span class="n">curdi</span><span class="p">)</span>
-                <span class="k">if</span> <span class="n">df</span><span class="o">.</span><span class="n">equals</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">):</span>
-                    <span class="c1"># NOTE: Update datainfo path</span>
-                    <span class="n">datainfo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">curdi</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
-                    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">datainfo</span><span class="o">=</span><span class="n">datainfo</span><span class="p">)</span>
-                    <span class="k">break</span>
+                <span class="n">datainfo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">curdi</span><span class="o">.</span><span class="n">path</span><span class="p">)</span>
+                <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">datainfo</span><span class="o">=</span><span class="n">datainfo</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">model_filename</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.csv&#39;</span>
+            <span class="n">h_dir</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
-            <span class="c1"># NOTE: Create the index file at .datasets/.hash/&lt;hash&gt;/&lt;model_filename&gt;</span>
-            <span class="n">index_path</span> <span class="o">=</span> <span class="n">h_dir</span> <span class="o">/</span> <span class="n">model_filename</span>
+            <span class="n">highest</span> <span class="o">=</span> <span class="mi">0</span>
+            <span class="k">for</span> <span class="n">file</span> <span class="ow">in</span> <span class="n">datasets_path</span><span class="o">.</span><span class="n">iterdir</span><span class="p">():</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">file</span><span class="o">.</span><span class="n">name</span>
+                <span class="k">if</span> <span class="n">name</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;data&#39;</span><span class="p">)</span> <span class="ow">and</span> <span class="n">name</span><span class="o">.</span><span class="n">endswith</span><span class="p">(</span><span class="s1">&#39;.csv&#39;</span><span class="p">):</span>
+                    <span class="n">number</span> <span class="o">=</span> <span class="nb">int</span><span class="p">(</span><span class="n">name</span><span class="p">[</span><span class="mi">4</span><span class="p">:</span><span class="o">-</span><span class="mi">4</span><span class="p">])</span>  <span class="c1"># Remove data and .csv</span>
+                    <span class="k">if</span> <span class="n">number</span> <span class="o">&gt;</span> <span class="n">highest</span><span class="p">:</span>
+                        <span class="n">highest</span> <span class="o">=</span> <span class="n">number</span>
+
+            <span class="n">dataset_basename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;data</span><span class="si">{</span><span class="n">highest</span><span class="w"> </span><span class="o">+</span><span class="w"> </span><span class="mi">1</span><span class="si">}</span><span class="s1">&#39;</span>
+            <span class="n">dataset_filename</span> <span class="o">=</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">dataset_basename</span><span class="si">}</span><span class="s1">.csv&#39;</span>
+
+            <span class="c1"># NOTE: Create the index file at .datasets/.hash/&lt;hash&gt;/&lt;dataset_filename&gt;</span>
+            <span class="n">index_path</span> <span class="o">=</span> <span class="n">h_dir</span> <span class="o">/</span> <span class="n">dataset_filename</span>
             <span class="n">index_path</span><span class="o">.</span><span class="n">touch</span><span class="p">()</span>
 
-            <span class="n">data_path</span> <span class="o">=</span> <span class="n">path_absolute</span><span class="p">(</span><span class="n">datasets_path</span> <span class="o">/</span> <span class="n">model_filename</span><span class="p">)</span>
+            <span class="n">data_path</span> <span class="o">=</span> <span class="n">path_absolute</span><span class="p">(</span><span class="n">datasets_path</span> <span class="o">/</span> <span class="n">dataset_filename</span><span class="p">)</span>
             <span class="n">datainfo</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">path</span><span class="o">=</span><span class="n">data_path</span><span class="p">)</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">datainfo</span><span class="o">=</span><span class="n">datainfo</span><span class="p">)</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">write_csv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">data_path</span><span class="p">,</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
             <span class="c1"># NOTE: Write datainfo last so that we are &quot;sure&quot; dataset is there</span>
             <span class="c1"># if datainfo is there</span>
-            <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">datasets_path</span> <span class="o">/</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="s1">&#39;.datainfo&#39;</span><span class="p">))</span>
+            <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">to_json</span><span class="p">(</span><span class="n">datasets_path</span> <span class="o">/</span> <span class="p">(</span><span class="n">dataset_basename</span> <span class="o">+</span> <span class="s1">&#39;.datainfo&#39;</span><span class="p">))</span>
 
         <span class="c1"># NOTE: Write the model</span>
-        <span class="n">model_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">model</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">model_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
         <span class="n">model_path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-        <span class="n">write_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">model_path</span> <span class="o">/</span> <span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">filename_extension</span><span class="p">)),</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+        <span class="n">write_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">model_path</span> <span class="o">/</span> <span class="p">(</span><span class="s2">&quot;model&quot;</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">filename_extension</span><span class="p">),</span> <span class="n">force</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">model</span>
 
     <span class="k">def</span> <span class="nf">store_local_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">,</span> <span class="n">new_filename</span><span class="o">=</span><span class="kc">None</span><span class="p">):</span>
         <span class="k">if</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
-            <span class="n">destination</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_entry</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span>
+            <span class="n">destination</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
             <span class="n">destination</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">new_filename</span><span class="p">:</span>
                 <span class="n">destination</span> <span class="o">=</span> <span class="n">destination</span> <span class="o">/</span> <span class="n">new_filename</span>
             <span class="n">shutil</span><span class="o">.</span><span class="n">copy2</span><span class="p">(</span><span class="n">path</span><span class="p">,</span> <span class="n">destination</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">store_metadata</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">metadata</span><span class="p">):</span>
-        <span class="n">destination</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_entry</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="n">DIRECTORY_PHARMPY_METADATA</span>
+        <span class="n">destination</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span> <span class="o">/</span> <span class="n">DIRECTORY_PHARMPY_METADATA</span>
         <span class="n">destination</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">with</span> <span class="nb">open</span><span class="p">(</span><span class="n">destination</span> <span class="o">/</span> <span class="n">FILE_METADATA</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">as</span> <span class="n">f</span><span class="p">:</span>
             <span class="n">json</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">metadata</span><span class="p">,</span> <span class="n">f</span><span class="p">,</span> <span class="n">indent</span><span class="o">=</span><span class="mi">2</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">store_modelfit_results</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">destination</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_entry</span><span class="o">.</span><span class="n">model</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="n">DIRECTORY_PHARMPY_METADATA</span>
+        <span class="n">destination</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span> <span class="o">/</span> <span class="n">DIRECTORY_PHARMPY_METADATA</span>
         <span class="n">destination</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
         <span class="n">modelfit_results</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">model_entry</span><span class="o">.</span><span class="n">modelfit_results</span>
@@ -860,12 +847,8 @@ document.write(`
 
 
 <span class="k">class</span> <span class="nc">LocalModelDirectoryDatabaseSnapshot</span><span class="p">(</span><span class="n">ModelSnapshot</span><span class="p">):</span>
-    <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">database</span><span class="p">:</span> <span class="n">LocalModelDirectoryDatabase</span><span class="p">,</span> <span class="n">model_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">db</span> <span class="o">=</span> <span class="n">database</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="n">model_name</span>
-
     <span class="k">def</span> <span class="nf">retrieve_local_files</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">destination_path</span><span class="p">):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
         <span class="n">files</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">glob</span><span class="p">(</span><span class="s1">&#39;*&#39;</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">f</span> <span class="ow">in</span> <span class="n">files</span><span class="p">:</span>
             <span class="k">if</span> <span class="n">f</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
@@ -875,15 +858,13 @@ document.write(`
 
     <span class="k">def</span> <span class="nf">retrieve_file</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">filename</span><span class="p">):</span>
         <span class="c1"># Return path to file</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="n">filename</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span> <span class="o">/</span> <span class="n">filename</span>
         <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">()</span> <span class="ow">and</span> <span class="n">stat</span><span class="p">(</span><span class="n">path</span><span class="p">)</span><span class="o">.</span><span class="n">st_size</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">path</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">FileNotFoundError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Cannot retrieve </span><span class="si">{</span><span class="n">filename</span><span class="si">}</span><span class="s2"> for </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
     <span class="k">def</span> <span class="nf">retrieve_model</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="kn">from</span> <span class="nn">pharmpy.model</span> <span class="kn">import</span> <span class="n">Model</span>
-
         <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_find_full_model_path</span><span class="p">()</span>
 
         <span class="c1"># NOTE: This will guess the model type</span>
@@ -892,12 +873,12 @@ document.write(`
         <span class="k">return</span> <span class="n">model</span>
 
     <span class="k">def</span> <span class="nf">_find_full_model_path</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="n">extensions</span> <span class="o">=</span> <span class="p">[</span><span class="s1">&#39;.mod&#39;</span><span class="p">,</span> <span class="s1">&#39;.ctl&#39;</span><span class="p">]</span>
-        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span>
+        <span class="n">extensions</span> <span class="o">=</span> <span class="p">(</span><span class="s1">&#39;.mod&#39;</span><span class="p">,</span> <span class="s1">&#39;.ctl&#39;</span><span class="p">)</span>
+        <span class="n">root</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span>
         <span class="n">errors</span> <span class="o">=</span> <span class="p">[]</span>
 
         <span class="k">for</span> <span class="n">extension</span> <span class="ow">in</span> <span class="n">extensions</span><span class="p">:</span>
-            <span class="n">filename</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">+</span> <span class="n">extension</span>
+            <span class="n">filename</span> <span class="o">=</span> <span class="s2">&quot;model&quot;</span> <span class="o">+</span> <span class="n">extension</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">root</span> <span class="o">/</span> <span class="n">filename</span>
 
             <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
@@ -906,7 +887,7 @@ document.write(`
                 <span class="n">errors</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span>
-                <span class="sa">f</span><span class="s1">&#39;Could not find </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s1"> in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="si">}</span><span class="s1">.&#39;</span>
+                <span class="sa">f</span><span class="s1">&#39;Could not find model in </span><span class="si">{</span><span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="si">}</span><span class="s1">.&#39;</span>
                 <span class="sa">f</span><span class="s1">&#39; Looked up </span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="nb">map</span><span class="p">(</span><span class="k">lambda</span><span class="w"> </span><span class="n">p</span><span class="p">:</span><span class="w"> </span><span class="sa">f</span><span class="s2">&quot;`</span><span class="si">{</span><span class="n">p</span><span class="si">}</span><span class="s2">`&quot;</span><span class="p">,</span><span class="w"> </span><span class="n">errors</span><span class="p">))</span><span class="si">}</span><span class="s1">.&#39;</span>
             <span class="p">)</span>
 
@@ -921,8 +902,13 @@ document.write(`
         <span class="c1"># FIXME: The following does not work because deserialization of modelfit</span>
         <span class="c1"># results is not generic enough. We only use it to make the resume_tool</span>
         <span class="c1"># test pass.</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">db</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="bp">self</span><span class="o">.</span><span class="n">name</span> <span class="o">/</span> <span class="n">DIRECTORY_PHARMPY_METADATA</span> <span class="o">/</span> <span class="n">FILE_MODELFIT_RESULTS</span>
-        <span class="k">return</span> <span class="n">read_results</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">database</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="nb">str</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">key</span><span class="p">)</span> <span class="o">/</span> <span class="n">DIRECTORY_PHARMPY_METADATA</span> <span class="o">/</span> <span class="n">FILE_MODELFIT_RESULTS</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="k">return</span> <span class="n">read_results</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">None</span>
 
     <span class="k">def</span> <span class="nf">retrieve_model_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">retrieve_model</span><span class="p">()</span>
@@ -980,7 +966,7 @@ document.write(`
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>

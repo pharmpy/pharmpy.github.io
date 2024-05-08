@@ -125,6 +125,8 @@ We can then examine the NONMEM model code:
 .. pharmpy-execute::
     print_model_code(model_start)
 
+.. _modeling_transformations:
+
 ~~~~~~~~~~~~~~~~~~~~~~~~
 Modeling transformations
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -372,7 +374,6 @@ List of functions to change population parameters:
 * :py:func:`pharmpy.modeling.unconstrain_parameters`
 * :py:func:`pharmpy.modeling.unfix_parameters`
 * :py:func:`pharmpy.modeling.unfix_parameters_to`
-* :py:func:`pharmpy.modeling.update_inits`
 
 Error model
 ~~~~~~~~~~~~
@@ -426,7 +427,7 @@ function:
 
 .. pharmpy-execute::
     run1 = set_estimation_step(model_start, method='imp', keep_every_nth_iter=10)
-    run1.estimation_steps
+    run1.execution_steps
 
 If we then examine the model code:
 

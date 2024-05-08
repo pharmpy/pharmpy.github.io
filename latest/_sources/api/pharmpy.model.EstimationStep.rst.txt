@@ -11,8 +11,7 @@ EstimationStep
    .. autosummary::
 
       ~EstimationStep.auto
-      ~EstimationStep.epsilon_derivatives
-      ~EstimationStep.eta_derivatives
+      ~EstimationStep.derivatives
       ~EstimationStep.evaluation
       ~EstimationStep.interaction
       ~EstimationStep.isample
@@ -40,8 +39,7 @@ EstimationStep
    .. rubric:: Attributes Documentation
 
    .. autoattribute:: auto
-   .. autoattribute:: epsilon_derivatives
-   .. autoattribute:: eta_derivatives
+   .. autoattribute:: derivatives
    .. autoattribute:: evaluation
    .. autoattribute:: interaction
    .. autoattribute:: isample

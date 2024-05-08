@@ -10,15 +10,15 @@ Model
 
    .. autosummary::
 
+      ~Model.code
       ~Model.datainfo
       ~Model.dataset
       ~Model.dependent_variables
       ~Model.description
-      ~Model.estimation_steps
+      ~Model.execution_steps
       ~Model.filename_extension
       ~Model.initial_individual_estimates
       ~Model.internals
-      ~Model.model_code
       ~Model.name
       ~Model.observation_transformation
       ~Model.parameters
@@ -43,15 +43,15 @@ Model
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: code
    .. autoattribute:: datainfo
    .. autoattribute:: dataset
    .. autoattribute:: dependent_variables
    .. autoattribute:: description
-   .. autoattribute:: estimation_steps
+   .. autoattribute:: execution_steps
    .. autoattribute:: filename_extension
    .. autoattribute:: initial_individual_estimates
    .. autoattribute:: internals
-   .. autoattribute:: model_code
    .. autoattribute:: name
    .. autoattribute:: observation_transformation
    .. autoattribute:: parameters

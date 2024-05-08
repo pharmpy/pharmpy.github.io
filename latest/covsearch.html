@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>COVsearch &#8212; Pharmpy 0.109.0 documentation</title>
+    <title>COVsearch &#8212; Pharmpy 0.110.0 documentation</title>
   
   
   
@@ -29,7 +29,7 @@
 <link rel="preload" as="font" type="font/woff2" crossorigin href="_static/vendor/fontawesome/6.5.1/webfonts/fa-regular-400.woff2" />
 
     <link rel="stylesheet" type="text/css" href="_static/pygments.css?v=d10597a4" />
-    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=eafc0fe6" />
+    <link rel="stylesheet" type="text/css" href="_static/graphviz.css?v=fd3f3429" />
     <link rel="stylesheet" type="text/css" href="_static/jupyter-sphinx.css" />
     <link rel="stylesheet" type="text/css" href="_static/thebelab.css" />
     <link rel="stylesheet" type="text/css" href="_static/tabs.css?v=a5c4661c" />
@@ -40,8 +40,8 @@
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=8d27b9dea8ad943066ae" />
   <script src="_static/vendor/fontawesome/6.5.1/js/all.min.js?digest=8d27b9dea8ad943066ae"></script>
 
-    <script src="_static/documentation_options.js?v=81a70176"></script>
-    <script src="_static/doctools.js?v=888ff710"></script>
+    <script src="_static/documentation_options.js?v=dafc297f"></script>
+    <script src="_static/doctools.js?v=9a2dae69"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/thebelab-helper.js"></script>
     <script src="_static/tabs.js?v=3030b3cb"></script>
@@ -55,7 +55,7 @@
     <link rel="prev" title="IOVsearch" href="iovsearch.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Apr 10, 2024"/>
+    <meta name="docbuild:last-update" content="May 08, 2024"/>
   </head>
   
   
@@ -128,8 +128,8 @@
     
     
     
-    <img src="_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 0.109.0 documentation - Home"/>
-    <script>document.write(`<img src="_static/Pharmpy_logo_dark.svg" class="logo__image only-dark" alt="Pharmpy 0.109.0 documentation - Home"/>`);</script>
+    <img src="_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 0.110.0 documentation - Home"/>
+    <script>document.write(`<img src="_static/Pharmpy_logo_dark.svg" class="logo__image only-dark" alt="Pharmpy 0.110.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -481,6 +481,7 @@ document.write(`
 <li class="toctree-l2"><a class="reference internal" href="allometry.html">allometry - add allometric scaling</a></li>
 <li class="toctree-l2"><a class="reference internal" href="estmethod.html">estmethod - compare estimation methods and/or solvers</a></li>
 <li class="toctree-l2"><a class="reference internal" href="retries.html">Retries - Rerun a model with tweaked initial estimates</a></li>
+<li class="toctree-l2"><a class="reference internal" href="simulation.html">Simulation - Run a simulation</a></li>
 </ul>
 </li>
 <li class="toctree-l1"><a class="reference internal" href="modelfit.html">Model estimation and results</a></li>
@@ -661,6 +662,16 @@ for no maximum (default).</p></td>
 <tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">algorithm</span></code></p></td>
 <td><p>The search <a class="reference internal" href="#algorithm-covsearch"><span class="std std-ref">algorithm</span></a> to use
 (default is <cite>‘scm-forward-then-backward’</cite>)</p></td>
+</tr>
+<tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">max_eval</span></code></p></td>
+<td><p>Limit the number of function evaluations to 3.1 times that of the
+base model. Default is False.</p></td>
+</tr>
+<tr class="row-odd"><td><p><code class="docutils literal notranslate"><span class="pre">adaptive_scope_reduction</span></code></p></td>
+<td><p>Stash all non-significant parameter-covariate effects at each step in
+the forward search for later evaluation. As soon as all significant
+effects have been tested the stashed effects gets evaluated in a
+normal forward approach. Default is False</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">strictness</span></code></p></td>
 <td><p><a class="reference internal" href="strictness.html#strictness"><span class="std std-ref">Strictness</span></a> criteria for model selection.
@@ -856,6 +867,15 @@ filtration is done, a new “filtered_input_model” is created, otherwise the i
         s4 -&gt; s8
         s4 -&gt; s9
     }</p></object></div>
+<section id="adaptive-scope-reduction">
+<h3>Adaptive scope reduction<a class="headerlink" href="#adaptive-scope-reduction" title="Link to this heading">#</a></h3>
+<p>The adaptive scope reduction option integrates part of the SCM+ procedure within the covsearch tool. This option will
+modify the forward search such that only significant effects will be transferred to the next step. Insignificant effects
+are stored away. The number of possible steps in this search is dependent on the <code class="docutils literal notranslate"><span class="pre">max_steps</span></code> argument. With the resulting
+model from this search as input, a regular ‘scm-forward’ procedure is applied, using only the previously insignificant effects.
+The number of possible steps in this procedure is also determined by the <code class="docutils literal notranslate"><span class="pre">max_steps</span></code> argument.</p>
+<p>If ‘scm-forward-then-backward’ is used, a subsequent backward search will follow.</p>
+</section>
 </section>
 <section id="results">
 <h2>Results<a class="headerlink" href="#results" title="Link to this heading">#</a></h2>
@@ -4514,7 +4534,10 @@ of this table.</p>
 <li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#wildcards">Wildcards</a></li>
 </ul>
 </li>
-<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#algorithm">Algorithm</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#algorithm">Algorithm</a><ul class="nav section-nav flex-column">
+<li class="toc-h3 nav-item toc-entry"><a class="reference internal nav-link" href="#adaptive-scope-reduction">Adaptive scope reduction</a></li>
+</ul>
+</li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#results">Results</a></li>
 </ul>
   </nav></div>
@@ -4553,7 +4576,7 @@ of this table.</p>
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.2.6.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.3.7.
     <br/>
   </p>
 </div>
