@@ -33,7 +33,7 @@ project = 'Pharmpy'
 year = '2018-2024'
 authors = ['the Pharmpy development team']
 copyright = '{0}; {1}'.format(year, ', '.join(authors))
-version = release = '0.110.0'
+version = release = '1.0.0'
 html_show_sourcelink = False
 
 pygments_style = 'trac'
@@ -77,6 +77,7 @@ autodoc_typehints = 'none'
 graphviz_output_format = 'svg'
 
 import doctest
+doctest_show_success = False
 doctest_default_flags = doctest.NORMALIZE_WHITESPACE
 doctest_global_setup = '''
 import pandas as pd
