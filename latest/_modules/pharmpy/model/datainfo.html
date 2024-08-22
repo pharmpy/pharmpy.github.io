@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.datainfo &#8212; Pharmpy 1.1.0 documentation</title>
+    <title>pharmpy.model.datainfo &#8212; Pharmpy 1.2.0 documentation</title>
   
   
   
@@ -39,7 +39,7 @@
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=dfe6caa3a7d634c4db9b" />
   <script src="../../../_static/vendor/fontawesome/6.5.2/js/all.min.js?digest=dfe6caa3a7d634c4db9b"></script>
 
-    <script src="../../../_static/documentation_options.js?v=fc837d61"></script>
+    <script src="../../../_static/documentation_options.js?v=6efca38a"></script>
     <script src="../../../_static/doctools.js?v=9a2dae69"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -52,7 +52,7 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-    <meta name="docbuild:last-update" content="Jul 17, 2024"/>
+    <meta name="docbuild:last-update" content="Aug 22, 2024"/>
   </head>
   
   
@@ -128,8 +128,8 @@
     
     
     
-    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.1.0 documentation - Home"/>
-    <script>document.write(`<img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark" alt="Pharmpy 1.1.0 documentation - Home"/>`);</script>
+    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.2.0 documentation - Home"/>
+    <script>document.write(`<img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark" alt="Pharmpy 1.2.0 documentation - Home"/>`);</script>
   
   
 </a></div>
@@ -503,6 +503,7 @@ document.write(`
 <span class="kn">from</span> <span class="nn">pathlib</span> <span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span> <span class="nn">typing</span> <span class="kn">import</span> <span class="n">TYPE_CHECKING</span><span class="p">,</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">cast</span><span class="p">,</span> <span class="n">overload</span>
 
+<span class="kn">from</span> <span class="nn">pharmpy</span> <span class="kn">import</span> <span class="n">conf</span>
 <span class="kn">from</span> <span class="nn">pharmpy.basic</span> <span class="kn">import</span> <span class="n">TUnit</span><span class="p">,</span> <span class="n">Unit</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.fs.path</span> <span class="kn">import</span> <span class="n">path_absolute</span><span class="p">,</span> <span class="n">path_relative_to</span>
 <span class="kn">from</span> <span class="nn">pharmpy.internals.immutable</span> <span class="kn">import</span> <span class="n">Immutable</span><span class="p">,</span> <span class="n">frozenmapping</span>
@@ -1082,6 +1083,8 @@ document.write(`
 <span class="sd">        Path to dataset file</span>
 <span class="sd">    separator : str</span>
 <span class="sd">        Character or regexp separator for dataset</span>
+<span class="sd">    missing_data_token : str</span>
+<span class="sd">        Token for missing data</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
     <span class="k">def</span> <span class="fm">__init__</span><span class="p">(</span>
@@ -1089,10 +1092,15 @@ document.write(`
         <span class="n">columns</span><span class="p">:</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">ColumnInfo</span><span class="p">,</span> <span class="o">...</span><span class="p">]</span> <span class="o">=</span> <span class="p">(),</span>
         <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span>
+        <span class="n">missing_data_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span> <span class="o">=</span> <span class="n">columns</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_path</span> <span class="o">=</span> <span class="n">path</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_separator</span> <span class="o">=</span> <span class="n">separator</span>
+        <span class="k">if</span> <span class="n">missing_data_token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_missing_data_token</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">missing_data_token</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_missing_data_token</span> <span class="o">=</span> <span class="n">missing_data_token</span>
 
 <div class="viewcode-block" id="DataInfo.create">
 <a class="viewcode-back" href="../../../api/pharmpy.model.DataInfo.html#pharmpy.model.DataInfo.create">[docs]</a>
@@ -1102,13 +1110,15 @@ document.write(`
         <span class="n">columns</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="n">Sequence</span><span class="p">[</span><span class="n">ColumnInfo</span><span class="p">],</span> <span class="n">Sequence</span><span class="p">[</span><span class="nb">str</span><span class="p">]]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
         <span class="n">separator</span><span class="p">:</span> <span class="nb">str</span> <span class="o">=</span> <span class="s1">&#39;,&#39;</span><span class="p">,</span>
+        <span class="n">missing_data_token</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
-        <span class="k">if</span> <span class="n">columns</span> <span class="ow">and</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span>
-            <span class="nb">isinstance</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">ColumnInfo</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns</span>
-        <span class="p">):</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Argument `columns` need to consist of either type `str` or `ColumnInfo`&#39;</span>
-            <span class="p">)</span>
+        <span class="k">if</span> <span class="n">columns</span><span class="p">:</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">columns</span><span class="p">,</span> <span class="n">Sequence</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span><span class="s1">&#39;Argument `columns` must be iterable&#39;</span><span class="p">)</span>
+            <span class="k">if</span> <span class="ow">not</span> <span class="nb">all</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="n">ColumnInfo</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">TypeError</span><span class="p">(</span>
+                    <span class="s1">&#39;Argument `columns` need to consist of either type `str` or `ColumnInfo`&#39;</span>
+                <span class="p">)</span>
         <span class="k">if</span> <span class="n">columns</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">cols</span> <span class="o">=</span> <span class="p">()</span>
         <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="ow">and</span> <span class="nb">any</span><span class="p">(</span><span class="nb">isinstance</span><span class="p">(</span><span class="n">col</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">):</span>
@@ -1117,7 +1127,11 @@ document.write(`
             <span class="n">cols</span> <span class="o">=</span> <span class="n">cast</span><span class="p">(</span><span class="nb">tuple</span><span class="p">[</span><span class="n">ColumnInfo</span><span class="p">,</span> <span class="o">...</span><span class="p">],</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">columns</span><span class="p">))</span>
         <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">separator</span><span class="p">)</span></div>
+        <span class="k">if</span> <span class="n">missing_data_token</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">missing_data_token</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">missing_data_token</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">cols</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">separator</span><span class="p">,</span> <span class="n">missing_data_token</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">missing_data_token</span><span class="p">)</span>
+        <span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="DataInfo.replace">
@@ -1135,7 +1149,13 @@ document.write(`
         <span class="k">else</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_path</span>
         <span class="n">separator</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;separator&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_separator</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">DataInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span> <span class="n">separator</span><span class="o">=</span><span class="n">separator</span><span class="p">)</span></div>
+        <span class="n">missing_data_token</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;missing_data_token&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_missing_data_token</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">DataInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="n">path</span><span class="p">,</span>
+            <span class="n">separator</span><span class="o">=</span><span class="n">separator</span><span class="p">,</span>
+            <span class="n">missing_data_token</span><span class="o">=</span><span class="nb">str</span><span class="p">(</span><span class="n">missing_data_token</span><span class="p">),</span>
+        <span class="p">)</span></div>
 
 
     <span class="k">def</span> <span class="fm">__add__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">DataInfo</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">DataInfo</span><span class="p">:</span>
@@ -1209,6 +1229,12 @@ document.write(`
 
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_columns</span><span class="p">[</span><span class="bp">self</span><span class="o">.</span><span class="n">_getindex</span><span class="p">(</span><span class="n">index</span><span class="p">)]</span>
 
+    <span class="k">def</span> <span class="fm">__contains__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">value</span><span class="p">:</span> <span class="n">Any</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+        <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="bp">self</span><span class="p">:</span>
+            <span class="k">if</span> <span class="n">col</span> <span class="o">==</span> <span class="n">value</span> <span class="ow">or</span> <span class="n">col</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="n">value</span><span class="p">:</span>
+                <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">return</span> <span class="kc">False</span>
+
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Path</span><span class="p">]:</span>
 <span class="w">        </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Path of dataset file</span>
@@ -1230,6 +1256,11 @@ document.write(`
 <span class="sd">        string.</span>
 <span class="sd">        &quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_separator</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span> <span class="nf">missing_data_token</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Token for missing data&quot;&quot;&quot;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_missing_data_token</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span> <span class="nf">typeix</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">TypeIndexer</span><span class="p">:</span>
@@ -1452,7 +1483,14 @@ document.write(`
     <span class="nd">@classmethod</span>
     <span class="k">def</span> <span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">DataInfo</span><span class="p">:</span>
         <span class="n">columns</span> <span class="o">=</span> <span class="nb">tuple</span><span class="p">(</span><span class="n">ColumnInfo</span><span class="o">.</span><span class="n">from_dict</span><span class="p">(</span><span class="n">col</span><span class="p">)</span> <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;columns&#39;</span><span class="p">])</span>
-        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span> <span class="n">path</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">],</span> <span class="n">separator</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;separator&#39;</span><span class="p">])</span></div>
+        <span class="c1"># For backwards compatibility</span>
+        <span class="n">missing_data_token</span> <span class="o">=</span> <span class="n">d</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;missing_data_token&#39;</span><span class="p">,</span> <span class="n">conf</span><span class="o">.</span><span class="n">missing_data_token</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">columns</span><span class="o">=</span><span class="n">columns</span><span class="p">,</span>
+            <span class="n">path</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">],</span>
+            <span class="n">separator</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;separator&#39;</span><span class="p">],</span>
+            <span class="n">missing_data_token</span><span class="o">=</span><span class="n">missing_data_token</span><span class="p">,</span>
+        <span class="p">)</span></div>
 
 
     <span class="k">def</span> <span class="nf">_to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
@@ -1475,6 +1513,7 @@ document.write(`
             <span class="s2">&quot;columns&quot;</span><span class="p">:</span> <span class="n">a</span><span class="p">,</span>
             <span class="s2">&quot;path&quot;</span><span class="p">:</span> <span class="n">path</span><span class="p">,</span>
             <span class="s2">&quot;separator&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_separator</span><span class="p">,</span>
+            <span class="s2">&quot;missing_data_token&quot;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_missing_data_token</span><span class="p">,</span>
         <span class="p">}</span>
 
 <div class="viewcode-block" id="DataInfo.to_json">
@@ -1656,7 +1695,7 @@ document.write(`
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 7.4.5.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.0.2.
     <br/>
   </p>
 </div>

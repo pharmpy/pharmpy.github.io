@@ -14,6 +14,7 @@ DataInfo
       ~DataInfo.dv_column
       ~DataInfo.id_column
       ~DataInfo.idv_column
+      ~DataInfo.missing_data_token
       ~DataInfo.names
       ~DataInfo.path
       ~DataInfo.separator
@@ -44,6 +45,7 @@ DataInfo
    .. autoattribute:: dv_column
    .. autoattribute:: id_column
    .. autoattribute:: idv_column
+   .. autoattribute:: missing_data_token
    .. autoattribute:: names
    .. autoattribute:: path
    .. autoattribute:: separator
