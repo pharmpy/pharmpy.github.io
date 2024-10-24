@@ -20,6 +20,7 @@ Statements
 
    .. autosummary::
 
+      ~Statements.create
       ~Statements.dependencies
       ~Statements.direct_dependencies
       ~Statements.find_assignment
@@ -41,6 +42,7 @@ Statements
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: create
    .. automethod:: dependencies
    .. automethod:: direct_dependencies
    .. automethod:: find_assignment

@@ -10,7 +10,6 @@ Infusion
 
    .. autosummary::
 
-      ~Infusion.amount
       ~Infusion.duration
       ~Infusion.free_symbols
       ~Infusion.rate
@@ -27,7 +26,6 @@ Infusion
 
    .. rubric:: Attributes Documentation
 
-   .. autoattribute:: amount
    .. autoattribute:: duration
    .. autoattribute:: free_symbols
    .. autoattribute:: rate

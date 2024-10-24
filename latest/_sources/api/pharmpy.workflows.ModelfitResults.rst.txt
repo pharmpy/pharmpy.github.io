@@ -23,6 +23,7 @@ ModelfitResults
       ~ModelfitResults.gradients_iterations
       ~ModelfitResults.individual_estimates
       ~ModelfitResults.individual_estimates_covariance
+      ~ModelfitResults.individual_eta_samples
       ~ModelfitResults.individual_ofv
       ~ModelfitResults.log
       ~ModelfitResults.log_likelihood
@@ -61,6 +62,7 @@ ModelfitResults
    .. autoattribute:: gradients_iterations
    .. autoattribute:: individual_estimates
    .. autoattribute:: individual_estimates_covariance
+   .. autoattribute:: individual_eta_samples
    .. autoattribute:: individual_ofv
    .. autoattribute:: log
    .. autoattribute:: log_likelihood

@@ -22,7 +22,6 @@ default_context
       ~default_context.get_subcontext
       ~default_context.list_all_names
       ~default_context.list_all_subcontexts
-      ~default_context.log_message
       ~default_context.retrieve_annotation
       ~default_context.retrieve_common_options
       ~default_context.retrieve_key
@@ -32,6 +31,7 @@ default_context
       ~default_context.retrieve_results
       ~default_context.store_annotation
       ~default_context.store_key
+      ~default_context.store_message
       ~default_context.store_metadata
       ~default_context.store_results
 
@@ -47,7 +47,6 @@ default_context
    .. automethod:: get_subcontext
    .. automethod:: list_all_names
    .. automethod:: list_all_subcontexts
-   .. automethod:: log_message
    .. automethod:: retrieve_annotation
    .. automethod:: retrieve_common_options
    .. automethod:: retrieve_key
@@ -57,5 +56,6 @@ default_context
    .. automethod:: retrieve_results
    .. automethod:: store_annotation
    .. automethod:: store_key
+   .. automethod:: store_message
    .. automethod:: store_metadata
    .. automethod:: store_results

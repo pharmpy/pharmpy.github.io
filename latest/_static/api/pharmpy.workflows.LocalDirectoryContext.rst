@@ -22,7 +22,6 @@ LocalDirectoryContext
       ~LocalDirectoryContext.get_subcontext
       ~LocalDirectoryContext.list_all_names
       ~LocalDirectoryContext.list_all_subcontexts
-      ~LocalDirectoryContext.log_message
       ~LocalDirectoryContext.retrieve_annotation
       ~LocalDirectoryContext.retrieve_common_options
       ~LocalDirectoryContext.retrieve_key
@@ -32,6 +31,7 @@ LocalDirectoryContext
       ~LocalDirectoryContext.retrieve_results
       ~LocalDirectoryContext.store_annotation
       ~LocalDirectoryContext.store_key
+      ~LocalDirectoryContext.store_message
       ~LocalDirectoryContext.store_metadata
       ~LocalDirectoryContext.store_results
 
@@ -47,7 +47,6 @@ LocalDirectoryContext
    .. automethod:: get_subcontext
    .. automethod:: list_all_names
    .. automethod:: list_all_subcontexts
-   .. automethod:: log_message
    .. automethod:: retrieve_annotation
    .. automethod:: retrieve_common_options
    .. automethod:: retrieve_key
@@ -57,5 +56,6 @@ LocalDirectoryContext
    .. automethod:: retrieve_results
    .. automethod:: store_annotation
    .. automethod:: store_key
+   .. automethod:: store_message
    .. automethod:: store_metadata
    .. automethod:: store_results

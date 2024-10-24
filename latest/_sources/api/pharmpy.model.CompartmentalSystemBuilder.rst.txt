@@ -11,10 +11,12 @@ CompartmentalSystemBuilder
    .. autosummary::
 
       ~CompartmentalSystemBuilder.add_compartment
+      ~CompartmentalSystemBuilder.add_dose
       ~CompartmentalSystemBuilder.add_flow
       ~CompartmentalSystemBuilder.find_compartment
       ~CompartmentalSystemBuilder.move_dose
       ~CompartmentalSystemBuilder.remove_compartment
+      ~CompartmentalSystemBuilder.remove_dose
       ~CompartmentalSystemBuilder.remove_flow
       ~CompartmentalSystemBuilder.set_bioavailability
       ~CompartmentalSystemBuilder.set_dose
@@ -24,10 +26,12 @@ CompartmentalSystemBuilder
    .. rubric:: Methods Documentation
 
    .. automethod:: add_compartment
+   .. automethod:: add_dose
    .. automethod:: add_flow
    .. automethod:: find_compartment
    .. automethod:: move_dose
    .. automethod:: remove_compartment
+   .. automethod:: remove_dose
    .. automethod:: remove_flow
    .. automethod:: set_bioavailability
    .. automethod:: set_dose

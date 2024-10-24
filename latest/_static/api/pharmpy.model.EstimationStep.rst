@@ -13,6 +13,7 @@ EstimationStep
       ~EstimationStep.auto
       ~EstimationStep.derivatives
       ~EstimationStep.evaluation
+      ~EstimationStep.individual_eta_samples
       ~EstimationStep.interaction
       ~EstimationStep.isample
       ~EstimationStep.keep_every_nth_iter
@@ -41,6 +42,7 @@ EstimationStep
    .. autoattribute:: auto
    .. autoattribute:: derivatives
    .. autoattribute:: evaluation
+   .. autoattribute:: individual_eta_samples
    .. autoattribute:: interaction
    .. autoattribute:: isample
    .. autoattribute:: keep_every_nth_iter

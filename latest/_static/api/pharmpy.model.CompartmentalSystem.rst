@@ -25,7 +25,6 @@ CompartmentalSystem
 
    .. autosummary::
 
-      ~CompartmentalSystem.atoms
       ~CompartmentalSystem.create
       ~CompartmentalSystem.find_compartment
       ~CompartmentalSystem.find_compartment_or_raise
@@ -57,7 +56,6 @@ CompartmentalSystem
 
    .. rubric:: Methods Documentation
 
-   .. automethod:: atoms
    .. automethod:: create
    .. automethod:: find_compartment
    .. automethod:: find_compartment_or_raise
