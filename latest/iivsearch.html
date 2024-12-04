@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>IIVsearch &#8212; Pharmpy 1.3.0 documentation</title>
+    <title>IIVsearch &#8212; Pharmpy 1.4.0 documentation</title>
   
   
   
@@ -43,7 +43,7 @@
   <link rel="preload" as="script" href="_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
 <link rel="preload" as="script" href="_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
 
-    <script src="_static/documentation_options.js?v=1f29e9d3"></script>
+    <script src="_static/documentation_options.js?v=9172181d"></script>
     <script src="_static/doctools.js?v=9bcbadda"></script>
     <script src="_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="_static/thebelab-helper.js"></script>
@@ -58,8 +58,8 @@
     <link rel="prev" title="Drug metabolite" href="drug_metabolite.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.0" />
-    <meta name="docbuild:last-update" content="Oct 24, 2024"/>
+  <meta name="docsearch:version" content="1.4.0" />
+    <meta name="docbuild:last-update" content="Dec 04, 2024"/>
   </head>
   
   
@@ -123,8 +123,8 @@
     
     
     
-    <img src="_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.3.0 documentation - Home"/>
-    <img src="_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.3.0 documentation - Home"/>
+    <img src="_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.4.0 documentation - Home"/>
+    <img src="_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.4.0 documentation - Home"/>
   
   
 </a></div>
@@ -623,7 +623,8 @@ See <a class="reference internal" href="#iiv-strategies-iivsearch"><span class="
 on, e.g. OFV (default is BIC)</p></td>
 </tr>
 <tr class="row-even"><td><p><code class="docutils literal notranslate"><span class="pre">linearize</span></code></p></td>
-<td><p>Decide wether or not to linearize model before starting the search.
+<td><p>Decide whether or not to <a class="reference internal" href="#linearize-iivsearch"><span class="std std-ref">linearize</span></a>
+model before starting the search.
 See <a class="reference internal" href="linearize_tool.html#linearize"><span class="std std-ref">linearization tool</span></a> for more. Default value
 is False.</p></td>
 </tr>
@@ -751,16 +752,14 @@ is chosen for the next step, updating the initial values once more.</p>
 <p>The candidate models are then compared using the specified rank type and if no better model can be found, the algorithm stops.</p>
 <p>However, this algorithm is not supported to run for the covariance structure search and thusly it will use the algorithm <code class="docutils literal notranslate"><span class="pre">top_down_exhaustive</span></code>
 for this step.</p>
-<div class="graphviz"><object data="_images/graphviz-23970c6c520d36bf7046d8304a5bc6d5da69219d.svg" type="image/svg+xml" class="graphviz">
+<div class="graphviz"><object data="_images/graphviz-acebc5ff49124745354cded8065927f88b92475b.svg" type="image/svg+xml" class="graphviz">
 <p class="warning">digraph BST {
         node [fontname=&quot;Arial&quot;];
-        base [label=&quot;Base model&quot;]
         s1 [label=&quot;[CL]&quot;]
         s2 [label=&quot;[CL,V]&quot;]
         s3 [label=&quot;[CL,MAT]&quot;]
         s4 [label=&quot;[CL,V,MAT]&quot;]
 
-        base -&gt; s1
         s1 -&gt; s2
         s1 -&gt; s3
         s2 -&gt; s4
@@ -828,6 +827,65 @@ if the user does not want to use the default. The following rank functions are a
 </table>
 </div>
 <p>Information about how BIC is calculated can be found in <a class="reference internal" href="api/pharmpy.modeling.calculate_bic.html#pharmpy.modeling.calculate_bic" title="pharmpy.modeling.calculate_bic"><code class="xref py py-func docutils literal notranslate"><span class="pre">pharmpy.modeling.calculate_bic()</span></code></a>.</p>
+</section>
+<section id="linearization-approach">
+<span id="linearize-iivsearch"></span><h2>Linearization approach<a class="headerlink" href="#linearization-approach" title="Link to this heading">#</a></h2>
+<p>IIVsearch can be run with linearization. In this approach, a base model with all possible IIVs will first be created and
+run in order to get the derivatives. Next, IIVsearch calls the linearize tool to linearize and run the model. All
+subsequent candidate models in IIVsearch will be linearized and estimated. Once the best model of these candidates
+have been selected, a delinearized version of the best candidate is created and estimated.</p>
+<div class="graphviz"><object data="_images/graphviz-d097b13f0432821b33fd0127b2f5be0b127320ae.svg" type="image/svg+xml" class="graphviz">
+<p class="warning">digraph G {
+  draw [
+    label = &quot;Input model&quot;;
+    shape = rect;
+  ];
+  derivative [
+    label = &quot;Add IIVs for derivatives&quot;;
+    shape = rect;
+  ];
+  linearize [
+      label = &quot;Linearize model&quot;;
+      shape = rect;
+  ]
+  cands [
+      label = &quot;Create linearized candidates&quot;;
+      shape = rect;
+  ]
+  best_cand [
+      label = &quot;Select best linearized model and delinearize&quot;;
+      shape = rect;
+  ]
+  better [
+      label = &quot;Better than input model?&quot;;
+      shape = rect;
+  ]
+  select_lin [
+      label = &quot;Select input&quot;;
+      shape = rect;
+  ]
+  select_input [
+      label = &quot;Select candidate&quot;;
+      shape = rect;
+  ]
+  done [
+      label = &quot;Best model&quot;;
+      shape = rect;
+  ]
+
+  draw -&gt; derivative;
+  derivative -&gt; linearize[label = &quot;Fit model&quot;];
+  linearize -&gt; cands[label = &quot;Fit model&quot;];
+  cands -&gt; best_cand[label = &quot;Fit models&quot;];
+  best_cand -&gt; better[label = &quot;Fit model&quot;];
+
+  better -&gt; select_input[label = &quot;Yes&quot;];
+  better -&gt; select_lin [label = &quot;No&quot;];
+
+  select_input -&gt; done;
+  select_lin -&gt; done;
+
+}</p></object></div>
 </section>
 <section id="the-iivsearch-results">
 <h2>The IIVsearch results<a class="headerlink" href="#the-iivsearch-results" title="Link to this heading">#</a></h2>
@@ -1313,6 +1371,7 @@ See <code class="xref py py-func docutils literal notranslate"><span class="pre"
 </li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#adding-iiv-to-the-start-model">Adding IIV to the start model</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#comparing-and-ranking-candidates">Comparing and ranking candidates</a></li>
+<li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#linearization-approach">Linearization approach</a></li>
 <li class="toc-h2 nav-item toc-entry"><a class="reference internal nav-link" href="#the-iivsearch-results">The IIVsearch results</a></li>
 </ul>
   </nav></div>

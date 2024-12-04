@@ -24,6 +24,7 @@ Context
       ~Context.get_model_context_path
       ~Context.get_parent_context
       ~Context.get_subcontext
+      ~Context.has_completed
       ~Context.list_all_names
       ~Context.list_all_subcontexts
       ~Context.log_error
@@ -62,6 +63,7 @@ Context
    .. automethod:: get_model_context_path
    .. automethod:: get_parent_context
    .. automethod:: get_subcontext
+   .. automethod:: has_completed
    .. automethod:: list_all_names
    .. automethod:: list_all_subcontexts
    .. automethod:: log_error

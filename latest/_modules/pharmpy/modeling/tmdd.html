@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.tmdd &#8212; Pharmpy 1.3.0 documentation</title>
+    <title>pharmpy.modeling.tmdd &#8212; Pharmpy 1.4.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=26a4bc78f4c0ddb94549" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=26a4bc78f4c0ddb94549" />
 
-    <script src="../../../_static/documentation_options.js?v=1f29e9d3"></script>
+    <script src="../../../_static/documentation_options.js?v=9172181d"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -53,8 +53,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.3.0" />
-    <meta name="docbuild:last-update" content="Oct 24, 2024"/>
+  <meta name="docsearch:version" content="1.4.0" />
+    <meta name="docbuild:last-update" content="Dec 04, 2024"/>
   </head>
   
   
@@ -118,8 +118,8 @@
     
     
     
-    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.3.0 documentation - Home"/>
-    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.3.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.4.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.4.0 documentation - Home"/>
   
   
 </a></div>
@@ -481,6 +481,7 @@
     <span class="n">CompartmentalSystem</span><span class="p">,</span>
     <span class="n">CompartmentalSystemBuilder</span><span class="p">,</span>
     <span class="n">Model</span><span class="p">,</span>
+    <span class="n">get_and_check_odes</span><span class="p">,</span>
     <span class="n">output</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span> <span class="nn">pharmpy.modeling</span> <span class="kn">import</span> <span class="n">get_central_volume_and_clearance</span>
@@ -497,7 +498,11 @@
 <div class="viewcode-block" id="set_tmdd">
 <a class="viewcode-back" href="../../../api/pharmpy.modeling.set_tmdd.html#pharmpy.modeling.set_tmdd">[docs]</a>
 <span class="k">def</span> <span class="nf">set_tmdd</span><span class="p">(</span>
-    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="n">TMDD_TYPE</span><span class="p">],</span> <span class="n">dv_types</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="n">DV_TYPES</span><span class="p">],</span> <span class="nb">int</span><span class="p">]]</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="nb">type</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;full&#39;</span><span class="p">,</span> <span class="s1">&#39;ib&#39;</span><span class="p">,</span> <span class="s1">&#39;cr&#39;</span><span class="p">,</span> <span class="s1">&#39;crib&#39;</span><span class="p">,</span> <span class="s1">&#39;qss&#39;</span><span class="p">,</span> <span class="s1">&#39;wagner&#39;</span><span class="p">,</span> <span class="s1">&#39;mmapp&#39;</span><span class="p">],</span>
+    <span class="n">dv_types</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span>
+        <span class="nb">dict</span><span class="p">[</span><span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;drug&#39;</span><span class="p">,</span> <span class="s1">&#39;drug_tot&#39;</span><span class="p">,</span> <span class="s1">&#39;target&#39;</span><span class="p">,</span> <span class="s1">&#39;target_tot&#39;</span><span class="p">,</span> <span class="s1">&#39;complex&#39;</span><span class="p">],</span> <span class="nb">int</span><span class="p">]</span>
+    <span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
 <span class="p">):</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Sets target mediated drug disposition</span>
 
@@ -539,12 +544,12 @@
     <span class="k">if</span> <span class="n">dv_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
         <span class="n">_validate_dv_types</span><span class="p">(</span><span class="n">dv_types</span><span class="p">)</span>
 
-    <span class="nb">type</span> <span class="o">=</span> <span class="nb">type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+    <span class="n">uptype</span> <span class="o">=</span> <span class="nb">type</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">_replace_trivial_redefinitions</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">set_first_order_elimination</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
-    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">get_and_check_odes</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
     <span class="n">central</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">central_compartment</span>
     <span class="n">cb</span> <span class="o">=</span> <span class="n">CompartmentalSystemBuilder</span><span class="p">(</span><span class="n">odes</span><span class="p">)</span>
 
@@ -557,7 +562,7 @@
 
     <span class="n">y_symbol</span> <span class="o">=</span> <span class="n">_get_y_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;FULL&quot;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">uptype</span> <span class="o">==</span> <span class="s2">&quot;FULL&quot;</span><span class="p">:</span>
         <span class="n">model</span><span class="p">,</span> <span class="n">kon</span><span class="p">,</span> <span class="n">koff</span><span class="p">,</span> <span class="n">kdeg</span> <span class="o">=</span> <span class="n">_create_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;KON&#39;</span><span class="p">,</span> <span class="s1">&#39;KOFF&#39;</span><span class="p">,</span> <span class="s1">&#39;KDEG&#39;</span><span class="p">])</span>
         <span class="n">target_comp</span><span class="p">,</span> <span class="n">complex_comp</span> <span class="o">=</span> <span class="n">_create_compartments</span><span class="p">(</span><span class="n">cb</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;TARGET&#39;</span><span class="p">,</span> <span class="s1">&#39;COMPLEX&#39;</span><span class="p">])</span>
         <span class="n">ksyn</span><span class="p">,</span> <span class="n">ksyn_ass</span> <span class="o">=</span> <span class="n">_create_ksyn</span><span class="p">()</span>
@@ -573,7 +578,7 @@
 
         <span class="n">before</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">ksyn_ass</span>
         <span class="n">after</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
-    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;IB&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">uptype</span> <span class="o">==</span> <span class="s2">&quot;IB&quot;</span><span class="p">:</span>
         <span class="n">model</span><span class="p">,</span> <span class="n">kdeg</span><span class="p">,</span> <span class="n">kon</span> <span class="o">=</span> <span class="n">_create_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;KDEG&#39;</span><span class="p">,</span> <span class="s1">&#39;KON&#39;</span><span class="p">])</span>
         <span class="n">target_comp</span><span class="p">,</span> <span class="n">complex_comp</span> <span class="o">=</span> <span class="n">_create_compartments</span><span class="p">(</span><span class="n">cb</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;TARGET&#39;</span><span class="p">,</span> <span class="s1">&#39;COMPLEX&#39;</span><span class="p">])</span>
         <span class="n">ksyn</span><span class="p">,</span> <span class="n">ksyn_ass</span> <span class="o">=</span> <span class="n">_create_ksyn</span><span class="p">()</span>
@@ -586,7 +591,7 @@
 
         <span class="n">before</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span> <span class="o">+</span> <span class="n">ksyn_ass</span>
         <span class="n">after</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
-    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;CR&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">uptype</span> <span class="o">==</span> <span class="s2">&quot;CR&quot;</span><span class="p">:</span>
         <span class="n">model</span><span class="p">,</span> <span class="n">kon</span><span class="p">,</span> <span class="n">koff</span> <span class="o">=</span> <span class="n">_create_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;KON&#39;</span><span class="p">,</span> <span class="s1">&#39;KOFF&#39;</span><span class="p">])</span>
         <span class="n">complex_comp</span> <span class="o">=</span> <span class="n">_create_compartments</span><span class="p">(</span><span class="n">cb</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;COMPLEX&#39;</span><span class="p">])</span>
 
@@ -596,7 +601,7 @@
 
         <span class="n">before</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span>
         <span class="n">after</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
-    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;CRIB&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">uptype</span> <span class="o">==</span> <span class="s2">&quot;CRIB&quot;</span><span class="p">:</span>
         <span class="n">model</span><span class="p">,</span> <span class="n">kon</span> <span class="o">=</span> <span class="n">_create_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;KON&#39;</span><span class="p">])</span>
         <span class="n">complex_comp</span> <span class="o">=</span> <span class="n">_create_compartments</span><span class="p">(</span><span class="n">cb</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;COMPLEX&#39;</span><span class="p">])</span>
 
@@ -606,7 +611,7 @@
 
         <span class="n">before</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">before_odes</span>
         <span class="n">after</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
-    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s2">&quot;QSS&quot;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">uptype</span> <span class="o">==</span> <span class="s2">&quot;QSS&quot;</span><span class="p">:</span>
         <span class="n">model</span><span class="p">,</span> <span class="n">kdc</span><span class="p">,</span> <span class="n">kdeg</span> <span class="o">=</span> <span class="n">_create_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;KDC&#39;</span><span class="p">,</span> <span class="s1">&#39;KDEG&#39;</span><span class="p">])</span>
         <span class="n">target_comp</span> <span class="o">=</span> <span class="n">_create_compartments</span><span class="p">(</span><span class="n">cb</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;TARGET&#39;</span><span class="p">])</span>
 
@@ -713,7 +718,7 @@
             <span class="n">after</span> <span class="o">=</span> <span class="n">after</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">y_symbol</span><span class="p">,</span> <span class="n">ipred</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;More than 2 peripheral compartments are not supported.&#39;</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;WAGNER&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">uptype</span> <span class="o">==</span> <span class="s1">&#39;WAGNER&#39;</span><span class="p">:</span>
         <span class="n">model</span><span class="p">,</span> <span class="n">km</span> <span class="o">=</span> <span class="n">_create_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;KM&#39;</span><span class="p">])</span>
 
         <span class="n">kel</span> <span class="o">=</span> <span class="n">odes</span><span class="o">.</span><span class="n">get_flow</span><span class="p">(</span><span class="n">central</span><span class="p">,</span> <span class="n">output</span><span class="p">)</span>
@@ -780,7 +785,7 @@
         <span class="n">after</span> <span class="o">=</span> <span class="n">lafree_final</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
         <span class="n">ipred</span> <span class="o">=</span> <span class="n">lafreef</span> <span class="o">/</span> <span class="n">vc</span>
         <span class="n">after</span> <span class="o">=</span> <span class="n">after</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">y_symbol</span><span class="p">,</span> <span class="n">ipred</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;MMAPP&#39;</span><span class="p">:</span>
+    <span class="k">elif</span> <span class="n">uptype</span> <span class="o">==</span> <span class="s1">&#39;MMAPP&#39;</span><span class="p">:</span>
         <span class="n">model</span><span class="p">,</span> <span class="n">km</span><span class="p">,</span> <span class="n">kdeg</span> <span class="o">=</span> <span class="n">_create_parameters</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;KM&#39;</span><span class="p">,</span> <span class="s1">&#39;KDEG&#39;</span><span class="p">])</span>
         <span class="n">target_comp</span> <span class="o">=</span> <span class="n">_create_compartments</span><span class="p">(</span><span class="n">cb</span><span class="p">,</span> <span class="p">[</span><span class="s1">&#39;TARGET&#39;</span><span class="p">])</span>
         <span class="n">ksyn</span><span class="p">,</span> <span class="n">ksyn_ass</span> <span class="o">=</span> <span class="n">_create_ksyn</span><span class="p">()</span>
@@ -800,18 +805,14 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown TMDD type &quot;</span><span class="si">{</span><span class="nb">type</span><span class="si">}</span><span class="s1">&quot;.&#39;</span><span class="p">)</span>
 
     <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">before</span> <span class="o">+</span> <span class="n">CompartmentalSystem</span><span class="p">(</span><span class="n">cb</span><span class="p">)</span> <span class="o">+</span> <span class="n">after</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;CR&#39;</span><span class="p">,</span> <span class="s1">&#39;CRIB&#39;</span><span class="p">,</span> <span class="s1">&#39;WAGNER&#39;</span><span class="p">,</span> <span class="s1">&#39;MMAPP&#39;</span><span class="p">):</span>
+    <span class="k">if</span> <span class="n">uptype</span> <span class="ow">not</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;CR&#39;</span><span class="p">,</span> <span class="s1">&#39;CRIB&#39;</span><span class="p">,</span> <span class="s1">&#39;WAGNER&#39;</span><span class="p">,</span> <span class="s1">&#39;MMAPP&#39;</span><span class="p">):</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">set_initial_condition</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;TARGET&quot;</span><span class="p">,</span> <span class="n">r_0</span> <span class="o">*</span> <span class="n">vc</span><span class="p">)</span>
-    <span class="k">if</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;MMAPP&#39;</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">uptype</span> <span class="o">==</span> <span class="s1">&#39;MMAPP&#39;</span><span class="p">:</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">set_initial_condition</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;TARGET&quot;</span><span class="p">,</span> <span class="n">r_0</span><span class="p">)</span>
 
     <span class="c1"># Multiple DVs:</span>
     <span class="k">if</span> <span class="n">dv_types</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;No dataset connected to model.&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s1">&#39;dvid&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">types</span> <span class="ow">and</span> <span class="s1">&#39;DVID&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;DVID column in dataset is needed when using dv_types.&quot;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">type</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;FULL&#39;</span><span class="p">,</span> <span class="s1">&#39;IB&#39;</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">uptype</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;FULL&#39;</span><span class="p">,</span> <span class="s1">&#39;IB&#39;</span><span class="p">):</span>
             <span class="k">if</span> <span class="s1">&#39;drug_tot&#39;</span> <span class="ow">in</span> <span class="n">dv_types</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">new_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">central</span><span class="o">.</span><span class="n">amount</span> <span class="o">+</span> <span class="n">complex_comp</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span> <span class="o">/</span> <span class="n">vc</span>
                 <span class="n">after</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
@@ -842,7 +843,7 @@
                 <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
                     <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">+</span> <span class="n">ytargettot</span><span class="p">,</span> <span class="n">dependent_variables</span><span class="o">=</span><span class="n">dvs</span>
                 <span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;QSS&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">uptype</span> <span class="o">==</span> <span class="s1">&#39;QSS&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="s1">&#39;drug_tot&#39;</span> <span class="ow">in</span> <span class="n">dv_types</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">new_y</span> <span class="o">=</span> <span class="n">central</span><span class="o">.</span><span class="n">amount</span> <span class="o">/</span> <span class="n">vc</span>
                 <span class="n">after</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
@@ -873,7 +874,7 @@
                 <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
                     <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">+</span> <span class="n">ytargettot</span><span class="p">,</span> <span class="n">dependent_variables</span><span class="o">=</span><span class="n">dvs</span>
                 <span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;MMAPP&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">uptype</span> <span class="o">==</span> <span class="s1">&#39;MMAPP&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="s1">&#39;target&#39;</span> <span class="ow">in</span> <span class="n">dv_types</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">y_target</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;Y_TARGET&quot;</span><span class="p">)</span>
                 <span class="n">ytarget</span> <span class="o">=</span> <span class="n">Assignment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">y_target</span><span class="p">,</span> <span class="n">target_comp</span><span class="o">.</span><span class="n">amount</span> <span class="o">/</span> <span class="n">vc</span><span class="p">)</span>
@@ -888,7 +889,7 @@
                 <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
                     <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">+</span> <span class="n">ytargettot</span><span class="p">,</span> <span class="n">dependent_variables</span><span class="o">=</span><span class="n">dvs</span>
                 <span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">type</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;CR&#39;</span><span class="p">,</span> <span class="s1">&#39;CRIB&#39;</span><span class="p">):</span>
+        <span class="k">elif</span> <span class="n">uptype</span> <span class="ow">in</span> <span class="p">(</span><span class="s1">&#39;CR&#39;</span><span class="p">,</span> <span class="s1">&#39;CRIB&#39;</span><span class="p">):</span>
             <span class="k">if</span> <span class="s1">&#39;drug_tot&#39;</span> <span class="ow">in</span> <span class="n">dv_types</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">new_y</span> <span class="o">=</span> <span class="p">(</span><span class="n">central</span><span class="o">.</span><span class="n">amount</span> <span class="o">+</span> <span class="n">complex_comp</span><span class="o">.</span><span class="n">amount</span><span class="p">)</span> <span class="o">/</span> <span class="n">vc</span>
                 <span class="n">after</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
@@ -903,7 +904,7 @@
                 <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
                     <span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">+</span> <span class="n">ycomplex</span><span class="p">,</span> <span class="n">dependent_variables</span><span class="o">=</span><span class="n">dvs</span>
                 <span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">type</span> <span class="o">==</span> <span class="s1">&#39;WAGNER&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">uptype</span> <span class="o">==</span> <span class="s1">&#39;WAGNER&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="s1">&#39;drug_tot&#39;</span> <span class="ow">in</span> <span class="n">dv_types</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
                 <span class="n">new_y</span> <span class="o">=</span> <span class="n">central</span><span class="o">.</span><span class="n">amount</span> <span class="o">/</span> <span class="n">vc</span>
                 <span class="n">after</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span>
@@ -929,8 +930,17 @@
         <span class="k">if</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;Y_TOTTARGET&#39;</span><span class="p">)</span> <span class="ow">in</span> <span class="nb">list</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="p">):</span>
             <span class="n">model</span> <span class="o">=</span> <span class="n">set_proportional_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="n">dv_types</span><span class="p">[</span><span class="s1">&#39;target_tot&#39;</span><span class="p">])</span>
 
-        <span class="n">dvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">dv</span> <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="s1">&#39;DVID in @dvs&#39;</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="k">try</span><span class="p">:</span>
+                <span class="n">dvid</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;dvid&#39;</span><span class="p">]</span>
+            <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
+                <span class="c1"># FIXME: Should be enough to look in datainfo</span>
+                <span class="k">if</span> <span class="s1">&#39;DVID&#39;</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">columns</span><span class="p">:</span>
+                    <span class="n">dvid</span> <span class="o">=</span> <span class="s1">&#39;DVID&#39;</span>
+                <span class="k">else</span><span class="p">:</span>
+                    <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;DVID column in dataset is needed when using dv_types.&quot;</span><span class="p">)</span>
+            <span class="n">dvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">dv</span> <span class="k">for</span> <span class="n">dv</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">values</span><span class="p">()]</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="o">.</span><span class="n">query</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">dvid</span><span class="si">}</span><span class="s1"> in @dvs&#39;</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
