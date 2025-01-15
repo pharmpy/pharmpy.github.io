@@ -19,6 +19,7 @@ Context
 
       ~Context.abort_workflow
       ~Context.call_workflow
+      ~Context.create_rng
       ~Context.create_subcontext
       ~Context.exists
       ~Context.get_model_context_path
@@ -58,6 +59,7 @@ Context
 
    .. automethod:: abort_workflow
    .. automethod:: call_workflow
+   .. automethod:: create_rng
    .. automethod:: create_subcontext
    .. automethod:: exists
    .. automethod:: get_model_context_path

@@ -27,6 +27,7 @@ Statements
       ~Statements.find_assignment_index
       ~Statements.from_dict
       ~Statements.full_expression
+      ~Statements.get_assignment
       ~Statements.reassign
       ~Statements.remove_symbol_definitions
       ~Statements.subs
@@ -49,6 +50,7 @@ Statements
    .. automethod:: find_assignment_index
    .. automethod:: from_dict
    .. automethod:: full_expression
+   .. automethod:: get_assignment
    .. automethod:: reassign
    .. automethod:: remove_symbol_definitions
    .. automethod:: subs
