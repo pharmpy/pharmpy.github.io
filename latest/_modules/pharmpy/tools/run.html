@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.run &#8212; Pharmpy 1.5.0 documentation</title>
+    <title>pharmpy.tools.run &#8212; Pharmpy 1.6.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=e0a75244"></script>
+    <script src="../../../_static/documentation_options.js?v=72d88caf"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -53,8 +53,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.5.0" />
-    <meta name="docbuild:last-update" content="Jan 15, 2025"/>
+  <meta name="docsearch:version" content="1.6.0" />
+    <meta name="docbuild:last-update" content="Feb 10, 2025"/>
   </head>
   
   
@@ -118,8 +118,8 @@
     
     
     
-    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.5.0 documentation - Home"/>
-    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.5.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.6.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.6.0 documentation - Home"/>
   
   
 </a></div>
@@ -513,6 +513,7 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.tools.psn_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_results</span> <span class="k">as</span> <span class="n">psn_create_results</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">Results</span><span class="p">,</span> <span class="n">Workflow</span><span class="p">,</span> <span class="n">execute_workflow</span><span class="p">,</span> <span class="n">split_common_options</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.contexts</span><span class="w"> </span><span class="kn">import</span> <span class="n">Context</span><span class="p">,</span> <span class="n">LocalDirectoryContext</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.dispatchers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dispatcher</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.model_database</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelDatabase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.model_entry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelEntry</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.results</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelfitResults</span><span class="p">,</span> <span class="n">mfr</span>
@@ -688,12 +689,12 @@
 
     <span class="n">tool_metadata</span> <span class="o">=</span> <span class="n">create_metadata</span><span class="p">(</span>
         <span class="n">database</span><span class="o">=</span><span class="n">ctx</span><span class="p">,</span>
-        <span class="n">dispatcher</span><span class="o">=</span><span class="n">dispatcher</span><span class="p">,</span>
         <span class="n">tool_name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span>
         <span class="n">tool_func</span><span class="o">=</span><span class="n">create_workflow</span><span class="p">,</span>
         <span class="n">args</span><span class="o">=</span><span class="n">args</span><span class="p">,</span>
         <span class="n">tool_options</span><span class="o">=</span><span class="n">tool_options</span><span class="p">,</span>
         <span class="n">common_options</span><span class="o">=</span><span class="n">common_options</span><span class="p">,</span>
+        <span class="n">dispatching_options</span><span class="o">=</span><span class="n">dispatching_options</span><span class="p">,</span>
     <span class="p">)</span>
 
     <span class="n">ctx</span><span class="o">.</span><span class="n">store_metadata</span><span class="p">(</span><span class="n">tool_metadata</span><span class="p">)</span>
@@ -736,16 +737,17 @@
 
 <span class="k">def</span><span class="w"> </span><span class="nf">create_metadata</span><span class="p">(</span>
     <span class="n">database</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span>
-    <span class="n">dispatcher</span><span class="p">,</span>
     <span class="n">tool_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
     <span class="n">tool_func</span><span class="p">,</span>
     <span class="n">args</span><span class="p">:</span> <span class="n">Sequence</span><span class="p">,</span>
     <span class="n">tool_options</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
     <span class="n">common_options</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
+    <span class="n">dispatching_options</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">],</span>
 <span class="p">):</span>
     <span class="n">tool_metadata</span> <span class="o">=</span> <span class="n">_create_metadata_tool</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">tool_name</span><span class="p">,</span> <span class="n">tool_func</span><span class="p">,</span> <span class="n">args</span><span class="p">,</span> <span class="n">tool_options</span><span class="p">)</span>
-    <span class="n">setup_metadata</span> <span class="o">=</span> <span class="n">_create_metadata_common</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">,</span> <span class="n">tool_name</span><span class="p">,</span> <span class="n">common_options</span><span class="p">)</span>
+    <span class="n">setup_metadata</span> <span class="o">=</span> <span class="n">_create_metadata_common</span><span class="p">(</span><span class="n">database</span><span class="p">,</span> <span class="n">tool_name</span><span class="p">,</span> <span class="n">common_options</span><span class="p">)</span>
     <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;common_options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">setup_metadata</span>
+    <span class="n">tool_metadata</span><span class="p">[</span><span class="s1">&#39;dispatching_options&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dispatching_options</span>
 
     <span class="k">return</span> <span class="n">tool_metadata</span>
 
@@ -909,10 +911,9 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">_create_metadata_common</span><span class="p">(</span>
-    <span class="n">database</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="n">dispatcher</span><span class="p">,</span> <span class="n">toolname</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">common_options</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
+    <span class="n">database</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="n">toolname</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">common_options</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span>
 <span class="p">):</span>
     <span class="n">setup_metadata</span> <span class="o">=</span> <span class="p">{}</span>
-    <span class="n">setup_metadata</span><span class="p">[</span><span class="s1">&#39;dispatcher&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">dispatcher</span><span class="o">.</span><span class="vm">__name__</span>
     <span class="c1"># FIXME: Naming of workflows/tools should be consistent (db and input name of tool)</span>
     <span class="n">setup_metadata</span><span class="p">[</span><span class="s1">&#39;context&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="p">{</span>
         <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="nb">type</span><span class="p">(</span><span class="n">database</span><span class="p">)</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
@@ -977,32 +978,23 @@
 
 
 <span class="k">def</span><span class="w"> </span><span class="nf">get_run_setup</span><span class="p">(</span><span class="n">dispatching_options</span><span class="p">,</span> <span class="n">common_options</span><span class="p">,</span> <span class="n">toolname</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Any</span><span class="p">,</span> <span class="n">Context</span><span class="p">]:</span>
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">dispatcher</span> <span class="o">=</span> <span class="n">dispatching_options</span><span class="p">[</span><span class="s1">&#39;dispatcher&#39;</span><span class="p">]</span>
-    <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_dispatcher</span>
-
-        <span class="n">dispatcher</span> <span class="o">=</span> <span class="n">default_dispatcher</span>
+    <span class="c1"># FIXME: Currently only one dispatcher</span>
+    <span class="n">dispatcher</span> <span class="o">=</span> <span class="n">Dispatcher</span><span class="o">.</span><span class="n">select_dispatcher</span><span class="p">(</span><span class="kc">None</span><span class="p">)</span>
 
     <span class="n">ctx</span> <span class="o">=</span> <span class="n">dispatching_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;context&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
     <span class="k">if</span> <span class="n">ctx</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
         <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">default_context</span>
 
-        <span class="n">broadcaster</span> <span class="o">=</span> <span class="n">dispatching_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;broadcaster&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">common_path</span> <span class="o">=</span> <span class="n">dispatching_options</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;path&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="k">if</span> <span class="n">common_path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">dispatching_options</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">])</span>
-            <span class="n">ctx</span> <span class="o">=</span> <span class="n">default_context</span><span class="p">(</span>
-                <span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">,</span> <span class="n">common_options</span><span class="o">=</span><span class="n">common_options</span><span class="p">,</span> <span class="n">broadcaster</span><span class="o">=</span><span class="n">broadcaster</span>
-            <span class="p">)</span>
+            <span class="n">ctx</span> <span class="o">=</span> <span class="n">default_context</span><span class="p">(</span><span class="n">path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">n</span> <span class="o">=</span> <span class="mi">1</span>
             <span class="k">while</span> <span class="kc">True</span><span class="p">:</span>
                 <span class="n">name</span> <span class="o">=</span> <span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">toolname</span><span class="si">}{</span><span class="n">n</span><span class="si">}</span><span class="s2">&quot;</span>
                 <span class="k">if</span> <span class="ow">not</span> <span class="n">default_context</span><span class="o">.</span><span class="n">exists</span><span class="p">(</span><span class="n">name</span><span class="p">):</span>
-                    <span class="n">ctx</span> <span class="o">=</span> <span class="n">default_context</span><span class="p">(</span>
-                        <span class="n">name</span><span class="p">,</span> <span class="n">common_options</span><span class="o">=</span><span class="n">common_options</span><span class="p">,</span> <span class="n">broadcaster</span><span class="o">=</span><span class="n">broadcaster</span>
-                    <span class="p">)</span>
+                    <span class="n">ctx</span> <span class="o">=</span> <span class="n">default_context</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
                     <span class="k">break</span>
                 <span class="n">n</span> <span class="o">+=</span> <span class="mi">1</span>
 

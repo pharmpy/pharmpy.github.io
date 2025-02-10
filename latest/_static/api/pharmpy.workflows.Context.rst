@@ -10,7 +10,9 @@ Context
 
    .. autosummary::
 
+      ~Context.broadcaster
       ~Context.context_path
+      ~Context.dispatcher
       ~Context.model_database
 
    .. rubric:: Methods Summary
@@ -52,7 +54,9 @@ Context
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: broadcaster
    .. autoattribute:: context_path
+   .. autoattribute:: dispatcher
    .. autoattribute:: model_database
 
    .. rubric:: Methods Documentation

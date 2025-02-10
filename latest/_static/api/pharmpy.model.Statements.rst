@@ -14,6 +14,7 @@ Statements
       ~Statements.before_odes
       ~Statements.error
       ~Statements.free_symbols
+      ~Statements.lhs_symbols
       ~Statements.ode_system
 
    .. rubric:: Methods Summary
@@ -39,6 +40,7 @@ Statements
    .. autoattribute:: before_odes
    .. autoattribute:: error
    .. autoattribute:: free_symbols
+   .. autoattribute:: lhs_symbols
    .. autoattribute:: ode_system
 
    .. rubric:: Methods Documentation

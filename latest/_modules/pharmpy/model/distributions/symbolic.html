@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.model.distributions.symbolic &#8212; Pharmpy 1.5.0 documentation</title>
+    <title>pharmpy.model.distributions.symbolic &#8212; Pharmpy 1.6.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=e0a75244"></script>
+    <script src="../../../../_static/documentation_options.js?v=72d88caf"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/thebelab-helper.js"></script>
@@ -53,8 +53,8 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.5.0" />
-    <meta name="docbuild:last-update" content="Jan 15, 2025"/>
+  <meta name="docsearch:version" content="1.6.0" />
+    <meta name="docbuild:last-update" content="Feb 10, 2025"/>
   </head>
   
   
@@ -118,8 +118,8 @@
     
     
     
-    <img src="../../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.5.0 documentation - Home"/>
-    <img src="../../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.5.0 documentation - Home"/>
+    <img src="../../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.6.0 documentation - Home"/>
+    <img src="../../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.6.0 documentation - Home"/>
   
   
 </a></div>
@@ -482,8 +482,9 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">pharmpy.internals.unicode</span><span class="w"> </span><span class="k">as</span><span class="w"> </span><span class="nn">unicode</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.basic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Expr</span><span class="p">,</span> <span class="n">Matrix</span><span class="p">,</span> <span class="n">TExpr</span><span class="p">,</span> <span class="n">TSymbol</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.internals.immutable</span><span class="w"> </span><span class="kn">import</span> <span class="n">Immutable</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.internals.immutable</span><span class="w"> </span><span class="kn">import</span> <span class="n">Immutable</span><span class="p">,</span> <span class="n">frozenmapping</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">.numeric</span><span class="w"> </span><span class="kn">import</span> <span class="n">FiniteDistribution</span> <span class="k">as</span> <span class="n">NumericFiniteDistribution</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.numeric</span><span class="w"> </span><span class="kn">import</span> <span class="n">MultivariateNormalDistribution</span> <span class="k">as</span> <span class="n">NumericMultivariateNormalDistribution</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.numeric</span><span class="w"> </span><span class="kn">import</span> <span class="n">NormalDistribution</span> <span class="k">as</span> <span class="n">NumericNormalDistribution</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.numeric</span><span class="w"> </span><span class="kn">import</span> <span class="n">NumericDistribution</span>
@@ -542,8 +543,12 @@
         <span class="k">pass</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
+        <span class="c1"># NOTE: This needs to be overridden for joint distributions</span>
+        <span class="k">return</span> <span class="mi">1</span>
+
     <span class="nd">@abstractmethod</span>
-    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Distribution</span><span class="p">:</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">item</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Distribution</span><span class="p">:</span>
         <span class="k">pass</span>
 
     <span class="nd">@property</span>
@@ -709,32 +714,6 @@
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="n">e</span><span class="p">)</span></div>
 
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">):</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-            <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
-                <span class="n">index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
-                    <span class="nb">range</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">step</span> <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">step</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
-                <span class="p">)</span>
-                <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
-                    <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-
-            <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">Collection</span><span class="p">):</span>
-                <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">index</span> <span class="ow">and</span> <span class="mi">0</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">index</span><span class="p">):</span>
-                    <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-
-            <span class="k">else</span><span class="p">:</span>
-                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-
-        <span class="k">return</span> <span class="bp">self</span>
-
 <div class="viewcode-block" id="NormalDistribution.get_variance">
 <a class="viewcode-back" href="../../../../api/pharmpy.model.NormalDistribution.html#pharmpy.model.NormalDistribution.get_variance">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_variance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Expr</span><span class="p">:</span>
@@ -752,6 +731,9 @@
             <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">((</span><span class="n">name1</span><span class="p">,</span> <span class="n">name2</span><span class="p">))</span></div>
 
 
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Distribution</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_getitem_single</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
     <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">NormalDistribution</span><span class="p">):</span>
             <span class="k">return</span> <span class="bp">NotImplemented</span>
@@ -761,9 +743,6 @@
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mean</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_mean</span>
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variance</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_variance</span>
         <span class="p">)</span>
-
-    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
-        <span class="k">return</span> <span class="mi">1</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_level</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_mean</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variance</span><span class="p">))</span>
@@ -1040,7 +1019,7 @@
             <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_variance</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_variance</span>
         <span class="p">)</span>
 
-    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+    <span class="k">def</span><span class="w"> </span><span class="fm">__len__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">int</span><span class="p">:</span>
         <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_names</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
@@ -1150,6 +1129,215 @@
 
 
 
+<div class="viewcode-block" id="FiniteDistribution">
+<a class="viewcode-back" href="../../../../api/pharmpy.model.FiniteDistribution.html#pharmpy.model.FiniteDistribution">[docs]</a>
+<span class="k">class</span><span class="w"> </span><span class="nc">FiniteDistribution</span><span class="p">(</span><span class="n">Distribution</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;A finite discrete distribution</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of the random variable</span>
+<span class="sd">    level : str</span>
+<span class="sd">        Name of the variability level</span>
+<span class="sd">    probabilities : frozenmapping[int, Expr]</span>
+<span class="sd">        Probabilities for each value</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.model import FiniteDistribution, Parameter</span>
+<span class="sd">    &gt;&gt;&gt; mixprob = Parameter.create(&#39;MIXPROB&#39;, 0.1)</span>
+<span class="sd">    &gt;&gt;&gt; dist = FiniteDistribution.create(&quot;MIX&quot;, &quot;IIV&quot;, {1: mixprob.symbol, 2: 1 - mixprob.symbol})</span>
+<span class="sd">    &gt;&gt;&gt; dist</span>
+<span class="sd">    MIX ~ Finite({P(1) = MIXPROB, P(2) = 1 - MIXPROB})</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__init__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">:</span> <span class="n">frozenmapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_level</span> <span class="o">=</span> <span class="n">level</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span> <span class="o">=</span> <span class="n">probabilities</span>
+
+<div class="viewcode-block" id="FiniteDistribution.create">
+<a class="viewcode-back" href="../../../../api/pharmpy.model.FiniteDistribution.html#pharmpy.model.FiniteDistribution.create">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">create</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">level</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Union</span><span class="p">[</span><span class="n">Expr</span><span class="p">,</span> <span class="nb">str</span><span class="p">]]):</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">level</span><span class="o">.</span><span class="n">upper</span><span class="p">()</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">Expr</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">probabilities</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">probs</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="FiniteDistribution.replace">
+<a class="viewcode-back" href="../../../../api/pharmpy.model.FiniteDistribution.html#pharmpy.model.FiniteDistribution.replace">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">replace</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="o">**</span><span class="n">kwargs</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">FiniteDistribution</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Replace properties and create a new FiniteDistribution&quot;&quot;&quot;</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;name&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span>
+        <span class="n">level</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;level&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_level</span><span class="p">)</span>
+        <span class="n">probabilities</span> <span class="o">=</span> <span class="n">kwargs</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;mean&#39;</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span><span class="p">)</span>
+        <span class="n">new</span> <span class="o">=</span> <span class="n">FiniteDistribution</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">level</span><span class="p">,</span> <span class="n">probabilities</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">new</span></div>
+
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">names</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="o">...</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,)</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">level</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_level</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">probabilities</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">frozenmapping</span><span class="p">[</span><span class="nb">int</span><span class="p">,</span> <span class="n">Expr</span><span class="p">]:</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">mean</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Expr</span><span class="p">:</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="n">n</span><span class="p">)</span> <span class="o">*</span> <span class="n">expr</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">variance</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Expr</span><span class="p">:</span>
+        <span class="n">mean</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">mean</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">x</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+            <span class="n">s</span> <span class="o">+=</span> <span class="p">(</span><span class="n">x</span> <span class="o">-</span> <span class="n">mean</span><span class="p">)</span> <span class="o">**</span> <span class="n">Expr</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">*</span> <span class="n">expr</span>
+        <span class="k">return</span> <span class="n">s</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">free_symbols</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">Expr</span><span class="p">]:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Free symbols including random variable itself&quot;&quot;&quot;</span>
+        <span class="n">symbs</span> <span class="o">=</span> <span class="p">{</span><span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)}</span>
+        <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">symbs</span> <span class="o">|=</span> <span class="n">expr</span><span class="o">.</span><span class="n">free_symbols</span>
+        <span class="k">return</span> <span class="n">symbs</span>
+
+<div class="viewcode-block" id="FiniteDistribution.subs">
+<a class="viewcode-back" href="../../../../api/pharmpy.model.FiniteDistribution.html#pharmpy.model.FiniteDistribution.subs">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">subs</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">TExpr</span><span class="p">,</span> <span class="n">TExpr</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">FiniteDistribution</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Substitute expressions</span>
+
+<span class="sd">        Parameters</span>
+<span class="sd">        ----------</span>
+<span class="sd">        d : dict</span>
+<span class="sd">            Dictionary of from: to pairs for substitution</span>
+
+<span class="sd">        Examples</span>
+<span class="sd">        --------</span>
+<span class="sd">        &gt;&gt;&gt; import sympy</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.basic import Expr</span>
+<span class="sd">        &gt;&gt;&gt; from pharmpy.model import FiniteDistribution, Parameter</span>
+<span class="sd">        &gt;&gt;&gt; mixprob = Parameter.create(&#39;MIXPROB&#39;, 0.1)</span>
+<span class="sd">        &gt;&gt;&gt; dist = FiniteDistribution.create(&quot;MIX&quot;, &quot;IIV&quot;, {1: mixprob.symbol, 2: 1 - mixprob.symbol})</span>
+<span class="sd">        &gt;&gt;&gt; dist</span>
+<span class="sd">        MIX ~ Finite({P(1) = MIXPROB, P(2) = 1 - MIXPROB})</span>
+<span class="sd">        &gt;&gt;&gt; dist = dist.subs({mixprob.symbol: Expr.symbol(&quot;NEWSYMBOL&quot;)})</span>
+<span class="sd">        &gt;&gt;&gt; dist</span>
+<span class="sd">        MIX ~ Finite({P(1) = NEWSYMBOL, P(2) = 1 - NEWSYMBOL})</span>
+
+<span class="sd">        &quot;&quot;&quot;</span>
+        <span class="n">newprobs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">newprobs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">d</span><span class="p">)</span>
+        <span class="n">name</span> <span class="o">=</span> <span class="n">_subs_name</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> <span class="n">d</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">FiniteDistribution</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_level</span><span class="p">,</span> <span class="n">frozenmapping</span><span class="p">(</span><span class="n">newprobs</span><span class="p">))</span></div>
+
+
+<div class="viewcode-block" id="FiniteDistribution.evalf">
+<a class="viewcode-back" href="../../../../api/pharmpy.model.FiniteDistribution.html#pharmpy.model.FiniteDistribution.evalf">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">evalf</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">parameters</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="n">TSymbol</span><span class="p">,</span> <span class="nb">float</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="n">NumericDistribution</span><span class="p">:</span>
+        <span class="n">numprobs</span> <span class="o">=</span> <span class="p">{}</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">numprobs</span><span class="p">[</span><span class="n">n</span><span class="p">]</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="n">expr</span><span class="o">.</span><span class="n">subs</span><span class="p">(</span><span class="n">parameters</span><span class="p">))</span>
+        <span class="k">return</span> <span class="n">NumericFiniteDistribution</span><span class="p">(</span><span class="n">numprobs</span><span class="p">)</span></div>
+
+
+<div class="viewcode-block" id="FiniteDistribution.get_variance">
+<a class="viewcode-back" href="../../../../api/pharmpy.model.FiniteDistribution.html#pharmpy.model.FiniteDistribution.get_variance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_variance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Expr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name</span> <span class="o">!=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variance</span></div>
+
+
+<div class="viewcode-block" id="FiniteDistribution.get_covariance">
+<a class="viewcode-back" href="../../../../api/pharmpy.model.FiniteDistribution.html#pharmpy.model.FiniteDistribution.get_covariance">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_covariance</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name1</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">name2</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Expr</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">name1</span> <span class="o">==</span> <span class="n">name2</span> <span class="o">==</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">variance</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">((</span><span class="n">name1</span><span class="p">,</span> <span class="n">name2</span><span class="p">))</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__eq__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">other</span><span class="p">:</span> <span class="n">Any</span><span class="p">):</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">other</span><span class="p">,</span> <span class="n">FiniteDistribution</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">NotImplemented</span>
+        <span class="k">return</span> <span class="p">(</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_name</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_level</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_level</span>
+            <span class="ow">and</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span> <span class="o">==</span> <span class="n">other</span><span class="o">.</span><span class="n">_probabilities</span>
+        <span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__getitem__</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Distribution</span><span class="p">:</span>
+        <span class="k">return</span> <span class="n">_getitem_single</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">index</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__hash__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="k">return</span> <span class="nb">hash</span><span class="p">((</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_level</span><span class="p">,</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span><span class="p">))</span>
+
+<div class="viewcode-block" id="FiniteDistribution.to_dict">
+<a class="viewcode-back" href="../../../../api/pharmpy.model.FiniteDistribution.html#pharmpy.model.FiniteDistribution.to_dict">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">to_dict</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">expr</span><span class="o">.</span><span class="n">serialize</span><span class="p">()</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="p">{</span>
+            <span class="s1">&#39;class&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="vm">__class__</span><span class="o">.</span><span class="vm">__name__</span><span class="p">,</span>
+            <span class="s1">&#39;name&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">,</span>
+            <span class="s1">&#39;level&#39;</span><span class="p">:</span> <span class="bp">self</span><span class="o">.</span><span class="n">_level</span><span class="p">,</span>
+            <span class="s1">&#39;probabilities&#39;</span><span class="p">:</span> <span class="n">probs</span><span class="p">,</span>
+        <span class="p">}</span></div>
+
+
+<div class="viewcode-block" id="FiniteDistribution.from_dict">
+<a class="viewcode-back" href="../../../../api/pharmpy.model.FiniteDistribution.html#pharmpy.model.FiniteDistribution.from_dict">[docs]</a>
+    <span class="nd">@classmethod</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">from_dict</span><span class="p">(</span><span class="bp">cls</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]):</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="p">{</span><span class="n">n</span><span class="p">:</span> <span class="n">Expr</span><span class="o">.</span><span class="n">deserialize</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span> <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="n">d</span><span class="p">[</span><span class="s1">&#39;probabilities&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">items</span><span class="p">()}</span>
+        <span class="k">return</span> <span class="bp">cls</span><span class="p">(</span>
+            <span class="n">name</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;name&#39;</span><span class="p">],</span>
+            <span class="n">level</span><span class="o">=</span><span class="n">d</span><span class="p">[</span><span class="s1">&#39;level&#39;</span><span class="p">],</span>
+            <span class="n">probabilities</span><span class="o">=</span><span class="n">frozenmapping</span><span class="p">(</span><span class="n">probs</span><span class="p">),</span>
+        <span class="p">)</span></div>
+
+
+    <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;P(</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">) = </span><span class="si">{</span><span class="n">expr</span><span class="o">.</span><span class="n">unicode</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span><span class="o">.</span><span class="n">unicode</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39; ~ Finite(</span><span class="se">{{</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span><span class="si">}</span><span class="s1">&#39;</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">}}</span><span class="s1">)&#39;</span>
+
+<div class="viewcode-block" id="FiniteDistribution.latex_string">
+<a class="viewcode-back" href="../../../../api/pharmpy.model.FiniteDistribution.html#pharmpy.model.FiniteDistribution.latex_string">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">latex_string</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">aligned</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">aligned</span><span class="p">:</span>
+            <span class="n">align_str</span> <span class="o">=</span> <span class="s1">&#39; &amp; &#39;</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">align_str</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span>
+        <span class="n">rv</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_name</span><span class="p">)</span><span class="o">.</span><span class="n">latex</span><span class="p">()</span>
+        <span class="n">probs</span> <span class="o">=</span> <span class="p">[]</span>
+        <span class="k">for</span> <span class="n">n</span><span class="p">,</span> <span class="n">expr</span> <span class="ow">in</span> <span class="bp">self</span><span class="o">.</span><span class="n">_probabilities</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
+            <span class="n">probs</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;P(</span><span class="si">{</span><span class="n">n</span><span class="si">}</span><span class="s1">) = </span><span class="si">{</span><span class="n">expr</span><span class="o">.</span><span class="n">latex</span><span class="p">()</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+        <span class="n">latex</span> <span class="o">=</span> <span class="p">(</span>
+            <span class="n">rv</span>
+            <span class="o">+</span> <span class="n">align_str</span>
+            <span class="o">+</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="se">\\</span><span class="s1">sim  </span><span class="si">{</span><span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;Finite&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">latex</span><span class="p">()</span><span class="si">}</span><span class="s1"> </span><span class="se">\\</span><span class="s1">left(</span><span class="si">{</span><span class="s2">&quot;, &quot;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">probs</span><span class="p">)</span><span class="si">}</span><span class="se">\\</span><span class="s1">right)&#39;</span>
+        <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">aligned</span><span class="p">:</span>
+            <span class="n">latex</span> <span class="o">=</span> <span class="s1">&#39;$&#39;</span> <span class="o">+</span> <span class="n">latex</span> <span class="o">+</span> <span class="s1">&#39;$&#39;</span>
+        <span class="k">return</span> <span class="n">latex</span></div>
+</div>
+
+
+
 <span class="k">def</span><span class="w"> </span><span class="nf">_subs_name</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">d</span><span class="p">:</span> <span class="n">Mapping</span><span class="p">[</span><span class="n">TExpr</span><span class="p">,</span> <span class="n">TExpr</span><span class="p">])</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
     <span class="k">if</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">d</span><span class="p">:</span>
         <span class="n">new_name</span> <span class="o">=</span> <span class="n">d</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
@@ -1158,6 +1346,35 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">new_name</span> <span class="o">=</span> <span class="n">name</span>
     <span class="k">return</span> <span class="n">new_name</span> <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">new_name</span><span class="p">,</span> <span class="nb">str</span><span class="p">)</span> <span class="k">else</span> <span class="nb">str</span><span class="p">(</span><span class="n">new_name</span><span class="p">)</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_getitem_single</span><span class="p">(</span>
+    <span class="n">dist</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="n">NormalDistribution</span><span class="p">,</span> <span class="n">FiniteDistribution</span><span class="p">],</span> <span class="n">index</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Union</span><span class="p">[</span><span class="n">NormalDistribution</span><span class="p">,</span> <span class="n">FiniteDistribution</span><span class="p">]:</span>
+    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">int</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="n">dist</span><span class="o">.</span><span class="n">_name</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="nb">slice</span><span class="p">):</span>
+            <span class="n">index</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span>
+                <span class="nb">range</span><span class="p">(</span><span class="n">index</span><span class="o">.</span><span class="n">start</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">stop</span><span class="p">,</span> <span class="n">index</span><span class="o">.</span><span class="n">step</span> <span class="k">if</span> <span class="n">index</span><span class="o">.</span><span class="n">step</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="p">)</span>
+            <span class="k">if</span> <span class="n">index</span> <span class="o">!=</span> <span class="p">[</span><span class="mi">0</span><span class="p">]:</span>
+                <span class="k">raise</span> <span class="ne">IndexError</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">index</span><span class="p">,</span> <span class="n">Collection</span><span class="p">):</span>
+            <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">index</span><span class="p">)</span> <span class="o">!=</span> <span class="mi">1</span> <span class="ow">or</span> <span class="p">(</span><span class="n">dist</span><span class="o">.</span><span class="n">_name</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">index</span> <span class="ow">and</span> <span class="mi">0</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">index</span><span class="p">):</span>
+                <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">KeyError</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">dist</span>
 </pre></div>
 
                 </article>

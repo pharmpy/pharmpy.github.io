@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.workflows.contexts.baseclass &#8212; Pharmpy 1.5.0 documentation</title>
+    <title>pharmpy.workflows.contexts.baseclass &#8212; Pharmpy 1.6.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=e0a75244"></script>
+    <script src="../../../../_static/documentation_options.js?v=72d88caf"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/thebelab-helper.js"></script>
@@ -53,8 +53,8 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.5.0" />
-    <meta name="docbuild:last-update" content="Jan 15, 2025"/>
+  <meta name="docsearch:version" content="1.6.0" />
+    <meta name="docbuild:last-update" content="Feb 10, 2025"/>
   </head>
   
   
@@ -118,8 +118,8 @@
     
     
     
-    <img src="../../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.5.0 documentation - Home"/>
-    <img src="../../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.5.0 documentation - Home"/>
+    <img src="../../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.6.0 documentation - Home"/>
+    <img src="../../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.6.0 documentation - Home"/>
   
   
 </a></div>
@@ -479,11 +479,11 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">datetime</span><span class="w"> </span><span class="kn">import</span> <span class="n">datetime</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
-<span class="kn">import</span><span class="w"> </span><span class="nn">pharmpy.workflows.contexts.broadcasters.null</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.deps</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.deps</span><span class="w"> </span><span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.contexts.broadcasters.terminal</span><span class="w"> </span><span class="kn">import</span> <span class="n">broadcast_message</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.broadcasters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Broadcaster</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.dispatchers</span><span class="w"> </span><span class="kn">import</span> <span class="n">Dispatcher</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.hashing</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelHash</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.model_database</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelDatabase</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.model_entry</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelEntry</span>
@@ -512,18 +512,12 @@
         <span class="bp">self</span><span class="p">,</span>
         <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
         <span class="n">ref</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">common_options</span><span class="p">:</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
-        <span class="n">broadcaster</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="c1"># If the context already exists it will be opened</span>
         <span class="c1"># otherwise a new top level context will be created</span>
         <span class="c1"># An implementation needs to create the model database here</span>
         <span class="c1"># If ref is None an implementation specific default ref will be used</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_name</span> <span class="o">=</span> <span class="n">name</span>
-        <span class="k">if</span> <span class="n">broadcaster</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="ow">and</span> <span class="n">broadcaster</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span> <span class="o">==</span> <span class="s1">&#39;null&#39;</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">broadcast_message</span> <span class="o">=</span> <span class="n">pharmpy</span><span class="o">.</span><span class="n">workflows</span><span class="o">.</span><span class="n">contexts</span><span class="o">.</span><span class="n">broadcasters</span><span class="o">.</span><span class="n">null</span><span class="o">.</span><span class="n">broadcast_message</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="bp">self</span><span class="o">.</span><span class="n">broadcast_message</span> <span class="o">=</span> <span class="n">broadcast_message</span>
 
     <span class="nd">@abstractmethod</span>
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -533,6 +527,38 @@
     <span class="k">def</span><span class="w"> </span><span class="nf">model_database</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelDatabase</span><span class="p">:</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;ModelDatabase to store results of models run in context&quot;&quot;&quot;</span>
         <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_model_database</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">broadcaster</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Broadcaster</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_broadcaster&#39;</span><span class="p">):</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">retrieve_metadata</span><span class="p">()</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="s1">&#39;dispatching_options&#39;</span> <span class="ow">in</span> <span class="n">metadata</span>
+                <span class="ow">and</span> <span class="s1">&#39;broadcaster&#39;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;dispatching_options&#39;</span><span class="p">]</span>
+            <span class="p">):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;dispatching_options&#39;</span><span class="p">][</span><span class="s1">&#39;broadcaster&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">conf</span>
+
+                <span class="n">name</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">broadcaster</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_broadcaster</span> <span class="o">=</span> <span class="n">Broadcaster</span><span class="o">.</span><span class="n">select_broadcaster</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_broadcaster</span>
+
+    <span class="nd">@property</span>
+    <span class="k">def</span><span class="w"> </span><span class="nf">dispatcher</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Dispatcher</span><span class="p">:</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_dispatcher&#39;</span><span class="p">):</span>
+            <span class="n">metadata</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">retrieve_metadata</span><span class="p">()</span>
+            <span class="k">if</span> <span class="p">(</span>
+                <span class="s1">&#39;dispatching_options&#39;</span> <span class="ow">in</span> <span class="n">metadata</span>
+                <span class="ow">and</span> <span class="s1">&#39;dispatcher&#39;</span> <span class="ow">in</span> <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;dispatching_options&#39;</span><span class="p">]</span>
+            <span class="p">):</span>
+                <span class="n">name</span> <span class="o">=</span> <span class="n">metadata</span><span class="p">[</span><span class="s1">&#39;dispatching_options&#39;</span><span class="p">][</span><span class="s1">&#39;dispatcher&#39;</span><span class="p">]</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy</span><span class="w"> </span><span class="kn">import</span> <span class="n">conf</span>
+
+                <span class="n">name</span> <span class="o">=</span> <span class="n">conf</span><span class="o">.</span><span class="n">dispatcher</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_dispatcher</span> <span class="o">=</span> <span class="n">Dispatcher</span><span class="o">.</span><span class="n">select_dispatcher</span><span class="p">(</span><span class="n">name</span><span class="p">)</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dispatcher</span>
 
     <span class="nd">@property</span>
     <span class="nd">@abstractmethod</span>
@@ -670,13 +696,13 @@
         <span class="n">model</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="n">Model</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
 <span class="w">        </span><span class="sd">&quot;&quot;&quot;Add a message to the log&quot;&quot;&quot;</span>
+        <span class="n">date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
         <span class="k">if</span> <span class="n">model</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="n">ctxpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">context_path</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">ctxpath</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_model_context_path</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-        <span class="n">date</span> <span class="o">=</span> <span class="n">datetime</span><span class="o">.</span><span class="n">now</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">store_message</span><span class="p">(</span><span class="n">severity</span><span class="p">,</span> <span class="n">ctxpath</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">broadcast_message</span><span class="p">(</span><span class="n">severity</span><span class="p">,</span> <span class="n">ctxpath</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">broadcaster</span><span class="o">.</span><span class="n">broadcast_message</span><span class="p">(</span><span class="n">severity</span><span class="p">,</span> <span class="n">ctxpath</span><span class="p">,</span> <span class="n">date</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="Context.log_info">
@@ -790,6 +816,7 @@
 <div class="viewcode-block" id="Context.retrieve_input_model_entry">
 <a class="viewcode-back" href="../../../../api/pharmpy.workflows.Context.html#pharmpy.workflows.Context.retrieve_input_model_entry">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">retrieve_input_model_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelEntry</span><span class="p">:</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve the ModelEntry of the model marked as input&quot;&quot;&quot;</span>
         <span class="n">me</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_me</span><span class="p">(</span><span class="n">INPUT_MODEL_NAME</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">me</span></div>
 
@@ -803,26 +830,25 @@
 <div class="viewcode-block" id="Context.retrieve_final_model_entry">
 <a class="viewcode-back" href="../../../../api/pharmpy.workflows.Context.html#pharmpy.workflows.Context.retrieve_final_model_entry">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">retrieve_final_model_entry</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelEntry</span><span class="p">:</span>
-        <span class="n">model</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_me</span><span class="p">(</span><span class="n">FINAL_MODEL_NAME</span><span class="p">)</span>
-        <span class="k">return</span> <span class="n">model</span></div>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Retrieve the ModelEntry of the model marked as final&quot;&quot;&quot;</span>
+        <span class="n">me</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_retrieve_me</span><span class="p">(</span><span class="n">FINAL_MODEL_NAME</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">me</span></div>
 
 
 <div class="viewcode-block" id="Context.call_workflow">
 <a class="viewcode-back" href="../../../../api/pharmpy.workflows.Context.html#pharmpy.workflows.Context.call_workflow">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">call_workflow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">workflow</span><span class="p">,</span> <span class="n">unique_name</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.dispatchers.local_dask</span><span class="w"> </span><span class="kn">import</span> <span class="n">call_workflow</span>
-
-        <span class="n">res</span> <span class="o">=</span> <span class="n">call_workflow</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">unique_name</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ask the dispatcher to call a subworkflow&quot;&quot;&quot;</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dispatcher</span><span class="o">.</span><span class="n">call_workflow</span><span class="p">(</span><span class="n">workflow</span><span class="p">,</span> <span class="n">unique_name</span><span class="p">,</span> <span class="bp">self</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span></div>
 
 
 <div class="viewcode-block" id="Context.abort_workflow">
 <a class="viewcode-back" href="../../../../api/pharmpy.workflows.Context.html#pharmpy.workflows.Context.abort_workflow">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">abort_workflow</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">message</span><span class="p">):</span>
+<span class="w">        </span><span class="sd">&quot;&quot;&quot;Ask the dispatcher to abort the currently running workflow directly&quot;&quot;&quot;</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">log_message</span><span class="p">(</span><span class="s2">&quot;critical&quot;</span><span class="p">,</span> <span class="n">message</span><span class="p">)</span>
-        <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.dispatchers.local_dask</span><span class="w"> </span><span class="kn">import</span> <span class="n">abort_workflow</span>
-
-        <span class="n">abort_workflow</span><span class="p">()</span></div>
+        <span class="bp">self</span><span class="o">.</span><span class="n">dispatcher</span><span class="o">.</span><span class="n">abort_workflow</span><span class="p">()</span></div>
 
 
 <div class="viewcode-block" id="Context.has_completed">

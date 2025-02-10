@@ -26,6 +26,7 @@ DataInfo
    .. autosummary::
 
       ~DataInfo.create
+      ~DataInfo.find_single_column_name
       ~DataInfo.from_dict
       ~DataInfo.from_json
       ~DataInfo.get_dtype_dict
@@ -55,6 +56,7 @@ DataInfo
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: find_single_column_name
    .. automethod:: from_dict
    .. automethod:: from_json
    .. automethod:: get_dtype_dict

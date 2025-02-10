@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.expressions &#8212; Pharmpy 1.5.0 documentation</title>
+    <title>pharmpy.modeling.expressions &#8212; Pharmpy 1.6.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=e0a75244"></script>
+    <script src="../../../_static/documentation_options.js?v=72d88caf"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -53,8 +53,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.5.0" />
-    <meta name="docbuild:last-update" content="Jan 15, 2025"/>
+  <meta name="docsearch:version" content="1.6.0" />
+    <meta name="docbuild:last-update" content="Feb 10, 2025"/>
   </head>
   
   
@@ -118,8 +118,8 @@
     
     
     
-    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.5.0 documentation - Home"/>
-    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.5.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.6.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.6.0 documentation - Home"/>
   
   
 </a></div>
@@ -483,8 +483,6 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.basic</span><span class="w"> </span><span class="kn">import</span> <span class="n">Expr</span><span class="p">,</span> <span class="n">TExpr</span><span class="p">,</span> <span class="n">TSymbol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.deps</span><span class="w"> </span><span class="kn">import</span> <span class="n">networkx</span> <span class="k">as</span> <span class="n">nx</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.deps</span><span class="w"> </span><span class="kn">import</span> <span class="n">sympy</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.internals.expr.assumptions</span><span class="w"> </span><span class="kn">import</span> <span class="n">assume_all</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.internals.expr.leaves</span><span class="w"> </span><span class="kn">import</span> <span class="n">free_images_and_symbols</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.internals.expr.subs</span><span class="w"> </span><span class="kn">import</span> <span class="n">subs</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.internals.graph.directed.connected_components</span><span class="w"> </span><span class="kn">import</span> <span class="n">strongly_connected_component_of</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.internals.graph.directed.inverse</span><span class="w"> </span><span class="kn">import</span> <span class="n">inverse</span> <span class="k">as</span> <span class="n">graph_inverse</span>
@@ -892,10 +890,12 @@
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="n">ind_index_assignments</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">_find_eta_assignments</span><span class="p">(</span><span class="n">model</span><span class="p">))</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">ind_index_assignments</span><span class="p">:</span>
+        <span class="k">return</span> <span class="kc">False</span>
     <span class="n">ind_parameters</span> <span class="o">=</span> <span class="p">[</span><span class="n">a</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">symbol</span> <span class="k">for</span> <span class="n">a</span> <span class="ow">in</span> <span class="n">ind_index_assignments</span><span class="p">]</span>
     <span class="n">mu_regex</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">compile</span><span class="p">(</span><span class="sa">r</span><span class="s1">&#39;^mu_\d*$&#39;</span><span class="p">,</span> <span class="n">re</span><span class="o">.</span><span class="n">IGNORECASE</span><span class="p">)</span>
     <span class="k">for</span> <span class="n">ind_param</span> <span class="ow">in</span> <span class="n">ind_parameters</span><span class="p">:</span>
-        <span class="n">ind_statement</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="n">ind_param</span><span class="p">)</span>
+        <span class="n">ind_statement</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">get_assignment</span><span class="p">(</span><span class="n">ind_param</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="nb">any</span><span class="p">(</span><span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">mu_regex</span><span class="p">,</span> <span class="nb">str</span><span class="p">(</span><span class="n">p</span><span class="p">))</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">ind_statement</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">):</span>
             <span class="k">return</span> <span class="kc">False</span>
 
@@ -905,7 +905,7 @@
 
 <div class="viewcode-block" id="get_mu_connected_to_parameter">
 <a class="viewcode-back" href="../../../api/pharmpy.modeling.get_mu_connected_to_parameter.html#pharmpy.modeling.get_mu_connected_to_parameter">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">get_mu_connected_to_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_mu_connected_to_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">parameter</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Return Mu name connected to parameter</span>
 
 <span class="sd">    If the given parameter is not dependent on any Mu, None is returned</span>
@@ -1456,6 +1456,8 @@
         <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">s</span><span class="p">,</span> <span class="n">CompartmentalSystem</span><span class="p">):</span>
             <span class="n">ode_index</span> <span class="o">=</span> <span class="n">i</span>
             <span class="k">break</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">assert</span> <span class="kc">False</span>  <span class="c1"># This should never happen</span>
 
     <span class="n">g</span> <span class="o">=</span> <span class="n">g</span><span class="o">.</span><span class="n">copy</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">s</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">):</span>
@@ -2450,8 +2452,7 @@
 <span class="sd">    True</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">expr</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">sympify</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">sympy</span><span class="o">.</span><span class="n">ask</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Q</span><span class="o">.</span><span class="n">real</span><span class="p">(</span><span class="n">expr</span><span class="p">),</span> <span class="n">assume_all</span><span class="p">(</span><span class="n">sympy</span><span class="o">.</span><span class="n">Q</span><span class="o">.</span><span class="n">real</span><span class="p">,</span> <span class="n">free_images_and_symbols</span><span class="p">(</span><span class="n">expr</span><span class="p">)))</span></div>
+    <span class="k">return</span> <span class="n">Expr</span><span class="p">(</span><span class="n">expr</span><span class="p">)</span><span class="o">.</span><span class="n">is_real</span><span class="p">()</span></div>
 
 
 
