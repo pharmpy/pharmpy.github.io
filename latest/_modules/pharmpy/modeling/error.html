@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.error &#8212; Pharmpy 1.6.0 documentation</title>
+    <title>pharmpy.modeling.error &#8212; Pharmpy 1.7.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=72d88caf"></script>
+    <script src="../../../_static/documentation_options.js?v=030dc6f6"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -53,8 +53,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.6.0" />
-    <meta name="docbuild:last-update" content="Feb 10, 2025"/>
+  <meta name="docsearch:version" content="1.7.0" />
+    <meta name="docbuild:last-update" content="May 13, 2025"/>
   </head>
   
   
@@ -118,8 +118,8 @@
     
     
     
-    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.6.0 documentation - Home"/>
-    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.6.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.7.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.7.0 documentation - Home"/>
   
   
 </a></div>
@@ -163,8 +163,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../changelog.html">
-    Changelog
+  <a class="nav-link nav-internal" href="../../../news.html">
+    News
   </a>
 </li>
 
@@ -334,8 +334,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../changelog.html">
-    Changelog
+  <a class="nav-link nav-internal" href="../../../news.html">
+    News
   </a>
 </li>
 
@@ -711,7 +711,7 @@
 <span class="sd">        A_CENTRAL(t)</span>
 <span class="sd">        ────────────</span>
 <span class="sd">    F =      S₁</span>
-<span class="sd">               ⎧2.225e-16  for F = 0</span>
+<span class="sd">               ⎧0.067  for F = 0</span>
 <span class="sd">               ⎨</span>
 <span class="sd">    IPREDADJ = ⎩    F      otherwise</span>
 <span class="sd">    Y = F + IPREDADJ⋅εₚ</span>
@@ -726,7 +726,7 @@
 <span class="sd">        A_CENTRAL(t)</span>
 <span class="sd">        ────────────</span>
 <span class="sd">    F =      S₁</span>
-<span class="sd">               ⎧2.225e-16  for F = 0</span>
+<span class="sd">               ⎧0.067  for F = 0</span>
 <span class="sd">               ⎨</span>
 <span class="sd">    IPREDADJ = ⎩    F      otherwise</span>
 <span class="sd">    Y = εₚ + log(IPREDADJ)</span>
@@ -767,7 +767,12 @@
         <span class="n">stats_new</span> <span class="o">=</span> <span class="n">stats</span><span class="o">.</span><span class="n">reassign</span><span class="p">(</span><span class="n">y</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">zero_protection</span><span class="p">:</span>
-        <span class="n">guard_expr</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">piecewise</span><span class="p">((</span><span class="mf">2.225e-16</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">minobs</span> <span class="o">=</span> <span class="n">get_observations</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="n">adjval</span> <span class="o">=</span> <span class="mf">0.01</span> <span class="o">*</span> <span class="n">minobs</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">adjval</span> <span class="o">=</span> <span class="mf">2.225e-16</span>
+        <span class="n">guard_expr</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">piecewise</span><span class="p">((</span><span class="n">adjval</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">Eq</span><span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="mi">0</span><span class="p">)),</span> <span class="p">(</span><span class="n">f</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
         <span class="n">guard_assignment</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">ipred</span><span class="p">,</span> <span class="n">guard_expr</span><span class="p">)</span>
         <span class="n">ind</span> <span class="o">=</span> <span class="mi">0</span>
         <span class="c1"># Find first occurrence of IPREDADJ</span>
@@ -928,7 +933,20 @@
                 <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Currently not supported to change from IIV on RUV model with BLQ&#39;</span><span class="p">)</span>
             <span class="n">error_expr</span> <span class="o">=</span> <span class="n">f_dummy</span> <span class="o">+</span> <span class="n">f_dummy</span> <span class="o">*</span> <span class="n">ruv_prop</span> <span class="o">*</span> <span class="n">eta_ruv</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span> <span class="o">+</span> <span class="n">ruv_add</span> <span class="o">*</span> <span class="n">eta_ruv</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="n">error_expr</span> <span class="o">=</span> <span class="n">f_dummy</span> <span class="o">+</span> <span class="n">f_dummy</span> <span class="o">*</span> <span class="n">ruv_prop</span> <span class="o">+</span> <span class="n">ruv_add</span>
+            <span class="n">ipred</span> <span class="o">=</span> <span class="n">get_ipred</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="n">dv</span><span class="p">)</span>
+            <span class="n">ipredadj</span> <span class="o">=</span> <span class="kc">None</span>
+            <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">after_odes</span><span class="p">:</span>
+                <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">is_piecewise</span><span class="p">():</span>
+                    <span class="n">args</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">args</span>
+                    <span class="k">for</span> <span class="n">expr</span><span class="p">,</span> <span class="n">cond</span> <span class="ow">in</span> <span class="n">args</span><span class="p">:</span>
+                        <span class="k">if</span> <span class="n">expr</span> <span class="o">==</span> <span class="n">ipred</span><span class="p">:</span>
+                            <span class="n">ipredadj</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">symbol</span>
+                            <span class="k">break</span>
+
+            <span class="k">if</span> <span class="n">ipredadj</span><span class="p">:</span>
+                <span class="n">error_expr</span> <span class="o">=</span> <span class="n">f_dummy</span> <span class="o">+</span> <span class="n">ipredadj</span> <span class="o">*</span> <span class="n">ruv_prop</span> <span class="o">+</span> <span class="n">ruv_add</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="n">error_expr</span> <span class="o">=</span> <span class="n">f_dummy</span> <span class="o">+</span> <span class="n">f_dummy</span> <span class="o">*</span> <span class="n">ruv_prop</span> <span class="o">+</span> <span class="n">ruv_add</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Not supported data transformation </span><span class="si">{</span><span class="n">data_trans</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
 
@@ -1758,7 +1776,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

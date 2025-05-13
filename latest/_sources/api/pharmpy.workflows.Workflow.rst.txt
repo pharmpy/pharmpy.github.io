@@ -18,6 +18,7 @@ Workflow
 
       ~Workflow.as_dask_dict
       ~Workflow.create
+      ~Workflow.get_id_mapping
       ~Workflow.plot_dask
       ~Workflow.replace
 
@@ -29,5 +30,6 @@ Workflow
 
    .. automethod:: as_dask_dict
    .. automethod:: create
+   .. automethod:: get_id_mapping
    .. automethod:: plot_dask
    .. automethod:: replace

@@ -18,12 +18,15 @@ LocalDirectoryContext
 
       ~LocalDirectoryContext.create_subcontext
       ~LocalDirectoryContext.exists
+      ~LocalDirectoryContext.finalize
       ~LocalDirectoryContext.get_parent_context
       ~LocalDirectoryContext.get_subcontext
+      ~LocalDirectoryContext.get_top_level_context
       ~LocalDirectoryContext.list_all_names
       ~LocalDirectoryContext.list_all_subcontexts
       ~LocalDirectoryContext.retrieve_annotation
       ~LocalDirectoryContext.retrieve_common_options
+      ~LocalDirectoryContext.retrieve_dispatching_options
       ~LocalDirectoryContext.retrieve_key
       ~LocalDirectoryContext.retrieve_log
       ~LocalDirectoryContext.retrieve_metadata
@@ -43,12 +46,15 @@ LocalDirectoryContext
 
    .. automethod:: create_subcontext
    .. automethod:: exists
+   .. automethod:: finalize
    .. automethod:: get_parent_context
    .. automethod:: get_subcontext
+   .. automethod:: get_top_level_context
    .. automethod:: list_all_names
    .. automethod:: list_all_subcontexts
    .. automethod:: retrieve_annotation
    .. automethod:: retrieve_common_options
+   .. automethod:: retrieve_dispatching_options
    .. automethod:: retrieve_key
    .. automethod:: retrieve_log
    .. automethod:: retrieve_metadata

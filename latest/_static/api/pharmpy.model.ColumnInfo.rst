@@ -17,6 +17,7 @@ ColumnInfo
       ~ColumnInfo.drop
       ~ColumnInfo.name
       ~ColumnInfo.scale
+      ~ColumnInfo.symbol
       ~ColumnInfo.type
       ~ColumnInfo.unit
 
@@ -44,6 +45,7 @@ ColumnInfo
    .. autoattribute:: drop
    .. autoattribute:: name
    .. autoattribute:: scale
+   .. autoattribute:: symbol
    .. autoattribute:: type
    .. autoattribute:: unit
 

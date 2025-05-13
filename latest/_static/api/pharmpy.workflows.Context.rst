@@ -14,6 +14,9 @@ Context
       ~Context.context_path
       ~Context.dispatcher
       ~Context.model_database
+      ~Context.name
+      ~Context.ref
+      ~Context.seed
 
    .. rubric:: Methods Summary
 
@@ -24,10 +27,14 @@ Context
       ~Context.create_rng
       ~Context.create_subcontext
       ~Context.exists
+      ~Context.finalize
       ~Context.get_model_context_path
+      ~Context.get_ncores_for_execution
       ~Context.get_parent_context
       ~Context.get_subcontext
+      ~Context.get_top_level_context
       ~Context.has_completed
+      ~Context.has_started
       ~Context.list_all_names
       ~Context.list_all_subcontexts
       ~Context.log_error
@@ -36,6 +43,7 @@ Context
       ~Context.log_warning
       ~Context.retrieve_annotation
       ~Context.retrieve_common_options
+      ~Context.retrieve_dispatching_options
       ~Context.retrieve_final_model_entry
       ~Context.retrieve_input_model_entry
       ~Context.retrieve_key
@@ -43,6 +51,7 @@ Context
       ~Context.retrieve_metadata
       ~Context.retrieve_model_entry
       ~Context.retrieve_results
+      ~Context.spawn_seed
       ~Context.store_annotation
       ~Context.store_final_model_entry
       ~Context.store_input_model_entry
@@ -58,6 +67,9 @@ Context
    .. autoattribute:: context_path
    .. autoattribute:: dispatcher
    .. autoattribute:: model_database
+   .. autoattribute:: name
+   .. autoattribute:: ref
+   .. autoattribute:: seed
 
    .. rubric:: Methods Documentation
 
@@ -66,10 +78,14 @@ Context
    .. automethod:: create_rng
    .. automethod:: create_subcontext
    .. automethod:: exists
+   .. automethod:: finalize
    .. automethod:: get_model_context_path
+   .. automethod:: get_ncores_for_execution
    .. automethod:: get_parent_context
    .. automethod:: get_subcontext
+   .. automethod:: get_top_level_context
    .. automethod:: has_completed
+   .. automethod:: has_started
    .. automethod:: list_all_names
    .. automethod:: list_all_subcontexts
    .. automethod:: log_error
@@ -78,6 +94,7 @@ Context
    .. automethod:: log_warning
    .. automethod:: retrieve_annotation
    .. automethod:: retrieve_common_options
+   .. automethod:: retrieve_dispatching_options
    .. automethod:: retrieve_final_model_entry
    .. automethod:: retrieve_input_model_entry
    .. automethod:: retrieve_key
@@ -85,6 +102,7 @@ Context
    .. automethod:: retrieve_metadata
    .. automethod:: retrieve_model_entry
    .. automethod:: retrieve_results
+   .. automethod:: spawn_seed
    .. automethod:: store_annotation
    .. automethod:: store_final_model_entry
    .. automethod:: store_input_model_entry

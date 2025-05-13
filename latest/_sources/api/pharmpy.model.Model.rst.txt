@@ -10,6 +10,7 @@ Model
 
    .. autosummary::
 
+      ~Model.ALLOWED_VALUE_TYPE_STRINGS
       ~Model.code
       ~Model.datainfo
       ~Model.dataset
@@ -42,6 +43,7 @@ Model
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: ALLOWED_VALUE_TYPE_STRINGS
    .. autoattribute:: code
    .. autoattribute:: datainfo
    .. autoattribute:: dataset

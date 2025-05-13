@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.context &#8212; Pharmpy 1.6.0 documentation</title>
+    <title>pharmpy.tools.context &#8212; Pharmpy 1.7.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=72d88caf"></script>
+    <script src="../../../_static/documentation_options.js?v=030dc6f6"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -53,8 +53,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.6.0" />
-    <meta name="docbuild:last-update" content="Feb 10, 2025"/>
+  <meta name="docsearch:version" content="1.7.0" />
+    <meta name="docbuild:last-update" content="May 13, 2025"/>
   </head>
   
   
@@ -118,8 +118,8 @@
     
     
     
-    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.6.0 documentation - Home"/>
-    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.6.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.7.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.7.0 documentation - Home"/>
   
   
 </a></div>
@@ -163,8 +163,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../changelog.html">
-    Changelog
+  <a class="nav-link nav-internal" href="../../../news.html">
+    News
   </a>
 </li>
 
@@ -334,8 +334,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../changelog.html">
-    Changelog
+  <a class="nav-link nav-internal" href="../../../news.html">
+    News
   </a>
 </li>
 
@@ -474,46 +474,34 @@
                   
   <h1>Source code for pharmpy.tools.context</h1><div class="highlight"><pre>
 <span></span><span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Union</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.internals.fs.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">normalize_user_given_path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelfitResults</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.broadcasters</span><span class="w"> </span><span class="kn">import</span> <span class="n">Broadcaster</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.contexts</span><span class="w"> </span><span class="kn">import</span> <span class="n">Context</span><span class="p">,</span> <span class="n">LocalDirectoryContext</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_open_context</span><span class="p">(</span><span class="n">source</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">Path</span><span class="p">)</span> <span class="ow">or</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
-        <span class="n">context</span> <span class="o">=</span> <span class="n">LocalDirectoryContext</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
-    <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">source</span><span class="p">,</span> <span class="n">Context</span><span class="p">):</span>
-        <span class="n">context</span> <span class="o">=</span> <span class="n">source</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="k">raise</span> <span class="ne">NotImplementedError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Not implemented for type </span><span class="se">\&#39;</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">source</span><span class="p">)</span><span class="si">}</span><span class="se">\&#39;</span><span class="s1">&#39;</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">context</span>
-
-
-<div class="viewcode-block" id="create_context">
-<a class="viewcode-back" href="../../../api/pharmpy.tools.create_context.html#pharmpy.tools.create_context">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">create_context</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
-<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a new context</span>
-
-<span class="sd">    Currently a local filesystem context (i.e. a directory)</span>
+<div class="viewcode-block" id="open_context">
+<a class="viewcode-back" href="../../../api/pharmpy.tools.open_context.html#pharmpy.tools.open_context">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">open_context</span><span class="p">(</span><span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">ref</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="kc">None</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Open a context from a tool run</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
 <span class="sd">    name : str</span>
 <span class="sd">        Name of the context</span>
-<span class="sd">    path : str or Path</span>
-<span class="sd">        Path to where to put the context</span>
+<span class="sd">    ref : str or Path</span>
+<span class="sd">        Parent path of the context</span>
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; from pharmpy.tools import create_context</span>
-<span class="sd">    &gt;&gt;&gt; ctx = create_context(&quot;myproject&quot;)  # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.tools import open_context</span>
+<span class="sd">    &gt;&gt;&gt; ctx = open_context(&quot;myrun&quot;)  # doctest: +SKIP</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">ref</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">normalize_user_given_path</span><span class="p">(</span><span class="n">path</span><span class="p">))</span> <span class="k">if</span> <span class="n">path</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
+    <span class="n">ref</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">normalize_user_given_path</span><span class="p">(</span><span class="n">ref</span><span class="p">))</span> <span class="k">if</span> <span class="n">ref</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span> <span class="k">else</span> <span class="kc">None</span>
     <span class="n">ctx</span> <span class="o">=</span> <span class="n">LocalDirectoryContext</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">ref</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">ctx</span></div>
 
@@ -521,7 +509,7 @@
 
 <div class="viewcode-block" id="print_log">
 <a class="viewcode-back" href="../../../api/pharmpy.tools.print_log.html#pharmpy.tools.print_log">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">print_log</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">Context</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">print_log</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">Context</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Print the log of a context</span>
 
 <span class="sd">    Parameters</span>
@@ -530,28 +518,117 @@
 <span class="sd">        Print the log of this context</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">broadcaster</span> <span class="o">=</span> <span class="n">Broadcaster</span><span class="o">.</span><span class="n">select_broadcaster</span><span class="p">(</span><span class="s2">&quot;terminal&quot;</span><span class="p">)</span>
+    <span class="n">broadcast_log</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="s2">&quot;terminal&quot;</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="broadcast_log">
+<a class="viewcode-back" href="../../../api/pharmpy.tools.broadcast_log.html#pharmpy.tools.broadcast_log">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">broadcast_log</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="n">broadcaster</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="kc">None</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Broadcast the log of a context</span>
+
+<span class="sd">    Default is to use the same broadcaster, but optionally another broadcaster could</span>
+<span class="sd">    be used.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    context : Context</span>
+<span class="sd">        Broadcast the log of this context</span>
+<span class="sd">    broadcaster : str</span>
+<span class="sd">        Name of the broadcaster to use. Default is to use the same as was original used.</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">broadcaster</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">bcst</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">broadcaster</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">bcst</span> <span class="o">=</span> <span class="n">Broadcaster</span><span class="o">.</span><span class="n">select_broadcaster</span><span class="p">(</span><span class="n">broadcaster</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">retrieve_log</span><span class="p">()</span>
     <span class="k">for</span> <span class="n">_</span><span class="p">,</span> <span class="n">row</span> <span class="ow">in</span> <span class="n">df</span><span class="o">.</span><span class="n">iterrows</span><span class="p">():</span>
-        <span class="n">broadcaster</span><span class="o">.</span><span class="n">broadcast_message</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;severity&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">])</span></div>
+        <span class="n">bcst</span><span class="o">.</span><span class="n">broadcast_message</span><span class="p">(</span><span class="n">row</span><span class="p">[</span><span class="s1">&#39;severity&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;path&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;time&#39;</span><span class="p">],</span> <span class="n">row</span><span class="p">[</span><span class="s1">&#39;message&#39;</span><span class="p">])</span></div>
 
+
+
+<div class="viewcode-block" id="retrieve_model">
+<a class="viewcode-back" href="../../../api/pharmpy.tools.retrieve_model.html#pharmpy.tools.retrieve_model">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">retrieve_model</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Model</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve a model from a context</span>
+
+<span class="sd">    Any models created and run by the tool can be</span>
+<span class="sd">    retrieved.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    context: Context</span>
+<span class="sd">        A previously opened context</span>
+<span class="sd">    name : str</span>
+<span class="sd">        Name of the model or a qualified name with a subcontext path, e.g.</span>
+<span class="sd">        :code:`&quot;iivsearch/@final&quot;`.</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    Model</span>
+<span class="sd">        The model object</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.tools import open_context, retrieve_model</span>
+<span class="sd">    &gt;&gt;&gt; context = open_context(ref=&#39;path/to/&#39;, name=&#39;modelsearch1&#39;)</span>
+<span class="sd">    &gt;&gt;&gt; model = retrieve_model(context, &#39;run1&#39;)      # doctest: +SKIP</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">subctx</span><span class="p">,</span> <span class="n">model_name</span> <span class="o">=</span> <span class="n">_split_subcontext_and_model</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">subctx</span><span class="o">.</span><span class="n">retrieve_model_entry</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span><span class="o">.</span><span class="n">model</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_split_subcontext_and_model</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="n">ctx_path</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">tuple</span><span class="p">[</span><span class="n">Context</span><span class="p">,</span> <span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Given a context and a context path get the lowest subcontext</span>
+<span class="sd">    in the path and the model name. If no model is in the path</span>
+<span class="sd">    return None instead.</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="n">ctx_path</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">a</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;@&#39;</span><span class="p">):</span>
+        <span class="n">model_name</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="o">-</span><span class="mi">1</span><span class="p">][</span><span class="mi">1</span><span class="p">:]</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="p">[:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
+    <span class="k">elif</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="c1"># In this case what we have is the model_name</span>
+        <span class="c1"># and the context is the same</span>
+        <span class="n">model_name</span> <span class="o">=</span> <span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="p">[]</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">model_name</span> <span class="o">=</span> <span class="kc">None</span>
+    <span class="k">for</span> <span class="n">subname</span> <span class="ow">in</span> <span class="n">a</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">context</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get_subcontext</span><span class="p">(</span><span class="n">subname</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">ValueError</span> <span class="k">as</span> <span class="n">e</span><span class="p">:</span>
+            <span class="n">all_subs</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">list_all_subcontexts</span><span class="p">()</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s2">. Did you mean </span><span class="si">{</span><span class="n">_present_string_array</span><span class="p">(</span><span class="n">all_subs</span><span class="p">)</span><span class="si">}</span><span class="s2">?&quot;</span><span class="p">)</span>
+
+    <span class="k">return</span> <span class="n">context</span><span class="p">,</span> <span class="n">model_name</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_present_string_array</span><span class="p">(</span><span class="n">a</span><span class="p">):</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Create a user presentable string from array of strings&quot;&quot;&quot;</span>
+    <span class="n">a</span> <span class="o">=</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;&quot;</span><span class="si">{</span><span class="n">e</span><span class="si">}</span><span class="s1">&quot;&#39;</span> <span class="k">for</span> <span class="n">e</span> <span class="ow">in</span> <span class="n">a</span><span class="p">]</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">a</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">a</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="si">}</span><span class="s1">&#39;</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">a</span><span class="p">[:</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span> <span class="o">+</span> <span class="p">[</span><span class="sa">f</span><span class="s1">&#39;</span><span class="si">{</span><span class="n">a</span><span class="p">[</span><span class="o">-</span><span class="mi">2</span><span class="p">]</span><span class="si">}</span><span class="s1"> or a[-1]&#39;</span><span class="p">]</span>
+        <span class="k">return</span> <span class="s1">&#39;one of: &#39;</span> <span class="o">+</span> <span class="s1">&#39;, &#39;</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
 
 
 <div class="viewcode-block" id="retrieve_modelfit_results">
 <a class="viewcode-back" href="../../../api/pharmpy.tools.retrieve_modelfit_results.html#pharmpy.tools.retrieve_modelfit_results">[docs]</a>
-<span class="k">def</span><span class="w"> </span><span class="nf">retrieve_modelfit_results</span><span class="p">(</span>
-    <span class="n">source</span><span class="p">:</span> <span class="n">Union</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Path</span><span class="p">,</span> <span class="n">Context</span><span class="p">],</span>
-    <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span>
-<span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelfitResults</span><span class="p">:</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">retrieve_modelfit_results</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">ModelfitResults</span><span class="p">:</span>
 <span class="w">    </span><span class="sd">&quot;&quot;&quot;Retrieve the modelfit results of a model</span>
 
 <span class="sd">    Parameters</span>
 <span class="sd">    ----------</span>
-<span class="sd">    source : str, Path, Context</span>
-<span class="sd">        Source where to find models. Can be a path (as str or Path), or a</span>
-<span class="sd">        Context</span>
+<span class="sd">    context : Context</span>
+<span class="sd">        A previously opened context</span>
 <span class="sd">    name : str</span>
-<span class="sd">        Name of the model</span>
+<span class="sd">        Name of the model or a qualified name with a subcontext path, e.g.</span>
+<span class="sd">        :code:`&quot;iivsearch/@final&quot;`.</span>
 
 <span class="sd">    Return</span>
 <span class="sd">    ------</span>
@@ -560,15 +637,53 @@
 
 <span class="sd">    Examples</span>
 <span class="sd">    --------</span>
-<span class="sd">    &gt;&gt;&gt; from pharmpy.tools import create_context, retrieve_modelfit_results</span>
-<span class="sd">    &gt;&gt;&gt; tooldir_path = &#39;path/to/tool/directory&#39;</span>
-<span class="sd">    &gt;&gt;&gt; context = create_context(&quot;iivsearch1&quot;)   # doctest: +SKIP</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.tools import open_context, retrieve_modelfit_results</span>
+<span class="sd">    &gt;&gt;&gt; context = open_context(&quot;iivsearch1&quot;)   # doctest: +SKIP</span>
 <span class="sd">    &gt;&gt;&gt; results = retrieve_modelfit_results(context, &#39;input&#39;)      # doctest: +SKIP</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
-    <span class="n">context</span> <span class="o">=</span> <span class="n">_open_context</span><span class="p">(</span><span class="n">source</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">context</span><span class="o">.</span><span class="n">retrieve_model_entry</span><span class="p">(</span><span class="n">name</span><span class="p">)</span><span class="o">.</span><span class="n">modelfit_results</span></div>
+    <span class="n">subctx</span><span class="p">,</span> <span class="n">model_name</span> <span class="o">=</span> <span class="n">_split_subcontext_and_model</span><span class="p">(</span><span class="n">context</span><span class="p">,</span> <span class="n">name</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">subctx</span><span class="o">.</span><span class="n">retrieve_model_entry</span><span class="p">(</span><span class="n">model_name</span><span class="p">)</span><span class="o">.</span><span class="n">modelfit_results</span></div>
 
+
+
+<div class="viewcode-block" id="list_models">
+<a class="viewcode-back" href="../../../api/pharmpy.tools.list_models.html#pharmpy.tools.list_models">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">list_models</span><span class="p">(</span><span class="n">context</span><span class="p">:</span> <span class="n">Context</span><span class="p">,</span> <span class="n">recursive</span><span class="p">:</span> <span class="nb">bool</span> <span class="o">=</span> <span class="kc">False</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">list</span><span class="p">[</span><span class="nb">str</span><span class="p">]:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;List names of all models in a context</span>
+
+<span class="sd">    Will by default list only models in the top level, but can list</span>
+<span class="sd">    all recursively using the recursive option. This will add the context</span>
+<span class="sd">    path to each model name as a qualifier.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    context : Context</span>
+<span class="sd">        The context</span>
+<span class="sd">    recursive : bool</span>
+<span class="sd">        Only top level or all levels recursively down.</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    list[str]</span>
+<span class="sd">        A list of the model names</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="ow">not</span> <span class="n">recursive</span><span class="p">:</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">list_all_names</span><span class="p">()</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">names</span> <span class="o">=</span> <span class="n">_get_model_names_recursive</span><span class="p">(</span><span class="n">context</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">names</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_model_names_recursive</span><span class="p">(</span><span class="n">context</span><span class="p">):</span>
+    <span class="n">ctx_path</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">context_path</span>
+    <span class="n">names</span> <span class="o">=</span> <span class="p">[</span><span class="n">ctx_path</span> <span class="o">+</span> <span class="s2">&quot;/@&quot;</span> <span class="o">+</span> <span class="n">name</span> <span class="k">for</span> <span class="n">name</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">list_all_names</span><span class="p">()]</span>
+    <span class="k">for</span> <span class="n">subctx_name</span> <span class="ow">in</span> <span class="n">context</span><span class="o">.</span><span class="n">list_all_subcontexts</span><span class="p">():</span>
+        <span class="n">subctx</span> <span class="o">=</span> <span class="n">context</span><span class="o">.</span><span class="n">get_subcontext</span><span class="p">(</span><span class="n">subctx_name</span><span class="p">)</span>
+        <span class="n">subctx_names</span> <span class="o">=</span> <span class="n">_get_model_names_recursive</span><span class="p">(</span><span class="n">subctx</span><span class="p">)</span>
+        <span class="n">names</span> <span class="o">+=</span> <span class="n">subctx_names</span>
+    <span class="k">return</span> <span class="n">names</span>
 </pre></div>
 
                 </article>
@@ -619,7 +734,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>

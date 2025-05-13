@@ -40,7 +40,7 @@ To initiate AMD in Python/R:
 
     from pharmpy.tools import run_amd
 
-    search_space = 'LET(CATEGORICAL,[SEX]);LET(CONTINUOUS,[AGE]);COVARIATE?(@IIV,@CONTINUOUS,EXP);COVARIATE?(@IIV,@CATEGORICAL, CAT)'
+    search_space = 'COVARIATE?(@IIV,SEX,EXP);COVARIATE?(@IIV,AGE,CAT)'
     res = run_amd(input='path/to/dataset',
                   modeltype='basic_pk',
                   administration='oral',
@@ -412,7 +412,7 @@ Strategy components
 ~~~~~~~~~~~~~~~~~~~
 
 The subtools that are run in each step, along with their respective arguments, are dependent on the model type given.
-Below follows a general description of each of the steps. As different model types can perform the the same step  
+Below follows a general description of each of the steps. As different model types can perform the same step  
 differently, please see the specific :ref:`model type page<modeltypes_amd>` for more details.
 
 Structural

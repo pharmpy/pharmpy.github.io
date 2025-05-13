@@ -18,12 +18,15 @@ default_context
 
       ~default_context.create_subcontext
       ~default_context.exists
+      ~default_context.finalize
       ~default_context.get_parent_context
       ~default_context.get_subcontext
+      ~default_context.get_top_level_context
       ~default_context.list_all_names
       ~default_context.list_all_subcontexts
       ~default_context.retrieve_annotation
       ~default_context.retrieve_common_options
+      ~default_context.retrieve_dispatching_options
       ~default_context.retrieve_key
       ~default_context.retrieve_log
       ~default_context.retrieve_metadata
@@ -43,12 +46,15 @@ default_context
 
    .. automethod:: create_subcontext
    .. automethod:: exists
+   .. automethod:: finalize
    .. automethod:: get_parent_context
    .. automethod:: get_subcontext
+   .. automethod:: get_top_level_context
    .. automethod:: list_all_names
    .. automethod:: list_all_subcontexts
    .. automethod:: retrieve_annotation
    .. automethod:: retrieve_common_options
+   .. automethod:: retrieve_dispatching_options
    .. automethod:: retrieve_key
    .. automethod:: retrieve_log
    .. automethod:: retrieve_metadata

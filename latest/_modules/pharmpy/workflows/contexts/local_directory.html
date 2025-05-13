@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.workflows.contexts.local_directory &#8212; Pharmpy 1.6.0 documentation</title>
+    <title>pharmpy.workflows.contexts.local_directory &#8212; Pharmpy 1.7.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../../_static/documentation_options.js?v=72d88caf"></script>
+    <script src="../../../../_static/documentation_options.js?v=030dc6f6"></script>
     <script src="../../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../../_static/thebelab-helper.js"></script>
@@ -53,8 +53,8 @@
     <link rel="search" title="Search" href="../../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.6.0" />
-    <meta name="docbuild:last-update" content="Feb 10, 2025"/>
+  <meta name="docsearch:version" content="1.7.0" />
+    <meta name="docbuild:last-update" content="May 13, 2025"/>
   </head>
   
   
@@ -118,8 +118,8 @@
     
     
     
-    <img src="../../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.6.0 documentation - Home"/>
-    <img src="../../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.6.0 documentation - Home"/>
+    <img src="../../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.7.0 documentation - Home"/>
+    <img src="../../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.7.0 documentation - Home"/>
   
   
 </a></div>
@@ -163,8 +163,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../../changelog.html">
-    Changelog
+  <a class="nav-link nav-internal" href="../../../../news.html">
+    News
   </a>
 </li>
 
@@ -334,8 +334,8 @@
 
 
 <li class="nav-item ">
-  <a class="nav-link nav-internal" href="../../../../changelog.html">
-    Changelog
+  <a class="nav-link nav-internal" href="../../../../news.html">
+    News
   </a>
 </li>
 
@@ -455,6 +455,9 @@
     
     <li class="breadcrumb-item"><a href="../../../index.html" class="nav-link">Module code</a></li>
     
+    
+    <li class="breadcrumb-item"><a href="../../workflows.html" class="nav-link">pharmpy.workflows</a></li>
+    
     <li class="breadcrumb-item active" aria-current="page"><span class="ellipsis">pharmpy.workflows.contexts.local_directory</span></li>
   </ul>
 </nav>
@@ -477,6 +480,7 @@
 
 <span class="kn">import</span><span class="w"> </span><span class="nn">json</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">os.path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">functools</span><span class="w"> </span><span class="kn">import</span> <span class="n">partial</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Literal</span><span class="p">,</span> <span class="n">Optional</span>
 
@@ -514,15 +518,18 @@
         <span class="n">ref</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span><span class="p">,</span>
     <span class="p">):</span>
         <span class="k">if</span> <span class="n">ref</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="n">ref</span> <span class="o">=</span> <span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">()</span>
+            <span class="n">ref</span> <span class="o">=</span> <span class="nb">str</span><span class="p">(</span><span class="n">Path</span><span class="o">.</span><span class="n">cwd</span><span class="p">())</span>
         <span class="n">path</span> <span class="o">=</span> <span class="n">Path</span><span class="p">(</span><span class="n">ref</span><span class="p">)</span> <span class="o">/</span> <span class="n">name</span>
 
-        <span class="bp">self</span><span class="o">.</span><span class="n">_init_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="n">isnew</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">_init_path</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">isnew</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_subcontexts</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_top_path</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">_init_model_database</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_init_annotations</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_init_model_name_map</span><span class="p">()</span>
-        <span class="bp">self</span><span class="o">.</span><span class="n">_init_log</span><span class="p">()</span>
+        <span class="k">if</span> <span class="n">isnew</span><span class="p">:</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_annotations</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_model_name_map</span><span class="p">()</span>
+            <span class="bp">self</span><span class="o">.</span><span class="n">_init_log</span><span class="p">()</span>
         <span class="nb">super</span><span class="p">()</span><span class="o">.</span><span class="fm">__init__</span><span class="p">(</span><span class="n">name</span><span class="p">,</span> <span class="n">ref</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="fm">__repr__</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">str</span><span class="p">:</span>
@@ -532,7 +539,11 @@
         <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">=</span> <span class="n">path_absolute</span><span class="p">(</span><span class="n">path</span><span class="p">)</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">path</span><span class="o">.</span><span class="n">mkdir</span><span class="p">(</span><span class="n">parents</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+            <span class="k">return</span> <span class="kc">True</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">return</span> <span class="kc">False</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_init_subcontexts</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;subcontexts&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
             <span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;subcontexts&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">mkdir</span><span class="p">()</span>
 
@@ -576,6 +587,12 @@
         <span class="n">path</span><span class="o">.</span><span class="n">touch</span><span class="p">(</span><span class="n">exist_ok</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">path_lock</span><span class="p">(</span><span class="nb">str</span><span class="p">(</span><span class="n">path</span><span class="p">),</span> <span class="n">shared</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
+    <span class="k">def</span><span class="w"> </span><span class="nf">_delete_lock</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">path</span><span class="p">:</span> <span class="n">Path</span><span class="p">):</span>
+        <span class="c1"># Delete a lock</span>
+        <span class="n">path</span> <span class="o">=</span> <span class="n">path</span><span class="o">.</span><span class="n">with_suffix</span><span class="p">(</span><span class="s1">&#39;.lock&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_file</span><span class="p">():</span>
+            <span class="n">path</span><span class="o">.</span><span class="n">unlink</span><span class="p">()</span>
+
 <div class="viewcode-block" id="LocalDirectoryContext.exists">
 <a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalDirectoryContext.html#pharmpy.workflows.LocalDirectoryContext.exists">[docs]</a>
     <span class="nd">@staticmethod</span>
@@ -598,7 +615,8 @@
 <div class="viewcode-block" id="LocalDirectoryContext.retrieve_results">
 <a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalDirectoryContext.html#pharmpy.workflows.LocalDirectoryContext.retrieve_results">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">retrieve_results</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Results</span><span class="p">:</span>
-        <span class="n">res</span> <span class="o">=</span> <span class="n">read_results</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;results.json&#39;</span><span class="p">)</span>
+        <span class="n">func</span> <span class="o">=</span> <span class="n">partial</span><span class="p">(</span><span class="n">_deserialize_model_from_hash</span><span class="p">,</span> <span class="n">modeldb</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">model_database</span><span class="p">)</span>
+        <span class="n">res</span> <span class="o">=</span> <span class="n">read_results</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;results.json&#39;</span><span class="p">,</span> <span class="n">model_deserialization_func</span><span class="o">=</span><span class="n">func</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">res</span></div>
 
 
@@ -608,8 +626,7 @@
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_metadata_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
-        <span class="c1"># Currently one metadata for nested context</span>
-        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_top_path</span> <span class="o">/</span> <span class="s1">&#39;metadata.json&#39;</span>
+        <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;metadata.json&#39;</span>
 
     <span class="nd">@property</span>
     <span class="k">def</span><span class="w"> </span><span class="nf">_models_path</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">Path</span><span class="p">:</span>
@@ -763,8 +780,30 @@
 <div class="viewcode-block" id="LocalDirectoryContext.retrieve_common_options">
 <a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalDirectoryContext.html#pharmpy.workflows.LocalDirectoryContext.retrieve_common_options">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">retrieve_common_options</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
-        <span class="n">meta</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">retrieve_metadata</span><span class="p">()</span>
+        <span class="n">ctx_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_top_level_context</span><span class="p">()</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">ctx_top</span><span class="o">.</span><span class="n">retrieve_metadata</span><span class="p">()</span>
         <span class="k">return</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;common_options&#39;</span><span class="p">]</span></div>
+
+
+<div class="viewcode-block" id="LocalDirectoryContext.retrieve_dispatching_options">
+<a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalDirectoryContext.html#pharmpy.workflows.LocalDirectoryContext.retrieve_dispatching_options">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">retrieve_dispatching_options</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">dict</span><span class="p">[</span><span class="nb">str</span><span class="p">,</span> <span class="n">Any</span><span class="p">]:</span>
+        <span class="k">if</span> <span class="nb">hasattr</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="s1">&#39;_dispatching_options&#39;</span><span class="p">):</span>
+            <span class="k">return</span> <span class="bp">self</span><span class="o">.</span><span class="n">_dispatching_options</span>
+        <span class="n">ctx_top</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">get_top_level_context</span><span class="p">()</span>
+        <span class="n">meta</span> <span class="o">=</span> <span class="n">ctx_top</span><span class="o">.</span><span class="n">retrieve_metadata</span><span class="p">()</span>
+        <span class="k">if</span> <span class="s1">&#39;dispatching_options&#39;</span> <span class="ow">in</span> <span class="n">meta</span><span class="p">:</span>
+            <span class="n">options</span> <span class="o">=</span> <span class="n">meta</span><span class="p">[</span><span class="s1">&#39;dispatching_options&#39;</span><span class="p">]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows.args</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
+                <span class="n">canonicalize_dispatching_options</span><span class="p">,</span>
+                <span class="n">get_default_dispatching_options</span><span class="p">,</span>
+            <span class="p">)</span>
+
+            <span class="n">options</span> <span class="o">=</span> <span class="n">get_default_dispatching_options</span><span class="p">()</span>
+            <span class="n">canonicalize_dispatching_options</span><span class="p">(</span><span class="n">options</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_dispatching_options</span> <span class="o">=</span> <span class="n">options</span>
+        <span class="k">return</span> <span class="n">options</span></div>
 
 
 <div class="viewcode-block" id="LocalDirectoryContext.get_parent_context">
@@ -777,22 +816,44 @@
         <span class="k">return</span> <span class="n">parent</span></div>
 
 
+<div class="viewcode-block" id="LocalDirectoryContext.get_top_level_context">
+<a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalDirectoryContext.html#pharmpy.workflows.LocalDirectoryContext.get_top_level_context">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">get_top_level_context</span><span class="p">(</span><span class="bp">self</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LocalDirectoryContext</span><span class="p">:</span>
+        <span class="n">ctx_top</span> <span class="o">=</span> <span class="n">LocalDirectoryContext</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_top_path</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="bp">self</span><span class="o">.</span><span class="n">_top_path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
+        <span class="k">return</span> <span class="n">ctx_top</span></div>
+
+
 <div class="viewcode-block" id="LocalDirectoryContext.get_subcontext">
 <a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalDirectoryContext.html#pharmpy.workflows.LocalDirectoryContext.get_subcontext">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">get_subcontext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LocalDirectoryContext</span><span class="p">:</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;subcontexts&#39;</span> <span class="o">/</span> <span class="n">name</span>
+        <span class="n">subcontexts_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;subcontexts&#39;</span>
+        <span class="k">if</span> <span class="n">subcontexts_path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">subcontexts_path</span> <span class="o">/</span> <span class="n">name</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="n">name</span>
         <span class="k">if</span> <span class="n">path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
             <span class="k">return</span> <span class="n">LocalDirectoryContext</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">path</span><span class="o">.</span><span class="n">parent</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;No subcontext with the name </span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span></div>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No subcontext with the name &quot;</span><span class="si">{</span><span class="n">name</span><span class="si">}</span><span class="s1">&quot;&#39;</span><span class="p">)</span></div>
 
 
 <div class="viewcode-block" id="LocalDirectoryContext.create_subcontext">
 <a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalDirectoryContext.html#pharmpy.workflows.LocalDirectoryContext.create_subcontext">[docs]</a>
     <span class="k">def</span><span class="w"> </span><span class="nf">create_subcontext</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">name</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="n">LocalDirectoryContext</span><span class="p">:</span>
-        <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;subcontexts&#39;</span>
+        <span class="n">subcontexts_path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span> <span class="o">/</span> <span class="s1">&#39;subcontexts&#39;</span>
+        <span class="k">if</span> <span class="n">subcontexts_path</span><span class="o">.</span><span class="n">is_dir</span><span class="p">():</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="n">subcontexts_path</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">path</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">path</span>
         <span class="n">ctx</span> <span class="o">=</span> <span class="n">LocalDirectoryContext</span><span class="p">(</span><span class="n">name</span><span class="o">=</span><span class="n">name</span><span class="p">,</span> <span class="n">ref</span><span class="o">=</span><span class="n">path</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">ctx</span></div>
+
+
+<div class="viewcode-block" id="LocalDirectoryContext.finalize">
+<a class="viewcode-back" href="../../../../api/pharmpy.workflows.LocalDirectoryContext.html#pharmpy.workflows.LocalDirectoryContext.finalize">[docs]</a>
+    <span class="k">def</span><span class="w"> </span><span class="nf">finalize</span><span class="p">(</span><span class="bp">self</span><span class="p">):</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delete_lock</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_annotations_path</span><span class="p">)</span>
+        <span class="bp">self</span><span class="o">.</span><span class="n">_delete_lock</span><span class="p">(</span><span class="bp">self</span><span class="o">.</span><span class="n">_log_path</span><span class="p">)</span></div>
 </div>
 
 
@@ -818,6 +879,11 @@
 
     <span class="k">def</span><span class="w"> </span><span class="nf">object_hook</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">obj</span><span class="p">):</span>
         <span class="k">return</span> <span class="n">obj</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_deserialize_model_from_hash</span><span class="p">(</span><span class="n">obj</span><span class="p">,</span> <span class="n">key</span><span class="p">,</span> <span class="n">modeldb</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">modeldb</span><span class="o">.</span><span class="n">retrieve_model</span><span class="p">(</span><span class="n">ModelHash</span><span class="p">(</span><span class="n">key</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">model</span>
 </pre></div>
 
                 </article>
@@ -868,7 +934,7 @@
         <div class="footer-item">
 
   <p class="sphinx-version">
-    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.1.3.
+    Created using <a href="https://www.sphinx-doc.org/">Sphinx</a> 8.2.3.
     <br/>
   </p>
 </div>
