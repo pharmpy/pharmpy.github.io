@@ -16,6 +16,7 @@ Statements
       ~Statements.free_symbols
       ~Statements.lhs_symbols
       ~Statements.ode_system
+      ~Statements.rhs_symbols
 
    .. rubric:: Methods Summary
 
@@ -42,6 +43,7 @@ Statements
    .. autoattribute:: free_symbols
    .. autoattribute:: lhs_symbols
    .. autoattribute:: ode_system
+   .. autoattribute:: rhs_symbols
 
    .. rubric:: Methods Documentation
 

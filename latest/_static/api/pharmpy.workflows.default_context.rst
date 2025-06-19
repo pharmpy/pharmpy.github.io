@@ -16,6 +16,7 @@ default_context
 
    .. autosummary::
 
+      ~default_context.abort_workflow
       ~default_context.create_subcontext
       ~default_context.exists
       ~default_context.finalize
@@ -44,6 +45,7 @@ default_context
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: abort_workflow
    .. automethod:: create_subcontext
    .. automethod:: exists
    .. automethod:: finalize

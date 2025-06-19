@@ -8,7 +8,7 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" /><meta name="viewport" content="width=device-width, initial-scale=1" />
 
-    <title>set_weibull_absorption &#8212; Pharmpy 1.7.2 documentation</title>
+    <title>set_weibull_absorption &#8212; Pharmpy 1.8.0 documentation</title>
   
   
   
@@ -42,12 +42,13 @@
   <link rel="preload" as="script" href="../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../_static/documentation_options.js?v=908dc885"></script>
+    <script src="../_static/documentation_options.js?v=b51e6972"></script>
     <script src="../_static/doctools.js?v=9bcbadda"></script>
     <script src="../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../_static/thebelab-helper.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/require.js/2.3.4/require.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@jupyter-widgets/html-manager@^1.0.1/dist/embed-amd.js"></script>
+    <script async="async" src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
     <script>DOCUMENTATION_OPTIONS.pagename = 'api/pharmpy.modeling.set_weibull_absorption';</script>
     <link rel="icon" href="../_static/Pharmpy_symbol.svg"/>
     <link rel="index" title="Index" href="../genindex.html" />
@@ -56,8 +57,8 @@
     <link rel="prev" title="set_upper_bounds" href="pharmpy.modeling.set_upper_bounds.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.7.2" />
-    <meta name="docbuild:last-update" content="May 21, 2025"/>
+  <meta name="docsearch:version" content="1.8.0" />
+    <meta name="docbuild:last-update" content="Jun 19, 2025"/>
   </head>
   
   
@@ -121,8 +122,8 @@
     
     
     
-    <img src="../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.7.2 documentation - Home"/>
-    <img src="../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.7.2 documentation - Home"/>
+    <img src="../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.8.0 documentation - Home"/>
+    <img src="../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.8.0 documentation - Home"/>
   
   
 </a></div>
@@ -485,6 +486,7 @@
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.add_predictions.html">add_predictions</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.add_residuals.html">add_residuals</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.add_time_after_dose.html">add_time_after_dose</a></li>
+<li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.add_time_of_last_dose.html">add_time_of_last_dose</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.append_estimation_step_options.html">append_estimation_step_options</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.bin_observations.html">bin_observations</a></li>
 <li class="toctree-l2"><a class="reference internal" href="pharmpy.modeling.bump_model_number.html">bump_model_number</a></li>
@@ -824,15 +826,46 @@
 <dt class="sig sig-object py" id="pharmpy.modeling.set_weibull_absorption">
 <span class="sig-prename descclassname"><span class="pre">pharmpy.modeling.</span></span><span class="sig-name descname"><span class="pre">set_weibull_absorption</span></span><span class="sig-paren">(</span><em class="sig-param"><span class="n"><span class="pre">model</span></span></em><span class="sig-paren">)</span><a class="reference internal" href="../_modules/pharmpy/modeling/odes.html#set_weibull_absorption"><span class="viewcode-link"><span class="pre">[source]</span></span></a><a class="headerlink" href="#pharmpy.modeling.set_weibull_absorption" title="Link to this definition">#</a></dt>
 <dd><p>Set or change to Weibull type absorption</p>
-<p>Initial estimate for absorption rate is set to??</p>
-<p>If multiple doses is set to the affected compartment, currently only iv+oral
-doses (one of each) is supported</p>
-<p>Weibull absorption cannot be used together with lag time and transit compartments.</p>
-<p>Assumes that absorption of one does is done when next dose is given.</p>
-<div class="admonition warning">
-<p class="admonition-title">Warning</p>
-<p>This function is still under development.</p>
+<p>The Weibull absorption has an abosption rate varying with time (or rather time after dose).
+<span class="math notranslate nohighlight">\(k_a(t) = \frac{k}{\lambda} (\frac{t}{\lambda})^{k - 1}\)</span></p>
+<p>Initial parameter estimates will be set differently depending on whether the original model
+has MAT and/or MDT.</p>
+<div class="pst-scrollable-table-container"><table class="table">
+<thead>
+<tr class="row-odd"><th class="head"><p>MAT</p></th>
+<th class="head"><p>MDT</p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(k\)</span></p></th>
+<th class="head"><p><span class="math notranslate nohighlight">\(\lambda\)</span></p></th>
+</tr>
+</thead>
+<tbody>
+<tr class="row-even"><td><p>yes</p></td>
+<td><p>yes</p></td>
+<td><p>1.5</p></td>
+<td><p><span class="math notranslate nohighlight">\(\frac{\mathsf{MAT}}{\Gamma(1 + \frac{1}{k})}\)</span></p></td>
+</tr>
+<tr class="row-odd"><td><p>yes</p></td>
+<td><p>no</p></td>
+<td><p>1.0</p></td>
+<td><p>MAT</p></td>
+</tr>
+<tr class="row-even"><td><p>no</p></td>
+<td><p>yes</p></td>
+<td><p>1.0</p></td>
+<td><p>MDT</p></td>
+</tr>
+<tr class="row-odd"><td><p>no</p></td>
+<td><p>no</p></td>
+<td><p>1.5</p></td>
+<td><p>Same as if having MAT, but use min observation time * 2</p></td>
+</tr>
+</tbody>
+</table>
 </div>
+<p>If multiple doses are fed into the affected compartment, currently only iv+oral
+doses (one of each) is supported.</p>
+<p>Weibull absorption cannot be used together with lag time or transit compartments.</p>
+<p>Assumes that absorption of one dose is complete when the next dose is given.</p>
 <dl class="field-list simple">
 <dt class="field-odd">Parameters<span class="colon">:</span></dt>
 <dd class="field-odd"><p><strong>model</strong> (<em>Model</em>) – Model to set or change to use Weibull absorption rate</p>
@@ -847,9 +880,9 @@ doses (one of each) is supported</p>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span> <span class="o">=</span> <span class="n">set_weibull_absorption</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
 <span class="gp">&gt;&gt;&gt; </span><span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
 <span class="go">Bolus(AMT, admid=1) → DEPOT</span>
-<span class="go">┌─────┐     ┌───────┐</span>
-<span class="go">│DEPOT│──KA→│CENTRAL│──CL/V→</span>
-<span class="go">└─────┘     └───────┘</span>
+<span class="go">┌─────┐      ┌───────┐</span>
+<span class="go">│DEPOT│──KAW→│CENTRAL│──CL/V→</span>
+<span class="go">└─────┘      └───────┘</span>
 </pre></div>
 </div>
 <div class="admonition seealso">

@@ -16,6 +16,7 @@ LocalDirectoryContext
 
    .. autosummary::
 
+      ~LocalDirectoryContext.abort_workflow
       ~LocalDirectoryContext.create_subcontext
       ~LocalDirectoryContext.exists
       ~LocalDirectoryContext.finalize
@@ -44,6 +45,7 @@ LocalDirectoryContext
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: abort_workflow
    .. automethod:: create_subcontext
    .. automethod:: exists
    .. automethod:: finalize
