@@ -10,8 +10,9 @@ default_model_database
 
    .. autosummary::
 
+      ~default_model_database.list_all_files
+      ~default_model_database.retrieve_all_files
       ~default_model_database.retrieve_file
-      ~default_model_database.retrieve_local_files
       ~default_model_database.retrieve_model
       ~default_model_database.retrieve_model_entry
       ~default_model_database.retrieve_modelfit_results
@@ -23,8 +24,9 @@ default_model_database
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: list_all_files
+   .. automethod:: retrieve_all_files
    .. automethod:: retrieve_file
-   .. automethod:: retrieve_local_files
    .. automethod:: retrieve_model
    .. automethod:: retrieve_model_entry
    .. automethod:: retrieve_modelfit_results

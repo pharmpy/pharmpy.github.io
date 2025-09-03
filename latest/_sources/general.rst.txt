@@ -11,4 +11,6 @@ General information about the Pharmpy tools can be found here:
 
    Common features <common_features>
    Model Feature Language (MFL) <mfl>
+   Options <options>
    Strictness <strictness>
+   Selection criteria <selection_criteria>

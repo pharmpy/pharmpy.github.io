@@ -20,6 +20,7 @@ extensions = [
     'jupyter_sphinx',
     'sphinx_tabs.tabs',
     'sphinxcontrib.autoprogram',
+    'sphinxcontrib.bibtex',
     'pharmpy_snippet',
 ]
 if os.getenv('SPELLCHECK'):
@@ -33,7 +34,7 @@ project = 'Pharmpy'
 year = '2018-2025'
 authors = ['the Pharmpy development team']
 copyright = '{0}; {1}'.format(year, ', '.join(authors))
-version = release = '1.8.0'
+version = release = '1.9.0'
 html_show_sourcelink = False
 
 pygments_style = 'trac'
@@ -58,8 +59,13 @@ html_theme_options = {
         {
             "name": "Report issues",
             "url": "https://github.com/pharmpy/pharmpy/issues",
+            "icon": "fa fa-bug",
+        },
+        {
+            "name": "Discussions",
+            "url": "https://github.com/pharmpy/pharmpy/discussions",
             "icon": "fa fa-comments",
-        }
+        },
     ]
 }
 html_favicon = 'images/Pharmpy_symbol.svg'
@@ -75,6 +81,7 @@ napoleon_use_param = False
 automodapi_inheritance_diagram = False
 autodoc_typehints = 'none'
 graphviz_output_format = 'svg'
+bibtex_bibfiles = ['references.bib']
 
 import doctest
 doctest_show_success = False

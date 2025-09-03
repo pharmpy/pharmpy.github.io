@@ -10,8 +10,9 @@ ModelDatabase
 
    .. autosummary::
 
+      ~ModelDatabase.list_all_files
+      ~ModelDatabase.retrieve_all_files
       ~ModelDatabase.retrieve_file
-      ~ModelDatabase.retrieve_local_files
       ~ModelDatabase.retrieve_model
       ~ModelDatabase.retrieve_model_entry
       ~ModelDatabase.retrieve_modelfit_results
@@ -25,8 +26,9 @@ ModelDatabase
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: list_all_files
+   .. automethod:: retrieve_all_files
    .. automethod:: retrieve_file
-   .. automethod:: retrieve_local_files
    .. automethod:: retrieve_model
    .. automethod:: retrieve_model_entry
    .. automethod:: retrieve_modelfit_results

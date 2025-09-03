@@ -30,6 +30,7 @@ Statements
       ~Statements.from_dict
       ~Statements.full_expression
       ~Statements.get_assignment
+      ~Statements.get_assignment_index
       ~Statements.reassign
       ~Statements.remove_symbol_definitions
       ~Statements.subs
@@ -55,6 +56,7 @@ Statements
    .. automethod:: from_dict
    .. automethod:: full_expression
    .. automethod:: get_assignment
+   .. automethod:: get_assignment_index
    .. automethod:: reassign
    .. automethod:: remove_symbol_definitions
    .. automethod:: subs

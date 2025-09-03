@@ -10,8 +10,9 @@ LocalDirectoryDatabase
 
    .. autosummary::
 
+      ~LocalDirectoryDatabase.list_all_files
+      ~LocalDirectoryDatabase.retrieve_all_files
       ~LocalDirectoryDatabase.retrieve_file
-      ~LocalDirectoryDatabase.retrieve_local_files
       ~LocalDirectoryDatabase.retrieve_model
       ~LocalDirectoryDatabase.retrieve_model_entry
       ~LocalDirectoryDatabase.retrieve_modelfit_results
@@ -23,8 +24,9 @@ LocalDirectoryDatabase
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: list_all_files
+   .. automethod:: retrieve_all_files
    .. automethod:: retrieve_file
-   .. automethod:: retrieve_local_files
    .. automethod:: retrieve_model
    .. automethod:: retrieve_model_entry
    .. automethod:: retrieve_modelfit_results

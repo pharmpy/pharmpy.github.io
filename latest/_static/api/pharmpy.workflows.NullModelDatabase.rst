@@ -10,8 +10,9 @@ NullModelDatabase
 
    .. autosummary::
 
+      ~NullModelDatabase.list_all_files
+      ~NullModelDatabase.retrieve_all_files
       ~NullModelDatabase.retrieve_file
-      ~NullModelDatabase.retrieve_local_files
       ~NullModelDatabase.retrieve_model
       ~NullModelDatabase.retrieve_model_entry
       ~NullModelDatabase.retrieve_modelfit_results
@@ -23,8 +24,9 @@ NullModelDatabase
 
    .. rubric:: Methods Documentation
 
+   .. automethod:: list_all_files
+   .. automethod:: retrieve_all_files
    .. automethod:: retrieve_file
-   .. automethod:: retrieve_local_files
    .. automethod:: retrieve_model
    .. automethod:: retrieve_model_entry
    .. automethod:: retrieve_modelfit_results
