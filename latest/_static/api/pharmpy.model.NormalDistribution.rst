@@ -14,6 +14,7 @@ NormalDistribution
       ~NormalDistribution.level
       ~NormalDistribution.mean
       ~NormalDistribution.names
+      ~NormalDistribution.parameter_names
       ~NormalDistribution.variance
 
    .. rubric:: Methods Summary
@@ -36,6 +37,7 @@ NormalDistribution
    .. autoattribute:: level
    .. autoattribute:: mean
    .. autoattribute:: names
+   .. autoattribute:: parameter_names
    .. autoattribute:: variance
 
    .. rubric:: Methods Documentation

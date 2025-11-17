@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.pd &#8212; Pharmpy 1.10.0 documentation</title>
+    <title>pharmpy.modeling.pd &#8212; Pharmpy 1.11.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=1d24b1d9"></script>
+    <script src="../../../_static/documentation_options.js?v=6cf1fb80"></script>
     <script src="../../../_static/doctools.js?v=9bcbadda"></script>
     <script src="../../../_static/sphinx_highlight.js?v=dc90522c"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -53,8 +53,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.10.0" />
-    <meta name="docbuild:last-update" content="Sep 18, 2025"/>
+  <meta name="docsearch:version" content="1.11.0" />
+    <meta name="docbuild:last-update" content="Nov 17, 2025"/>
   </head>
   
   
@@ -118,8 +118,8 @@
     
     
     
-    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.10.0 documentation - Home"/>
-    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.10.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.11.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.11.0 documentation - Home"/>
   
   
 </a></div>
@@ -516,7 +516,7 @@
     <span class="n">get_and_check_odes</span><span class="p">,</span>
     <span class="n">output</span><span class="p">,</span>
 <span class="p">)</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.modeling</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_central_volume_and_clearance</span><span class="p">,</span> <span class="n">set_initial_condition</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.modeling</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_symbol</span><span class="p">,</span> <span class="n">get_central_volume_and_clearance</span><span class="p">,</span> <span class="n">set_initial_condition</span>
 
 <span class="kn">from</span><span class="w"> </span><span class="nn">.error</span><span class="w"> </span><span class="kn">import</span> <span class="n">set_proportional_error_model</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.odes</span><span class="w"> </span><span class="kn">import</span> <span class="n">add_individual_parameter</span><span class="p">,</span> <span class="n">set_initial_estimates</span>
@@ -656,9 +656,9 @@
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; model = set_direct_effect(model, &quot;linear&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;E&quot;)</span>
-<span class="sd">          ⎛SLOPE⋅A_CENTRAL(t)    ⎞</span>
-<span class="sd">        B⋅⎜────────────────── + 1⎟</span>
-<span class="sd">    E =   ⎝        VC            ⎠</span>
+<span class="sd">        SLOPE⋅A_CENTRAL(t)</span>
+<span class="sd">        ──────────────────</span>
+<span class="sd">    E =         VC</span>
 
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">if</span> <span class="n">variable</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
@@ -670,6 +670,7 @@
             <span class="k">if</span> <span class="n">s</span><span class="o">.</span><span class="n">expression</span> <span class="o">==</span> <span class="n">conc_expr</span><span class="p">:</span>
                 <span class="n">variable_symb</span> <span class="o">=</span> <span class="n">s</span><span class="o">.</span><span class="n">symbol</span>
                 <span class="k">break</span>
+        <span class="n">concentration</span> <span class="o">=</span> <span class="kc">True</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">variable_symb</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">variable</span><span class="p">)</span>
         <span class="k">if</span> <span class="p">(</span>
@@ -677,31 +678,52 @@
             <span class="ow">and</span> <span class="n">variable_symb</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">free_symbols</span>
         <span class="p">):</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Variable </span><span class="si">{</span><span class="n">variable</span><span class="si">}</span><span class="s1"> could not be found&#39;</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">_add_effect</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">variable_symb</span><span class="p">)</span>
+        <span class="n">concentration</span> <span class="o">=</span> <span class="kc">False</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">_add_effect</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">variable_symb</span><span class="p">,</span> <span class="n">concentration</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">model</span></div>
 
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">_add_effect</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">conc</span><span class="p">):</span>
-    <span class="n">e0</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">e0</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_baseline_effect</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">):</span>
+    <span class="n">b</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">b</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;B&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
 
-    <span class="c1"># Add effect E</span>
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_handle_zero</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">Expr</span><span class="p">):</span>
+    <span class="n">idv</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">idv_column</span><span class="o">.</span><span class="n">symbol</span>
+    <span class="k">if</span> <span class="n">expr</span><span class="o">.</span><span class="n">is_piecewise</span><span class="p">():</span>
+        <span class="n">condition</span> <span class="o">=</span> <span class="p">(</span><span class="n">idv</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">)</span> <span class="o">|</span> <span class="n">expr</span><span class="o">.</span><span class="n">piecewise_args</span><span class="p">[</span><span class="mi">0</span><span class="p">][</span><span class="mi">1</span><span class="p">]</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">expr</span><span class="o">.</span><span class="n">piecewise_args</span><span class="p">[</span><span class="mi">1</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">piecewise</span><span class="p">((</span><span class="n">Expr</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">condition</span><span class="p">),</span> <span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">expr</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">piecewise</span><span class="p">((</span><span class="n">Expr</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">idv</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">expr</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+    <span class="k">return</span> <span class="n">expr</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_drug_effect</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">conc</span><span class="p">,</span> <span class="n">zero_handled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
     <span class="k">if</span> <span class="n">expr</span> <span class="o">==</span> <span class="s2">&quot;linear&quot;</span><span class="p">:</span>
-        <span class="n">s</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;SLOPE&quot;</span><span class="p">)</span>
+        <span class="n">s</span> <span class="o">=</span> <span class="n">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;SLOPE&quot;</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">lower</span><span class="o">=-</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span>
-        <span class="n">E</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;E&#39;</span><span class="p">),</span> <span class="n">e0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">s</span> <span class="o">*</span> <span class="n">conc</span><span class="p">)))</span>
+        <span class="n">effect</span> <span class="o">=</span> <span class="n">s</span> <span class="o">*</span> <span class="n">conc</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">zero_handled</span><span class="p">:</span>
+            <span class="n">effect</span> <span class="o">=</span> <span class="n">_handle_zero</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">effect</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">expr</span> <span class="o">==</span> <span class="s2">&quot;emax&quot;</span><span class="p">:</span>
         <span class="n">emax</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;E_MAX&quot;</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">emax</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">lower</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">)</span>
         <span class="n">ec50</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;EC_50&quot;</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">ec50</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
-        <span class="n">E</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">),</span> <span class="n">e0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">emax</span> <span class="o">*</span> <span class="n">conc</span> <span class="o">/</span> <span class="p">(</span><span class="n">ec50</span> <span class="o">+</span> <span class="n">conc</span><span class="p">))))</span>
+        <span class="n">effect</span> <span class="o">=</span> <span class="n">emax</span> <span class="o">*</span> <span class="n">conc</span> <span class="o">/</span> <span class="p">(</span><span class="n">ec50</span> <span class="o">+</span> <span class="n">conc</span><span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">zero_handled</span><span class="p">:</span>
+            <span class="n">effect</span> <span class="o">=</span> <span class="n">_handle_zero</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">effect</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">expr</span> <span class="o">==</span> <span class="s2">&quot;step&quot;</span><span class="p">:</span>
         <span class="n">emax</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;E_MAX&quot;</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">emax</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">lower</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">)</span>
-        <span class="n">E</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">),</span> <span class="n">Expr</span><span class="o">.</span><span class="n">piecewise</span><span class="p">((</span><span class="n">e0</span><span class="p">,</span> <span class="n">conc</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">e0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">emax</span><span class="p">),</span> <span class="kc">True</span><span class="p">)))</span>
+        <span class="n">effect</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">piecewise</span><span class="p">((</span><span class="n">Expr</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="n">conc</span> <span class="o">&lt;=</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">emax</span><span class="p">,</span> <span class="kc">True</span><span class="p">))</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">zero_handled</span><span class="p">:</span>
+            <span class="n">effect</span> <span class="o">=</span> <span class="n">_handle_zero</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">effect</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">expr</span> <span class="o">==</span> <span class="s2">&quot;sigmoid&quot;</span><span class="p">:</span>
         <span class="n">emax</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;E_MAX&quot;</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">emax</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">lower</span><span class="o">=-</span><span class="mf">1.0</span><span class="p">)</span>
@@ -710,28 +732,79 @@
         <span class="n">n</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;N&quot;</span><span class="p">)</span>  <span class="c1"># Hill coefficient</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">n</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">set_initial_estimates</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="p">{</span><span class="s2">&quot;POP_N&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">})</span>
-        <span class="n">E</span> <span class="o">=</span> <span class="n">Assignment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-            <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">),</span>
-            <span class="n">Expr</span><span class="o">.</span><span class="n">piecewise</span><span class="p">(</span>
-                <span class="p">((</span><span class="n">e0</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="p">(</span><span class="n">emax</span> <span class="o">*</span> <span class="n">conc</span><span class="o">**</span><span class="n">n</span> <span class="o">/</span> <span class="p">(</span><span class="n">ec50</span><span class="o">**</span><span class="n">n</span> <span class="o">+</span> <span class="n">conc</span><span class="o">**</span><span class="n">n</span><span class="p">)))),</span> <span class="n">conc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">e0</span><span class="p">,</span> <span class="kc">True</span><span class="p">)</span>
-            <span class="p">),</span>
+        <span class="n">effect</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">piecewise</span><span class="p">(</span>
+            <span class="p">((</span><span class="n">emax</span> <span class="o">*</span> <span class="n">conc</span><span class="o">**</span><span class="n">n</span> <span class="o">/</span> <span class="p">(</span><span class="n">ec50</span><span class="o">**</span><span class="n">n</span> <span class="o">+</span> <span class="n">conc</span><span class="o">**</span><span class="n">n</span><span class="p">)),</span> <span class="n">conc</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">),</span> <span class="p">(</span><span class="n">Expr</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">0</span><span class="p">),</span> <span class="kc">True</span><span class="p">)</span>
         <span class="p">)</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">zero_handled</span><span class="p">:</span>
+            <span class="n">effect</span> <span class="o">=</span> <span class="n">_handle_zero</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">effect</span><span class="p">)</span>
     <span class="k">elif</span> <span class="n">expr</span> <span class="o">==</span> <span class="s2">&quot;loglin&quot;</span><span class="p">:</span>
         <span class="n">s</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;SLOPE&quot;</span><span class="p">)</span>
+        <span class="n">e0</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">lower</span><span class="o">=-</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span>
-        <span class="n">E</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">),</span> <span class="n">s</span> <span class="o">*</span> <span class="p">(</span><span class="n">conc</span> <span class="o">+</span> <span class="p">(</span><span class="n">e0</span> <span class="o">/</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">())</span><span class="o">.</span><span class="n">log</span><span class="p">())</span>
+        <span class="n">effect</span> <span class="o">=</span> <span class="n">s</span> <span class="o">*</span> <span class="p">(</span><span class="n">conc</span> <span class="o">+</span> <span class="p">(</span><span class="n">e0</span> <span class="o">/</span> <span class="n">s</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">())</span><span class="o">.</span><span class="n">log</span><span class="p">()</span>
+        <span class="k">if</span> <span class="ow">not</span> <span class="n">zero_handled</span><span class="p">:</span>
+            <span class="n">effect</span> <span class="o">=</span> <span class="n">_handle_zero</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">effect</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Unknown model &quot;</span><span class="si">{</span><span class="n">expr</span><span class="si">}</span><span class="s1">&quot;.&#39;</span><span class="p">)</span>
 
-    <span class="c1"># Add dependent variable Y_2</span>
-    <span class="n">y_2</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;Y_2&#39;</span><span class="p">)</span>
-    <span class="n">y</span> <span class="o">=</span> <span class="n">Assignment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">y_2</span><span class="p">,</span> <span class="n">E</span><span class="o">.</span><span class="n">symbol</span><span class="p">)</span>
-    <span class="n">dvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">y_2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">+</span> <span class="n">E</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">dependent_variables</span><span class="o">=</span><span class="n">dvs</span><span class="p">)</span>
+    <span class="n">E</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">),</span> <span class="n">effect</span><span class="p">)</span>
+    <span class="n">e_index</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">e_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">r_index</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">r_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">+</span> <span class="n">E</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">r_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">E</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="n">r_index</span><span class="p">:]</span>
+            <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">e_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">E</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="n">e_index</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
 
-    <span class="c1"># Add error model</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">set_proportional_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zero_protection</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
 
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_response</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">r_index</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">expr</span> <span class="o">!=</span> <span class="s2">&quot;loglin&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">r_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+            <span class="n">assignment</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="n">r_index</span><span class="p">]</span>
+            <span class="k">assert</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">assignment</span><span class="p">,</span> <span class="n">Assignment</span><span class="p">)</span>
+            <span class="n">expression</span> <span class="o">=</span> <span class="n">assignment</span><span class="o">.</span><span class="n">expression</span> <span class="o">*</span> <span class="p">(</span><span class="n">Expr</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">))</span>
+            <span class="n">assignment</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span> <span class="n">expression</span><span class="p">)</span>
+            <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="n">r_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">assignment</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="n">r_index</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">b</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
+            <span class="n">assignment</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">),</span> <span class="n">b</span> <span class="o">*</span> <span class="p">(</span><span class="n">Expr</span><span class="o">.</span><span class="n">integer</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">)))</span>
+            <span class="n">statements</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">+</span> <span class="n">assignment</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_dependent_variable</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="nb">str</span><span class="p">):</span>
+    <span class="n">dv</span><span class="p">,</span> <span class="o">*</span><span class="n">_</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span>
+
+    <span class="n">a</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">get_assignment</span><span class="p">(</span><span class="n">dv</span><span class="p">)</span>
+    <span class="n">R</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">R</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">a</span><span class="o">.</span><span class="n">expression</span><span class="o">.</span><span class="n">free_symbols</span><span class="p">:</span>
+        <span class="c1"># Add dependent variable Y_2</span>
+        <span class="n">y_2</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s1">&#39;Y_2&#39;</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">expr</span> <span class="o">!=</span> <span class="s1">&#39;loglin&#39;</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">Assignment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">y_2</span><span class="p">,</span> <span class="n">R</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">y</span> <span class="o">=</span> <span class="n">Assignment</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">y_2</span><span class="p">,</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;E&quot;</span><span class="p">))</span>
+        <span class="n">dvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dependent_variables</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">y_2</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">model</span><span class="o">.</span><span class="n">statements</span> <span class="o">+</span> <span class="n">y</span><span class="p">,</span> <span class="n">dependent_variables</span><span class="o">=</span><span class="n">dvs</span><span class="p">)</span>
+
+        <span class="c1"># Add error model</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">set_proportional_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zero_protection</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">model</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_add_effect</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">conc</span><span class="p">,</span> <span class="n">zero_handled</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">_add_baseline_effect</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">_add_drug_effect</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expr</span><span class="p">,</span> <span class="n">conc</span><span class="p">,</span> <span class="n">zero_handled</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">_add_response</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">_add_dependent_variable</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span>
 
 
@@ -913,6 +986,111 @@
     <span class="c1"># Add error model</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">set_proportional_error_model</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">dv</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">zero_protection</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
 
+    <span class="k">return</span> <span class="n">model</span></div>
+
+
+
+<div class="viewcode-block" id="add_placebo_model">
+<a class="viewcode-back" href="../../../api/pharmpy.modeling.add_placebo_model.html#pharmpy.modeling.add_placebo_model">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">add_placebo_model</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span>
+    <span class="n">expr</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;linear&#39;</span><span class="p">,</span> <span class="s1">&#39;exp&#39;</span><span class="p">,</span> <span class="s1">&#39;hyperbolic&#39;</span><span class="p">],</span>
+    <span class="n">operator</span><span class="p">:</span> <span class="n">Literal</span><span class="p">[</span><span class="s1">&#39;*&#39;</span><span class="p">,</span> <span class="s1">&#39;+&#39;</span><span class="p">,</span> <span class="s1">&#39;prop&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span>
+<span class="p">):</span>
+<span class="w">    </span><span class="sa">r</span><span class="sd">&quot;&quot;&quot;Add a placebo or disease progression effect to a model.</span>
+
+<span class="sd">    .. warning:: This function is under development.</span>
+
+<span class="sd">    * linear</span>
+
+<span class="sd">        .. math:: R = B + \text{slope} \cdot \text{TIME}</span>
+
+<span class="sd">    * exp</span>
+
+<span class="sd">        .. math:: R = B \cdot e^{\frac{-t}{t_D}}</span>
+
+<span class="sd">    * hyperbolic</span>
+
+<span class="sd">        .. math:: R = B \cdot \frac{t_{50}}{t + t_{50}}</span>
+
+<span class="sd">    :math:`B` is the baseline effect</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    expr : str</span>
+<span class="sd">        Name of placebo/disease progression effect function.</span>
+<span class="sd">    operator : str</span>
+<span class="sd">        Operator to use for combining the baseline with the placebo/disease progression</span>
+
+<span class="sd">    Return</span>
+<span class="sd">    ------</span>
+<span class="sd">    Model</span>
+<span class="sd">        Updated Pharmpy model</span>
+
+<span class="sd">    Examples</span>
+<span class="sd">    --------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import *</span>
+<span class="sd">    &gt;&gt;&gt; model = create_basic_pd_model()</span>
+<span class="sd">    &gt;&gt;&gt; model = add_placebo_model(model, &quot;linear&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; model.statements.find_assignment(&quot;PDP&quot;)</span>
+<span class="sd">    PDP = SLOPE⋅TIME</span>
+
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">r_index</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">r_index</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;Cannot find response variable R. Is this a PD model?&quot;</span><span class="p">)</span>
+
+    <span class="n">P</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;PDP&quot;</span><span class="p">)</span>
+
+    <span class="n">p_index</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">find_assignment_index</span><span class="p">(</span><span class="s2">&quot;PDP&quot;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">p_index</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s2">&quot;PDP already in the model. Not yet supported&quot;</span><span class="p">)</span>
+
+    <span class="n">idv</span> <span class="o">=</span> <span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">idv_column</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+    <span class="n">old_rassign</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">get_assignment</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
+
+    <span class="k">def</span><span class="w"> </span><span class="nf">operate</span><span class="p">(</span><span class="n">lhs</span><span class="p">,</span> <span class="n">rhs</span><span class="p">,</span> <span class="n">operator</span><span class="p">):</span>
+        <span class="k">if</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lhs</span> <span class="o">*</span> <span class="n">rhs</span>
+        <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;+&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lhs</span> <span class="o">+</span> <span class="n">rhs</span>
+        <span class="k">elif</span> <span class="n">operator</span> <span class="o">==</span> <span class="s1">&#39;prop&#39;</span><span class="p">:</span>
+            <span class="k">return</span> <span class="n">lhs</span> <span class="o">*</span> <span class="p">(</span><span class="mi">1</span> <span class="o">+</span> <span class="n">rhs</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown operator </span><span class="si">{</span><span class="n">operator</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">expr</span> <span class="o">==</span> <span class="s1">&#39;linear&#39;</span><span class="p">:</span>
+        <span class="n">slope</span> <span class="o">=</span> <span class="n">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;SLOPE&quot;</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">slope</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">lower</span><span class="o">=-</span><span class="nb">float</span><span class="p">(</span><span class="s2">&quot;inf&quot;</span><span class="p">))</span>
+        <span class="n">passign_expr</span> <span class="o">=</span> <span class="n">slope</span> <span class="o">*</span> <span class="n">idv</span>
+        <span class="n">rassign_expr</span> <span class="o">=</span> <span class="n">operate</span><span class="p">(</span><span class="n">old_rassign</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">operator</span><span class="p">)</span>
+    <span class="k">elif</span> <span class="n">expr</span> <span class="o">==</span> <span class="s1">&#39;exp&#39;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">operator</span> <span class="o">!=</span> <span class="s1">&#39;*&#39;</span><span class="p">:</span>
+            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Only * is supported for exp&#39;</span><span class="p">)</span>
+        <span class="n">td</span> <span class="o">=</span> <span class="n">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;TD&quot;</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">td</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">passign_expr</span> <span class="o">=</span> <span class="p">(</span><span class="o">-</span><span class="n">idv</span> <span class="o">/</span> <span class="n">td</span><span class="p">)</span><span class="o">.</span><span class="n">exp</span><span class="p">()</span>
+        <span class="n">rassign_expr</span> <span class="o">=</span> <span class="n">old_rassign</span><span class="o">.</span><span class="n">expression</span> <span class="o">*</span> <span class="n">P</span>
+    <span class="k">elif</span> <span class="n">expr</span> <span class="o">==</span> <span class="s1">&#39;hyperbolic&#39;</span><span class="p">:</span>
+        <span class="n">t50</span> <span class="o">=</span> <span class="n">create_symbol</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="s2">&quot;T50&quot;</span><span class="p">)</span>
+        <span class="n">model</span> <span class="o">=</span> <span class="n">add_individual_parameter</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">t50</span><span class="o">.</span><span class="n">name</span><span class="p">)</span>
+        <span class="n">passign_expr</span> <span class="o">=</span> <span class="n">t50</span> <span class="o">/</span> <span class="p">(</span><span class="n">idv</span> <span class="o">+</span> <span class="n">t50</span><span class="p">)</span>
+        <span class="n">rassign_expr</span> <span class="o">=</span> <span class="n">operate</span><span class="p">(</span><span class="n">old_rassign</span><span class="o">.</span><span class="n">expression</span><span class="p">,</span> <span class="n">P</span><span class="p">,</span> <span class="n">operator</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unknown placebo model </span><span class="si">{</span><span class="n">expr</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+
+    <span class="n">passign</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">P</span><span class="p">,</span> <span class="n">passign_expr</span><span class="p">)</span>
+    <span class="n">new_rassign</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">old_rassign</span><span class="o">.</span><span class="n">symbol</span><span class="p">,</span> <span class="n">rassign_expr</span><span class="p">)</span>
+
+    <span class="n">r_index</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">get_assignment_index</span><span class="p">(</span><span class="s2">&quot;R&quot;</span><span class="p">)</span>
+    <span class="n">statements</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[:</span><span class="n">r_index</span><span class="p">]</span> <span class="o">+</span> <span class="n">passign</span> <span class="o">+</span> <span class="n">new_rassign</span> <span class="o">+</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="p">[</span><span class="n">r_index</span> <span class="o">+</span> <span class="mi">1</span> <span class="p">:]</span>
+    <span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">statements</span><span class="o">=</span><span class="n">statements</span><span class="p">)</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span>
     <span class="k">return</span> <span class="n">model</span></div>
 
 </pre></div>

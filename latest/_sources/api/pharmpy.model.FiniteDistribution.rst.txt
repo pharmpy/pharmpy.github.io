@@ -14,6 +14,7 @@ FiniteDistribution
       ~FiniteDistribution.level
       ~FiniteDistribution.mean
       ~FiniteDistribution.names
+      ~FiniteDistribution.parameter_names
       ~FiniteDistribution.probabilities
       ~FiniteDistribution.variance
 
@@ -37,6 +38,7 @@ FiniteDistribution
    .. autoattribute:: level
    .. autoattribute:: mean
    .. autoattribute:: names
+   .. autoattribute:: parameter_names
    .. autoattribute:: probabilities
    .. autoattribute:: variance
 

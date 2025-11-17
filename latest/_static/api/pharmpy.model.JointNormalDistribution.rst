@@ -14,6 +14,7 @@ JointNormalDistribution
       ~JointNormalDistribution.level
       ~JointNormalDistribution.mean
       ~JointNormalDistribution.names
+      ~JointNormalDistribution.parameter_names
       ~JointNormalDistribution.variance
 
    .. rubric:: Methods Summary
@@ -36,6 +37,7 @@ JointNormalDistribution
    .. autoattribute:: level
    .. autoattribute:: mean
    .. autoattribute:: names
+   .. autoattribute:: parameter_names
    .. autoattribute:: variance
 
    .. rubric:: Methods Documentation
