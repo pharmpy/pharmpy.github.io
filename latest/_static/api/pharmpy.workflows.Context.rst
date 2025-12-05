@@ -26,6 +26,7 @@ Context
       ~Context.call_workflow
       ~Context.create_rng
       ~Context.create_subcontext
+      ~Context.default_exists
       ~Context.exists
       ~Context.finalize
       ~Context.get_model_context_path
@@ -51,6 +52,7 @@ Context
       ~Context.retrieve_metadata
       ~Context.retrieve_model_entry
       ~Context.retrieve_results
+      ~Context.select_context
       ~Context.spawn_seed
       ~Context.store_annotation
       ~Context.store_final_model_entry
@@ -77,6 +79,7 @@ Context
    .. automethod:: call_workflow
    .. automethod:: create_rng
    .. automethod:: create_subcontext
+   .. automethod:: default_exists
    .. automethod:: exists
    .. automethod:: finalize
    .. automethod:: get_model_context_path
@@ -102,6 +105,7 @@ Context
    .. automethod:: retrieve_metadata
    .. automethod:: retrieve_model_entry
    .. automethod:: retrieve_results
+   .. automethod:: select_context
    .. automethod:: spawn_seed
    .. automethod:: store_annotation
    .. automethod:: store_final_model_entry

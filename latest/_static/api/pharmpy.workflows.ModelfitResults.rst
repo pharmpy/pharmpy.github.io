@@ -10,6 +10,7 @@ ModelfitResults
 
    .. autosummary::
 
+      ~ModelfitResults.condition_number
       ~ModelfitResults.correlation_matrix
       ~ModelfitResults.covariance_matrix
       ~ModelfitResults.covstep_successful
@@ -49,6 +50,7 @@ ModelfitResults
 
    .. rubric:: Attributes Documentation
 
+   .. autoattribute:: condition_number
    .. autoattribute:: correlation_matrix
    .. autoattribute:: covariance_matrix
    .. autoattribute:: covstep_successful

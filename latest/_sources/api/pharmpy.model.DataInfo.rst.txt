@@ -18,6 +18,7 @@ DataInfo
       ~DataInfo.names
       ~DataInfo.path
       ~DataInfo.separator
+      ~DataInfo.symbols
       ~DataInfo.typeix
       ~DataInfo.types
 
@@ -50,6 +51,7 @@ DataInfo
    .. autoattribute:: names
    .. autoattribute:: path
    .. autoattribute:: separator
+   .. autoattribute:: symbols
    .. autoattribute:: typeix
    .. autoattribute:: types
 
