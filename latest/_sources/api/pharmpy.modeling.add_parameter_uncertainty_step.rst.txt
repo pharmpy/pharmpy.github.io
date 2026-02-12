@@ -1,5 +1,5 @@
-add_parameter_uncertainty_step
-==============================
+﻿pharmpy.modeling.add\_parameter\_uncertainty\_step
+==================================================
 
 .. currentmodule:: pharmpy.modeling
 

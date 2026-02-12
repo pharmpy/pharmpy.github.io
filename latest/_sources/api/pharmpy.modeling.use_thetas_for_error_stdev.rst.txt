@@ -1,5 +1,5 @@
-use_thetas_for_error_stdev
-==========================
+﻿pharmpy.modeling.use\_thetas\_for\_error\_stdev
+===============================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-remove_bioavailability
-======================
+﻿pharmpy.modeling.remove\_bioavailability
+========================================
 
 .. currentmodule:: pharmpy.modeling
 

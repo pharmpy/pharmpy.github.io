@@ -1,5 +1,5 @@
-remove_derivative
-=================
+﻿pharmpy.modeling.remove\_derivative
+===================================
 
 .. currentmodule:: pharmpy.modeling
 

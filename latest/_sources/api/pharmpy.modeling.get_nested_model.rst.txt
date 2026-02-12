@@ -1,5 +1,5 @@
-get_nested_model
-================
+﻿pharmpy.modeling.get\_nested\_model
+===================================
 
 .. currentmodule:: pharmpy.modeling
 

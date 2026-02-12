@@ -1,5 +1,5 @@
-calculate_aic
-=============
+﻿pharmpy.modeling.calculate\_aic
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

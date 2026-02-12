@@ -1,5 +1,5 @@
-convert_model
-=============
+﻿pharmpy.modeling.convert\_model
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

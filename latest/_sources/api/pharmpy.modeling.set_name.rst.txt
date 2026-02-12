@@ -1,5 +1,5 @@
-set_name
-========
+﻿pharmpy.modeling.set\_name
+==========================
 
 .. currentmodule:: pharmpy.modeling
 

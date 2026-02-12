@@ -1,5 +1,5 @@
-create_rng
-==========
+﻿pharmpy.modeling.create\_rng
+============================
 
 .. currentmodule:: pharmpy.modeling
 

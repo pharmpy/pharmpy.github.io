@@ -1,5 +1,5 @@
-calculate_pk_parameters_statistics
-==================================
+﻿pharmpy.modeling.calculate\_pk\_parameters\_statistics
+======================================================
 
 .. currentmodule:: pharmpy.modeling
 

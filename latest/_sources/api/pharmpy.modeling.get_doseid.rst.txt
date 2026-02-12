@@ -1,5 +1,5 @@
-get_doseid
-==========
+﻿pharmpy.modeling.get\_doseid
+============================
 
 .. currentmodule:: pharmpy.modeling
 

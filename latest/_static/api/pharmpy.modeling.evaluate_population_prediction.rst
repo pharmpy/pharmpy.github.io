@@ -1,5 +1,5 @@
-evaluate_population_prediction
-==============================
+﻿pharmpy.modeling.evaluate\_population\_prediction
+=================================================
 
 .. currentmodule:: pharmpy.modeling
 

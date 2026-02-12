@@ -1,5 +1,5 @@
-binarize_dataset
-================
+﻿pharmpy.modeling.binarize\_dataset
+==================================
 
 .. currentmodule:: pharmpy.modeling
 

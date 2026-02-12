@@ -1,5 +1,5 @@
-is_simulation_model
-===================
+﻿pharmpy.modeling.is\_simulation\_model
+======================================
 
 .. currentmodule:: pharmpy.modeling
 

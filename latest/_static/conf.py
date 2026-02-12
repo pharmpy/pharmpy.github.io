@@ -31,10 +31,10 @@ if os.getenv('SPELLCHECK'):
 source_suffix = '.rst'
 master_doc = 'index'
 project = 'Pharmpy'
-year = '2018-2025'
+year = '2018-2026'
 authors = ['the Pharmpy development team']
 copyright = '{0}; {1}'.format(year, ', '.join(authors))
-version = release = '1.12.0'
+version = release = '2.0.0'
 html_show_sourcelink = False
 
 pygments_style = 'trac'
@@ -92,5 +92,6 @@ pd.set_option('display.width', 1000)
 pd.set_option('display.max_columns', 1000)
 '''
 
-# Page is reachable from browser but gives 403 with GET
-linkcheck_ignore = [r'https://doi.org/10.1002/psp4.12741']
+linkcheck_ignore = [r'https://doi.org/10.1002/psp4.12741', # Page is reachable from browser but gives 403 with GET
+    r'https://doi.org/10.1515/ijb-2019-0082',
+    r'https://projecteuclid.org/journals/electronic-journal-of-statistics/volume-8/issue-1/A-note-on-BIC-in-mixed-effects-models/10.1214/14-EJS890.full']

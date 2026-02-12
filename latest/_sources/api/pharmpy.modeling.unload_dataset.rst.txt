@@ -1,5 +1,5 @@
-unload_dataset
-==============
+﻿pharmpy.modeling.unload\_dataset
+================================
 
 .. currentmodule:: pharmpy.modeling
 

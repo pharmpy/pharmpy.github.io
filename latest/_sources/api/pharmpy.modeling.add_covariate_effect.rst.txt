@@ -1,5 +1,5 @@
-add_covariate_effect
-====================
+﻿pharmpy.modeling.add\_covariate\_effect
+=======================================
 
 .. currentmodule:: pharmpy.modeling
 

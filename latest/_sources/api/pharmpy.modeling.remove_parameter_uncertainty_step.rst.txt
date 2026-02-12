@@ -1,5 +1,5 @@
-remove_parameter_uncertainty_step
-=================================
+﻿pharmpy.modeling.remove\_parameter\_uncertainty\_step
+=====================================================
 
 .. currentmodule:: pharmpy.modeling
 

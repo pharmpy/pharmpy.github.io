@@ -1,5 +1,5 @@
-simplify_expression
-===================
+﻿pharmpy.modeling.simplify\_expression
+=====================================
 
 .. currentmodule:: pharmpy.modeling
 

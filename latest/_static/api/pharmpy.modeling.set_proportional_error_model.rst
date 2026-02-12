@@ -1,5 +1,5 @@
-set_proportional_error_model
-============================
+﻿pharmpy.modeling.set\_proportional\_error\_model
+================================================
 
 .. currentmodule:: pharmpy.modeling
 

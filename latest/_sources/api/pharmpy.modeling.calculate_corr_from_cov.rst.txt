@@ -1,5 +1,5 @@
-calculate_corr_from_cov
-=======================
+﻿pharmpy.modeling.calculate\_corr\_from\_cov
+===========================================
 
 .. currentmodule:: pharmpy.modeling
 

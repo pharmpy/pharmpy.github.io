@@ -1,5 +1,5 @@
-cleanup_model
-=============
+﻿pharmpy.modeling.cleanup\_model
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

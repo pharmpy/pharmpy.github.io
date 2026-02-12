@@ -1,5 +1,5 @@
-get_bioavailability
-===================
+﻿pharmpy.modeling.get\_bioavailability
+=====================================
 
 .. currentmodule:: pharmpy.modeling
 

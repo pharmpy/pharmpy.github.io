@@ -1,5 +1,5 @@
-add_individual_parameter
-========================
+﻿pharmpy.modeling.add\_individual\_parameter
+===========================================
 
 .. currentmodule:: pharmpy.modeling
 

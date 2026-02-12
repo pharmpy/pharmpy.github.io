@@ -1,5 +1,5 @@
-find_volume_parameters
-======================
+﻿pharmpy.modeling.find\_volume\_parameters
+=========================================
 
 .. currentmodule:: pharmpy.modeling
 

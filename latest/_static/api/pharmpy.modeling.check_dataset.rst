@@ -1,5 +1,5 @@
-check_dataset
-=============
+﻿pharmpy.modeling.check\_dataset
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

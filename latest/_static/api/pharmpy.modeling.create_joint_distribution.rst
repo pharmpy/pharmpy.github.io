@@ -1,5 +1,5 @@
-create_joint_distribution
-=========================
+﻿pharmpy.modeling.create\_joint\_distribution
+============================================
 
 .. currentmodule:: pharmpy.modeling
 

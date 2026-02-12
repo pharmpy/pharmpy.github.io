@@ -1,5 +1,5 @@
-insert_ebes_into_dataset
-========================
+﻿pharmpy.modeling.insert\_ebes\_into\_dataset
+============================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-add_predictions
-===============
+﻿pharmpy.modeling.add\_predictions
+=================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-remove_iov
-==========
+﻿pharmpy.modeling.remove\_iov
+============================
 
 .. currentmodule:: pharmpy.modeling
 

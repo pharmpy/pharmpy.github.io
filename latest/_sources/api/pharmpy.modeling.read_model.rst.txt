@@ -1,5 +1,5 @@
-read_model
-==========
+﻿pharmpy.modeling.read\_model
+============================
 
 .. currentmodule:: pharmpy.modeling
 

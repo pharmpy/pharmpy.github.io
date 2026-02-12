@@ -1,5 +1,5 @@
-set_dataset
-===========
+﻿pharmpy.modeling.set\_dataset
+=============================
 
 .. currentmodule:: pharmpy.modeling
 

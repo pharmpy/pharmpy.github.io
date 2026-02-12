@@ -1,5 +1,5 @@
-create_symbol
-=============
+﻿pharmpy.modeling.create\_symbol
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-has_first_order_elimination
-===========================
+﻿pharmpy.modeling.has\_first\_order\_elimination
+===============================================
 
 .. currentmodule:: pharmpy.modeling
 

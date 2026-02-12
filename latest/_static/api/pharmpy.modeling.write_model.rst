@@ -1,5 +1,5 @@
-write_model
-===========
+﻿pharmpy.modeling.write\_model
+=============================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-has_weibull_absorption
-======================
+﻿pharmpy.modeling.has\_weibull\_absorption
+=========================================
 
 .. currentmodule:: pharmpy.modeling
 

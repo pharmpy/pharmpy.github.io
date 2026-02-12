@@ -1,5 +1,5 @@
-get_individual_parameters
-=========================
+﻿pharmpy.modeling.get\_individual\_parameters
+============================================
 
 .. currentmodule:: pharmpy.modeling
 

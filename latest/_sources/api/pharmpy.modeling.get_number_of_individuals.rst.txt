@@ -1,5 +1,5 @@
-get_number_of_individuals
-=========================
+﻿pharmpy.modeling.get\_number\_of\_individuals
+=============================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-has_linear_odes
-===============
+﻿pharmpy.modeling.has\_linear\_odes
+==================================
 
 .. currentmodule:: pharmpy.modeling
 

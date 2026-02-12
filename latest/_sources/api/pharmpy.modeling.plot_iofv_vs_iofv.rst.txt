@@ -1,5 +1,5 @@
-plot_iofv_vs_iofv
-=================
+﻿pharmpy.modeling.plot\_iofv\_vs\_iofv
+=====================================
 
 .. currentmodule:: pharmpy.modeling
 

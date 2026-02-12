@@ -1,5 +1,5 @@
-add_metabolite
-==============
+﻿pharmpy.modeling.add\_metabolite
+================================
 
 .. currentmodule:: pharmpy.modeling
 

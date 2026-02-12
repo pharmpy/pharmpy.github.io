@@ -1,5 +1,5 @@
-bin_observations
-================
+﻿pharmpy.modeling.bin\_observations
+==================================
 
 .. currentmodule:: pharmpy.modeling
 

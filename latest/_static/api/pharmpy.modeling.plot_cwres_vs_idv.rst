@@ -1,5 +1,5 @@
-plot_cwres_vs_idv
-=================
+﻿pharmpy.modeling.plot\_cwres\_vs\_idv
+=====================================
 
 .. currentmodule:: pharmpy.modeling
 

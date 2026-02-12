@@ -1,5 +1,5 @@
-get_zero_order_inputs
-=====================
+﻿pharmpy.modeling.get\_zero\_order\_inputs
+=========================================
 
 .. currentmodule:: pharmpy.modeling
 

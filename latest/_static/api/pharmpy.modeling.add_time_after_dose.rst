@@ -1,5 +1,5 @@
-add_time_after_dose
-===================
+﻿pharmpy.modeling.add\_time\_after\_dose
+=======================================
 
 .. currentmodule:: pharmpy.modeling
 

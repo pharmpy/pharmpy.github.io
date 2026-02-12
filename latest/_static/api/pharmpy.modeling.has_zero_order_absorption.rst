@@ -1,5 +1,5 @@
-has_zero_order_absorption
-=========================
+﻿pharmpy.modeling.has\_zero\_order\_absorption
+=============================================
 
 .. currentmodule:: pharmpy.modeling
 

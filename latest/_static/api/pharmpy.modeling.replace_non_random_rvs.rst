@@ -1,5 +1,5 @@
-replace_non_random_rvs
-======================
+﻿pharmpy.modeling.replace\_non\_random\_rvs
+==========================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-add_bioavailability
-===================
+﻿pharmpy.modeling.add\_bioavailability
+=====================================
 
 .. currentmodule:: pharmpy.modeling
 

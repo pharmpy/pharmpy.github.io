@@ -1,5 +1,5 @@
-set_simulation
-==============
+﻿pharmpy.modeling.set\_simulation
+================================
 
 .. currentmodule:: pharmpy.modeling
 

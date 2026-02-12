@@ -1,5 +1,5 @@
-unconstrain_parameters
-======================
+﻿pharmpy.modeling.unconstrain\_parameters
+========================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-get_cmt
-=======
+﻿pharmpy.modeling.get\_cmt
+=========================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-read_model_from_string
-======================
+﻿pharmpy.modeling.read\_model\_from\_string
+==========================================
 
 .. currentmodule:: pharmpy.modeling
 

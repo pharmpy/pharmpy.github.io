@@ -1,5 +1,5 @@
-get_ids
-=======
+﻿pharmpy.modeling.get\_ids
+=========================
 
 .. currentmodule:: pharmpy.modeling
 

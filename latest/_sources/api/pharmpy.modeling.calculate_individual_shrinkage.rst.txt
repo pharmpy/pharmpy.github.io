@@ -1,5 +1,5 @@
-calculate_individual_shrinkage
-==============================
+﻿pharmpy.modeling.calculate\_individual\_shrinkage
+=================================================
 
 .. currentmodule:: pharmpy.modeling
 

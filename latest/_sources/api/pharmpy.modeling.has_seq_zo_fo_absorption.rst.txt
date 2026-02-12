@@ -1,5 +1,5 @@
-has_seq_zo_fo_absorption
-========================
+﻿pharmpy.modeling.has\_seq\_zo\_fo\_absorption
+=============================================
 
 .. currentmodule:: pharmpy.modeling
 

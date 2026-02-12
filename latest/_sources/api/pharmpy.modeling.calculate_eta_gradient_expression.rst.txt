@@ -1,5 +1,5 @@
-calculate_eta_gradient_expression
-=================================
+﻿pharmpy.modeling.calculate\_eta\_gradient\_expression
+=====================================================
 
 .. currentmodule:: pharmpy.modeling
 

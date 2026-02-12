@@ -1,5 +1,5 @@
-set_ode_solver
-==============
+﻿pharmpy.modeling.set\_ode\_solver
+=================================
 
 .. currentmodule:: pharmpy.modeling
 

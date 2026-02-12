@@ -1,5 +1,5 @@
-check_high_correlations
-=======================
+﻿pharmpy.modeling.check\_high\_correlations
+==========================================
 
 .. currentmodule:: pharmpy.modeling
 

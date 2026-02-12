@@ -1,5 +1,5 @@
-has_first_order_absorption
-==========================
+﻿pharmpy.modeling.has\_first\_order\_absorption
+==============================================
 
 .. currentmodule:: pharmpy.modeling
 

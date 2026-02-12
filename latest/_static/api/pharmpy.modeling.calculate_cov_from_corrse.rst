@@ -1,5 +1,5 @@
-calculate_cov_from_corrse
-=========================
+﻿pharmpy.modeling.calculate\_cov\_from\_corrse
+=============================================
 
 .. currentmodule:: pharmpy.modeling
 

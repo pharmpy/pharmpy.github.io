@@ -1,5 +1,5 @@
-calculate_individual_parameter_statistics
-=========================================
+﻿pharmpy.modeling.calculate\_individual\_parameter\_statistics
+=============================================================
 
 .. currentmodule:: pharmpy.modeling
 

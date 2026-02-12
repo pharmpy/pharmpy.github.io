@@ -1,5 +1,5 @@
-is_real
-=======
+﻿pharmpy.modeling.is\_real
+=========================
 
 .. currentmodule:: pharmpy.modeling
 

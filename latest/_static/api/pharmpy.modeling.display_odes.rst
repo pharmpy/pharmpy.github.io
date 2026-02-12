@@ -1,5 +1,5 @@
-display_odes
-============
+﻿pharmpy.modeling.display\_odes
+==============================
 
 .. currentmodule:: pharmpy.modeling
 

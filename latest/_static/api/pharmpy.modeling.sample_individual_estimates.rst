@@ -1,5 +1,5 @@
-sample_individual_estimates
-===========================
+﻿pharmpy.modeling.sample\_individual\_estimates
+==============================================
 
 .. currentmodule:: pharmpy.modeling
 

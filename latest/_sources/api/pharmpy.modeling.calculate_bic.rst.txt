@@ -1,5 +1,5 @@
-calculate_bic
-=============
+﻿pharmpy.modeling.calculate\_bic
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

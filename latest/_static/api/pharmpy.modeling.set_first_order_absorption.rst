@@ -1,5 +1,5 @@
-set_first_order_absorption
-==========================
+﻿pharmpy.modeling.set\_first\_order\_absorption
+==============================================
 
 .. currentmodule:: pharmpy.modeling
 

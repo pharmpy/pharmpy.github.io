@@ -1,5 +1,5 @@
-set_covariates
-==============
+﻿pharmpy.modeling.set\_covariates
+================================
 
 .. currentmodule:: pharmpy.modeling
 

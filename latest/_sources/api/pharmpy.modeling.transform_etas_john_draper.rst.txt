@@ -1,5 +1,5 @@
-transform_etas_john_draper
-==========================
+﻿pharmpy.modeling.transform\_etas\_john\_draper
+==============================================
 
 .. currentmodule:: pharmpy.modeling
 

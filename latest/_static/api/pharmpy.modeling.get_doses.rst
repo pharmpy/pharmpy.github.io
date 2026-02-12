@@ -1,5 +1,5 @@
-get_doses
-=========
+﻿pharmpy.modeling.get\_doses
+===========================
 
 .. currentmodule:: pharmpy.modeling
 

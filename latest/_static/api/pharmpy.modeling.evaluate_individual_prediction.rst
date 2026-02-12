@@ -1,5 +1,5 @@
-evaluate_individual_prediction
-==============================
+﻿pharmpy.modeling.evaluate\_individual\_prediction
+=================================================
 
 .. currentmodule:: pharmpy.modeling
 

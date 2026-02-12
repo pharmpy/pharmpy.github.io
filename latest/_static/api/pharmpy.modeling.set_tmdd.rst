@@ -1,5 +1,5 @@
-set_tmdd
-========
+﻿pharmpy.modeling.set\_tmdd
+==========================
 
 .. currentmodule:: pharmpy.modeling
 

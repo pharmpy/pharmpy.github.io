@@ -1,5 +1,5 @@
-deidentify_data
-===============
+﻿pharmpy.modeling.deidentify\_data
+=================================
 
 .. currentmodule:: pharmpy.modeling
 

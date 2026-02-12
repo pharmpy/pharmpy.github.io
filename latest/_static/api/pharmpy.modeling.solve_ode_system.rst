@@ -1,5 +1,5 @@
-solve_ode_system
-================
+﻿pharmpy.modeling.solve\_ode\_system
+===================================
 
 .. currentmodule:: pharmpy.modeling
 

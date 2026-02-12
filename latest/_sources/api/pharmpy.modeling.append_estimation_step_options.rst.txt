@@ -1,5 +1,5 @@
-append_estimation_step_options
-==============================
+﻿pharmpy.modeling.append\_estimation\_step\_options
+==================================================
 
 .. currentmodule:: pharmpy.modeling
 

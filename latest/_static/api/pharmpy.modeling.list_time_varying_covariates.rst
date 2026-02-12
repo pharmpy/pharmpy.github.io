@@ -1,5 +1,5 @@
-list_time_varying_covariates
-============================
+﻿pharmpy.modeling.list\_time\_varying\_covariates
+================================================
 
 .. currentmodule:: pharmpy.modeling
 

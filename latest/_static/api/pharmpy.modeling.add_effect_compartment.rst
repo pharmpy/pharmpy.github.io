@@ -1,5 +1,5 @@
-add_effect_compartment
-======================
+﻿pharmpy.modeling.add\_effect\_compartment
+=========================================
 
 .. currentmodule:: pharmpy.modeling
 

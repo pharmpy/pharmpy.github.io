@@ -1,5 +1,5 @@
-plot_dv_vs_pred
-===============
+﻿pharmpy.modeling.plot\_dv\_vs\_pred
+===================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-get_covariate_effects
-=====================
+﻿pharmpy.modeling.get\_covariate\_effects
+========================================
 
 .. currentmodule:: pharmpy.modeling
 

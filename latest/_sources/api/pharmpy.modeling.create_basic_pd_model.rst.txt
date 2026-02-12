@@ -1,5 +1,5 @@
-create_basic_pd_model
-=====================
+﻿pharmpy.modeling.create\_basic\_pd\_model
+=========================================
 
 .. currentmodule:: pharmpy.modeling
 

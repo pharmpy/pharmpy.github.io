@@ -1,5 +1,5 @@
-add_residuals
-=============
+﻿pharmpy.modeling.add\_residuals
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

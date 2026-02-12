@@ -1,5 +1,5 @@
-calculate_parameters_from_ucp
-=============================
+﻿pharmpy.modeling.calculate\_parameters\_from\_ucp
+=================================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-resample_data
-=============
+﻿pharmpy.modeling.resample\_data
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

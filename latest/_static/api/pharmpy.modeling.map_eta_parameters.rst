@@ -1,5 +1,5 @@
-map_eta_parameters
-==================
+﻿pharmpy.modeling.map\_eta\_parameters
+=====================================
 
 .. currentmodule:: pharmpy.modeling
 

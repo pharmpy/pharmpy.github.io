@@ -1,5 +1,5 @@
-set_initial_condition
-=====================
+﻿pharmpy.modeling.set\_initial\_condition
+========================================
 
 .. currentmodule:: pharmpy.modeling
 

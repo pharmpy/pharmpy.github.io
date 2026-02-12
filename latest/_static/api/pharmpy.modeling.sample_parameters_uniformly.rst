@@ -1,5 +1,5 @@
-sample_parameters_uniformly
-===========================
+﻿pharmpy.modeling.sample\_parameters\_uniformly
+==============================================
 
 .. currentmodule:: pharmpy.modeling
 

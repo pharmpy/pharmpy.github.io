@@ -1,5 +1,5 @@
-get_evid
-========
+﻿pharmpy.modeling.get\_evid
+==========================
 
 .. currentmodule:: pharmpy.modeling
 

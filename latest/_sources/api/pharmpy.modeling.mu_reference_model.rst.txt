@@ -1,5 +1,5 @@
-mu_reference_model
-==================
+﻿pharmpy.modeling.mu\_reference\_model
+=====================================
 
 .. currentmodule:: pharmpy.modeling
 

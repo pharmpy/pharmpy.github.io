@@ -1,5 +1,5 @@
-set_additive_error_model
-========================
+﻿pharmpy.modeling.set\_additive\_error\_model
+============================================
 
 .. currentmodule:: pharmpy.modeling
 

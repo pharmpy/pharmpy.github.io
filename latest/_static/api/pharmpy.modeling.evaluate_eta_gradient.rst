@@ -1,5 +1,5 @@
-evaluate_eta_gradient
-=====================
+﻿pharmpy.modeling.evaluate\_eta\_gradient
+========================================
 
 .. currentmodule:: pharmpy.modeling
 

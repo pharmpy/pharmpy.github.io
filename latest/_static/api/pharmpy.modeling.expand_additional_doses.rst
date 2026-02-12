@@ -1,5 +1,5 @@
-expand_additional_doses
-=======================
+﻿pharmpy.modeling.expand\_additional\_doses
+==========================================
 
 .. currentmodule:: pharmpy.modeling
 

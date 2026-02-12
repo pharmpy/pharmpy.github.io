@@ -1,5 +1,5 @@
-set_reference_values
-====================
+﻿pharmpy.modeling.set\_reference\_values
+=======================================
 
 .. currentmodule:: pharmpy.modeling
 

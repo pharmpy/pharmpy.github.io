@@ -1,5 +1,5 @@
-calculate_ucp_scale
-===================
+﻿pharmpy.modeling.calculate\_ucp\_scale
+======================================
 
 .. currentmodule:: pharmpy.modeling
 

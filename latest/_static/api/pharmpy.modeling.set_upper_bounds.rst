@@ -1,5 +1,5 @@
-set_upper_bounds
-================
+﻿pharmpy.modeling.set\_upper\_bounds
+===================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-set_instantaneous_absorption
-============================
+﻿pharmpy.modeling.set\_instantaneous\_absorption
+===============================================
 
 .. currentmodule:: pharmpy.modeling
 

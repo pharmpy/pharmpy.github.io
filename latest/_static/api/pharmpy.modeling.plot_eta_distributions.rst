@@ -1,5 +1,5 @@
-plot_eta_distributions
-======================
+﻿pharmpy.modeling.plot\_eta\_distributions
+=========================================
 
 .. currentmodule:: pharmpy.modeling
 

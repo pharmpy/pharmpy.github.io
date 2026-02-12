@@ -1,5 +1,5 @@
-has_random_effect
-=================
+﻿pharmpy.modeling.has\_random\_effect
+====================================
 
 .. currentmodule:: pharmpy.modeling
 

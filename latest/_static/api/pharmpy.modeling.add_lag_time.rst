@@ -1,5 +1,5 @@
-add_lag_time
-============
+﻿pharmpy.modeling.add\_lag\_time
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

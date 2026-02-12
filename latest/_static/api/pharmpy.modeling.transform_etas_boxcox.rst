@@ -1,5 +1,5 @@
-transform_etas_boxcox
-=====================
+﻿pharmpy.modeling.transform\_etas\_boxcox
+========================================
 
 .. currentmodule:: pharmpy.modeling
 

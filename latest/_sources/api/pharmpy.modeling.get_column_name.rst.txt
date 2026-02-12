@@ -1,5 +1,5 @@
-get_column_name
-===============
+﻿pharmpy.modeling.get\_column\_name
+==================================
 
 .. currentmodule:: pharmpy.modeling
 

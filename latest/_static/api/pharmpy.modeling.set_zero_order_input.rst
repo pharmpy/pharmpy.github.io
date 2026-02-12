@@ -1,5 +1,5 @@
-set_zero_order_input
-====================
+﻿pharmpy.modeling.set\_zero\_order\_input
+========================================
 
 .. currentmodule:: pharmpy.modeling
 

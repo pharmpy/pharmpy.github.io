@@ -1,5 +1,5 @@
-evaluate_weighted_residuals
-===========================
+﻿pharmpy.modeling.evaluate\_weighted\_residuals
+==============================================
 
 .. currentmodule:: pharmpy.modeling
 

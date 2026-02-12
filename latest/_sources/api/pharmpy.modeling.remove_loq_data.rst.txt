@@ -1,5 +1,5 @@
-remove_loq_data
-===============
+﻿pharmpy.modeling.remove\_loq\_data
+==================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-get_parameter_rv
-================
+﻿pharmpy.modeling.get\_parameter\_rv
+===================================
 
 .. currentmodule:: pharmpy.modeling
 

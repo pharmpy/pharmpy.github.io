@@ -1,5 +1,5 @@
-remove_predictions
-==================
+﻿pharmpy.modeling.remove\_predictions
+====================================
 
 .. currentmodule:: pharmpy.modeling
 

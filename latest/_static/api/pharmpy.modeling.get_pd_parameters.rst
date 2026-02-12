@@ -1,5 +1,5 @@
-get_pd_parameters
-=================
+﻿pharmpy.modeling.get\_pd\_parameters
+====================================
 
 .. currentmodule:: pharmpy.modeling
 

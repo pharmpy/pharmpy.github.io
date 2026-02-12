@@ -1,5 +1,5 @@
-plot_dv_vs_ipred
-================
+﻿pharmpy.modeling.plot\_dv\_vs\_ipred
+====================================
 
 .. currentmodule:: pharmpy.modeling
 

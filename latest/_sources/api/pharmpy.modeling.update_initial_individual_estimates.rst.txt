@@ -1,5 +1,5 @@
-update_initial_individual_estimates
-===================================
+﻿pharmpy.modeling.update\_initial\_individual\_estimates
+=======================================================
 
 .. currentmodule:: pharmpy.modeling
 

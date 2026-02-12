@@ -1,5 +1,5 @@
-evaluate_expression
-===================
+﻿pharmpy.modeling.evaluate\_expression
+=====================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-set_peripheral_compartments
-===========================
+﻿pharmpy.modeling.set\_peripheral\_compartments
+==============================================
 
 .. currentmodule:: pharmpy.modeling
 

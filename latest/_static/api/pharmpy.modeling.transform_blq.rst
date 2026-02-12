@@ -1,5 +1,5 @@
-transform_blq
-=============
+﻿pharmpy.modeling.transform\_blq
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

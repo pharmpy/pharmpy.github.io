@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.modeling.data &#8212; Pharmpy 1.12.0 documentation</title>
+    <title>pharmpy.modeling.data &#8212; Pharmpy 2.0.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=fe8e256b"></script>
+    <script src="../../../_static/documentation_options.js?v=51b770b3"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -53,8 +53,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.12.0" />
-    <meta name="docbuild:last-update" content="Dec 05, 2025"/>
+  <meta name="docsearch:version" content="2.0.0" />
+    <meta name="docbuild:last-update" content="Feb 12, 2026"/>
   </head>
   
   
@@ -118,8 +118,8 @@
     
     
     
-    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.12.0 documentation - Home"/>
-    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.12.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 2.0.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 2.0.0 documentation - Home"/>
   
   
 </a></div>
@@ -511,18 +511,22 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.deps.rich</span><span class="w"> </span><span class="kn">import</span> <span class="n">box</span> <span class="k">as</span> <span class="n">rich_box</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.deps.rich</span><span class="w"> </span><span class="kn">import</span> <span class="n">console</span> <span class="k">as</span> <span class="n">rich_console</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.deps.rich</span><span class="w"> </span><span class="kn">import</span> <span class="n">table</span> <span class="k">as</span> <span class="n">rich_table</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.internals.df</span><span class="w"> </span><span class="kn">import</span> <span class="n">reset_index</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.internals.fs.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">normalize_user_given_path</span><span class="p">,</span> <span class="n">path_absolute</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.internals.math</span><span class="w"> </span><span class="kn">import</span> <span class="n">replace_nan</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.model</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">Assignment</span><span class="p">,</span>
     <span class="n">ColumnInfo</span><span class="p">,</span>
     <span class="n">CompartmentalSystem</span><span class="p">,</span>
     <span class="n">DataInfo</span><span class="p">,</span>
     <span class="n">DatasetError</span><span class="p">,</span>
+    <span class="n">DataVariable</span><span class="p">,</span>
     <span class="n">Model</span><span class="p">,</span>
     <span class="n">get_and_check_dataset</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.model.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">update_datainfo</span>
 
+<span class="kn">from</span><span class="w"> </span><span class="nn">.evaluation</span><span class="w"> </span><span class="kn">import</span> <span class="n">evaluate_expression</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.expressions</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_dv_symbol</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">.iterators</span><span class="w"> </span><span class="kn">import</span> <span class="n">resample_data</span>
 
@@ -936,7 +940,8 @@
     <span class="n">newcols</span> <span class="o">=</span> <span class="p">[]</span>
     <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">di</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">name</span> <span class="ow">in</span> <span class="n">covariates</span><span class="p">:</span>
-            <span class="n">newcol</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;covariate&#39;</span><span class="p">)</span>
+            <span class="n">newvar</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;covariate&#39;</span><span class="p">)</span>
+            <span class="n">newcol</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">variable_mapping</span><span class="o">=</span><span class="n">newvar</span><span class="p">)</span>
             <span class="n">newcols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">newcol</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">newcols</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
@@ -972,17 +977,13 @@
     <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
         <span class="k">pass</span>
     <span class="k">else</span><span class="p">:</span>
-        <span class="n">curdvid</span> <span class="o">=</span> <span class="n">curdvid</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">curdvid</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+        <span class="n">curdvid</span> <span class="o">=</span> <span class="n">curdvid</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">variable_mapping</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
         <span class="n">di</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="n">curdvid</span><span class="p">)</span>
 
-    <span class="n">col</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-        <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dvid&#39;</span><span class="p">,</span>
-        <span class="n">unit</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span>
-        <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">,</span>
-        <span class="n">continuous</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span>
-        <span class="n">descriptor</span><span class="o">=</span><span class="s1">&#39;observation identifier&#39;</span><span class="p">,</span>
-    <span class="p">)</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">set_property</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">set_property</span><span class="p">(</span><span class="s1">&#39;descriptor&#39;</span><span class="p">,</span> <span class="s1">&#39;observation identifier&#39;</span><span class="p">)</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dvid&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
+    <span class="n">col</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">variable_mapping</span><span class="o">=</span><span class="n">var</span><span class="p">,</span> <span class="n">drop</span><span class="o">=</span><span class="kc">False</span><span class="p">)</span>
     <span class="n">df</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
     <span class="k">if</span> <span class="ow">not</span> <span class="n">col</span><span class="o">.</span><span class="n">is_integer</span><span class="p">():</span>
         <span class="n">ser</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="n">name</span><span class="p">]</span>
@@ -997,7 +998,9 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="n">new_dataset</span> <span class="o">=</span> <span class="kc">False</span>
 
-    <span class="n">col</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">categories</span><span class="o">=</span><span class="nb">sorted</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">()))</span>
+    <span class="n">categories</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">name</span><span class="p">]</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">set_property</span><span class="p">(</span><span class="s1">&#39;categories&#39;</span><span class="p">,</span> <span class="n">categories</span><span class="p">)</span>
+    <span class="n">col</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">variable_mapping</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
 
     <span class="n">di</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="n">col</span><span class="p">)</span>
 
@@ -1266,7 +1269,7 @@
         <span class="n">df</span><span class="o">.</span><span class="n">rename</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">{</span><span class="s1">&#39;_EXPANDED&#39;</span><span class="p">:</span> <span class="s1">&#39;EXPANDED&#39;</span><span class="p">},</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">([</span><span class="n">addl</span><span class="p">,</span> <span class="n">ii</span><span class="p">,</span> <span class="s1">&#39;_EXPANDED&#39;</span><span class="p">],</span> <span class="n">axis</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">df</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
+    <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">dataset</span><span class="o">=</span><span class="n">reset_index</span><span class="p">(</span><span class="n">df</span><span class="p">))</span>
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
 
@@ -1294,17 +1297,17 @@
 <span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, get_doseid</span>
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; get_doseid(model)  # doctest: +ELLIPSIS</span>
-<span class="sd">    0       1</span>
 <span class="sd">    1       1</span>
-<span class="sd">    2       2</span>
-<span class="sd">    3       3</span>
-<span class="sd">    4       4</span>
+<span class="sd">    2       1</span>
+<span class="sd">    3       2</span>
+<span class="sd">    4       3</span>
+<span class="sd">    5       4</span>
 <span class="sd">           ..</span>
-<span class="sd">    739    10</span>
-<span class="sd">    740    11</span>
-<span class="sd">    741    12</span>
-<span class="sd">    742    13</span>
+<span class="sd">    740    10</span>
+<span class="sd">    741    11</span>
+<span class="sd">    742    12</span>
 <span class="sd">    743    13</span>
+<span class="sd">    744    13</span>
 <span class="sd">    Name: DOSEID, Length: 744, dtype: int...</span>
 <span class="sd">    &quot;&quot;&quot;</span>
     <span class="k">try</span><span class="p">:</span>
@@ -1465,8 +1468,8 @@
     <span class="n">adm</span><span class="o">.</span><span class="n">name</span> <span class="o">=</span> <span class="s2">&quot;ADMID&quot;</span>
 
     <span class="c1"># Replace all observations with the previous admid type</span>
-    <span class="n">current_admin</span> <span class="o">=</span> <span class="n">adm</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-    <span class="n">current_subject</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">][</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">current_admin</span> <span class="o">=</span> <span class="n">adm</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+    <span class="n">current_subject</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">]</span><span class="o">.</span><span class="n">iloc</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
     <span class="k">for</span> <span class="n">i</span><span class="p">,</span> <span class="n">data</span> <span class="ow">in</span> <span class="nb">enumerate</span><span class="p">(</span><span class="nb">zip</span><span class="p">(</span><span class="n">get_evid</span><span class="p">(</span><span class="n">model</span><span class="p">),</span> <span class="n">adm</span><span class="p">,</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;ID&quot;</span><span class="p">])):</span>
         <span class="n">event</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
         <span class="n">admin</span> <span class="o">=</span> <span class="n">data</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span>
@@ -1515,7 +1518,8 @@
         <span class="n">dataset</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span>
         <span class="n">dataset</span><span class="p">[</span><span class="s2">&quot;ADMID&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">adm</span>
         <span class="n">di</span> <span class="o">=</span> <span class="n">update_datainfo</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">,</span> <span class="n">dataset</span><span class="p">)</span>
-        <span class="n">colinfo</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="s1">&#39;ADMID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;admid&#39;</span><span class="p">)</span>
+        <span class="n">var</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="s1">&#39;ADMID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;admid&#39;</span><span class="p">)</span>
+        <span class="n">colinfo</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="s1">&#39;ADMID&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">variable_mapping</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
         <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">datainfo</span><span class="o">=</span><span class="n">di</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="n">colinfo</span><span class="p">),</span> <span class="n">dataset</span><span class="o">=</span><span class="n">dataset</span><span class="p">)</span>
 
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
@@ -1715,11 +1719,7 @@
 <span class="sd">    add_time_of_last_dose : Add time of last dose to model</span>
 <span class="sd">    &quot;&quot;&quot;</span>
 
-    <span class="k">try</span><span class="p">:</span>
-        <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">descriptorix</span><span class="p">[</span><span class="s1">&#39;time after dose&#39;</span><span class="p">]</span>
-    <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
-        <span class="k">pass</span>
-    <span class="k">else</span><span class="p">:</span>
+    <span class="k">if</span> <span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">find_column_by_property</span><span class="p">(</span><span class="s1">&#39;descriptor&#39;</span><span class="p">,</span> <span class="s1">&#39;time after dose&#39;</span><span class="p">):</span>
         <span class="c1"># Already have time after dose</span>
         <span class="k">return</span> <span class="n">model</span>
     <span class="n">temp</span> <span class="o">=</span> <span class="n">translate_nmtran_time</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
@@ -1735,8 +1735,10 @@
     <span class="k">else</span><span class="p">:</span>
         <span class="c1"># FIXME: Temp workaround, should be canonicalized in Model.replace</span>
         <span class="n">di</span> <span class="o">=</span> <span class="n">update_datainfo</span><span class="p">(</span><span class="n">temp</span><span class="o">.</span><span class="n">datainfo</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
-        <span class="n">new_idvcol</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">idv_column</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
-        <span class="n">new_timecol</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="s1">&#39;_NEWTIME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;idv&#39;</span><span class="p">)</span>
+        <span class="n">new_idvvar</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">idv_column</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;unknown&#39;</span><span class="p">)</span>
+        <span class="n">new_idvcol</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">idv_column</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">variable_mapping</span><span class="o">=</span><span class="n">new_idvvar</span><span class="p">)</span>
+        <span class="n">new_timevar</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="s1">&#39;_NEWTIME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="nb">type</span><span class="o">=</span><span class="s1">&#39;idv&#39;</span><span class="p">)</span>
+        <span class="n">new_timecol</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="s1">&#39;_NEWTIME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">variable_mapping</span><span class="o">=</span><span class="n">new_timevar</span><span class="p">)</span>
         <span class="n">di</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="n">new_idvcol</span><span class="p">)</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="n">new_timecol</span><span class="p">)</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="n">temp</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">datainfo</span><span class="o">=</span><span class="n">di</span><span class="p">,</span> <span class="n">dataset</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
         <span class="n">temp</span> <span class="o">=</span> <span class="n">expand_additional_doses</span><span class="p">(</span><span class="n">temp</span><span class="p">,</span> <span class="n">flag</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1745,15 +1747,13 @@
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;_DOSEID&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">get_doseid</span><span class="p">(</span><span class="n">temp</span><span class="p">)</span>
 
     <span class="c1"># Sort in case DOSEIDs are non-increasing</span>
-    <span class="n">df</span> <span class="o">=</span> <span class="p">(</span>
-        <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idlab</span><span class="p">)[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span>
-        <span class="o">.</span><span class="n">apply</span><span class="p">(</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;_DOSEID&#39;</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;stable&#39;</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">))</span>
-        <span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
+    <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">(</span><span class="n">idlab</span><span class="p">)[</span><span class="n">df</span><span class="o">.</span><span class="n">columns</span><span class="p">]</span><span class="o">.</span><span class="n">apply</span><span class="p">(</span>
+        <span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">x</span><span class="o">.</span><span class="n">sort_values</span><span class="p">(</span><span class="n">by</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;_DOSEID&#39;</span><span class="p">],</span> <span class="n">kind</span><span class="o">=</span><span class="s1">&#39;stable&#39;</span><span class="p">,</span> <span class="n">ignore_index</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
     <span class="p">)</span>
+    <span class="n">df</span><span class="o">.</span><span class="n">index</span> <span class="o">=</span> <span class="nb">range</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="n">df</span><span class="p">)</span> <span class="o">+</span> <span class="mi">1</span><span class="p">)</span>
 
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;TAD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">idlab</span><span class="p">,</span> <span class="s1">&#39;_DOSEID&#39;</span><span class="p">])[</span><span class="s1">&#39;_NEWTIME&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">diff</span><span class="p">()</span><span class="o">.</span><span class="n">fillna</span><span class="p">(</span><span class="mf">0.0</span><span class="p">)</span>
     <span class="n">df</span><span class="p">[</span><span class="s1">&#39;TAD&#39;</span><span class="p">]</span> <span class="o">=</span> <span class="n">df</span><span class="o">.</span><span class="n">groupby</span><span class="p">([</span><span class="n">idlab</span><span class="p">,</span> <span class="s1">&#39;_DOSEID&#39;</span><span class="p">])[</span><span class="s1">&#39;TAD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">cumsum</span><span class="p">()</span>
-
     <span class="k">if</span> <span class="n">addl</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">df</span><span class="p">[</span><span class="o">~</span><span class="n">df</span><span class="p">[</span><span class="s1">&#39;EXPANDED&#39;</span><span class="p">]]</span><span class="o">.</span><span class="n">reset_index</span><span class="p">(</span><span class="n">drop</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="n">df</span><span class="o">.</span><span class="n">drop</span><span class="p">(</span><span class="n">columns</span><span class="o">=</span><span class="p">[</span><span class="s1">&#39;EXPANDED&#39;</span><span class="p">],</span> <span class="n">inplace</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
@@ -1762,7 +1762,12 @@
 
     <span class="c1"># FIXME: Temp workaround, should be canonicalized in Model.replace</span>
     <span class="n">di</span> <span class="o">=</span> <span class="n">update_datainfo</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
-    <span class="n">colinfo</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="s1">&#39;TAD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">descriptor</span><span class="o">=</span><span class="s1">&#39;time after dose&#39;</span><span class="p">,</span> <span class="n">unit</span><span class="o">=</span><span class="n">di</span><span class="p">[</span><span class="n">idv</span><span class="p">]</span><span class="o">.</span><span class="n">unit</span><span class="p">)</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="p">(</span>
+        <span class="n">di</span><span class="p">[</span><span class="s1">&#39;TAD&#39;</span><span class="p">]</span>
+        <span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">set_property</span><span class="p">(</span><span class="s1">&#39;descriptor&#39;</span><span class="p">,</span> <span class="s1">&#39;time after dose&#39;</span><span class="p">)</span>
+        <span class="o">.</span><span class="n">set_property</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">,</span> <span class="n">di</span><span class="p">[</span><span class="n">idv</span><span class="p">]</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">get_property</span><span class="p">(</span><span class="s1">&#39;unit&#39;</span><span class="p">))</span>
+    <span class="p">)</span>
+    <span class="n">colinfo</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="s1">&#39;TAD&#39;</span><span class="p">]</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">variable_mapping</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
     <span class="n">model</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">datainfo</span><span class="o">=</span><span class="n">di</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="n">colinfo</span><span class="p">),</span> <span class="n">dataset</span><span class="o">=</span><span class="n">df</span><span class="p">)</span>
     <span class="k">return</span> <span class="n">model</span><span class="o">.</span><span class="n">update_source</span><span class="p">()</span></div>
 
@@ -2378,17 +2383,17 @@
 <span class="sd">    &gt;&gt;&gt; model = set_reference_values(model, {&#39;WGT&#39;: 0.5, &#39;AMT&#39;: 4.0})</span>
 <span class="sd">    &gt;&gt;&gt; model.dataset</span>
 <span class="sd">         ID   TIME  AMT  WGT  APGR    DV  FA1  FA2</span>
-<span class="sd">    0     1    0.0  4.0  0.5   7.0   0.0  1.0  1.0</span>
-<span class="sd">    1     1    2.0  0.0  0.5   7.0  17.3  0.0  0.0</span>
-<span class="sd">    2     1   12.5  4.0  0.5   7.0   0.0  1.0  1.0</span>
-<span class="sd">    3     1   24.5  4.0  0.5   7.0   0.0  1.0  1.0</span>
-<span class="sd">    4     1   37.0  4.0  0.5   7.0   0.0  1.0  1.0</span>
+<span class="sd">    1     1    0.0  4.0  0.5   7.0   0.0  1.0  1.0</span>
+<span class="sd">    2     1    2.0  0.0  0.5   7.0  17.3  0.0  0.0</span>
+<span class="sd">    3     1   12.5  4.0  0.5   7.0   0.0  1.0  1.0</span>
+<span class="sd">    4     1   24.5  4.0  0.5   7.0   0.0  1.0  1.0</span>
+<span class="sd">    5     1   37.0  4.0  0.5   7.0   0.0  1.0  1.0</span>
 <span class="sd">    ..   ..    ...  ...  ...   ...   ...  ...  ...</span>
-<span class="sd">    739  59  108.3  4.0  0.5   6.0   0.0  1.0  1.0</span>
-<span class="sd">    740  59  120.5  4.0  0.5   6.0   0.0  1.0  1.0</span>
-<span class="sd">    741  59  132.3  4.0  0.5   6.0   0.0  1.0  1.0</span>
-<span class="sd">    742  59  144.8  4.0  0.5   6.0   0.0  1.0  1.0</span>
-<span class="sd">    743  59  146.8  0.0  0.5   6.0  40.2  0.0  0.0</span>
+<span class="sd">    740  59  108.3  4.0  0.5   6.0   0.0  1.0  1.0</span>
+<span class="sd">    741  59  120.5  4.0  0.5   6.0   0.0  1.0  1.0</span>
+<span class="sd">    742  59  132.3  4.0  0.5   6.0   0.0  1.0  1.0</span>
+<span class="sd">    743  59  144.8  4.0  0.5   6.0   0.0  1.0  1.0</span>
+<span class="sd">    744  59  146.8  0.0  0.5   6.0  40.2  0.0  0.0</span>
 <span class="sd">    &lt;BLANKLINE&gt;</span>
 <span class="sd">    [744 rows x 8 columns]</span>
 
@@ -2439,17 +2444,17 @@
 <span class="sd">    &gt;&gt;&gt; model = infer_datatypes(model, [&#39;APGR&#39;])</span>
 <span class="sd">    &gt;&gt;&gt; model.dataset</span>
 <span class="sd">         ID   TIME   AMT  WGT  APGR    DV  FA1  FA2</span>
-<span class="sd">    0     1    0.0  25.0  1.4     7   0.0  1.0  1.0</span>
-<span class="sd">    1     1    2.0   0.0  1.4     7  17.3  0.0  0.0</span>
-<span class="sd">    2     1   12.5   3.5  1.4     7   0.0  1.0  1.0</span>
-<span class="sd">    3     1   24.5   3.5  1.4     7   0.0  1.0  1.0</span>
-<span class="sd">    4     1   37.0   3.5  1.4     7   0.0  1.0  1.0</span>
+<span class="sd">    1     1    0.0  25.0  1.4     7   0.0  1.0  1.0</span>
+<span class="sd">    2     1    2.0   0.0  1.4     7  17.3  0.0  0.0</span>
+<span class="sd">    3     1   12.5   3.5  1.4     7   0.0  1.0  1.0</span>
+<span class="sd">    4     1   24.5   3.5  1.4     7   0.0  1.0  1.0</span>
+<span class="sd">    5     1   37.0   3.5  1.4     7   0.0  1.0  1.0</span>
 <span class="sd">    ..   ..    ...   ...  ...   ...   ...  ...  ...</span>
-<span class="sd">    739  59  108.3   3.0  1.1     6   0.0  1.0  1.0</span>
-<span class="sd">    740  59  120.5   3.0  1.1     6   0.0  1.0  1.0</span>
-<span class="sd">    741  59  132.3   3.0  1.1     6   0.0  1.0  1.0</span>
-<span class="sd">    742  59  144.8   3.0  1.1     6   0.0  1.0  1.0</span>
-<span class="sd">    743  59  146.8   0.0  1.1     6  40.2  0.0  0.0</span>
+<span class="sd">    740  59  108.3   3.0  1.1     6   0.0  1.0  1.0</span>
+<span class="sd">    741  59  120.5   3.0  1.1     6   0.0  1.0  1.0</span>
+<span class="sd">    742  59  132.3   3.0  1.1     6   0.0  1.0  1.0</span>
+<span class="sd">    743  59  144.8   3.0  1.1     6   0.0  1.0  1.0</span>
+<span class="sd">    744  59  146.8   0.0  1.1     6  40.2  0.0  0.0</span>
 <span class="sd">    &lt;BLANKLINE&gt;</span>
 <span class="sd">    [744 rows x 8 columns]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -2535,42 +2540,45 @@
             <span class="bp">self</span><span class="o">.</span><span class="n">violations</span><span class="o">.</span><span class="n">append</span><span class="p">((</span><span class="n">code</span><span class="p">,</span> <span class="n">result</span><span class="p">,</span> <span class="n">violation</span><span class="p">))</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">check_has_unit</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
-        <span class="n">has_unit</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">unit</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
+        <span class="c1"># FIXME: This might not be relevant with a default value of unit 1</span>
+        <span class="n">has_unit</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;unit&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_result</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="n">has_unit</span><span class="p">,</span> <span class="n">violation</span><span class="o">=</span><span class="n">col</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
         <span class="k">return</span> <span class="n">has_unit</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">check_is_unitless</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">col</span><span class="p">):</span>
-        <span class="n">is_unitless</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">unit</span> <span class="o">==</span> <span class="n">Unit</span><span class="o">.</span><span class="n">unitless</span><span class="p">()</span>
+        <span class="n">is_unitless</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;unit&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span> <span class="o">==</span> <span class="n">Unit</span><span class="o">.</span><span class="n">unitless</span><span class="p">()</span>
         <span class="bp">self</span><span class="o">.</span><span class="n">set_result</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">test</span><span class="o">=</span><span class="n">is_unitless</span><span class="p">,</span> <span class="n">violation</span><span class="o">=</span><span class="n">col</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">warn</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">check_dimension</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">column</span><span class="p">,</span> <span class="n">dim</span><span class="p">):</span>
-        <span class="k">if</span> <span class="n">column</span><span class="o">.</span><span class="n">unit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">unit</span> <span class="o">=</span> <span class="n">column</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;unit&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">unit</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_result</span><span class="p">(</span><span class="n">code</span><span class="p">,</span> <span class="n">skip</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
             <span class="k">return</span> <span class="kc">False</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">dim2</span> <span class="o">=</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">Dimension</span><span class="p">(</span>
-                <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">si</span><span class="o">.</span><span class="n">SI</span><span class="o">.</span><span class="n">get_dimensional_expr</span><span class="p">(</span><span class="n">column</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">_expr</span><span class="p">)</span>
+                <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">si</span><span class="o">.</span><span class="n">SI</span><span class="o">.</span><span class="n">get_dimensional_expr</span><span class="p">(</span><span class="n">unit</span><span class="o">.</span><span class="n">_expr</span><span class="p">)</span>
             <span class="p">)</span>
             <span class="bp">self</span><span class="o">.</span><span class="n">set_result</span><span class="p">(</span>
                 <span class="n">code</span><span class="p">,</span>
                 <span class="n">test</span><span class="o">=</span><span class="n">dim</span> <span class="o">==</span> <span class="n">dim2</span><span class="p">,</span>
-                <span class="n">violation</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Unit </span><span class="si">{</span><span class="n">column</span><span class="o">.</span><span class="n">unit</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is not a </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2"> unit&quot;</span><span class="p">,</span>
+                <span class="n">violation</span><span class="o">=</span><span class="sa">f</span><span class="s2">&quot;Unit </span><span class="si">{</span><span class="n">unit</span><span class="si">}</span><span class="s2"> of </span><span class="si">{</span><span class="n">column</span><span class="o">.</span><span class="n">name</span><span class="si">}</span><span class="s2"> is not a </span><span class="si">{</span><span class="n">dim</span><span class="si">}</span><span class="s2"> unit&quot;</span><span class="p">,</span>
             <span class="p">)</span>
             <span class="k">return</span> <span class="n">dim</span> <span class="o">==</span> <span class="n">dim2</span>
 
     <span class="k">def</span><span class="w"> </span><span class="nf">check_range</span><span class="p">(</span><span class="bp">self</span><span class="p">,</span> <span class="n">code</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">lower</span><span class="p">,</span> <span class="n">upper</span><span class="p">,</span> <span class="n">unit</span><span class="p">,</span> <span class="n">lower_included</span><span class="o">=</span><span class="kc">True</span><span class="p">,</span> <span class="n">upper_included</span><span class="o">=</span><span class="kc">True</span><span class="p">):</span>
+        <span class="n">col_unit</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s2">&quot;unit&quot;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
         <span class="n">name</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">name</span>
         <span class="k">if</span> <span class="n">lower</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">scaled_lower</span> <span class="o">=</span> <span class="n">lower</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">scaled_lower</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
-                <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">convert_to</span><span class="p">(</span><span class="n">lower</span> <span class="o">*</span> <span class="n">unit</span><span class="p">,</span> <span class="n">col</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">_expr</span><span class="p">)</span> <span class="o">/</span> <span class="n">col</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">_expr</span>
+                <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">convert_to</span><span class="p">(</span><span class="n">lower</span> <span class="o">*</span> <span class="n">unit</span><span class="p">,</span> <span class="n">col_unit</span><span class="o">.</span><span class="n">_expr</span><span class="p">)</span> <span class="o">/</span> <span class="n">col_unit</span><span class="o">.</span><span class="n">_expr</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">upper</span> <span class="o">==</span> <span class="mi">0</span><span class="p">:</span>
             <span class="n">scaled_upper</span> <span class="o">=</span> <span class="n">upper</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">scaled_upper</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span>
-                <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">convert_to</span><span class="p">(</span><span class="n">upper</span> <span class="o">*</span> <span class="n">unit</span><span class="p">,</span> <span class="n">col</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">_expr</span><span class="p">)</span> <span class="o">/</span> <span class="n">col</span><span class="o">.</span><span class="n">unit</span><span class="o">.</span><span class="n">_expr</span>
+                <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">convert_to</span><span class="p">(</span><span class="n">upper</span> <span class="o">*</span> <span class="n">unit</span><span class="p">,</span> <span class="n">col_unit</span><span class="o">.</span><span class="n">_expr</span><span class="p">)</span> <span class="o">/</span> <span class="n">col_unit</span><span class="o">.</span><span class="n">_expr</span>
             <span class="p">)</span>
         <span class="k">if</span> <span class="n">lower_included</span><span class="p">:</span>
             <span class="n">lower_viol</span> <span class="o">=</span> <span class="bp">self</span><span class="o">.</span><span class="n">dataset</span><span class="p">[</span><span class="n">name</span><span class="p">]</span> <span class="o">&lt;</span> <span class="n">scaled_lower</span>
@@ -2681,31 +2689,32 @@
     <span class="n">checker</span> <span class="o">=</span> <span class="n">Checker</span><span class="p">(</span><span class="n">di</span><span class="p">,</span> <span class="n">df</span><span class="p">,</span> <span class="n">verbose</span><span class="o">=</span><span class="n">verbose</span><span class="p">)</span>
 
     <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">di</span><span class="p">:</span>
-        <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;body weight&quot;</span><span class="p">:</span>
+        <span class="n">descriptor</span> <span class="o">=</span> <span class="n">col</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">properties</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="s1">&#39;descriptor&#39;</span><span class="p">,</span> <span class="kc">None</span><span class="p">)</span>
+        <span class="k">if</span> <span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;body weight&quot;</span><span class="p">:</span>
             <span class="n">checker</span><span class="o">.</span><span class="n">check_has_unit</span><span class="p">(</span><span class="s2">&quot;A1&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
             <span class="n">samedim</span> <span class="o">=</span> <span class="n">checker</span><span class="o">.</span><span class="n">check_dimension</span><span class="p">(</span><span class="s2">&quot;A2&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">samedim</span><span class="p">:</span>
                 <span class="n">checker</span><span class="o">.</span><span class="n">check_range</span><span class="p">(</span><span class="s2">&quot;A3&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">kg</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;age&quot;</span><span class="p">:</span>
             <span class="n">checker</span><span class="o">.</span><span class="n">check_has_unit</span><span class="p">(</span><span class="s2">&quot;A4&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
             <span class="n">samedim</span> <span class="o">=</span> <span class="n">checker</span><span class="o">.</span><span class="n">check_dimension</span><span class="p">(</span><span class="s2">&quot;A5&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">samedim</span><span class="p">:</span>
                 <span class="n">checker</span><span class="o">.</span><span class="n">check_range</span><span class="p">(</span><span class="s2">&quot;A6&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">130</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">year</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;lean body mass&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;lean body mass&quot;</span><span class="p">:</span>
             <span class="n">checker</span><span class="o">.</span><span class="n">check_has_unit</span><span class="p">(</span><span class="s2">&quot;A7&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
             <span class="n">samedim</span> <span class="o">=</span> <span class="n">checker</span><span class="o">.</span><span class="n">check_dimension</span><span class="p">(</span><span class="s2">&quot;A8&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">samedim</span><span class="p">:</span>
                 <span class="n">checker</span><span class="o">.</span><span class="n">check_range</span><span class="p">(</span><span class="s2">&quot;A9&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">kg</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;fat free mass&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;fat free mass&quot;</span><span class="p">:</span>
             <span class="n">checker</span><span class="o">.</span><span class="n">check_has_unit</span><span class="p">(</span><span class="s2">&quot;A10&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
             <span class="n">samedim</span> <span class="o">=</span> <span class="n">checker</span><span class="o">.</span><span class="n">check_dimension</span><span class="p">(</span><span class="s2">&quot;A11&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">mass</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">samedim</span><span class="p">:</span>
                 <span class="n">checker</span><span class="o">.</span><span class="n">check_range</span><span class="p">(</span><span class="s2">&quot;A12&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">700</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">kg</span><span class="p">,</span> <span class="kc">False</span><span class="p">,</span> <span class="kc">False</span><span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;time after dose&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;time after dose&quot;</span><span class="p">:</span>
             <span class="n">checker</span><span class="o">.</span><span class="n">check_has_unit</span><span class="p">(</span><span class="s2">&quot;D1&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
             <span class="n">samedim</span> <span class="o">=</span> <span class="n">checker</span><span class="o">.</span><span class="n">check_dimension</span><span class="p">(</span><span class="s2">&quot;D2&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">time</span><span class="p">)</span>
             <span class="k">if</span> <span class="n">samedim</span><span class="p">:</span>
@@ -2713,7 +2722,7 @@
                     <span class="s2">&quot;D3&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nb">float</span><span class="p">(</span><span class="s1">&#39;inf&#39;</span><span class="p">),</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">second</span><span class="p">,</span> <span class="kc">True</span><span class="p">,</span> <span class="kc">False</span>
                 <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;plasma concentration&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;plasma concentration&quot;</span><span class="p">:</span>
             <span class="n">checker</span><span class="o">.</span><span class="n">check_has_unit</span><span class="p">(</span><span class="s2">&quot;D4&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
             <span class="n">samedim</span> <span class="o">=</span> <span class="n">checker</span><span class="o">.</span><span class="n">check_dimension</span><span class="p">(</span>
                 <span class="s2">&quot;D5&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">,</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">mass</span> <span class="o">/</span> <span class="n">sympy</span><span class="o">.</span><span class="n">physics</span><span class="o">.</span><span class="n">units</span><span class="o">.</span><span class="n">length</span><span class="o">**</span><span class="mi">3</span>
@@ -2729,7 +2738,7 @@
                     <span class="kc">False</span><span class="p">,</span>
                 <span class="p">)</span>
 
-        <span class="k">if</span> <span class="n">col</span><span class="o">.</span><span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;subject identifier&quot;</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">descriptor</span> <span class="o">==</span> <span class="s2">&quot;subject identifier&quot;</span><span class="p">:</span>
             <span class="n">checker</span><span class="o">.</span><span class="n">check_is_unitless</span><span class="p">(</span><span class="s2">&quot;I1&quot;</span><span class="p">,</span> <span class="n">col</span><span class="p">)</span>
 
     <span class="k">if</span> <span class="n">dataframe</span><span class="p">:</span>
@@ -2777,6 +2786,7 @@
         <span class="p">)</span>
         <span class="c1"># This assumes a PK model</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">filter_observations</span><span class="p">(</span><span class="n">df</span><span class="p">,</span> <span class="n">datainfo</span><span class="p">)</span>
+        <span class="n">df</span> <span class="o">=</span> <span class="n">reset_index</span><span class="p">(</span><span class="n">df</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">df</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">read_csv</span><span class="p">(</span>
             <span class="n">datainfo</span><span class="o">.</span><span class="n">path</span><span class="p">,</span>
@@ -2818,36 +2828,49 @@
     <span class="k">for</span> <span class="n">colname</span> <span class="ow">in</span> <span class="n">colnames</span><span class="p">:</span>
         <span class="n">colname</span> <span class="o">=</span> <span class="n">colname</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="s1">&#39;.&#39;</span><span class="p">,</span> <span class="s1">&#39;_&#39;</span><span class="p">)</span>  <span class="c1"># pandas uses . to name mangle</span>
         <span class="k">if</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;ID&#39;</span> <span class="ow">or</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;L1&#39;</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;id&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;DV&#39;</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dv&#39;</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dv&#39;</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;TIME&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="ow">not</span> <span class="nb">set</span><span class="p">(</span><span class="n">colnames</span><span class="p">)</span><span class="o">.</span><span class="n">isdisjoint</span><span class="p">({</span><span class="s1">&#39;DATE&#39;</span><span class="p">,</span> <span class="s1">&#39;DAT1&#39;</span><span class="p">,</span> <span class="s1">&#39;DAT2&#39;</span><span class="p">,</span> <span class="s1">&#39;DAT3&#39;</span><span class="p">}):</span>
                 <span class="n">datatype</span> <span class="o">=</span> <span class="s1">&#39;nmtran-time&#39;</span>
             <span class="k">else</span><span class="p">:</span>
                 <span class="n">datatype</span> <span class="o">=</span> <span class="s1">&#39;float64&#39;</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;idv&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="n">datatype</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;idv&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="n">datatype</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;EVID&#39;</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;event&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;event&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;MDV&#39;</span><span class="p">:</span>
             <span class="k">if</span> <span class="s1">&#39;EVID&#39;</span> <span class="ow">in</span> <span class="n">colnames</span><span class="p">:</span>
-                <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;mdv&#39;</span><span class="p">)</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;mdv&#39;</span><span class="p">)</span>
+                <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
             <span class="k">else</span><span class="p">:</span>
-                <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;event&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+                <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;event&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">)</span>
+                <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;AMT&#39;</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dose&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dose&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;RATE&#39;</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;rate&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;rate&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;BLQ&#39;</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;blq&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;blq&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;LLOQ&#39;</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;lloq&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;lloq&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;DVID&#39;</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dvid&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;dvid&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;SS&#39;</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ss&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ss&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">,</span> <span class="n">datatype</span><span class="o">=</span><span class="s1">&#39;int32&#39;</span><span class="p">)</span>
         <span class="k">elif</span> <span class="n">colname</span> <span class="o">==</span> <span class="s1">&#39;II&#39;</span><span class="p">:</span>
-            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ii&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">DataVariable</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;ii&#39;</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;ratio&#39;</span><span class="p">)</span>
+            <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">,</span> <span class="n">var</span><span class="p">)</span>
         <span class="k">else</span><span class="p">:</span>
             <span class="n">info</span> <span class="o">=</span> <span class="n">ColumnInfo</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">colname</span><span class="p">)</span>
         <span class="n">column_info</span><span class="o">.</span><span class="n">append</span><span class="p">(</span><span class="n">info</span><span class="p">)</span>
@@ -2896,7 +2919,7 @@
     <span class="k">for</span> <span class="n">datecol</span> <span class="ow">in</span> <span class="n">date_columns</span><span class="p">:</span>
         <span class="k">if</span> <span class="n">pd</span><span class="o">.</span><span class="n">api</span><span class="o">.</span><span class="n">types</span><span class="o">.</span><span class="n">is_datetime64_any_dtype</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">datecol</span><span class="p">]):</span>
             <span class="k">pass</span>
-        <span class="k">elif</span> <span class="n">df</span><span class="p">[</span><span class="n">datecol</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;object&#39;</span><span class="p">:</span>
+        <span class="k">elif</span> <span class="n">df</span><span class="p">[</span><span class="n">datecol</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;object&#39;</span> <span class="ow">or</span> <span class="n">df</span><span class="p">[</span><span class="n">datecol</span><span class="p">]</span><span class="o">.</span><span class="n">dtype</span> <span class="o">==</span> <span class="s1">&#39;str&#39;</span><span class="p">:</span>
             <span class="c1"># assume string</span>
             <span class="n">df</span><span class="p">[</span><span class="n">datecol</span><span class="p">]</span> <span class="o">=</span> <span class="n">pd</span><span class="o">.</span><span class="n">to_datetime</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">datecol</span><span class="p">])</span>
         <span class="k">else</span><span class="p">:</span>
@@ -3027,17 +3050,17 @@
 <span class="sd">    &gt;&gt;&gt; model = set_dataset(model, dataset_path, datatype=&#39;nonmem&#39;)</span>
 <span class="sd">    &gt;&gt;&gt; model.dataset</span>
 <span class="sd">         ID   TIME   AMT  WGT  APGR    DV  FA1  FA2</span>
-<span class="sd">    0     1    0.0  25.0  1.4   7.0   0.0  1.0  1.0</span>
-<span class="sd">    1     1    2.0   0.0  1.4   7.0  17.3  0.0  0.0</span>
-<span class="sd">    2     1   12.5   3.5  1.4   7.0   0.0  1.0  1.0</span>
-<span class="sd">    3     1   24.5   3.5  1.4   7.0   0.0  1.0  1.0</span>
-<span class="sd">    4     1   37.0   3.5  1.4   7.0   0.0  1.0  1.0</span>
+<span class="sd">    1     1    0.0  25.0  1.4   7.0   0.0  1.0  1.0</span>
+<span class="sd">    2     1    2.0   0.0  1.4   7.0  17.3  0.0  0.0</span>
+<span class="sd">    3     1   12.5   3.5  1.4   7.0   0.0  1.0  1.0</span>
+<span class="sd">    4     1   24.5   3.5  1.4   7.0   0.0  1.0  1.0</span>
+<span class="sd">    5     1   37.0   3.5  1.4   7.0   0.0  1.0  1.0</span>
 <span class="sd">    ..   ..    ...   ...  ...   ...   ...  ...  ...</span>
-<span class="sd">    739  59  108.3   3.0  1.1   6.0   0.0  1.0  1.0</span>
-<span class="sd">    740  59  120.5   3.0  1.1   6.0   0.0  1.0  1.0</span>
-<span class="sd">    741  59  132.3   3.0  1.1   6.0   0.0  1.0  1.0</span>
-<span class="sd">    742  59  144.8   3.0  1.1   6.0   0.0  1.0  1.0</span>
-<span class="sd">    743  59  146.8   0.0  1.1   6.0  40.2  0.0  0.0</span>
+<span class="sd">    740  59  108.3   3.0  1.1   6.0   0.0  1.0  1.0</span>
+<span class="sd">    741  59  120.5   3.0  1.1   6.0   0.0  1.0  1.0</span>
+<span class="sd">    742  59  132.3   3.0  1.1   6.0   0.0  1.0  1.0</span>
+<span class="sd">    743  59  144.8   3.0  1.1   6.0   0.0  1.0  1.0</span>
+<span class="sd">    744  59  146.8   0.0  1.1   6.0  40.2  0.0  0.0</span>
 <span class="sd">    &lt;BLANKLINE&gt;</span>
 <span class="sd">    [744 rows x 8 columns]</span>
 
@@ -3104,17 +3127,17 @@
 <span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
 <span class="sd">    &gt;&gt;&gt; bins, boundaries = bin_observations(model, method=&quot;equal_width&quot;, nbins=10)</span>
 <span class="sd">    &gt;&gt;&gt; bins</span>
-<span class="sd">    1      0</span>
-<span class="sd">    11     2</span>
-<span class="sd">    13     0</span>
-<span class="sd">    19     1</span>
-<span class="sd">    26     3</span>
+<span class="sd">    2      0</span>
+<span class="sd">    12     2</span>
+<span class="sd">    14     0</span>
+<span class="sd">    20     1</span>
+<span class="sd">    27     3</span>
 <span class="sd">           ..</span>
-<span class="sd">    719    1</span>
-<span class="sd">    727    3</span>
-<span class="sd">    729    0</span>
-<span class="sd">    736    1</span>
-<span class="sd">    743    3</span>
+<span class="sd">    720    1</span>
+<span class="sd">    728    3</span>
+<span class="sd">    730    0</span>
+<span class="sd">    737    1</span>
+<span class="sd">    744    3</span>
 <span class="sd">    Name: TIME, Length: 155, dtype: int64</span>
 <span class="sd">    &gt;&gt;&gt; boundaries</span>
 <span class="sd">    array([  0.  ,  39.88,  78.76, 117.64, 156.52, 195.4 , 234.28, 273.16,</span>
@@ -3227,17 +3250,17 @@
 <span class="sd">    &gt;&gt;&gt; model = binarize_dataset(model, [&#39;APGR&#39;])</span>
 <span class="sd">    &gt;&gt;&gt; model.dataset</span>
 <span class="sd">         ID   TIME   AMT  WGT    DV  FA1  FA2  APGR_1  APGR_2  APGR_3  APGR_4  APGR_5  APGR_6  APGR_7  APGR_8  APGR_9</span>
-<span class="sd">    0     1    0.0  25.0  1.4   0.0  1.0  1.0       0       0       0       0       0       0       1       0       0</span>
-<span class="sd">    1     1    2.0   0.0  1.4  17.3  0.0  0.0       0       0       0       0       0       0       1       0       0</span>
-<span class="sd">    2     1   12.5   3.5  1.4   0.0  1.0  1.0       0       0       0       0       0       0       1       0       0</span>
-<span class="sd">    3     1   24.5   3.5  1.4   0.0  1.0  1.0       0       0       0       0       0       0       1       0       0</span>
-<span class="sd">    4     1   37.0   3.5  1.4   0.0  1.0  1.0       0       0       0       0       0       0       1       0       0</span>
+<span class="sd">    1     1    0.0  25.0  1.4   0.0  1.0  1.0       0       0       0       0       0       0       1       0       0</span>
+<span class="sd">    2     1    2.0   0.0  1.4  17.3  0.0  0.0       0       0       0       0       0       0       1       0       0</span>
+<span class="sd">    3     1   12.5   3.5  1.4   0.0  1.0  1.0       0       0       0       0       0       0       1       0       0</span>
+<span class="sd">    4     1   24.5   3.5  1.4   0.0  1.0  1.0       0       0       0       0       0       0       1       0       0</span>
+<span class="sd">    5     1   37.0   3.5  1.4   0.0  1.0  1.0       0       0       0       0       0       0       1       0       0</span>
 <span class="sd">    ..   ..    ...   ...  ...   ...  ...  ...     ...     ...     ...     ...     ...     ...     ...     ...     ...</span>
-<span class="sd">    739  59  108.3   3.0  1.1   0.0  1.0  1.0       0       0       0       0       0       1       0       0       0</span>
-<span class="sd">    740  59  120.5   3.0  1.1   0.0  1.0  1.0       0       0       0       0       0       1       0       0       0</span>
-<span class="sd">    741  59  132.3   3.0  1.1   0.0  1.0  1.0       0       0       0       0       0       1       0       0       0</span>
-<span class="sd">    742  59  144.8   3.0  1.1   0.0  1.0  1.0       0       0       0       0       0       1       0       0       0</span>
-<span class="sd">    743  59  146.8   0.0  1.1  40.2  0.0  0.0       0       0       0       0       0       1       0       0       0</span>
+<span class="sd">    740  59  108.3   3.0  1.1   0.0  1.0  1.0       0       0       0       0       0       1       0       0       0</span>
+<span class="sd">    741  59  120.5   3.0  1.1   0.0  1.0  1.0       0       0       0       0       0       1       0       0       0</span>
+<span class="sd">    742  59  132.3   3.0  1.1   0.0  1.0  1.0       0       0       0       0       0       1       0       0       0</span>
+<span class="sd">    743  59  144.8   3.0  1.1   0.0  1.0  1.0       0       0       0       0       0       1       0       0       0</span>
+<span class="sd">    744  59  146.8   0.0  1.1  40.2  0.0  0.0       0       0       0       0       0       1       0       0       0</span>
 <span class="sd">    &lt;BLANKLINE&gt;</span>
 <span class="sd">    [744 rows x 16 columns]</span>
 <span class="sd">    &quot;&quot;&quot;</span>
@@ -3252,7 +3275,7 @@
             <span class="n">covariates</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">typeix</span><span class="p">[</span><span class="s1">&#39;covariate&#39;</span><span class="p">]</span>
         <span class="k">except</span> <span class="ne">IndexError</span><span class="p">:</span>
             <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;No covariates for `columns` found: </span><span class="si">{</span><span class="n">columns</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
-        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">cov</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">cov</span> <span class="ow">in</span> <span class="n">covariates</span> <span class="k">if</span> <span class="n">cov</span><span class="o">.</span><span class="n">is_categorical</span><span class="p">()]</span>
+        <span class="n">columns</span> <span class="o">=</span> <span class="p">[</span><span class="n">cov</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">cov</span> <span class="ow">in</span> <span class="n">covariates</span> <span class="k">if</span> <span class="n">cov</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">is_categorical</span><span class="p">()]</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">columns</span><span class="p">:</span>
             <span class="k">return</span> <span class="n">model</span>
 
@@ -3260,6 +3283,8 @@
 
     <span class="k">for</span> <span class="n">col</span> <span class="ow">in</span> <span class="n">columns</span><span class="p">:</span>
         <span class="n">levels</span> <span class="o">=</span> <span class="nb">sorted</span><span class="p">(</span><span class="nb">set</span><span class="p">(</span><span class="n">df</span><span class="p">[</span><span class="n">col</span><span class="p">]</span><span class="o">.</span><span class="n">values</span><span class="p">))</span>
+        <span class="k">if</span> <span class="n">levels</span> <span class="o">==</span> <span class="p">[</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">]:</span>
+            <span class="k">continue</span>
         <span class="k">if</span> <span class="ow">not</span> <span class="n">all_levels</span><span class="p">:</span>
             <span class="n">levels</span> <span class="o">=</span> <span class="n">levels</span><span class="p">[</span><span class="mi">0</span><span class="p">:</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
 
@@ -3281,9 +3306,10 @@
         <span class="n">di</span> <span class="o">=</span> <span class="n">update_datainfo</span><span class="p">(</span><span class="n">di</span><span class="p">,</span> <span class="n">df</span><span class="p">)</span>
         <span class="k">for</span> <span class="n">col_name</span> <span class="ow">in</span> <span class="n">level_map</span><span class="o">.</span><span class="n">keys</span><span class="p">():</span>
             <span class="n">ci</span> <span class="o">=</span> <span class="n">di</span><span class="p">[</span><span class="n">col_name</span><span class="p">]</span>
-            <span class="n">ci_new</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
-                <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;covariate&#39;</span><span class="p">,</span> <span class="n">continuous</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">,</span> <span class="n">categories</span><span class="o">=</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+            <span class="n">var</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">variable</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span>
+                <span class="nb">type</span><span class="o">=</span><span class="s1">&#39;covariate&#39;</span><span class="p">,</span> <span class="n">count</span><span class="o">=</span><span class="kc">False</span><span class="p">,</span> <span class="n">scale</span><span class="o">=</span><span class="s1">&#39;nominal&#39;</span><span class="p">,</span> <span class="n">properties</span><span class="o">=</span><span class="p">{</span><span class="s2">&quot;categories&quot;</span><span class="p">:</span> <span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">)}</span>
             <span class="p">)</span>
+            <span class="n">ci_new</span> <span class="o">=</span> <span class="n">ci</span><span class="o">.</span><span class="n">replace</span><span class="p">(</span><span class="n">variable_mapping</span><span class="o">=</span><span class="n">var</span><span class="p">)</span>
             <span class="n">di</span> <span class="o">=</span> <span class="n">di</span><span class="o">.</span><span class="n">set_column</span><span class="p">(</span><span class="n">ci_new</span><span class="p">)</span>
 
         <span class="n">changed</span> <span class="o">=</span> <span class="kc">True</span>
@@ -3331,6 +3357,121 @@
         <span class="n">name</span> <span class="o">=</span> <span class="n">columns</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
     <span class="k">return</span> <span class="n">name</span></div>
 
+
+
+<div class="viewcode-block" id="calculate_summary_statistic">
+<a class="viewcode-back" href="../../../api/pharmpy.modeling.calculate_summary_statistic.html#pharmpy.modeling.calculate_summary_statistic">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">calculate_summary_statistic</span><span class="p">(</span>
+    <span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">stat</span><span class="p">:</span> <span class="nb">str</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">str</span><span class="p">],</span> <span class="n">default</span><span class="p">:</span> <span class="n">Optional</span><span class="p">[</span><span class="nb">float</span><span class="p">]</span> <span class="o">=</span> <span class="kc">None</span>
+<span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">float</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Calculate a summary statistic for an expression over the dataset</span>
+
+<span class="sd">    The expression can be a dataset column name, a variable from the model, e.g. a derived</span>
+<span class="sd">    covariate or a matematical expression involving dataset columns or model variables.</span>
+<span class="sd">    If a calculation involves population parameters, the initial estimates will be used.</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    stat : str</span>
+<span class="sd">        The summary statistic. Can be &quot;max&quot;, &quot;min&quot;, &quot;median&quot; or &quot;mean&quot;</span>
+<span class="sd">    expr : str</span>
+<span class="sd">        A mathematical expression containing column or variable names</span>
+<span class="sd">    default : float</span>
+<span class="sd">        An optional default value to use in case the statistic couldn&#39;t be calculated.</span>
+<span class="sd">        For example if the model has no dataset.</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    float</span>
+<span class="sd">        The summary statistic</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, calculate_summary_statistic</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; calculate_summary_statistic(model, &quot;max&quot;, &quot;TIME&quot;)</span>
+<span class="sd">    389.8</span>
+<span class="sd">    &gt;&gt;&gt; calculate_summary_statistic(model, &quot;median&quot;, &quot;log(WGT)&quot;)</span>
+<span class="sd">    0.26236426446749106</span>
+<span class="sd">    &gt;&gt;&gt; calculate_summary_statistic(model, &quot;median&quot;, &quot;TVCL&quot;)</span>
+<span class="sd">    0.006100991</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+    <span class="k">if</span> <span class="n">expr</span> <span class="ow">is</span> <span class="kc">None</span> <span class="ow">or</span> <span class="n">model</span><span class="o">.</span><span class="n">dataset</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;NaN&quot;</span><span class="p">)</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="k">try</span><span class="p">:</span>
+            <span class="n">vec</span> <span class="o">=</span> <span class="n">evaluate_expression</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
+        <span class="k">except</span> <span class="ne">KeyError</span><span class="p">:</span>
+            <span class="n">value</span> <span class="o">=</span> <span class="nb">float</span><span class="p">(</span><span class="s2">&quot;NaN&quot;</span><span class="p">)</span>
+        <span class="k">else</span><span class="p">:</span>
+            <span class="n">stat</span> <span class="o">=</span> <span class="n">stat</span><span class="o">.</span><span class="n">lower</span><span class="p">()</span>
+            <span class="k">if</span> <span class="n">stat</span> <span class="o">==</span> <span class="s2">&quot;max&quot;</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">max</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">stat</span> <span class="o">==</span> <span class="s2">&quot;min&quot;</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">min</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">stat</span> <span class="o">==</span> <span class="s2">&quot;mean&quot;</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">mean</span><span class="p">()</span>
+            <span class="k">elif</span> <span class="n">stat</span> <span class="o">==</span> <span class="s2">&quot;median&quot;</span><span class="p">:</span>
+                <span class="n">value</span> <span class="o">=</span> <span class="n">vec</span><span class="o">.</span><span class="n">median</span><span class="p">()</span>
+            <span class="k">else</span><span class="p">:</span>
+                <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s2">&quot;Unsupported statistic </span><span class="si">{</span><span class="n">stat</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">replace_nan</span><span class="p">(</span><span class="nb">float</span><span class="p">(</span><span class="n">value</span><span class="p">),</span> <span class="n">default</span><span class="p">)</span></div>
+
+
+
+<div class="viewcode-block" id="is_binary">
+<a class="viewcode-back" href="../../../api/pharmpy.modeling.is_binary.html#pharmpy.modeling.is_binary">[docs]</a>
+<span class="k">def</span><span class="w"> </span><span class="nf">is_binary</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="nb">str</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">bool</span><span class="p">:</span>
+<span class="w">    </span><span class="sd">&quot;&quot;&quot;Check if an expression defines a binary variable (only having values 0 and 1)</span>
+
+<span class="sd">    Parameters</span>
+<span class="sd">    ----------</span>
+<span class="sd">    model : Model</span>
+<span class="sd">        Pharmpy model</span>
+<span class="sd">    expr : str</span>
+<span class="sd">        A mathematical expression containing column or variable names</span>
+
+<span class="sd">    Returns</span>
+<span class="sd">    -------</span>
+<span class="sd">    bool</span>
+<span class="sd">        True if binary</span>
+
+<span class="sd">    Example</span>
+<span class="sd">    -------</span>
+<span class="sd">    &gt;&gt;&gt; from pharmpy.modeling import load_example_model, is_binary</span>
+<span class="sd">    &gt;&gt;&gt; model = load_example_model(&quot;pheno&quot;)</span>
+<span class="sd">    &gt;&gt;&gt; is_binary(model, &quot;WGT&quot;)</span>
+<span class="sd">    False</span>
+<span class="sd">    &gt;&gt;&gt; is_binary(model, &quot;FA1&quot;)</span>
+<span class="sd">    True</span>
+<span class="sd">    &quot;&quot;&quot;</span>
+
+    <span class="n">odes</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span>
+    <span class="k">if</span> <span class="n">odes</span> <span class="ow">is</span> <span class="ow">not</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">odes</span><span class="o">.</span><span class="n">t</span> <span class="ow">in</span> <span class="n">_get_all_statement_deps</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">Expr</span><span class="p">(</span><span class="n">expr</span><span class="p">)):</span>
+            <span class="k">return</span> <span class="kc">False</span>
+
+    <span class="n">vec</span> <span class="o">=</span> <span class="n">evaluate_expression</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">expr</span><span class="p">)</span>
+    <span class="n">unique</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">vec</span><span class="o">.</span><span class="n">unique</span><span class="p">())</span>
+    <span class="k">return</span> <span class="n">unique</span> <span class="o">==</span> <span class="p">{</span><span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">}</span></div>
+
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_all_statement_deps</span><span class="p">(</span><span class="n">model</span><span class="p">:</span> <span class="n">Model</span><span class="p">,</span> <span class="n">expr</span><span class="p">:</span> <span class="n">Expr</span><span class="p">)</span> <span class="o">-&gt;</span> <span class="nb">set</span><span class="p">[</span><span class="n">Expr</span><span class="p">]:</span>
+    <span class="c1"># Dummy because Expr.free_symbols does not count amount functions</span>
+    <span class="n">dummy_assignment</span> <span class="o">=</span> <span class="n">Assignment</span><span class="p">(</span><span class="n">Expr</span><span class="o">.</span><span class="n">symbol</span><span class="p">(</span><span class="s2">&quot;_DUMMY&quot;</span><span class="p">),</span> <span class="n">expr</span><span class="p">)</span>
+    <span class="n">expr_symbs</span> <span class="o">=</span> <span class="n">dummy_assignment</span><span class="o">.</span><span class="n">rhs_symbols</span>
+    <span class="n">data_symbs</span> <span class="o">=</span> <span class="nb">set</span><span class="p">(</span><span class="n">model</span><span class="o">.</span><span class="n">datainfo</span><span class="o">.</span><span class="n">symbols</span><span class="p">)</span>
+    <span class="n">lhs_symbs</span> <span class="o">=</span> <span class="n">expr_symbs</span> <span class="o">-</span> <span class="n">data_symbs</span>
+    <span class="n">all_deps</span> <span class="o">=</span> <span class="nb">set</span><span class="p">()</span>
+    <span class="k">for</span> <span class="n">s</span> <span class="ow">in</span> <span class="n">lhs_symbs</span><span class="p">:</span>
+        <span class="k">if</span> <span class="n">s</span> <span class="o">!=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">ode_system</span><span class="o">.</span><span class="n">t</span><span class="p">:</span>
+            <span class="n">symbol_deps</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">statements</span><span class="o">.</span><span class="n">dependencies</span><span class="p">(</span><span class="n">s</span><span class="p">)</span>
+            <span class="n">all_deps</span> <span class="o">|=</span> <span class="n">symbol_deps</span>
+        <span class="n">all_deps</span> <span class="o">|=</span> <span class="p">{</span><span class="n">s</span><span class="p">}</span>
+    <span class="k">return</span> <span class="n">all_deps</span>
 </pre></div>
 
                 </article>
@@ -3372,7 +3513,7 @@
 
   <p class="copyright">
     
-      © Copyright 2018-2025; the Pharmpy development team.
+      © Copyright 2018-2026; the Pharmpy development team.
       <br/>
     
   </p>

@@ -1,5 +1,5 @@
-remove_iiv
-==========
+﻿pharmpy.modeling.remove\_iiv
+============================
 
 .. currentmodule:: pharmpy.modeling
 

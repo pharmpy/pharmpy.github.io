@@ -1,5 +1,5 @@
-evaluate_epsilon_gradient
-=========================
+﻿pharmpy.modeling.evaluate\_epsilon\_gradient
+============================================
 
 .. currentmodule:: pharmpy.modeling
 

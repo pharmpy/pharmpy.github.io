@@ -1,5 +1,5 @@
-get_omegas
-==========
+﻿pharmpy.modeling.get\_omegas
+============================
 
 .. currentmodule:: pharmpy.modeling
 

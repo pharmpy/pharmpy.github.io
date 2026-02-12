@@ -1,5 +1,5 @@
-remove_covariate_effect
-=======================
+﻿pharmpy.modeling.remove\_covariate\_effect
+==========================================
 
 .. currentmodule:: pharmpy.modeling
 

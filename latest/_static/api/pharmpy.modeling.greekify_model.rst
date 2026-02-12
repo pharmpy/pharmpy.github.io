@@ -1,5 +1,5 @@
-greekify_model
-==============
+﻿pharmpy.modeling.greekify\_model
+================================
 
 .. currentmodule:: pharmpy.modeling
 

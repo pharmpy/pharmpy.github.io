@@ -1,5 +1,5 @@
-bump_model_number
-=================
+﻿pharmpy.modeling.bump\_model\_number
+====================================
 
 .. currentmodule:: pharmpy.modeling
 

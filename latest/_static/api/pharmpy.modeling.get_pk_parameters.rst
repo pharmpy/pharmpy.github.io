@@ -1,5 +1,5 @@
-get_pk_parameters
-=================
+﻿pharmpy.modeling.get\_pk\_parameters
+====================================
 
 .. currentmodule:: pharmpy.modeling
 

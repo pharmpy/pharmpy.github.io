@@ -1,5 +1,5 @@
-set_baseline_effect
-===================
+﻿pharmpy.modeling.set\_baseline\_effect
+======================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-set_weibull_absorption
-======================
+﻿pharmpy.modeling.set\_weibull\_absorption
+=========================================
 
 .. currentmodule:: pharmpy.modeling
 

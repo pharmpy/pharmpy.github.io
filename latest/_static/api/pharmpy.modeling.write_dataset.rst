@@ -1,5 +1,5 @@
-write_dataset
-=============
+﻿pharmpy.modeling.write\_dataset
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

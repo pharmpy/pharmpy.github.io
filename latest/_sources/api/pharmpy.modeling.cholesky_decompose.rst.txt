@@ -1,5 +1,5 @@
-cholesky_decompose
-==================
+﻿pharmpy.modeling.cholesky\_decompose
+====================================
 
 .. currentmodule:: pharmpy.modeling
 

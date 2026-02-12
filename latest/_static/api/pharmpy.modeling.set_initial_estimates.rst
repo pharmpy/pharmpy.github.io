@@ -1,5 +1,5 @@
-set_initial_estimates
-=====================
+﻿pharmpy.modeling.set\_initial\_estimates
+========================================
 
 .. currentmodule:: pharmpy.modeling
 

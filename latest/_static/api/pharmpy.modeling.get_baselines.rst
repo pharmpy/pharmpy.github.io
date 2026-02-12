@@ -1,5 +1,5 @@
-get_baselines
-=============
+﻿pharmpy.modeling.get\_baselines
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

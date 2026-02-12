@@ -1,5 +1,5 @@
-calculate_se_from_cov
-=====================
+﻿pharmpy.modeling.calculate\_se\_from\_cov
+=========================================
 
 .. currentmodule:: pharmpy.modeling
 

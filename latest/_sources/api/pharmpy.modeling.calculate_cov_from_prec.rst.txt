@@ -1,5 +1,5 @@
-calculate_cov_from_prec
-=======================
+﻿pharmpy.modeling.calculate\_cov\_from\_prec
+===========================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-unfix_parameters_to
-===================
+﻿pharmpy.modeling.unfix\_parameters\_to
+======================================
 
 .. currentmodule:: pharmpy.modeling
 

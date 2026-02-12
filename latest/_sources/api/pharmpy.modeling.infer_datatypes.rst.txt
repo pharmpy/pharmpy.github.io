@@ -1,5 +1,5 @@
-infer_datatypes
-===============
+﻿pharmpy.modeling.infer\_datatypes
+=================================
 
 .. currentmodule:: pharmpy.modeling
 

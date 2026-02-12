@@ -1,5 +1,5 @@
-plot_individual_predictions
-===========================
+﻿pharmpy.modeling.plot\_individual\_predictions
+==============================================
 
 .. currentmodule:: pharmpy.modeling
 

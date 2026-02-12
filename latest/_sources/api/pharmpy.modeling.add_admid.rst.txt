@@ -1,5 +1,5 @@
-add_admid
-=========
+﻿pharmpy.modeling.add\_admid
+===========================
 
 .. currentmodule:: pharmpy.modeling
 

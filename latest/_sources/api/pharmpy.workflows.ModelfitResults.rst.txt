@@ -15,8 +15,10 @@ ModelfitResults
       ~ModelfitResults.covariance_matrix
       ~ModelfitResults.covstep_successful
       ~ModelfitResults.derivatives
+      ~ModelfitResults.eps_shrinkage
       ~ModelfitResults.estimation_runtime
       ~ModelfitResults.estimation_runtime_iterations
+      ~ModelfitResults.eta_shrinkage
       ~ModelfitResults.evaluation
       ~ModelfitResults.function_evaluations
       ~ModelfitResults.function_evaluations_iterations
@@ -55,8 +57,10 @@ ModelfitResults
    .. autoattribute:: covariance_matrix
    .. autoattribute:: covstep_successful
    .. autoattribute:: derivatives
+   .. autoattribute:: eps_shrinkage
    .. autoattribute:: estimation_runtime
    .. autoattribute:: estimation_runtime_iterations
+   .. autoattribute:: eta_shrinkage
    .. autoattribute:: evaluation
    .. autoattribute:: function_evaluations
    .. autoattribute:: function_evaluations_iterations

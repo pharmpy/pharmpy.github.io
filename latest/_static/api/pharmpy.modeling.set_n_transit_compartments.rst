@@ -1,5 +1,5 @@
-set_n_transit_compartments
-==========================
+﻿pharmpy.modeling.set\_n\_transit\_compartments
+==============================================
 
 .. currentmodule:: pharmpy.modeling
 

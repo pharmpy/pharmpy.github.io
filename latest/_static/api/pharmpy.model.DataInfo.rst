@@ -10,7 +10,6 @@ DataInfo
 
    .. autosummary::
 
-      ~DataInfo.descriptorix
       ~DataInfo.dv_column
       ~DataInfo.id_column
       ~DataInfo.idv_column
@@ -21,12 +20,14 @@ DataInfo
       ~DataInfo.symbols
       ~DataInfo.typeix
       ~DataInfo.types
+      ~DataInfo.variables
 
    .. rubric:: Methods Summary
 
    .. autosummary::
 
       ~DataInfo.create
+      ~DataInfo.find_column_by_property
       ~DataInfo.find_single_column_name
       ~DataInfo.from_dict
       ~DataInfo.from_json
@@ -43,7 +44,6 @@ DataInfo
 
    .. rubric:: Attributes Documentation
 
-   .. autoattribute:: descriptorix
    .. autoattribute:: dv_column
    .. autoattribute:: id_column
    .. autoattribute:: idv_column
@@ -54,10 +54,12 @@ DataInfo
    .. autoattribute:: symbols
    .. autoattribute:: typeix
    .. autoattribute:: types
+   .. autoattribute:: variables
 
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: find_column_by_property
    .. automethod:: find_single_column_name
    .. automethod:: from_dict
    .. automethod:: from_json

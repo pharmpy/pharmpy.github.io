@@ -1,5 +1,5 @@
-add_allometry
-=============
+﻿pharmpy.modeling.add\_allometry
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

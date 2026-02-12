@@ -1,5 +1,5 @@
-set_michaelis_menten_elimination
-================================
+﻿pharmpy.modeling.set\_michaelis\_menten\_elimination
+====================================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-has_weighted_error_model
-========================
+﻿pharmpy.modeling.has\_weighted\_error\_model
+============================================
 
 .. currentmodule:: pharmpy.modeling
 

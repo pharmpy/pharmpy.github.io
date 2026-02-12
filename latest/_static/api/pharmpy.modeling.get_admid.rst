@@ -1,5 +1,5 @@
-get_admid
-=========
+﻿pharmpy.modeling.get\_admid
+===========================
 
 .. currentmodule:: pharmpy.modeling
 

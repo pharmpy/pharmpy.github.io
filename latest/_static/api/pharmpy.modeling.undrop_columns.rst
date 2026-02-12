@@ -1,5 +1,5 @@
-undrop_columns
-==============
+﻿pharmpy.modeling.undrop\_columns
+================================
 
 .. currentmodule:: pharmpy.modeling
 

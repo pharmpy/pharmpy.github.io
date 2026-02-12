@@ -1,5 +1,5 @@
-set_description
-===============
+﻿pharmpy.modeling.set\_description
+=================================
 
 .. currentmodule:: pharmpy.modeling
 

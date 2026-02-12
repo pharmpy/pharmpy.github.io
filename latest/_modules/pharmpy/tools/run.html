@@ -7,7 +7,7 @@
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>pharmpy.tools.run &#8212; Pharmpy 1.12.0 documentation</title>
+    <title>pharmpy.tools.run &#8212; Pharmpy 2.0.0 documentation</title>
   
   
   
@@ -41,7 +41,7 @@
   <link rel="preload" as="script" href="../../../_static/scripts/bootstrap.js?digest=8878045cc6db502f8baf" />
 <link rel="preload" as="script" href="../../../_static/scripts/pydata-sphinx-theme.js?digest=8878045cc6db502f8baf" />
 
-    <script src="../../../_static/documentation_options.js?v=fe8e256b"></script>
+    <script src="../../../_static/documentation_options.js?v=51b770b3"></script>
     <script src="../../../_static/doctools.js?v=fd6eb6e6"></script>
     <script src="../../../_static/sphinx_highlight.js?v=6ffebe34"></script>
     <script src="../../../_static/thebelab-helper.js"></script>
@@ -53,8 +53,8 @@
     <link rel="search" title="Search" href="../../../search.html" />
   <meta name="viewport" content="width=device-width, initial-scale=1"/>
   <meta name="docsearch:language" content="en"/>
-  <meta name="docsearch:version" content="1.12.0" />
-    <meta name="docbuild:last-update" content="Dec 05, 2025"/>
+  <meta name="docsearch:version" content="2.0.0" />
+    <meta name="docbuild:last-update" content="Feb 12, 2026"/>
   </head>
   
   
@@ -118,8 +118,8 @@
     
     
     
-    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 1.12.0 documentation - Home"/>
-    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 1.12.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo.svg" class="logo__image only-light" alt="Pharmpy 2.0.0 documentation - Home"/>
+    <img src="../../../_static/Pharmpy_logo_dark.svg" class="logo__image only-dark pst-js-only" alt="Pharmpy 2.0.0 documentation - Home"/>
   
   
 </a></div>
@@ -509,14 +509,13 @@
 <span class="kn">from</span><span class="w"> </span><span class="nn">pathlib</span><span class="w"> </span><span class="kn">import</span> <span class="n">Path</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">typing</span><span class="w"> </span><span class="kn">import</span> <span class="n">Any</span><span class="p">,</span> <span class="n">Optional</span><span class="p">,</span> <span class="n">Union</span><span class="p">,</span> <span class="n">get_args</span><span class="p">,</span> <span class="n">get_origin</span><span class="p">,</span> <span class="n">get_type_hints</span>
 
-<span class="kn">from</span><span class="w"> </span><span class="nn">lark</span><span class="w"> </span><span class="kn">import</span> <span class="n">UnexpectedToken</span>
-
 <span class="kn">import</span><span class="w"> </span><span class="nn">pharmpy</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pharmpy.tools.modelfit</span>
 <span class="kn">import</span><span class="w"> </span><span class="nn">pharmpy.workflows.results</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.deps</span><span class="w"> </span><span class="kn">import</span> <span class="n">numpy</span> <span class="k">as</span> <span class="n">np</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.deps</span><span class="w"> </span><span class="kn">import</span> <span class="n">pandas</span> <span class="k">as</span> <span class="n">pd</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.internals.fs.path</span><span class="w"> </span><span class="kn">import</span> <span class="n">normalize_user_given_path</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.mfl</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelFeatures</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.model</span><span class="w"> </span><span class="kn">import</span> <span class="n">Model</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.modeling</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">calculate_aic</span><span class="p">,</span>
@@ -524,20 +523,13 @@
     <span class="n">check_high_correlations</span><span class="p">,</span>
     <span class="n">check_parameters_near_bounds</span><span class="p">,</span>
     <span class="n">get_omegas</span><span class="p">,</span>
-    <span class="n">get_parameter_rv</span><span class="p">,</span>
     <span class="n">get_sigmas</span><span class="p">,</span>
     <span class="n">get_thetas</span><span class="p">,</span>
-    <span class="n">has_random_effect</span><span class="p">,</span>
     <span class="n">read_model</span><span class="p">,</span>
 <span class="p">)</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.modeling.lrt</span><span class="w"> </span><span class="kn">import</span> <span class="n">degrees_of_freedom</span> <span class="k">as</span> <span class="n">lrt_df</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.modeling.lrt</span><span class="w"> </span><span class="kn">import</span> <span class="n">test</span> <span class="k">as</span> <span class="n">lrt_test</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.tools.mfl.parse</span><span class="w"> </span><span class="kn">import</span> <span class="n">ModelFeatures</span><span class="p">,</span> <span class="n">get_model_features</span><span class="p">,</span> <span class="n">parse</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.tools.mfl.statement.feature.absorption</span><span class="w"> </span><span class="kn">import</span> <span class="n">Absorption</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.tools.mfl.statement.feature.elimination</span><span class="w"> </span><span class="kn">import</span> <span class="n">Elimination</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.tools.mfl.statement.feature.lagtime</span><span class="w"> </span><span class="kn">import</span> <span class="n">LagTime</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.tools.mfl.statement.feature.peripherals</span><span class="w"> </span><span class="kn">import</span> <span class="n">Peripherals</span>
-<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.tools.mfl.statement.feature.transits</span><span class="w"> </span><span class="kn">import</span> <span class="n">Transits</span>
+<span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.modeling.mfl</span><span class="w"> </span><span class="kn">import</span> <span class="n">get_model_features</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.tools.psn_helpers</span><span class="w"> </span><span class="kn">import</span> <span class="n">create_results</span> <span class="k">as</span> <span class="n">psn_create_results</span>
 <span class="kn">from</span><span class="w"> </span><span class="nn">pharmpy.workflows</span><span class="w"> </span><span class="kn">import</span> <span class="p">(</span>
     <span class="n">DispatchingError</span><span class="p">,</span>
@@ -2064,16 +2056,32 @@
         <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="s1">&#39;Missing values for `E_p` and `E_q`, either must be specified&#39;</span><span class="p">)</span>
 
     <span class="k">try</span><span class="p">:</span>
-        <span class="n">search_space_mfl</span><span class="p">,</span> <span class="n">cand_mfl</span> <span class="o">=</span> <span class="n">parse_search_space_modelsearch</span><span class="p">(</span><span class="n">candidate_model</span><span class="p">,</span> <span class="n">search_space</span><span class="p">)</span>
-        <span class="k">if</span> <span class="n">E_p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
-                <span class="s1">&#39;Missing value for `E_p`, must be specified when using structual MFL in `search_space`&#39;</span>
-            <span class="p">)</span>
-        <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span> <span class="o">=</span> <span class="n">get_penalty_parameters_mfl</span><span class="p">(</span><span class="n">search_space_mfl</span><span class="p">,</span> <span class="n">cand_mfl</span><span class="p">)</span>
-        <span class="n">q</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="n">k_q</span> <span class="o">=</span> <span class="mi">0</span>
-    <span class="k">except</span> <span class="n">UnexpectedToken</span><span class="p">:</span>
-        <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k_q</span> <span class="o">=</span> <span class="n">get_penalty_parameters_rvs</span><span class="p">(</span><span class="n">candidate_model</span><span class="p">,</span> <span class="n">search_space</span><span class="p">)</span>
+        <span class="n">search_space_mfl</span> <span class="o">=</span> <span class="n">ModelFeatures</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">search_space</span><span class="p">)</span>
+    <span class="k">except</span> <span class="ne">ValueError</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;Could not parse `search_space`: </span><span class="si">{</span><span class="n">search_space</span><span class="si">}</span><span class="s1">&#39;</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="p">(</span>
+        <span class="n">search_space_mfl</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filter_on</span><span class="o">=</span><span class="s1">&#39;pk&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">search_space_mfl</span><span class="o">.</span><span class="n">iiv</span> <span class="ow">or</span> <span class="n">search_space_mfl</span><span class="o">.</span><span class="n">iov</span>
+    <span class="p">)</span> <span class="ow">and</span> <span class="n">E_p</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Missing value for `E_p`, must be specified when using structural or IIV/IOV MFL in `search_space`&#39;</span>
+        <span class="p">)</span>
+    <span class="k">if</span> <span class="n">search_space_mfl</span><span class="o">.</span><span class="n">covariance</span> <span class="ow">and</span> <span class="n">E_q</span> <span class="ow">is</span> <span class="kc">None</span><span class="p">:</span>
+        <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span>
+            <span class="s1">&#39;Missing value for `E_q`, must be specified when using covariance MFL in `search_space`&#39;</span>
+        <span class="p">)</span>
+
+    <span class="n">cand_mfl</span> <span class="o">=</span> <span class="n">ModelFeatures</span><span class="o">.</span><span class="n">create</span><span class="p">([])</span>
+    <span class="k">if</span> <span class="n">search_space_mfl</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filter_on</span><span class="o">=</span><span class="s1">&#39;pk&#39;</span><span class="p">):</span>
+        <span class="n">cand_mfl</span> <span class="o">+=</span> <span class="n">get_model_features</span><span class="p">(</span><span class="n">candidate_model</span><span class="p">,</span> <span class="s1">&#39;pk&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">search_space_mfl</span><span class="o">.</span><span class="n">iiv</span><span class="p">:</span>
+        <span class="n">cand_mfl</span> <span class="o">+=</span> <span class="n">get_model_features</span><span class="p">(</span><span class="n">candidate_model</span><span class="p">,</span> <span class="s1">&#39;iiv&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">search_space_mfl</span><span class="o">.</span><span class="n">iov</span><span class="p">:</span>
+        <span class="n">cand_mfl</span> <span class="o">+=</span> <span class="n">get_model_features</span><span class="p">(</span><span class="n">candidate_model</span><span class="p">,</span> <span class="s1">&#39;iov&#39;</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">search_space_mfl</span><span class="o">.</span><span class="n">covariance</span><span class="p">:</span>
+        <span class="n">cand_mfl</span> <span class="o">+=</span> <span class="n">get_model_features</span><span class="p">(</span><span class="n">candidate_model</span><span class="p">,</span> <span class="s1">&#39;covariance&#39;</span><span class="p">)</span>
+
+    <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k_q</span> <span class="o">=</span> <span class="n">get_mbic_penalty_parameters</span><span class="p">(</span><span class="n">search_space_mfl</span><span class="p">,</span> <span class="n">cand_mfl</span><span class="p">)</span>
 
     <span class="c1"># To avoid domain error</span>
     <span class="n">p</span> <span class="o">=</span> <span class="n">p</span> <span class="k">if</span> <span class="n">k_p</span> <span class="o">!=</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">1</span>
@@ -2097,137 +2105,125 @@
     <span class="k">return</span> <span class="n">e</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">parse_search_space_modelsearch</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">search_space</span><span class="p">):</span>
-    <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">search_space</span><span class="p">,</span> <span class="nb">str</span><span class="p">):</span>
-        <span class="n">search_space_mfl</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">search_space</span><span class="p">,</span> <span class="n">mfl_class</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="k">else</span><span class="p">:</span>
-        <span class="n">search_space_mfl</span> <span class="o">=</span> <span class="n">search_space</span>
-    <span class="n">cand_features</span> <span class="o">=</span> <span class="n">get_model_features</span><span class="p">(</span><span class="n">model</span><span class="p">)</span>
-    <span class="n">cand_mfl</span> <span class="o">=</span> <span class="n">parse</span><span class="p">(</span><span class="n">cand_features</span><span class="p">,</span> <span class="n">mfl_class</span><span class="o">=</span><span class="kc">True</span><span class="p">)</span>
-    <span class="c1"># FIXME: Workaround to skip covariate effects detected in search space</span>
-    <span class="n">cand_mfl</span> <span class="o">=</span> <span class="n">ModelFeatures</span><span class="o">.</span><span class="n">create</span><span class="p">(</span>
-        <span class="n">absorption</span><span class="o">=</span><span class="n">cand_mfl</span><span class="o">.</span><span class="n">absorption</span><span class="p">,</span>
-        <span class="n">elimination</span><span class="o">=</span><span class="n">cand_mfl</span><span class="o">.</span><span class="n">elimination</span><span class="p">,</span>
-        <span class="n">transits</span><span class="o">=</span><span class="n">cand_mfl</span><span class="o">.</span><span class="n">transits</span><span class="p">,</span>
-        <span class="n">peripherals</span><span class="o">=</span><span class="n">cand_mfl</span><span class="o">.</span><span class="n">peripherals</span><span class="p">,</span>
-        <span class="n">lagtime</span><span class="o">=</span><span class="n">cand_mfl</span><span class="o">.</span><span class="n">lagtime</span><span class="p">,</span>
-    <span class="p">)</span>
-
-    <span class="k">return</span> <span class="n">search_space_mfl</span><span class="p">,</span> <span class="n">cand_mfl</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">get_penalty_parameters_mfl</span><span class="p">(</span><span class="n">search_space_mfl</span><span class="p">,</span> <span class="n">cand_mfl</span><span class="p">):</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">get_mbic_penalty_parameters</span><span class="p">(</span><span class="n">search_space_mfl</span><span class="p">,</span> <span class="n">cand_mfl</span><span class="p">):</span>
     <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
-    <span class="k">for</span> <span class="n">attr_name</span><span class="p">,</span> <span class="n">attr</span> <span class="ow">in</span> <span class="nb">vars</span><span class="p">(</span><span class="n">cand_mfl</span><span class="p">)</span><span class="o">.</span><span class="n">items</span><span class="p">():</span>
-        <span class="k">if</span> <span class="ow">not</span> <span class="n">attr</span><span class="p">:</span>
-            <span class="k">continue</span>
-        <span class="n">attr_search_space</span> <span class="o">=</span> <span class="nb">getattr</span><span class="p">(</span><span class="n">search_space_mfl</span><span class="p">,</span> <span class="n">attr_name</span><span class="p">)</span>
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="nb">tuple</span><span class="p">):</span>
-            <span class="k">assert</span> <span class="nb">len</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span> <span class="ow">and</span> <span class="nb">len</span><span class="p">(</span><span class="n">attr_search_space</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span>
-            <span class="n">attr</span><span class="p">,</span> <span class="n">attr_search_space</span> <span class="o">=</span> <span class="n">attr</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="n">attr_search_space</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
 
-        <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">attr_search_space</span><span class="p">)</span> <span class="o">==</span> <span class="mi">1</span><span class="p">:</span>
-            <span class="k">continue</span>
+    <span class="n">penalty_funcs</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">_get_absorption_penalty</span><span class="p">,</span>
+        <span class="n">_get_transits_penalty</span><span class="p">,</span>
+        <span class="n">_get_lagtime_penalty</span><span class="p">,</span>
+        <span class="n">_get_elimination_penalty</span><span class="p">,</span>
+        <span class="n">_get_peripherals_penalty</span><span class="p">,</span>
+        <span class="n">_get_variability_penalty</span><span class="p">,</span>
+    <span class="p">]</span>
+    <span class="k">for</span> <span class="n">func</span> <span class="ow">in</span> <span class="n">penalty_funcs</span><span class="p">:</span>
+        <span class="n">p_func</span><span class="p">,</span> <span class="n">k_p_func</span> <span class="o">=</span> <span class="n">func</span><span class="p">(</span><span class="n">search_space_mfl</span><span class="p">,</span> <span class="n">cand_mfl</span><span class="p">)</span>
+        <span class="n">p</span> <span class="o">+=</span> <span class="n">p_func</span>
+        <span class="n">k_p</span> <span class="o">+=</span> <span class="n">k_p_func</span>
 
-        <span class="k">if</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Absorption</span><span class="p">):</span>
-            <span class="n">abs_search_space</span> <span class="o">=</span> <span class="p">[</span><span class="n">mode</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">attr_search_space</span><span class="o">.</span><span class="n">modes</span><span class="p">]</span>
-            <span class="k">if</span> <span class="s1">&#39;SEQ-ZO-FO&#39;</span> <span class="ow">in</span> <span class="n">abs_search_space</span><span class="p">:</span>
-                <span class="n">p_attr</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">p_attr</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="n">abs_type</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">modes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
-            <span class="k">if</span> <span class="n">abs_type</span> <span class="o">==</span> <span class="s1">&#39;SEQ-ZO-FO&#39;</span><span class="p">:</span>
-                <span class="n">k_p_attr</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">k_p_attr</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">if</span> <span class="s1">&#39;INST&#39;</span> <span class="ow">in</span> <span class="n">abs_search_space</span><span class="p">:</span>
-                <span class="n">p_attr</span> <span class="o">+=</span> <span class="mi">1</span>
-                <span class="k">if</span> <span class="n">abs_type</span> <span class="o">!=</span> <span class="s1">&#39;INST&#39;</span><span class="p">:</span>
-                    <span class="n">k_p_attr</span> <span class="o">+=</span> <span class="mi">1</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Transits</span><span class="p">):</span>
-
-            <span class="k">def</span><span class="w"> </span><span class="nf">_has_depot</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
-                <span class="k">return</span> <span class="s1">&#39;DEPOT&#39;</span> <span class="ow">in</span> <span class="p">[</span><span class="n">mode</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">attr</span><span class="o">.</span><span class="n">depot</span><span class="p">]</span>
-
-            <span class="k">if</span> <span class="n">_has_depot</span><span class="p">(</span><span class="n">attr_search_space</span><span class="o">.</span><span class="n">eval</span><span class="p">):</span>
-                <span class="n">p_attr</span> <span class="o">=</span> <span class="nb">len</span><span class="p">([</span><span class="n">n</span> <span class="k">for</span> <span class="n">n</span> <span class="ow">in</span> <span class="n">attr_search_space</span><span class="o">.</span><span class="n">counts</span> <span class="k">if</span> <span class="n">n</span> <span class="o">&gt;</span> <span class="mi">0</span><span class="p">])</span>
-                <span class="k">if</span> <span class="n">_has_depot</span><span class="p">(</span><span class="n">attr</span><span class="p">):</span>
-                    <span class="n">k_p_attr</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
-                <span class="k">else</span><span class="p">:</span>
-                    <span class="n">k_p_attr</span> <span class="o">=</span> <span class="mi">0</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">p_attr</span> <span class="o">=</span> <span class="mi">0</span>
-                <span class="n">k_p_attr</span> <span class="o">=</span> <span class="mi">0</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">LagTime</span><span class="p">):</span>
-            <span class="n">p_attr</span> <span class="o">=</span> <span class="mi">1</span>
-            <span class="n">k_p_attr</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">attr</span><span class="o">.</span><span class="n">modes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span> <span class="o">==</span> <span class="s1">&#39;ON&#39;</span> <span class="k">else</span> <span class="mi">0</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Elimination</span><span class="p">):</span>
-            <span class="n">attr_names</span> <span class="o">=</span> <span class="p">[</span><span class="n">mode</span><span class="o">.</span><span class="n">name</span> <span class="k">for</span> <span class="n">mode</span> <span class="ow">in</span> <span class="n">attr_search_space</span><span class="o">.</span><span class="n">modes</span><span class="p">]</span>
-            <span class="n">sort_val</span> <span class="o">=</span> <span class="p">{</span><span class="s1">&#39;FO&#39;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span> <span class="s1">&#39;MM&#39;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;MIX-FO-MM&#39;</span><span class="p">:</span> <span class="mi">2</span><span class="p">}</span>
-            <span class="n">attr_names</span><span class="o">.</span><span class="n">sort</span><span class="p">(</span><span class="n">key</span><span class="o">=</span><span class="k">lambda</span> <span class="n">x</span><span class="p">:</span> <span class="n">sort_val</span><span class="p">[</span><span class="n">x</span><span class="p">])</span>
-            <span class="n">p_attr</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">attr_names</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-            <span class="n">elim_type</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">modes</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">name</span>
-            <span class="n">k_p_attr</span> <span class="o">=</span> <span class="nb">list</span><span class="p">(</span><span class="n">attr_names</span><span class="p">)</span><span class="o">.</span><span class="n">index</span><span class="p">(</span><span class="n">elim_type</span><span class="p">)</span>
-        <span class="k">elif</span> <span class="nb">isinstance</span><span class="p">(</span><span class="n">attr</span><span class="p">,</span> <span class="n">Peripherals</span><span class="p">):</span>
-            <span class="c1"># FIXME: This will not work with e.g. `PERIPHERALS([0,2])`</span>
-            <span class="n">p_attr</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">attr_search_space</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span>
-            <span class="n">k_p_attr</span> <span class="o">=</span> <span class="n">attr</span><span class="o">.</span><span class="n">counts</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">raise</span> <span class="ne">ValueError</span><span class="p">(</span><span class="sa">f</span><span class="s1">&#39;MFL attribute of type `</span><span class="si">{</span><span class="nb">type</span><span class="p">(</span><span class="n">attr</span><span class="p">)</span><span class="si">}</span><span class="s1">` not supported.&#39;</span><span class="p">)</span>
-
-        <span class="n">p</span> <span class="o">+=</span> <span class="n">p_attr</span>
-        <span class="n">k_p</span> <span class="o">+=</span> <span class="n">k_p_attr</span>
-
-    <span class="k">return</span> <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span>
-
-
-<span class="k">def</span><span class="w"> </span><span class="nf">get_penalty_parameters_rvs</span><span class="p">(</span><span class="n">cand_model</span><span class="p">,</span> <span class="n">search_space</span><span class="p">):</span>
-    <span class="n">iiv_params</span><span class="p">,</span> <span class="n">iov_params</span><span class="p">,</span> <span class="n">cov_params</span> <span class="o">=</span> <span class="n">parse_search_space_rvs</span><span class="p">(</span><span class="n">search_space</span><span class="p">)</span>
-    <span class="n">p</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">iiv_params</span><span class="p">)</span> <span class="o">+</span> <span class="nb">len</span><span class="p">(</span><span class="n">iov_params</span><span class="p">)</span>
-    <span class="n">k_p</span> <span class="o">=</span> <span class="n">get_k_p</span><span class="p">(</span><span class="n">cand_model</span><span class="p">,</span> <span class="n">iiv_params</span><span class="p">,</span> <span class="s1">&#39;iiv&#39;</span><span class="p">)</span> <span class="o">+</span> <span class="n">get_k_p</span><span class="p">(</span><span class="n">cand_model</span><span class="p">,</span> <span class="n">iov_params</span><span class="p">,</span> <span class="s1">&#39;iov&#39;</span><span class="p">)</span>
-    <span class="k">if</span> <span class="n">cov_params</span><span class="p">:</span>
-        <span class="n">q</span> <span class="o">=</span> <span class="nb">int</span><span class="p">((</span><span class="nb">len</span><span class="p">(</span><span class="n">cov_params</span><span class="p">)</span> <span class="o">*</span> <span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="n">cov_params</span><span class="p">)</span> <span class="o">-</span> <span class="mi">1</span><span class="p">))</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
-        <span class="n">k_q</span> <span class="o">=</span> <span class="n">get_k_q</span><span class="p">(</span><span class="n">cand_model</span><span class="p">,</span> <span class="n">cov_params</span><span class="p">)</span>
+    <span class="k">if</span> <span class="n">search_space_mfl</span><span class="o">.</span><span class="n">covariance</span><span class="p">:</span>
+        <span class="n">q</span><span class="p">,</span> <span class="n">k_q</span> <span class="o">=</span> <span class="n">_get_covariance_penalty</span><span class="p">(</span><span class="n">search_space_mfl</span><span class="p">,</span> <span class="n">cand_mfl</span><span class="p">)</span>
     <span class="k">else</span><span class="p">:</span>
         <span class="n">q</span><span class="p">,</span> <span class="n">k_q</span> <span class="o">=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
 
     <span class="k">return</span> <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span><span class="p">,</span> <span class="n">q</span><span class="p">,</span> <span class="n">k_q</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">parse_search_space_rvs</span><span class="p">(</span><span class="n">search_space</span><span class="p">):</span>
-    <span class="n">iiv_params</span><span class="p">,</span> <span class="n">iov_params</span><span class="p">,</span> <span class="n">cov_params</span> <span class="o">=</span> <span class="p">[],</span> <span class="p">[],</span> <span class="p">[]</span>
-    <span class="k">for</span> <span class="n">subexpr</span> <span class="ow">in</span> <span class="n">search_space</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;;&#39;</span><span class="p">):</span>
-        <span class="k">assert</span> <span class="n">subexpr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;IIV&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">subexpr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;IOV&#39;</span><span class="p">)</span> <span class="ow">or</span> <span class="n">subexpr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;COV&#39;</span><span class="p">)</span>
-        <span class="k">if</span> <span class="s1">&#39;?&#39;</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">subexpr</span><span class="p">:</span>
-            <span class="k">continue</span>
-        <span class="k">if</span> <span class="n">subexpr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;COV&#39;</span><span class="p">):</span>
-            <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;COV\?\(\[*([\w,]*)\]*\)&#39;</span>
-            <span class="n">params</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">subexpr</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-            <span class="n">cov_params</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-        <span class="k">else</span><span class="p">:</span>
-            <span class="k">if</span> <span class="n">subexpr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;IIV&#39;</span><span class="p">):</span>
-                <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;IIV\?\(\[*([\w,]*)\]*,\w+\)&#39;</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">pattern</span> <span class="o">=</span> <span class="sa">r</span><span class="s1">&#39;IOV\?\(\[*([\w,]*)\]*\)&#39;</span>
-            <span class="n">params</span> <span class="o">=</span> <span class="n">re</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="n">pattern</span><span class="p">,</span> <span class="n">subexpr</span><span class="p">)</span><span class="o">.</span><span class="n">group</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s1">&#39;,&#39;</span><span class="p">)</span>
-            <span class="k">if</span> <span class="n">subexpr</span><span class="o">.</span><span class="n">startswith</span><span class="p">(</span><span class="s1">&#39;IIV&#39;</span><span class="p">):</span>
-                <span class="n">iiv_params</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-            <span class="k">else</span><span class="p">:</span>
-                <span class="n">iov_params</span><span class="o">.</span><span class="n">extend</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
-    <span class="k">return</span> <span class="n">iiv_params</span><span class="p">,</span> <span class="n">iov_params</span><span class="p">,</span> <span class="n">cov_params</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_absorption_penalty</span><span class="p">(</span><span class="n">mfl_full</span><span class="p">,</span> <span class="n">mfl_cand</span><span class="p">):</span>
+    <span class="n">absorption</span> <span class="o">=</span> <span class="n">mfl_full</span><span class="o">.</span><span class="n">absorption</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">absorption</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="n">absorption_types</span> <span class="o">=</span> <span class="p">[</span><span class="nb">abs</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="nb">abs</span> <span class="ow">in</span> <span class="n">absorption</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;SEQ-ZO-FO&#39;</span> <span class="ow">in</span> <span class="n">absorption_types</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">mfl_cand</span><span class="o">.</span><span class="n">absorption</span><span class="p">:</span>
+        <span class="n">a</span> <span class="o">=</span> <span class="n">mfl_cand</span><span class="o">.</span><span class="n">absorption</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">k_p</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;SEQ-ZO-FO&#39;</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">k_p</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">get_k_p</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">params</span><span class="p">,</span> <span class="n">level</span><span class="p">):</span>
-    <span class="n">params</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span> <span class="k">if</span> <span class="n">has_random_effect</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">p</span><span class="p">,</span> <span class="n">level</span><span class="p">)]</span>
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">params</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_transits_penalty</span><span class="p">(</span><span class="n">mfl_full</span><span class="p">,</span> <span class="n">mfl_cand</span><span class="p">):</span>
+    <span class="n">transits</span> <span class="o">=</span> <span class="n">mfl_full</span><span class="o">.</span><span class="n">transits</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">transits</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+
+    <span class="n">contributing_transits</span> <span class="o">=</span> <span class="p">[</span>
+        <span class="n">transit</span> <span class="k">for</span> <span class="n">transit</span> <span class="ow">in</span> <span class="n">transits</span> <span class="k">if</span> <span class="n">transit</span><span class="o">.</span><span class="n">depot</span> <span class="ow">and</span> <span class="n">transit</span><span class="o">.</span><span class="n">number</span> <span class="o">&gt;</span> <span class="mi">0</span>
+    <span class="p">]</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">contributing_transits</span><span class="p">)</span>
+
+    <span class="k">if</span> <span class="n">mfl_cand</span><span class="o">.</span><span class="n">transits</span><span class="p">:</span>
+        <span class="n">t</span> <span class="o">=</span> <span class="n">mfl_cand</span><span class="o">.</span><span class="n">transits</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">k_p</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">t</span><span class="o">.</span><span class="n">depot</span> <span class="ow">and</span> <span class="n">t</span><span class="o">.</span><span class="n">number</span> <span class="o">&gt;</span> <span class="mi">0</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">k_p</span> <span class="o">=</span> <span class="mi">0</span>
+
+    <span class="k">return</span> <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span>
 
 
-<span class="k">def</span><span class="w"> </span><span class="nf">get_k_q</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">params</span><span class="p">):</span>
-    <span class="n">param_rvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">get_parameter_rv</span><span class="p">(</span><span class="n">model</span><span class="p">,</span> <span class="n">p</span><span class="p">)</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">params</span><span class="p">]</span>
-    <span class="n">param_rvs</span> <span class="o">=</span> <span class="p">[</span><span class="n">item</span> <span class="k">for</span> <span class="n">sublist</span> <span class="ow">in</span> <span class="n">param_rvs</span> <span class="k">for</span> <span class="n">item</span> <span class="ow">in</span> <span class="n">sublist</span><span class="p">]</span>
-    <span class="n">rvs</span> <span class="o">=</span> <span class="n">model</span><span class="o">.</span><span class="n">random_variables</span><span class="p">[</span><span class="n">param_rvs</span><span class="p">]</span>
-    <span class="n">cov_params</span> <span class="o">=</span> <span class="p">[</span><span class="n">p</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">rvs</span><span class="o">.</span><span class="n">parameter_names</span> <span class="k">if</span> <span class="n">p</span> <span class="ow">not</span> <span class="ow">in</span> <span class="n">rvs</span><span class="o">.</span><span class="n">variance_parameters</span><span class="p">]</span>
-    <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="n">cov_params</span><span class="p">)</span>
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_lagtime_penalty</span><span class="p">(</span><span class="n">mfl_full</span><span class="p">,</span> <span class="n">mfl_cand</span><span class="p">):</span>
+    <span class="n">lagtime</span> <span class="o">=</span> <span class="n">mfl_full</span><span class="o">.</span><span class="n">lagtime</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">lagtime</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">if</span> <span class="n">mfl_cand</span><span class="o">.</span><span class="n">lagtime</span><span class="p">:</span>
+        <span class="n">k_p</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">mfl_cand</span><span class="o">.</span><span class="n">lagtime</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">on</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">k_p</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_elimination_penalty</span><span class="p">(</span><span class="n">mfl_full</span><span class="p">,</span> <span class="n">mfl_cand</span><span class="p">):</span>
+    <span class="n">elimination</span> <span class="o">=</span> <span class="n">mfl_full</span><span class="o">.</span><span class="n">elimination</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">elimination</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="n">elimination_types</span> <span class="o">=</span> <span class="p">[</span><span class="n">elim</span><span class="o">.</span><span class="n">type</span> <span class="k">for</span> <span class="n">elim</span> <span class="ow">in</span> <span class="n">elimination</span><span class="p">]</span>
+    <span class="k">if</span> <span class="s1">&#39;MIX-FO-MM&#39;</span> <span class="ow">in</span> <span class="n">elimination_types</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="mi">1</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">p</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">if</span> <span class="n">mfl_cand</span><span class="o">.</span><span class="n">elimination</span><span class="p">:</span>
+        <span class="n">e</span> <span class="o">=</span> <span class="n">mfl_cand</span><span class="o">.</span><span class="n">elimination</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span>
+        <span class="n">k_p</span> <span class="o">=</span> <span class="mi">1</span> <span class="k">if</span> <span class="n">e</span><span class="o">.</span><span class="n">type</span> <span class="o">==</span> <span class="s1">&#39;MIX-FO-MM&#39;</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">else</span><span class="p">:</span>
+        <span class="n">k_p</span> <span class="o">=</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_peripherals_penalty</span><span class="p">(</span><span class="n">mfl_full</span><span class="p">,</span> <span class="n">mfl_cand</span><span class="p">):</span>
+    <span class="n">peripherals</span> <span class="o">=</span> <span class="n">mfl_full</span><span class="o">.</span><span class="n">peripherals</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">peripherals</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="n">number_of_peripherals</span> <span class="o">=</span> <span class="p">{</span><span class="n">p</span><span class="o">.</span><span class="n">number</span> <span class="k">for</span> <span class="n">p</span> <span class="ow">in</span> <span class="n">peripherals</span> <span class="k">if</span> <span class="n">p</span><span class="o">.</span><span class="n">number</span> <span class="o">!=</span> <span class="mi">0</span><span class="p">}</span>
+    <span class="n">p</span> <span class="o">=</span> <span class="nb">max</span><span class="p">(</span><span class="n">number_of_peripherals</span><span class="p">)</span>
+    <span class="n">k_p</span> <span class="o">=</span> <span class="n">mfl_cand</span><span class="o">.</span><span class="n">peripherals</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span><span class="o">.</span><span class="n">number</span> <span class="k">if</span> <span class="n">mfl_cand</span><span class="o">.</span><span class="n">peripherals</span> <span class="k">else</span> <span class="mi">0</span>
+    <span class="k">return</span> <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_variability_penalty</span><span class="p">(</span><span class="n">mfl_full</span><span class="p">,</span> <span class="n">mfl_cand</span><span class="p">):</span>
+    <span class="n">var</span> <span class="o">=</span> <span class="n">mfl_full</span><span class="o">.</span><span class="n">iiv</span> <span class="o">+</span> <span class="n">mfl_full</span><span class="o">.</span><span class="n">iov</span>
+    <span class="n">var_optional</span> <span class="o">=</span> <span class="n">var</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filter_on</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">)</span>
+    <span class="n">var_forced</span> <span class="o">=</span> <span class="n">var</span> <span class="o">-</span> <span class="n">var_optional</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_optional</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="n">var_cand</span> <span class="o">=</span> <span class="p">(</span><span class="n">mfl_cand</span><span class="o">.</span><span class="n">iiv</span> <span class="o">+</span> <span class="n">mfl_cand</span><span class="o">.</span><span class="n">iov</span><span class="p">)</span> <span class="o">-</span> <span class="n">var_forced</span>
+    <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_optional</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">var_cand</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">p</span><span class="p">,</span> <span class="n">k_p</span>
+
+
+<span class="k">def</span><span class="w"> </span><span class="nf">_get_covariance_penalty</span><span class="p">(</span><span class="n">mfl_full</span><span class="p">,</span> <span class="n">mfl_cand</span><span class="p">):</span>
+    <span class="n">cov</span> <span class="o">=</span> <span class="n">mfl_full</span><span class="o">.</span><span class="n">covariance</span>
+    <span class="n">cov_optional</span> <span class="o">=</span> <span class="n">cov</span><span class="o">.</span><span class="n">filter</span><span class="p">(</span><span class="n">filter_on</span><span class="o">=</span><span class="s1">&#39;optional&#39;</span><span class="p">)</span>
+    <span class="n">cov_forced</span> <span class="o">=</span> <span class="n">cov</span> <span class="o">-</span> <span class="n">cov_optional</span>
+    <span class="k">if</span> <span class="nb">len</span><span class="p">(</span><span class="n">cov_optional</span><span class="p">)</span> <span class="o">&lt;=</span> <span class="mi">1</span><span class="p">:</span>
+        <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span>
+    <span class="n">cov_cand</span> <span class="o">=</span> <span class="n">mfl_cand</span><span class="o">.</span><span class="n">covariance</span> <span class="o">-</span> <span class="n">cov_forced</span>
+    <span class="n">q</span><span class="p">,</span> <span class="n">k_q</span> <span class="o">=</span> <span class="nb">len</span><span class="p">(</span><span class="n">cov_optional</span><span class="p">),</span> <span class="nb">len</span><span class="p">(</span><span class="n">cov_cand</span><span class="p">)</span>
+    <span class="k">return</span> <span class="n">q</span><span class="p">,</span> <span class="n">k_q</span>
 </pre></div>
 
                 </article>
@@ -2269,7 +2265,7 @@
 
   <p class="copyright">
     
-      © Copyright 2018-2025; the Pharmpy development team.
+      © Copyright 2018-2026; the Pharmpy development team.
       <br/>
     
   </p>

@@ -1,5 +1,5 @@
-filter_dataset
-==============
+﻿pharmpy.modeling.filter\_dataset
+================================
 
 .. currentmodule:: pharmpy.modeling
 

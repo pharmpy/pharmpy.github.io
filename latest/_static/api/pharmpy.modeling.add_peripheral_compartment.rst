@@ -1,5 +1,5 @@
-add_peripheral_compartment
-==========================
+﻿pharmpy.modeling.add\_peripheral\_compartment
+=============================================
 
 .. currentmodule:: pharmpy.modeling
 

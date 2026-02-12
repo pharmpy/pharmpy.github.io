@@ -1,5 +1,5 @@
-remove_residuals
-================
+﻿pharmpy.modeling.remove\_residuals
+==================================
 
 .. currentmodule:: pharmpy.modeling
 

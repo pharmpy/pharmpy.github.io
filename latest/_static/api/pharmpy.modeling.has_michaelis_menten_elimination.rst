@@ -1,5 +1,5 @@
-has_michaelis_menten_elimination
-================================
+﻿pharmpy.modeling.has\_michaelis\_menten\_elimination
+====================================================
 
 .. currentmodule:: pharmpy.modeling
 

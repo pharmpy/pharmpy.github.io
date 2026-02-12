@@ -1,5 +1,5 @@
-make_declarative
-================
+﻿pharmpy.modeling.make\_declarative
+==================================
 
 .. currentmodule:: pharmpy.modeling
 

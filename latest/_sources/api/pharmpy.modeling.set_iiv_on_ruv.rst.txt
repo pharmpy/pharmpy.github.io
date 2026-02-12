@@ -1,5 +1,5 @@
-set_iiv_on_ruv
-==============
+﻿pharmpy.modeling.set\_iiv\_on\_ruv
+==================================
 
 .. currentmodule:: pharmpy.modeling
 

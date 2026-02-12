@@ -1,5 +1,5 @@
-add_placebo_model
-=================
+﻿pharmpy.modeling.add\_placebo\_model
+====================================
 
 .. currentmodule:: pharmpy.modeling
 

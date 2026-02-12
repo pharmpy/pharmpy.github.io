@@ -1,5 +1,5 @@
-omit_data
-=========
+﻿pharmpy.modeling.omit\_data
+===========================
 
 .. currentmodule:: pharmpy.modeling
 

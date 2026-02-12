@@ -1,5 +1,5 @@
-add_pk_iiv
-==========
+﻿pharmpy.modeling.add\_pk\_iiv
+=============================
 
 .. currentmodule:: pharmpy.modeling
 

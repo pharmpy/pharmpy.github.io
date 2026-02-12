@@ -1,5 +1,5 @@
-get_dv_symbol
-=============
+﻿pharmpy.modeling.get\_dv\_symbol
+================================
 
 .. currentmodule:: pharmpy.modeling
 

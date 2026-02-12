@@ -1,5 +1,5 @@
-fix_parameters
-==============
+﻿pharmpy.modeling.fix\_parameters
+================================
 
 .. currentmodule:: pharmpy.modeling
 

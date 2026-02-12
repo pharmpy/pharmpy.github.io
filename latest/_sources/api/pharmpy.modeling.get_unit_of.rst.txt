@@ -1,5 +1,5 @@
-get_unit_of
-===========
+﻿pharmpy.modeling.get\_unit\_of
+==============================
 
 .. currentmodule:: pharmpy.modeling
 

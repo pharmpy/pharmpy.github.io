@@ -1,5 +1,5 @@
-get_sigmas
-==========
+﻿pharmpy.modeling.get\_sigmas
+============================
 
 .. currentmodule:: pharmpy.modeling
 

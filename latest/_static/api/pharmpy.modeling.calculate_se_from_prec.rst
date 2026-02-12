@@ -1,5 +1,5 @@
-calculate_se_from_prec
-======================
+﻿pharmpy.modeling.calculate\_se\_from\_prec
+==========================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-remove_estimation_step
-======================
+﻿pharmpy.modeling.remove\_estimation\_step
+=========================================
 
 .. currentmodule:: pharmpy.modeling
 

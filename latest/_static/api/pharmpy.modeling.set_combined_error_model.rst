@@ -1,5 +1,5 @@
-set_combined_error_model
-========================
+﻿pharmpy.modeling.set\_combined\_error\_model
+============================================
 
 .. currentmodule:: pharmpy.modeling
 

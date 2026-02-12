@@ -1,5 +1,5 @@
-is_linearized
-=============
+﻿pharmpy.modeling.is\_linearized
+===============================
 
 .. currentmodule:: pharmpy.modeling
 

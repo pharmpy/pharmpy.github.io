@@ -1,5 +1,5 @@
-write_csv
-=========
+﻿pharmpy.modeling.write\_csv
+===========================
 
 .. currentmodule:: pharmpy.modeling
 

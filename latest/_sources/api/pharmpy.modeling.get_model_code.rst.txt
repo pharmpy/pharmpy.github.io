@@ -1,5 +1,5 @@
-get_model_code
-==============
+﻿pharmpy.modeling.get\_model\_code
+=================================
 
 .. currentmodule:: pharmpy.modeling
 

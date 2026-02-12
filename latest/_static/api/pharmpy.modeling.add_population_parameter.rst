@@ -1,5 +1,5 @@
-add_population_parameter
-========================
+﻿pharmpy.modeling.add\_population\_parameter
+===========================================
 
 .. currentmodule:: pharmpy.modeling
 

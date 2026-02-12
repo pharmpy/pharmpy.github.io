@@ -1,5 +1,5 @@
-get_observation_expression
-==========================
+﻿pharmpy.modeling.get\_observation\_expression
+=============================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-remove_peripheral_compartment
-=============================
+﻿pharmpy.modeling.remove\_peripheral\_compartment
+================================================
 
 .. currentmodule:: pharmpy.modeling
 

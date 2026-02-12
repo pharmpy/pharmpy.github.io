@@ -1,5 +1,5 @@
-get_config_path
-===============
+﻿pharmpy.modeling.get\_config\_path
+==================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-rename_symbols
-==============
+﻿pharmpy.modeling.rename\_symbols
+================================
 
 .. currentmodule:: pharmpy.modeling
 

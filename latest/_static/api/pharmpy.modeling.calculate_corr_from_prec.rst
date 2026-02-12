@@ -1,5 +1,5 @@
-calculate_corr_from_prec
-========================
+﻿pharmpy.modeling.calculate\_corr\_from\_prec
+============================================
 
 .. currentmodule:: pharmpy.modeling
 

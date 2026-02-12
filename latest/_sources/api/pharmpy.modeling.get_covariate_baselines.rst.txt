@@ -1,5 +1,5 @@
-get_covariate_baselines
-=======================
+﻿pharmpy.modeling.get\_covariate\_baselines
+==========================================
 
 .. currentmodule:: pharmpy.modeling
 

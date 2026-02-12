@@ -1,5 +1,5 @@
-get_thetas
-==========
+﻿pharmpy.modeling.get\_thetas
+============================
 
 .. currentmodule:: pharmpy.modeling
 

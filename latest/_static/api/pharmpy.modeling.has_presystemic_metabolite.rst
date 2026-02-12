@@ -1,5 +1,5 @@
-has_presystemic_metabolite
-==========================
+﻿pharmpy.modeling.has\_presystemic\_metabolite
+=============================================
 
 .. currentmodule:: pharmpy.modeling
 

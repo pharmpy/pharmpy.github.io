@@ -1,5 +1,5 @@
-create_config_template
-======================
+﻿pharmpy.modeling.create\_config\_template
+=========================================
 
 .. currentmodule:: pharmpy.modeling
 

@@ -1,5 +1,5 @@
-plot_vpc
-========
+﻿pharmpy.modeling.plot\_vpc
+==========================
 
 .. currentmodule:: pharmpy.modeling
 

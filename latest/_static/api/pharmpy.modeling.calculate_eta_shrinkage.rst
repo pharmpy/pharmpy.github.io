@@ -1,5 +1,5 @@
-calculate_eta_shrinkage
-=======================
+﻿pharmpy.modeling.calculate\_eta\_shrinkage
+==========================================
 
 .. currentmodule:: pharmpy.modeling
 

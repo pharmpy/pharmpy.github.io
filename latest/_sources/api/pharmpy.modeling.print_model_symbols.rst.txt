@@ -1,5 +1,5 @@
-print_model_symbols
-===================
+﻿pharmpy.modeling.print\_model\_symbols
+======================================
 
 .. currentmodule:: pharmpy.modeling
 

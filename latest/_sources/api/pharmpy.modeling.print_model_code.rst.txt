@@ -1,5 +1,5 @@
-print_model_code
-================
+﻿pharmpy.modeling.print\_model\_code
+===================================
 
 .. currentmodule:: pharmpy.modeling
 
