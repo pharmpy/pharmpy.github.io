@@ -2,6 +2,19 @@
 News
 ====
 
+
+Pharmpy and pharmr 2.1.0 released
+---------------------------------
+
+*2026-05-08* --- Pharmpy 2.1.0 and pharmr 2.1.0 are now available. The highlights of the release are:
+
+* Extended functionality of IIVSearch (now supports additive IIVs and MFL to fine tune search space)
+* New provenance system to keep track of changes to the dataset
+* Added modeling functions for unit handling
+* Various bug fixes
+
+See :ref:`CHANGELOG<2.1.0>` for details.
+
 Pharmpy and pharmr 2.0.0 released
 ---------------------------------
 

@@ -53,6 +53,7 @@ Dataset handling
     add_time_of_last_dose
     bin_observations
     binarize_dataset
+    convert_unit
     deidentify_data
     drop_columns
     drop_dropped_columns
@@ -66,7 +67,9 @@ Dataset handling
     set_dataset
     set_dvid
     set_lloq_data
+    set_property
     set_reference_values
+    set_unit
     translate_nmtran_time
     undrop_columns
     unload_dataset
@@ -231,7 +234,7 @@ PD modeling
 
     add_effect_compartment
     add_indirect_effect
-    add_placebo_model
+    set_placebo_model
     set_baseline_effect
     set_direct_effect
 
@@ -273,6 +276,7 @@ Estimation steps
     add_parameter_uncertainty_step
     add_predictions
     add_residuals
+    add_output_variables
     append_estimation_step_options
     is_simulation_model
     remove_derivative

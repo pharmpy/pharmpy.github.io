@@ -16,6 +16,7 @@ DataInfo
       ~DataInfo.missing_data_token
       ~DataInfo.names
       ~DataInfo.path
+      ~DataInfo.provenance
       ~DataInfo.separator
       ~DataInfo.symbols
       ~DataInfo.typeix
@@ -50,6 +51,7 @@ DataInfo
    .. autoattribute:: missing_data_token
    .. autoattribute:: names
    .. autoattribute:: path
+   .. autoattribute:: provenance
    .. autoattribute:: separator
    .. autoattribute:: symbols
    .. autoattribute:: typeix
