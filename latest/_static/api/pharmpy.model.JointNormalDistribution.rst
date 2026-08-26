@@ -15,6 +15,7 @@ JointNormalDistribution
       ~JointNormalDistribution.mean
       ~JointNormalDistribution.names
       ~JointNormalDistribution.parameter_names
+      ~JointNormalDistribution.symbols
       ~JointNormalDistribution.variance
 
    .. rubric:: Methods Summary
@@ -38,6 +39,7 @@ JointNormalDistribution
    .. autoattribute:: mean
    .. autoattribute:: names
    .. autoattribute:: parameter_names
+   .. autoattribute:: symbols
    .. autoattribute:: variance
 
    .. rubric:: Methods Documentation

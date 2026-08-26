@@ -28,8 +28,10 @@ DataInfo
    .. autosummary::
 
       ~DataInfo.create
+      ~DataInfo.find_column
       ~DataInfo.find_column_by_property
       ~DataInfo.find_single_column_name
+      ~DataInfo.find_variable
       ~DataInfo.from_dict
       ~DataInfo.from_json
       ~DataInfo.get_dtype_dict
@@ -61,8 +63,10 @@ DataInfo
    .. rubric:: Methods Documentation
 
    .. automethod:: create
+   .. automethod:: find_column
    .. automethod:: find_column_by_property
    .. automethod:: find_single_column_name
+   .. automethod:: find_variable
    .. automethod:: from_dict
    .. automethod:: from_json
    .. automethod:: get_dtype_dict

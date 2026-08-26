@@ -51,28 +51,32 @@ Dataset handling
     add_cmt
     add_time_after_dose
     add_time_of_last_dose
+    annotate_unit
     bin_observations
     binarize_dataset
     convert_unit
+    create_datainfo
     deidentify_data
     drop_columns
     drop_dropped_columns
     expand_additional_doses
     is_binary
     load_dataset
+    read_datainfo
     read_dataset_from_datainfo
     remove_loq_data
     remove_unused_columns
+    reset_dataset
     set_covariates
     set_dataset
     set_dvid
     set_lloq_data
     set_property
     set_reference_values
-    set_unit
     translate_nmtran_time
     undrop_columns
     unload_dataset
+    write_datainfo
 
 Dataset exploration
 --------------------
@@ -136,19 +140,12 @@ Parameter variability
     create_joint_distribution
     remove_iiv
     remove_iov
+    replace_non_random_rvs
     split_joint_distribution
     transform_etas_boxcox
     transform_etas_john_draper
     transform_etas_tdist
     update_initial_individual_estimates
-
-Random variables
-----------------
-
-.. autosummary::
-   :toctree: api/
-
-    replace_non_random_rvs
 
 Covariate effects
 -----------------
@@ -399,3 +396,15 @@ Iterators
 
     omit_data
     resample_data
+
+Trial design
+------------
+
+.. autosummary::
+   :toctree: api/
+
+    add_administration
+    add_arm
+    add_observations
+    create_dataset_from_design
+    create_trial_design
